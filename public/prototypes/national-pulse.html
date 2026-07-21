@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>National Pulse v2 — Talk to Minister Dashboard</title>
+<style>
+:root{
+  --navy:#1B2A6B; --navy-d:#121C4A; --red:#D22030; --gold:#FFCC00;
+  --green:#1E9E52; --amber:#E8A400;
+  --bg:#EEF0F4; --card:#FFFFFF; --ink:#17181C; --grey:#6B7180; --line:#E3E6EC;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+
+/* ================= HEADER ================= */
+header{background:linear-gradient(100deg,var(--navy-d),var(--navy) 60%,#24368a);color:#fff;padding:16px 26px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.hLogo{display:flex;align-items:center;gap:12px}
+.hLogo .flag{width:36px;height:36px}
+.hLogo .t b{display:block;font-size:15px;font-weight:800;letter-spacing:.4px}
+.hLogo .t small{font-size:10px;opacity:.75;letter-spacing:1.4px;font-weight:700}
+.hTitle{margin-left:6px;padding-left:18px;border-left:1px solid rgba(255,255,255,.25)}
+.hTitle h1{font-size:19px;font-weight:800}
+.hTitle p{font-size:11px;opacity:.75;margin-top:1px}
+.hRight{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.live{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;background:rgba(255,255,255,.12);padding:7px 12px;border-radius:99px}
+.live i{width:8px;height:8px;border-radius:50%;background:#3DDC6A;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.range{display:flex;background:rgba(255,255,255,.12);border-radius:11px;padding:3px}
+.range button{border:0;background:transparent;color:#fff;font-size:12px;font-weight:700;padding:7px 13px;border-radius:9px;opacity:.7}
+.range button.on{background:#fff;color:var(--navy);opacity:1}
+.brief{border:0;background:var(--gold);color:#3A2C00;font-weight:800;font-size:12px;padding:9px 15px;border-radius:11px}
+.actBtn{border:0;background:rgba(255,255,255,.15);color:#fff;font-weight:800;font-size:12px;padding:9px 15px;border-radius:11px;position:relative}
+.actBtn .n{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+
+.filterBar{padding:12px 26px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:7px 8px 7px 14px;border-radius:99px;display:none;align-items:center;gap:8px}
+.chip.on{display:inline-flex}
+.chip button{border:0;background:rgba(255,255,255,.25);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;line-height:1}
+.scope{font-size:12.5px;color:var(--grey);font-weight:600}
+.scope b{color:var(--ink)}
+
+/* ================= LAYOUT ================= */
+.wrap{padding:16px 26px 40px;display:flex;flex-direction:column;gap:16px;max-width:1540px;margin:0 auto}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.grid-main{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:16px}
+.grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+@media(max-width:1120px){.grid-main,.grid-3,.grid-2{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--card);border-radius:16px;padding:18px 20px;box-shadow:0 1px 3px rgba(20,25,40,.06),0 8px 24px rgba(20,25,40,.05)}
+.cardHead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+.cardHead h2{font-size:14.5px;font-weight:800}
+.cardHead small{font-size:11px;color:var(--grey);font-weight:600}
+
+.kpi{background:var(--card);border-radius:16px;padding:15px 18px;box-shadow:0 1px 3px rgba(20,25,40,.06),0 8px 24px rgba(20,25,40,.05);position:relative;overflow:hidden}
+.kpi .lbl{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--grey)}
+.kpi .val{font-size:29px;font-weight:800;letter-spacing:-.5px;margin:3px 0 2px;font-variant-numeric:tabular-nums}
+.kpi .delta{font-size:11.5px;font-weight:700}
+.kpi .delta.up{color:var(--green)}.kpi .delta.down{color:var(--red)}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--navy)}
+.kpi.k2::before{background:var(--gold)}.kpi.k3::before{background:var(--green)}.kpi.k4::before{background:var(--red)}
+
+/* ================= MAP ================= */
+.mapWrap{position:relative}
+.mapWrap svg{width:100%;height:auto;display:block}
+.state{stroke:#fff;stroke-width:2.2;cursor:pointer;transition:filter .15s,opacity .2s;stroke-linejoin:round}
+.state:hover{filter:brightness(1.09) saturate(1.12)}
+.state.dim{opacity:.25}
+.state.sel{stroke:var(--ink);stroke-width:2.8}
+.bubble{fill:var(--navy);fill-opacity:.88;pointer-events:none}
+.bubble-pulse{fill:none;stroke:var(--navy);stroke-width:1.6;pointer-events:none;animation:mpulse 2.6s infinite}
+@keyframes mpulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+.stLbl{font-size:11.5px;font-weight:700;fill:#fff;pointer-events:none;paint-order:stroke;stroke:rgba(0,0,0,.32);stroke-width:2.6px;text-anchor:middle}
+.seaLbl{font-size:11px;font-weight:700;fill:#A9B0BF;letter-spacing:2px}
+.legend{display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap}
+.legend .bar{flex:1;min-width:150px;height:10px;border-radius:6px;background:linear-gradient(90deg,#C6222F,#E8A400,#1E9E52)}
+.legend small{font-size:10.5px;color:var(--grey);font-weight:700}
+.legend .bub{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--grey);font-weight:700}
+.legend .bub i{width:11px;height:11px;border-radius:50%;background:var(--navy);display:inline-block}
+#mapTip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:11.5px;padding:8px 11px;border-radius:9px;opacity:0;transition:opacity .12s;white-space:nowrap;z-index:5;line-height:1.5}
+
+/* district heat grid */
+#distCard{display:none}
+#distCard.on{display:block}
+.distGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.dTile{border-radius:12px;padding:11px 12px;color:#fff;cursor:pointer;transition:transform .12s;position:relative;overflow:hidden}
+.dTile:hover{transform:translateY(-2px)}
+.dTile b{display:block;font-size:12.5px;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.25)}
+.dTile small{font-size:10.5px;opacity:.92;font-weight:700}
+.dTile .sc{position:absolute;top:9px;right:10px;font-size:10px;font-weight:800;background:rgba(0,0,0,.22);padding:2px 7px;border-radius:99px}
+.distSummary{display:flex;gap:16px;font-size:12px;color:var(--grey);font-weight:600;margin-bottom:11px;flex-wrap:wrap}
+.distSummary b{color:var(--ink)}
+
+/* ================= CHARTS ================= */
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.lg{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+.lg span{font-size:11px;color:var(--grey);font-weight:700;display:flex;align-items:center;gap:6px}
+.lg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.donutRow{display:flex;align-items:center;gap:18px}
+.donutRow svg{width:126px;height:126px;flex:0 0 auto}
+.donutStats{flex:1;display:flex;flex-direction:column;gap:9px}
+.dStat{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600}
+.dStat i{width:11px;height:11px;border-radius:3px}
+.dStat b{margin-left:auto;font-variant-numeric:tabular-nums}
+
+/* topics */
+.topicRow{display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:9px;transition:background .12s}
+.topicRow:hover{background:#F5F7FB}
+.topicRow:last-child{border:0}
+.topicRow .nm{width:42%;font-size:12.5px;font-weight:700;line-height:1.25;display:flex;align-items:center;gap:6px}
+.topicRow .nm .go{color:var(--navy);font-size:10px;opacity:.6}
+.topicRow .barBg{flex:1;height:9px;background:#EDEFF4;border-radius:6px;overflow:hidden}
+.topicRow .barFill{height:100%;border-radius:6px}
+.topicRow .ct{width:44px;text-align:right;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.topicRow .tr{width:20px;text-align:center;font-size:12px;font-weight:800}
+.tr.up{color:var(--red)}.tr.down{color:var(--green)}.tr.flat{color:var(--grey)}
+.hintLine{font-size:11px;color:var(--grey);font-weight:600;margin-top:8px}
+
+/* keywords / langs */
+.kwWrap{display:flex;flex-wrap:wrap;gap:8px}
+.kw{background:#F1F3F8;border:1px solid var(--line);border-radius:99px;padding:7px 13px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:7px}
+.kw em{font-style:normal;font-size:10px;font-weight:800;color:#fff;background:var(--red);border-radius:99px;padding:2px 7px}
+.kw em.g{background:var(--green)}
+.langRow{display:flex;align-items:center;gap:10px;padding:7px 0}
+.langRow .nm{width:108px;font-size:12.5px;font-weight:700}
+.langRow .barBg{flex:1;height:9px;background:#EDEFF4;border-radius:6px;overflow:hidden}
+.langRow .barFill{height:100%;background:var(--navy);border-radius:6px}
+.langRow b{width:40px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums}
+
+/* suggestions & feed */
+.sug{border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin-bottom:10px}
+.sug:last-child{margin-bottom:0}
+.sug .top{display:flex;align-items:flex-start;gap:9px}
+.sug .top b{font-size:13px;line-height:1.35;flex:1}
+.tag{font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 9px;border-radius:7px;white-space:nowrap}
+.tag.rev{background:#FFF3D6;color:#8A6400}
+.tag.ack{background:#E7ECFF;color:var(--navy)}
+.tag.act{background:#E2F6E9;color:#137A3D}
+.tag.asg{background:#F1E6FF;color:#5A2CA0}
+.tag.prog{background:#DFF3FF;color:#0A6C9E}
+.sug .meta{display:flex;gap:14px;font-size:11px;color:var(--grey);font-weight:600;margin-top:7px;flex-wrap:wrap}
+.sug .meta b{color:var(--ink)}
+.assignMini{border:1.5px solid var(--navy);background:#fff;color:var(--navy);font-size:11px;font-weight:800;padding:6px 12px;border-radius:9px;margin-top:9px}
+.assignMini:hover{background:var(--navy);color:#fff}
+.assignedNote{font-size:11px;font-weight:700;color:#5A2CA0;margin-top:8px}
+.feedRow{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:12.5px;align-items:flex-start}
+.feedRow:last-child{border:0}
+.sdot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex:0 0 auto}
+.feedRow .fx{flex:1;line-height:1.45}
+.feedRow .fx small{display:block;color:var(--grey);font-weight:600;font-size:11px;margin-top:2px}
+.feedRow .quote{font-style:italic;color:#3C3F48}
+.urgent{background:#FFF1F1;border:1px solid #F5C9C9;border-radius:13px;padding:12px 14px;margin-bottom:12px}
+.urgent b{color:var(--red);font-size:12px;letter-spacing:.6px}
+.urgent p{font-size:12.5px;margin-top:5px;line-height:1.45}
+.urgent .assignMini{margin-top:8px}
+
+/* ================= MODALS ================= */
+.modal{position:fixed;inset:0;background:rgba(10,14,30,.55);display:none;align-items:flex-start;justify-content:center;padding:34px 20px;z-index:60;overflow-y:auto}
+.modal.open{display:flex}
+.mCard{background:#fff;border-radius:18px;max-width:720px;width:100%;padding:24px 26px;animation:pop .25s ease}
+@keyframes pop{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+.mCard h3{font-size:18px;font-weight:800;margin-bottom:3px;padding-right:40px}
+.mCard .sub{font-size:12px;color:var(--grey);margin-bottom:14px;font-weight:600}
+.mCard h4{font-size:12.5px;font-weight:800;margin:16px 0 8px;color:var(--navy);letter-spacing:.3px;text-transform:uppercase}
+.mClose{float:right;border:0;background:#EEF0F4;width:34px;height:34px;border-radius:50%;font-size:15px}
+.subIssue{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.subIssue:last-child{border:0}
+.subIssue .nm{width:46%;font-weight:700;line-height:1.3}
+.subIssue .barBg{flex:1;height:8px;background:#EDEFF4;border-radius:5px;overflow:hidden}
+.subIssue .barFill{height:100%;background:var(--red);border-radius:5px}
+.subIssue b{width:40px;text-align:right;font-variant-numeric:tabular-nums;font-size:12px}
+.qList .q{background:#F7F8FB;border-left:3px solid var(--navy);border-radius:0 10px 10px 0;padding:10px 13px;font-size:12.5px;font-style:italic;color:#33363F;margin-bottom:8px;line-height:1.5}
+.qList .q small{display:block;font-style:normal;color:var(--grey);font-weight:700;font-size:10.5px;margin-top:4px}
+.miniStats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.miniStat{flex:1;min-width:120px;background:#F4F6FA;border-radius:11px;padding:10px 12px}
+.miniStat small{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--grey);text-transform:uppercase}
+.miniStat b{display:block;font-size:18px;margin-top:2px}
+.spark{width:100%;height:44px}
+.distHits{display:flex;flex-wrap:wrap;gap:7px}
+.distHit{font-size:11px;font-weight:700;background:#FDECEC;color:#A31C28;padding:5px 11px;border-radius:99px}
+.mFoot{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.btnP{flex:1;border:0;background:var(--navy);color:#fff;font-weight:800;font-size:13.5px;padding:13px;border-radius:12px}
+.btnS{flex:1;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-weight:700;font-size:13.5px;padding:13px;border-radius:12px}
+
+/* assign form */
+label.f{display:block;font-size:11.5px;font-weight:800;margin:12px 0 5px;color:var(--ink)}
+select.f,input.f,textarea.f{width:100%;font-family:inherit;font-size:14px;padding:11px 12px;border:1.5px solid var(--line);border-radius:11px;background:#fff;outline:none;color:var(--ink)}
+select.f:focus,input.f:focus,textarea.f:focus{border-color:var(--navy)}
+textarea.f{resize:vertical;min-height:70px}
+.deptHint{font-size:11px;color:var(--green);font-weight:700;margin-top:5px}
+.prioRow{display:flex;gap:8px}
+.prio{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:10px;font-weight:800;font-size:12.5px;text-align:center;cursor:pointer}
+.prio.sel{border-color:var(--navy);background:var(--navy);color:#fff}
+.prio.hi.sel{border-color:var(--red);background:var(--red)}
+
+/* action tracker drawer */
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,94vw);background:#fff;z-index:70;box-shadow:-14px 0 44px rgba(10,14,30,.25);transform:translateX(105%);transition:transform .3s ease;display:flex;flex-direction:column}
+#drawer.open{transform:none}
+#drawer .dh{background:var(--navy);color:#fff;padding:18px 20px;display:flex;align-items:center;gap:10px}
+#drawer .dh h3{font-size:15.5px;font-weight:800;flex:1}
+#drawer .dh button{border:0;background:rgba(255,255,255,.18);color:#fff;width:32px;height:32px;border-radius:50%}
+#drawer .body{flex:1;overflow-y:auto;padding:16px 18px}
+.task{border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin-bottom:11px}
+.task .t1{display:flex;gap:9px;align-items:flex-start}
+.task .t1 b{flex:1;font-size:13px;line-height:1.35}
+.task .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--grey);font-weight:600;margin-top:7px}
+.task .meta b{color:var(--ink)}
+.task .row2{display:flex;gap:8px;margin-top:9px;align-items:center}
+.task select{flex:1;font-family:inherit;font-size:12px;font-weight:700;padding:7px 9px;border-radius:9px;border:1.5px solid var(--line)}
+.due.over{color:var(--red)}
+.emptyT{text-align:center;color:var(--grey);font-size:12.5px;padding:30px 10px;line-height:1.6}
+.deptStat{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:12px;font-weight:600}
+.deptStat .nm{width:150px}
+.deptStat .barBg{flex:1;height:8px;background:#EDEFF4;border-radius:5px;overflow:hidden}
+.deptStat .barFill{height:100%;background:#5A2CA0;border-radius:5px}
+.deptStat b{width:24px;text-align:right}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:13px 20px;border-radius:12px;z-index:90;transition:transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.toast.show{transform:translateX(-50%)}
+footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey);font-weight:600}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hLogo">
+    <svg class="flag" viewBox="0 0 40 40"><g><path d="M8 22 c0-9 5-16 12-16 c7 0 12 7 12 16 l-2 12 H10 Z" fill="#fff" opacity=".16"/><path d="M8 22 c0-9 5-16 12-16 c7 0 12 7 12 16 l-2 12 H10 Z" fill="none" stroke="#fff" stroke-width="1.4"/><g fill="#D22030"><rect x="12" y="2" width="3" height="10" rx="1.5"/><rect x="17" y="0" width="3" height="12" rx="1.5"/><rect x="22" y="1" width="3" height="11" rx="1.5"/><rect x="27" y="3" width="3" height="9" rx="1.5"/></g><circle cx="17" cy="24" r="7" fill="#FFCC00"/><circle cx="20" cy="24" r="6" fill="#1B2A6B"/><path d="M27 24 l1.6 3.4 3.6.4 -2.7 2.5 .7 3.6 -3.2-1.9 -3.2 1.9 .7-3.6 -2.7-2.5 3.6-.4 Z" fill="#FFCC00"/></g></svg>
+    <div class="t"><b>MALAYSIA MADANI</b><small>MINISTRY OF HOME AFFAIRS</small></div>
+  </div>
+  <div class="hTitle">
+    <h1>National Pulse — Talk to Minister</h1>
+    <p>What citizens are telling Minister Saifuddin Nasution · powered by BYOND asia</p>
+  </div>
+  <div class="hRight">
+    <div class="live"><i></i>LIVE</div>
+    <div class="range" id="range">
+      <button data-d="7" class="on">7 days</button>
+      <button data-d="30">30 days</button>
+      <button data-d="90">90 days</button>
+    </div>
+    <button class="actBtn" onclick="openDrawer()">📋 Action Tracker<span class="n" id="taskCount">0</span></button>
+    <button class="brief" onclick="document.getElementById('briefModal').classList.add('open')">📄 Weekly Briefing</button>
+  </div>
+</header>
+
+<div class="filterBar">
+  <span class="scope">Showing: <b id="scopeLbl">All Malaysia</b></span>
+  <span class="chip" id="stateChip"><span id="stateChipNm"></span><button onclick="selectState(null)">✕</button></span>
+  <span class="scope" style="margin-left:auto">Demo prototype · synthetic data · actions reset on refresh</span>
+</div>
+
+<div class="wrap">
+
+  <!-- KPI TILES -->
+  <div class="kpis">
+    <div class="kpi"><div class="lbl">Sessions</div><div class="val" id="kSess">—</div><div class="delta up">▲ 12% vs prior period</div></div>
+    <div class="kpi k2"><div class="lbl">Citizens Reached</div><div class="val" id="kCit">—</div><div class="delta up">▲ 9% vs prior period</div></div>
+    <div class="kpi k3"><div class="lbl">Avg Satisfaction</div><div class="val" id="kSat">4.6 / 5</div><div class="delta up">▲ 0.1 vs prior period</div></div>
+    <div class="kpi k4"><div class="lbl">Net Sentiment</div><div class="val" id="kSent">—</div><div class="delta down">▼ 3 pts vs prior period</div></div>
+  </div>
+
+  <!-- MAP + SIDE -->
+  <div class="grid-main">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card" id="mapCard">
+        <div class="cardHead">
+          <h2>🗺️ Where citizens are engaging from</h2>
+          <small>Colour = sentiment · Circle = volume · Click a state for district breakdown</small>
+        </div>
+        <div class="mapWrap">
+          <div id="mapTip"></div>
+          <svg viewBox="0 0 1000 560" id="mapSvg" role="img" aria-label="Malaysia sentiment map">
+            <text class="seaLbl" x="60" y="480">STRAITS OF MALACCA</text>
+            <text class="seaLbl" x="360" y="120">SOUTH CHINA SEA</text>
+            <text class="seaLbl" x="820" y="520">CELEBES SEA</text>
+          </svg>
+        </div>
+        <div class="legend">
+          <small>Negative</small><div class="bar"></div><small>Positive</small>
+          <span class="bub"><i></i>Session volume</span>
+        </div>
+      </div>
+
+      <!-- DISTRICT DRILL-DOWN -->
+      <div class="card" id="distCard">
+        <div class="cardHead">
+          <h2 id="distTitle">📍 District breakdown</h2>
+          <small>Colour = district sentiment · Click a tile to filter voices</small>
+        </div>
+        <div class="distSummary" id="distSummary"></div>
+        <div class="distGrid" id="distGrid"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card chart">
+        <div class="cardHead"><h2>📈 Sentiment trend</h2><small>share of sessions · 12 weeks</small></div>
+        <svg viewBox="0 0 520 200" id="trendSvg"></svg>
+        <div class="lg">
+          <span><i style="background:var(--green)"></i>Positive</span>
+          <span><i style="background:var(--red)"></i>Negative</span>
+          <span><i style="background:#B9BFCC"></i>Neutral</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cardHead"><h2>🎯 Sentiment split</h2><small id="donutScope">All Malaysia</small></div>
+        <div class="donutRow">
+          <svg viewBox="0 0 42 42" id="donutSvg"></svg>
+          <div class="donutStats" id="donutStats"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cardHead"><h2>🌐 Session languages</h2><small>engagement by community</small></div>
+        <div id="langList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPICS + KEYWORDS + SUGGESTIONS -->
+  <div class="grid-3">
+    <div class="card">
+      <div class="cardHead"><h2>🔥 Top issues raised</h2><small id="topicScope">All Malaysia</small></div>
+      <div id="topicList"></div>
+      <div class="hintLine">👉 Click an issue to open the deep dive &amp; assign action</div>
+    </div>
+    <div class="card">
+      <div class="cardHead"><h2>💬 Trending keywords</h2><small>growth-weighted</small></div>
+      <div class="kwWrap" id="kwWrap"></div>
+      <div class="cardHead" style="margin-top:20px"><h2>🏛️ Department workload</h2><small>open actions assigned via this dashboard</small></div>
+      <div id="deptStats"><div class="emptyT" style="padding:14px 6px">No actions assigned yet.<br>Open an issue deep dive to assign one.</div></div>
+    </div>
+    <div class="card">
+      <div class="cardHead"><h2>💡 Top citizen suggestions</h2><small>ranked by frequency × spread</small></div>
+      <div id="sugList"></div>
+    </div>
+  </div>
+
+  <!-- FEED + URGENT -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="cardHead"><h2>🗣️ Latest voices</h2><small id="feedScope">anonymised · AI summaries with verbatim anchors</small></div>
+      <div id="feedList"></div>
+    </div>
+    <div class="card">
+      <div class="cardHead"><h2>🚨 Urgent review queue</h2><small>safety-critical · same-day human review</small></div>
+      <div class="urgent"><b>⚑ FLAGGED · 2h ago</b><p><b>Sandakan, Sabah</b> — suspected human-trafficking activity reported near a jetty area.</p><button class="assignMini" onclick="openAssign('Urgent: suspected trafficking activity — Sandakan','Policing & safety','high')">⚡ Assign action</button></div>
+      <div class="urgent"><b>⚑ FLAGGED · 5h ago</b><p><b>Klang, Selangor</b> — loan-shark harassment targeting elderly residents in one flat block.</p><button class="assignMini" onclick="openAssign('Urgent: loan-shark harassment of elderly — Klang','Policing & safety','high')">⚡ Assign action</button></div>
+      <div class="cardHead" style="margin-top:18px"><h2>✅ You said, we did</h2><small>closing the loop with citizens</small></div>
+      <div class="sug"><div class="top"><b>Online foreign-worker permit renewal — pilot announced for Selangor &amp; Johor</b><span class="tag act">ACTIONED</span></div><div class="meta"><span>Driven by <b>214 sessions</b></span><span>Citizens notified via WhatsApp: <b>214</b></span></div></div>
+    </div>
+  </div>
+</div>
+
+<footer>Talk to Minister · National Pulse Dashboard v2 · Demo prototype with synthetic data · BYOND asia × Malaysia MADANI</footer>
+
+<!-- ============ TOPIC DEEP-DIVE MODAL ============ -->
+<div class="modal" id="topicModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard">
+    <button class="mClose" onclick="document.getElementById('topicModal').classList.remove('open')">✕</button>
+    <h3 id="tmTitle">Issue deep dive</h3>
+    <div class="sub" id="tmSub"></div>
+    <div class="miniStats" id="tmStats"></div>
+    <h4>Trend · 12 weeks</h4>
+    <svg class="spark" viewBox="0 0 400 44" id="tmSpark"></svg>
+    <h4>What exactly citizens are raising</h4>
+    <div id="tmSubs"></div>
+    <h4>Hotspot districts</h4>
+    <div class="distHits" id="tmDists"></div>
+    <h4>Representative voices</h4>
+    <div class="qList" id="tmQuotes"></div>
+    <div class="mFoot">
+      <button class="btnS" onclick="toast('Demo: full session list would open in Session Explorer.')">View all sessions</button>
+      <button class="btnP" id="tmAssign">⚡ Assign action to department</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ASSIGN ACTION MODAL ============ -->
+<div class="modal" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard" style="max-width:560px">
+    <button class="mClose" onclick="document.getElementById('assignModal').classList.remove('open')">✕</button>
+    <h3>Assign action</h3>
+    <div class="sub">Routes this issue to the responsible agency with an owner, priority and due date. The assignment is logged and tracked to resolution.</div>
+    <label class="f">Issue</label>
+    <input class="f" id="aIssue">
+    <label class="f">Assign to department</label>
+    <select class="f" id="aDept"></select>
+    <div class="deptHint" id="aDeptHint"></div>
+    <label class="f">Priority</label>
+    <div class="prioRow">
+      <div class="prio" data-p="normal">Normal</div>
+      <div class="prio" data-p="elevated">Elevated</div>
+      <div class="prio hi" data-p="high">High / Urgent</div>
+    </div>
+    <label class="f">Due date</label>
+    <input class="f" id="aDue" type="date">
+    <label class="f">Instruction to department <i style="font-weight:500;color:var(--grey)">(optional)</i></label>
+    <textarea class="f" id="aNote" placeholder="e.g. Investigate backlog at Shah Alam office and report recovery plan within 14 days."></textarea>
+    <div class="mFoot">
+      <button class="btnS" onclick="document.getElementById('assignModal').classList.remove('open')">Cancel</button>
+      <button class="btnP" onclick="createTask()">Assign &amp; track</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ACTION TRACKER DRAWER ============ -->
+<div id="drawer">
+  <div class="dh"><h3>📋 Action Tracker</h3><button onclick="document.getElementById('drawer').classList.remove('open')">✕</button></div>
+  <div class="body" id="taskList"><div class="emptyT">No actions yet.<br><br>Open any issue deep dive, urgent flag, or suggestion and tap <b>Assign action</b>. Every assignment is logged here with owner, due date and status — the Minister's follow-through view.</div></div>
+</div>
+
+<!-- ============ BRIEFING MODAL ============ -->
+<div class="modal" id="briefModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard">
+    <button class="mClose" onclick="document.getElementById('briefModal').classList.remove('open')">✕</button>
+    <h3>Weekly Ministry Briefing</h3>
+    <div class="sub">Week 29 · 13–19 July 2026 · Auto-generated, human-reviewed · CONFIDENTIAL — DEMO</div>
+    <h4>Headline</h4>
+    <p style="font-size:13px;line-height:1.55">2,847 sessions (+12%). Net sentiment −8 (down 3 pts), driven by immigration processing delays in Selangor and Johor. Session-experience satisfaction remains 4.6/5. <b>4 actions assigned last week; 2 resolved within SLA.</b></p>
+    <h4>Top pain points</h4>
+    <p style="font-size:13px;line-height:1.6">1. Foreign-worker permit renewal delays (214 sessions) · 2. Online scam losses &amp; slow bank freezes (188, rising in Penang) · 3. Night patrol requests in urban flats (141).</p>
+    <h4>Geographic watch</h4>
+    <p style="font-size:13px;line-height:1.55">Sabah diverges −21 pts below national mean, concentrated in Sandakan and Lahad Datu (documentation &amp; border topics). Recommend a dedicated Sabah session block and JPN mobile-kiosk feasibility review.</p>
+    <h4>Accountability</h4>
+    <p style="font-size:13px;line-height:1.55">Immigration Dept: 2 open actions (1 due this week). PDRM: 1 open (urgent). JPN: 1 open. Average resolution time last 4 weeks: 9.2 days.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   DATA
+================================================================ */
+const TOPICS=["Policing & safety","Immigration & borders","MyKad & registration","Scams & cybercrime","Foreign workers","Drugs & rehab","Civil defence","General feedback"];
+const NEG_TOPICS=new Set(["Policing & safety","Immigration & borders","Scams & cybercrime","Foreign workers","Drugs & rehab"]);
+const KW_POOL={
+ "Policing & safety":["patrol","balai","response time","CCTV","mat rempit"],
+ "Immigration & borders":["permit","passport","renewal","queue","visa"],
+ "MyKad & registration":["MyKad","JPN","birth cert","replacement","kiosk"],
+ "Scams & cybercrime":["scam","bank freeze","TAC","online fraud","mule account"],
+ "Foreign workers":["levy","quota","agent","FOMEMA","work pass"],
+ "Drugs & rehab":["dadah","rehab","vape","school"],
+ "Civil defence":["banjir","flood","APM","siren"],
+ "General feedback":["terima kasih","MADANI","kerajaan","harga"]
+};
+const DEPTS=[
+ {id:"jim",n:"Immigration Dept (JIM)"},
+ {id:"pdrm",n:"Royal Malaysia Police (PDRM)"},
+ {id:"jsjk",n:"PDRM Commercial Crime (JSJK)"},
+ {id:"jpn",n:"National Registration (JPN)"},
+ {id:"aadk",n:"Anti-Drugs Agency (AADK)"},
+ {id:"apm",n:"Civil Defence Force (APM)"},
+ {id:"penjara",n:"Prisons Dept"},
+ {id:"rela",n:"RELA"},
+ {id:"polisi",n:"KDN Policy Division"},
+ {id:"comms",n:"Minister's Office / Comms"}
+];
+const TOPIC_DEPT={
+ "Policing & safety":"pdrm","Immigration & borders":"jim","MyKad & registration":"jpn",
+ "Scams & cybercrime":"jsjk","Foreign workers":"jim","Drugs & rehab":"aadk",
+ "Civil defence":"apm","General feedback":"comms"
+};
+const GEO={
+ "Perlis":["Kangar","Arau","Padang Besar"],
+ "Kedah":["Kota Setar","Kuala Muda","Kulim","Kubang Pasu","Langkawi","Baling"],
+ "Penang":["Timur Laut","Barat Daya","SP Utara","SP Tengah","SP Selatan"],
+ "Perak":["Kinta","Larut Matang","Manjung","Hilir Perak","Kerian","Kuala Kangsar","Batang Padang"],
+ "Kelantan":["Kota Bharu","Pasir Mas","Tumpat","Bachok","Tanah Merah","Gua Musang"],
+ "Terengganu":["Kuala Terengganu","Kemaman","Dungun","Besut","Marang"],
+ "Pahang":["Kuantan","Temerloh","Bentong","Pekan","Raub","Cameron Highlands"],
+ "Selangor":["Petaling","Klang","Hulu Langat","Gombak","Sepang","Kuala Langat","Kuala Selangor","Hulu Selangor","Sabak Bernam"],
+ "Kuala Lumpur":["Bukit Bintang","Kepong","Wangsa Maju","Cheras","Lembah Pantai","Setiawangsa"],
+ "Putrajaya":["Presint 1–9","Presint 10–20"],
+ "N. Sembilan":["Seremban","Port Dickson","Jempol","Rembau","Tampin"],
+ "Melaka":["Melaka Tengah","Alor Gajah","Jasin"],
+ "Johor":["Johor Bahru","Batu Pahat","Kluang","Muar","Kulai","Segamat","Pontian","Kota Tinggi","Mersing"],
+ "Sarawak":["Kuching","Miri","Sibu","Bintulu","Samarahan","Sri Aman","Kapit"],
+ "Sabah":["Kota Kinabalu","Sandakan","Tawau","Penampang","Lahad Datu","Keningau","Semporna","Kudat"],
+ "Labuan":["Victoria","Rancha-Rancha"]
+};
+const STATES=[
+ {id:"pls",n:"Perlis",s:38,v:0.18},{id:"kdh",n:"Kedah",s:142,v:0.02},
+ {id:"png",n:"Penang",s:236,v:-0.12},{id:"prk",n:"Perak",s:198,v:0.08},
+ {id:"kel",n:"Kelantan",s:121,v:-0.05},{id:"trg",n:"Terengganu",s:96,v:0.15},
+ {id:"phg",n:"Pahang",s:117,v:0.11},{id:"sel",n:"Selangor",s:512,v:-0.22},
+ {id:"kul",n:"Kuala Lumpur",s:398,v:-0.08},{id:"pjy",n:"Putrajaya",s:41,v:0.25},
+ {id:"nsn",n:"N. Sembilan",s:104,v:0.06},{id:"mlk",n:"Melaka",s:88,v:0.19},
+ {id:"jhr",n:"Johor",s:334,v:-0.15},{id:"swk",n:"Sarawak",s:186,v:0.09},
+ {id:"sbh",n:"Sabah",s:206,v:-0.28},{id:"lbn",n:"Labuan",s:22,v:0.05}
+];
+function hash(str){let h=0;for(const c of str)h=(h*31+c.charCodeAt(0))>>>0;return h}
+STATES.forEach(st=>{
+  const h=hash(st.n);
+  st.topics=TOPICS.map((t,i)=>({t,c:Math.round(st.s*(0.06+((h>>>i)&7)/38))})).sort((a,b)=>b.c-a.c);
+  st.langs={"Bahasa Melayu":54+(h%14),"English":18+((h>>>2)%8),"中文 Chinese":10+((h>>>4)%9),"தமிழ் Tamil":4+((h>>>6)%5),"العربية Arabic":1+((h>>>8)%2)};
+  /* districts with share + sentiment variance */
+  const ds=GEO[st.n]||["Central"];
+  let rem=st.s;
+  st.districts=ds.map((d,i)=>{
+    const hh=hash(d+st.n);
+    const share=i===ds.length-1?Math.max(rem,4):Math.max(4,Math.round(st.s*(0.9/ds.length)+((hh%9)-4)));
+    rem-=share;
+    const dv=Math.max(-0.65,Math.min(0.55,st.v+(((hh>>>3)%21)-10)/38));
+    return {d,s:Math.max(share,4),v:dv,topTopic:st.topics[(hh>>>5)%3].t};
+  }).sort((a,b)=>b.s-a.s);
+});
+const TOPIC_DETAIL={
+ "Immigration & borders":{subs:[["Foreign-worker permit renewal delays",42],["Passport appointment availability",23],["Counter queue times (Shah Alam, JB)",18],["Visa status transparency",10],["Border checkpoint congestion",7]],
+  quotes:[["Permit renewal at Shah Alam took three months — my employer nearly gave up.","Petaling, Selangor · BM"],["Passport slots in JB are gone in minutes every morning.","Johor Bahru, Johor · EN"],["Please show application status online, we keep taking leave to queue.","Timur Laut, Penang · 中文"]],
+  dists:["Petaling","Johor Bahru","Klang","Timur Laut","Kota Kinabalu"],trend:[18,19,21,20,23,25,24,27,29,31,32,34]},
+ "Policing & safety":{subs:[["Requests for visible night patrols",38],["Slow response to reports",24],["Mat rempit & street racing",16],["CCTV coverage in flats",13],["Loan-shark harassment",9]],
+  quotes:[["We need more night patrols around the flats near the CIQ area.","Johor Bahru, Johor · BM"],["Report made two weeks ago, still no update from the balai.","Kota Bharu, Kelantan · BM"],["Ah Long splashed paint again at Block C. Old folks are scared.","Klang, Selangor · 中文"]],
+  dists:["Klang","Johor Bahru","Kota Bharu","Cheras","Sandakan"],trend:[26,25,27,26,28,27,29,28,30,29,31,30]},
+ "Scams & cybercrime":{subs:[["Phone / Macau scam losses",40],["Slow bank account freezing",26],["Mule account recruitment of youth",15],["Fake investment platforms",12],["SIM-card fraud",7]],
+  quotes:[["My mother lost RM18,000 to a phone scam. The bank freeze came too late.","Timur Laut, Penang · 中文"],["The scammer knew my MyKad number. How?","Kuala Terengganu · BM"],["Students are being offered RM300 to rent out their bank accounts.","Kinta, Perak · TA"]],
+  dists:["Timur Laut","Petaling","Kinta","Bukit Bintang","Kuching"],trend:[14,15,15,17,18,19,21,22,24,26,27,29]},
+ "Foreign workers":{subs:[["Agent overcharging above official fees",35],["Levy & quota confusion",27],["FOMEMA scheduling",19],["Undocumented worker concerns",12],["Employer compliance",7]],
+  quotes:[["The new levy portal works, but agents still charge extra. Please publish official fees.","KL · EN"],["Quota approval took 5 months, our restaurant almost closed.","Melaka Tengah · 中文"],["FOMEMA slots always full in our district.","Kuantan, Pahang · BM"]],
+  dists:["Bukit Bintang","Petaling","Johor Bahru","Kuantan","Kota Kinabalu"],trend:[16,17,16,18,17,19,18,20,19,21,20,22]},
+ "MyKad & registration":{subs:[["Long travel to JPN offices (rural)",39],["Replacement processing time",26],["Late birth registration (Sabah)",21],["Kiosk availability",14]],
+  quotes:[["Villagers here travel 4 hours to replace a MyKad. Please bring mobile kiosks.","Sandakan, Sabah · BM"],["My son's late registration has taken 2 years.","Lahad Datu, Sabah · BM"]],
+  dists:["Sandakan","Lahad Datu","Keningau","Gua Musang","Kapit"],trend:[12,12,13,12,14,13,15,14,15,16,15,17]},
+ "Drugs & rehab":{subs:[["Vape with substances near schools",41],["Rehab centre capacity",25],["Community relapse support",20],["Enforcement visibility",14]],
+  quotes:[["Vape with substances is spreading near schools. Parents are worried.","Kota Bharu, Kelantan · BM"],["After rehab there is no follow-up in the kampung.","Baling, Kedah · BM"]],
+  dists:["Kota Bharu","Baling","Tawau","Cheras","Sibu"],trend:[10,11,10,12,12,13,12,14,13,15,14,16]}
+};
+const SUGS=[
+ {b:"Online foreign-worker permit renewal with live status tracking",c:214,sp:"11 states",tag:"act",lbl:"ACTIONED",topic:"Immigration & borders"},
+ {b:"One-call scam-freeze hotline connected directly to all banks",c:167,sp:"9 states",tag:"ack",lbl:"ACKNOWLEDGED",topic:"Scams & cybercrime"},
+ {b:"Mobile MyKad replacement kiosks for rural districts",c:98,sp:"Sabah · Sarawak · Kelantan",tag:"rev",lbl:"UNDER REVIEW",topic:"MyKad & registration"},
+ {b:"Publish official agent fees for work-pass applications",c:76,sp:"7 states",tag:"rev",lbl:"UNDER REVIEW",topic:"Foreign workers"},
+ {b:"More visible neighbourhood patrols after 10pm",c:64,sp:"Selangor · Johor · Penang",tag:"ack",lbl:"ACKNOWLEDGED",topic:"Policing & safety"}
+];
+const FEED=[
+ {st:"Selangor",d:"Petaling",v:-0.7,t:"Immigration & borders",q:"Permit renewal at Shah Alam took three months — my employer nearly gave up.",l:"BM",time:"12 min ago"},
+ {st:"Penang",d:"Timur Laut",v:-0.5,t:"Scams & cybercrime",q:"My mother lost RM18,000 to a phone scam. The bank freeze came too late.",l:"中文",time:"26 min ago"},
+ {st:"Johor",d:"Johor Bahru",v:-0.4,t:"Policing & safety",q:"We need more night patrols around the flats near the CIQ area.",l:"BM",time:"41 min ago"},
+ {st:"Melaka",d:"Melaka Tengah",v:0.8,t:"General feedback",q:"Thank you for this platform. First time I feel the government is listening.",l:"EN",time:"1 h ago"},
+ {st:"Sabah",d:"Sandakan",v:-0.6,t:"MyKad & registration",q:"Villagers here travel 4 hours to replace a MyKad. Please bring mobile kiosks.",l:"BM",time:"1 h ago"},
+ {st:"Perak",d:"Kinta",v:0.5,t:"Civil defence",q:"APM response during last month's flood was fast — please keep the new siren system.",l:"தமிழ்",time:"2 h ago"},
+ {st:"Kelantan",d:"Kota Bharu",v:-0.3,t:"Drugs & rehab",q:"Vape with substances is spreading near schools. Parents are worried.",l:"BM",time:"2 h ago"},
+ {st:"Kuala Lumpur",d:"Bukit Bintang",v:0.3,t:"Foreign workers",q:"The new levy portal works, but agents still charge extra. Please publish official fees.",l:"EN",time:"3 h ago"},
+ {st:"Sarawak",d:"Kuching",v:0.4,t:"General feedback",q:"Proud to speak to the Minister in my own language from Kuching.",l:"BM",time:"3 h ago"}
+];
+const TREND=[[46,30],[47,29],[45,31],[48,28],[46,30],[44,33],[45,32],[43,34],[44,33],[42,36],[43,35],[41,37]];
+
+/* ================================================================
+   MAP GEOMETRY — refined Malaysia
+   Peninsular: shared-border polygons; Borneo: Sarawak crescent + Sabah
+================================================================ */
+const SHAPES={
+ pls:{d:"M97 62 L118 50 L132 58 L128 76 L108 82 Z",lx:74,ly:56,bx:113,by:66,small:1},
+ kdh:{d:"M108 82 L128 76 L132 58 L156 50 L176 62 L182 92 L172 122 L150 138 L124 132 L110 106 Z",lx:146,ly:98,bx:146,by:98},
+ png:{d:"M92 128 a13 13 0 1 1 -.5 .8 Z M110 106 L124 132 L118 154 L104 146 L102 122 Z",lx:66,ly:120,bx:100,by:135,small:1},
+ prk:{d:"M124 132 L150 138 L172 122 L188 142 L196 178 L188 214 L172 240 L152 232 L138 196 L118 154 Z",lx:158,ly:186,bx:158,by:186},
+ kel:{d:"M156 50 L192 40 L228 48 L238 74 L228 104 L204 122 L182 92 L176 62 Z",lx:206,ly:80,bx:206,by:80},
+ trg:{d:"M228 48 L252 58 L272 92 L282 130 L272 166 L248 176 L232 148 L228 104 L238 74 Z",lx:256,ly:118,bx:256,by:118},
+ phg:{d:"M204 122 L228 104 L232 148 L248 176 L272 166 L276 204 L266 244 L238 268 L206 274 L182 252 L172 240 L188 214 L196 178 L188 142 Z",lx:228,ly:210,bx:228,by:210},
+ sel:{d:"M152 232 L172 240 L182 252 L192 286 L184 316 L162 318 L148 288 L146 258 Z",lx:132,ly:280,bx:167,by:278},
+ kul:{d:"M184 258 a10 10 0 1 1 -.5 .8 Z",lx:232,ly:256,bx:192,by:266,small:1},
+ pjy:{d:"M180 296 a7 7 0 1 1 -.5 .8 Z",lx:228,ly:302,bx:186,by:302,small:1},
+ nsn:{d:"M184 316 L192 286 L206 274 L238 268 L248 296 L236 326 L206 336 Z",lx:216,ly:302,bx:216,by:304},
+ mlk:{d:"M206 336 L236 326 L246 350 L228 370 L206 360 Z",lx:226,ly:392,bx:225,by:348,small:1},
+ jhr:{d:"M236 326 L248 296 L266 244 L238 268 L266 244 L276 244 L296 268 L310 306 L322 344 L312 384 L282 410 L248 400 L232 372 L228 370 L246 350 Z",lx:280,ly:346,bx:280,by:346},
+ swk:{d:"M478 402 L512 362 L548 328 L592 296 L640 270 L688 252 L716 248 L728 268 L712 300 L676 328 L628 356 L576 384 L528 404 L494 414 Z",lx:600,ly:334,bx:600,by:330},
+ sbh:{d:"M716 248 L740 196 L764 152 L800 122 L846 108 L892 118 L926 146 L938 178 L916 196 L930 226 L902 244 L868 230 L842 252 L804 262 L764 258 L738 262 L728 268 Z",lx:830,ly:190,bx:830,by:190},
+ lbn:{d:"M726 226 a8 8 0 1 1 -.5 .8 Z",lx:702,ly:216,bx:733,by:233,small:1}
+};
+
+/* ================================================================
+   UI STATE + HELPERS
+================================================================ */
+let rangeD=7, selState=null, selDistrict=null, tasks=[], assignCtx=null;
+const $=id=>document.getElementById(id);
+const sentColor=v=>{
+  const t=Math.max(0,Math.min(1,(v+0.5)));
+  const lerp=(a,b,u)=>Math.round(a+(b-a)*u);
+  let c1,c2,u;
+  if(t<0.5){c1=[198,34,47];c2=[232,164,0];u=t/0.5}else{c1=[232,164,0];c2=[30,158,82];u=(t-0.5)/0.5}
+  return `rgb(${lerp(c1[0],c2[0],u)},${lerp(c1[1],c2[1],u)},${lerp(c1[2],c2[2],u)})`;
+};
+const scale=n=>Math.round(n*(rangeD===7?1:rangeD===30?4.1:11.6));
+const fmtN=n=>n.toLocaleString('en-MY');
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2600);}
+
+/* ================================================================
+   MAP
+================================================================ */
+const mapSvg=$('mapSvg'), tip=$('mapTip');
+function drawMap(){
+  mapSvg.querySelectorAll('.state,.bubble,.bubble-pulse,.stLbl').forEach(e=>e.remove());
+  const maxS=Math.max(...STATES.map(s=>s.s));
+  STATES.forEach(st=>{
+    const sh=SHAPES[st.id]; if(!sh)return;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',sh.d);
+    path.setAttribute('class','state'+(selState===st.id?' sel':'')+(selState&&selState!==st.id?' dim':''));
+    path.setAttribute('fill',sentColor(st.v));
+    path.addEventListener('click',()=>selectState(selState===st.id?null:st.id));
+    path.addEventListener('mousemove',e=>{
+      const r=mapSvg.parentElement.getBoundingClientRect();
+      tip.style.left=(e.clientX-r.left+14)+'px';tip.style.top=(e.clientY-r.top-10)+'px';tip.style.opacity=1;
+      tip.innerHTML=`<b>${st.n}</b><br>${fmtN(scale(st.s))} sessions · sentiment ${st.v>0?'+':''}${Math.round(st.v*100)}<br><span style="opacity:.7">Click for district breakdown</span>`;
+    });
+    path.addEventListener('mouseleave',()=>tip.style.opacity=0);
+    mapSvg.appendChild(path);
+    const r=4+12*Math.sqrt(st.s/maxS);
+    const pulse=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    pulse.setAttribute('cx',sh.bx);pulse.setAttribute('cy',sh.by);pulse.setAttribute('r',r);
+    pulse.setAttribute('class','bubble-pulse');
+    pulse.style.transformOrigin=`${sh.bx}px ${sh.by}px`;
+    const bub=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    bub.setAttribute('cx',sh.bx);bub.setAttribute('cy',sh.by);bub.setAttribute('r',r*0.5);
+    bub.setAttribute('class','bubble');
+    mapSvg.appendChild(pulse);mapSvg.appendChild(bub);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',sh.lx);t.setAttribute('y',sh.ly);t.setAttribute('class','stLbl');
+    if(sh.small)t.setAttribute('font-size','10');
+    t.textContent=st.n;mapSvg.appendChild(t);
+  });
+}
+
+/* ================================================================
+   DISTRICT DRILL-DOWN
+================================================================ */
+function renderDistricts(){
+  const card=$('distCard');
+  if(!selState){card.classList.remove('on');selDistrict=null;return}
+  const st=STATES.find(s=>s.id===selState);
+  card.classList.add('on');
+  $('distTitle').textContent=`📍 ${st.n} — district breakdown`;
+  const worst=[...st.districts].sort((a,b)=>a.v-b.v)[0];
+  const best=[...st.districts].sort((a,b)=>b.v-a.v)[0];
+  $('distSummary').innerHTML=
+    `<span><b>${st.districts.length}</b> districts</span>
+     <span>Most negative: <b style="color:var(--red)">${worst.d}</b> (${Math.round(worst.v*100)})</span>
+     <span>Most positive: <b style="color:var(--green)">${best.d}</b> (+${Math.round(best.v*100)})</span>
+     <span>Top issue: <b>${st.topics[0].t}</b></span>`;
+  $('distGrid').innerHTML=st.districts.map(d=>
+    `<div class="dTile ${selDistrict===d.d?'selD':''}" style="background:${sentColor(d.v)};${selDistrict===d.d?'outline:3px solid var(--ink)':''}" onclick="selectDistrict('${d.d.replace(/'/g,"\\'")}')">
+      <span class="sc">${d.v>0?'+':''}${Math.round(d.v*100)}</span>
+      <b>${d.d}</b>
+      <small>${fmtN(scale(d.s))} sessions</small><br>
+      <small style="opacity:.8">Top: ${d.topTopic}</small>
+    </div>`).join('');
+}
+function selectDistrict(d){selDistrict=selDistrict===d?null:d;render();toast(selDistrict?`Voices filtered to ${d}`:'District filter cleared');}
+
+/* ================================================================
+   MAIN RENDER
+================================================================ */
+function currentStates(){return selState?STATES.filter(s=>s.id===selState):STATES}
+function render(){
+  const set=currentStates();
+  const name=selState?set[0].n:"All Malaysia";
+  $('scopeLbl').textContent=name+(selDistrict?' · '+selDistrict:'');
+  $('donutScope').textContent=name;
+  $('topicScope').textContent=name;
+  const chip=$('stateChip');
+  chip.classList.toggle('on',!!selState);
+  $('stateChipNm').textContent=name+(selDistrict?' · '+selDistrict:'');
+
+  const sess=set.reduce((a,s)=>a+s.s,0);
+  const sent=set.reduce((a,s)=>a+s.v*s.s,0)/sess;
+  $('kSess').textContent=fmtN(scale(sess));
+  $('kCit').textContent=fmtN(Math.round(scale(sess)*0.93));
+  const ns=Math.round(sent*100);
+  const kS=$('kSent');kS.textContent=(ns>0?"+":"")+ns;
+  kS.style.color=ns>=5?"var(--green)":ns<=-5?"var(--red)":"var(--amber)";
+
+  /* topics */
+  const agg={};set.forEach(st=>st.topics.forEach(t=>agg[t.t]=(agg[t.t]||0)+t.c));
+  const list=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxT=list[0][1];
+  const trends=["up","up","flat","up","down","flat","down","flat"];
+  $('topicList').innerHTML=list.map(([t,c],i)=>{
+    const neg=NEG_TOPICS.has(t);
+    return `<div class="topicRow" onclick="openTopic('${t.replace(/'/g,"\\'")}',${scale(c)})">
+      <div class="nm">${t}<span class="go">▸</span></div>
+      <div class="barBg"><div class="barFill" style="width:${Math.round(c/maxT*100)}%;background:${neg?"var(--red)":"var(--green)"}"></div></div>
+      <div class="ct">${fmtN(scale(c))}</div>
+      <div class="tr ${trends[i]}">${trends[i]==="up"?"▲":trends[i]==="down"?"▼":"—"}</div>
+    </div>`;}).join('');
+
+  /* keywords */
+  const kws=[];list.slice(0,4).forEach(([t],ti)=>KW_POOL[t].slice(0,ti===0?4:3).forEach((k,i)=>kws.push({k,g:38-ti*9-i*4})));
+  $('kwWrap').innerHTML=kws.slice(0,12).map(x=>
+    `<span class="kw" style="font-size:${12+Math.round(x.g/9)}px">${x.k}<em class="${x.g<14?'g':''}">+${x.g}%</em></span>`).join('');
+
+  /* languages */
+  const lagg={};set.forEach(st=>Object.entries(st.langs).forEach(([l,p])=>lagg[l]=(lagg[l]||0)+p*st.s));
+  const ltot=Object.values(lagg).reduce((a,b)=>a+b,0);
+  $('langList').innerHTML=Object.entries(lagg).sort((a,b)=>b[1]-a[1]).map(([l,v])=>{
+    const pc=Math.round(v/ltot*100);
+    return `<div class="langRow"><div class="nm">${l}</div><div class="barBg"><div class="barFill" style="width:${pc}%"></div></div><b>${pc}%</b></div>`;}).join('');
+
+  const pos=Math.round(44+sent*40), neg=Math.round(31-sent*38), neu=100-pos-neg;
+  drawDonut(pos,neu,neg);
+
+  /* suggestions */
+  $('sugList').innerHTML=SUGS.map((s,i)=>{
+    const assigned=tasks.find(t=>t.src==='sug'+i);
+    return `<div class="sug"><div class="top"><b>${s.b}</b><span class="tag ${assigned?'asg':s.tag}">${assigned?'ASSIGNED':s.lbl}</span></div>
+     <div class="meta"><span><b>${fmtN(scale(s.c))}</b> sessions</span><span>Spread: <b>${s.sp}</b></span></div>
+     ${assigned?`<div class="assignedNote">→ ${assigned.deptName} · due ${assigned.due}</div>`
+       :`<button class="assignMini" onclick="openAssign('${s.b.replace(/'/g,"\\'")}','${s.topic}','normal','sug${i}')">⚡ Assign action</button>`}
+    </div>`;}).join('');
+
+  /* feed */
+  let feed=FEED;
+  if(selState)feed=feed.filter(f=>f.st===set[0].n);
+  if(selDistrict)feed=feed.filter(f=>f.d===selDistrict);
+  if(!feed.length)feed=FEED.slice(0,3);
+  $('feedScope').textContent=(selDistrict?selDistrict+', ':'')+(selState?name+' · ':'')+'anonymised';
+  $('feedList').innerHTML=feed.map(f=>
+    `<div class="feedRow"><div class="sdot" style="background:${sentColor(f.v)}"></div>
+      <div class="fx"><span class="quote">“${f.q}”</span>
+      <small>${f.d}, ${f.st} · ${f.t} · ${f.l} · ${f.time}</small></div></div>`).join('');
+
+  renderDistricts();
+  drawMap();
+  renderDeptStats();
+}
+
+/* ================================================================
+   CHARTS
+================================================================ */
+function drawTrend(){
+  const svg=$('trendSvg');
+  const W=520,H=200,pad={l:34,r:8,t:12,b:24};
+  const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+  const x=i=>pad.l+i/(TREND.length-1)*iw;
+  const y=v=>pad.t+(1-v/60)*ih;
+  let g='';
+  [0,20,40,60].forEach(v=>{g+=`<line x1="${pad.l}" y1="${y(v)}" x2="${W-pad.r}" y2="${y(v)}" stroke="#EDEFF4" stroke-width="1.5"/><text x="${pad.l-8}" y="${y(v)+4}" font-size="10" fill="#9AA0AE" text-anchor="end" font-weight="700">${v}%</text>`;});
+  const posLine=TREND.map((t,i)=>`${x(i)},${y(t[0])}`).join(' ');
+  const negLine=TREND.map((t,i)=>`${x(i)},${y(t[1])}`).join(' ');
+  const neuPts=TREND.map((t,i)=>`${x(i)},${y(100-t[0]-t[1])}`).join(' ');
+  g+=`<polygon points="${pad.l},${y(0)} ${posLine} ${W-pad.r},${y(0)}" fill="rgba(30,158,82,.12)"/>`;
+  g+=`<polyline points="${posLine}" fill="none" stroke="var(--green)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  g+=`<polyline points="${negLine}" fill="none" stroke="var(--red)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  g+=`<polyline points="${neuPts}" fill="none" stroke="#B9BFCC" stroke-width="2" stroke-dasharray="4 5"/>`;
+  const last=TREND[11];
+  g+=`<circle cx="${x(11)}" cy="${y(last[0])}" r="4.5" fill="var(--green)"/><text x="${x(11)-6}" y="${y(last[0])-9}" font-size="11" font-weight="800" fill="var(--green)" text-anchor="end">${last[0]}%</text>`;
+  g+=`<circle cx="${x(11)}" cy="${y(last[1])}" r="4.5" fill="var(--red)"/><text x="${x(11)-6}" y="${y(last[1])+16}" font-size="11" font-weight="800" fill="var(--red)" text-anchor="end">${last[1]}%</text>`;
+  ["W18","W20","W22","W24","W26","W28"].forEach((w,i)=>{g+=`<text x="${x(i*2+1)}" y="${H-4}" font-size="10" fill="#9AA0AE" font-weight="700" text-anchor="middle">${w}</text>`;});
+  svg.innerHTML=g;
+}
+function drawDonut(pos,neu,neg){
+  const svg=$('donutSvg');
+  const C=2*Math.PI*15.9;
+  const seg=(pc,off,color)=>`<circle cx="21" cy="21" r="15.9" fill="none" stroke="${color}" stroke-width="7" stroke-dasharray="${pc/100*C} ${C}" stroke-dashoffset="${-off/100*C}" transform="rotate(-90 21 21)"/>`;
+  svg.innerHTML=seg(pos,0,'#1E9E52')+seg(neu,pos,'#B9BFCC')+seg(neg,pos+neu,'#D22030')+
+    `<text x="21" y="20" text-anchor="middle" font-size="8.5" font-weight="800" fill="#17181C">${pos}%</text>
+     <text x="21" y="27.5" text-anchor="middle" font-size="4.2" font-weight="700" fill="#6B7180">POSITIVE</text>`;
+  $('donutStats').innerHTML=
+   `<div class="dStat"><i style="background:var(--green)"></i>Positive<b>${pos}%</b></div>
+    <div class="dStat"><i style="background:#B9BFCC"></i>Neutral<b>${neu}%</b></div>
+    <div class="dStat"><i style="background:var(--red)"></i>Negative<b>${neg}%</b></div>`;
+}
+
+/* ================================================================
+   TOPIC DEEP DIVE
+================================================================ */
+let currentTopic=null;
+function openTopic(t,count){
+  currentTopic=t;
+  const d=TOPIC_DETAIL[t]||{subs:[["General mentions",100]],quotes:[["(Representative quotes appear here.)","—"]],dists:["—"],trend:[8,8,9,9,10,10,11,11,12,12,13,13]};
+  $('tmTitle').textContent=t;
+  $('tmSub').textContent=(selState?STATES.find(s=>s.id===selState).n:'All Malaysia')+' · last '+rangeD+' days';
+  const tr=d.trend, delta=Math.round((tr[11]-tr[7])/tr[7]*100);
+  $('tmStats').innerHTML=
+   `<div class="miniStat"><small>Sessions</small><b>${fmtN(count)}</b></div>
+    <div class="miniStat"><small>4-wk trend</small><b style="color:${delta>0?'var(--red)':'var(--green)'}">${delta>0?'▲ +':''}${delta}%</b></div>
+    <div class="miniStat"><small>Recommended owner</small><b style="font-size:13px;line-height:1.3">${DEPTS.find(x=>x.id===TOPIC_DEPT[t]).n}</b></div>`;
+  /* sparkline */
+  const mx=Math.max(...tr), pts=tr.map((v,i)=>`${i/(tr.length-1)*396+2},${42-(v/mx)*38}`).join(' ');
+  $('tmSpark').innerHTML=`<polyline points="${pts}" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="398" cy="${42-(tr[11]/mx)*38}" r="3.5" fill="var(--red)"/>`;
+  const mS=Math.max(...d.subs.map(s=>s[1]));
+  $('tmSubs').innerHTML=d.subs.map(([nm,v])=>
+    `<div class="subIssue"><div class="nm">${nm}</div><div class="barBg"><div class="barFill" style="width:${v/mS*100}%"></div></div><b>${v}%</b></div>`).join('');
+  $('tmDists').innerHTML=d.dists.map(x=>`<span class="distHit">${x}</span>`).join('');
+  $('tmQuotes').innerHTML=d.quotes.map(([q,m])=>`<div class="q">“${q}”<small>${m}</small></div>`).join('');
+  $('tmAssign').onclick=()=>{$('topicModal').classList.remove('open');openAssign(t+' — '+(d.subs[0][0]),t,'elevated');};
+  $('topicModal').classList.add('open');
+}
+
+/* ================================================================
+   ASSIGN ACTION
+================================================================ */
+$('aDept').innerHTML=DEPTS.map(d=>`<option value="${d.id}">${d.n}</option>`).join('');
+let prio='normal';
+document.querySelectorAll('.prio').forEach(p=>p.onclick=()=>{
+  document.querySelectorAll('.prio').forEach(x=>x.classList.remove('sel'));
+  p.classList.add('sel');prio=p.dataset.p;
+});
+function openAssign(issue,topic,pri,src){
+  assignCtx={src:src||('adhoc'+Date.now())};
+  $('aIssue').value=issue;
+  const rec=TOPIC_DEPT[topic]||'polisi';
+  $('aDept').value=rec;
+  $('aDeptHint').textContent='✓ AI-suggested owner based on issue classification: '+DEPTS.find(d=>d.id===rec).n;
+  prio=pri||'normal';
+  document.querySelectorAll('.prio').forEach(x=>x.classList.toggle('sel',x.dataset.p===prio));
+  const d=new Date();d.setDate(d.getDate()+(prio==='high'?3:14));
+  $('aDue').value=d.toISOString().slice(0,10);
+  $('aNote').value='';
+  $('assignModal').classList.add('open');
+}
+function createTask(){
+  const dept=DEPTS.find(d=>d.id===$('aDept').value);
+  tasks.unshift({
+    id:'ACT-'+String(1000+tasks.length+1),
+    issue:$('aIssue').value, dept:dept.id, deptName:dept.n,
+    prio, due:$('aDue').value, note:$('aNote').value,
+    status:'Assigned', created:new Date().toLocaleDateString('en-MY',{day:'numeric',month:'short'}),
+    src:assignCtx.src
+  });
+  $('assignModal').classList.remove('open');
+  renderTasks();render();
+  toast('✓ Action assigned to '+dept.n+' — tracked in Action Tracker');
+}
+function renderTasks(){
+  $('taskCount').textContent=tasks.filter(t=>t.status!=='Resolved').length;
+  if(!tasks.length){$('taskList').innerHTML='<div class="emptyT">No actions yet.<br><br>Open any issue deep dive, urgent flag, or suggestion and tap <b>Assign action</b>.</div>';return}
+  $('taskList').innerHTML=tasks.map((t,i)=>{
+    const over=new Date(t.due)<new Date()&&t.status!=='Resolved';
+    const cls=t.status==='Resolved'?'act':t.status==='In progress'?'prog':'asg';
+    return `<div class="task">
+      <div class="t1"><b>${t.issue}</b><span class="tag ${cls}">${t.status.toUpperCase()}</span></div>
+      <div class="meta">
+        <span>${t.id}</span><span>Owner: <b>${t.deptName}</b></span>
+        <span class="due ${over?'over':''}">Due: <b>${t.due}</b>${over?' ⚠ OVERDUE':''}</span>
+        <span>Priority: <b style="${t.prio==='high'?'color:var(--red)':''}">${t.prio}</b></span>
+      </div>
+      ${t.note?`<div class="meta"><span>“${t.note}”</span></div>`:''}
+      <div class="row2">
+        <select onchange="setStatus(${i},this.value)">
+          <option ${t.status==='Assigned'?'selected':''}>Assigned</option>
+          <option ${t.status==='In progress'?'selected':''}>In progress</option>
+          <option ${t.status==='Resolved'?'selected':''}>Resolved</option>
+        </select>
+      </div>
+    </div>`;}).join('');
+}
+function setStatus(i,v){
+  tasks[i].status=v;renderTasks();render();
+  if(v==='Resolved')toast('✓ Resolved — citizens who raised this can be notified via WhatsApp ("You said, we did").');
+}
+function renderDeptStats(){
+  const open=tasks.filter(t=>t.status!=='Resolved');
+  if(!open.length){$('deptStats').innerHTML='<div class="emptyT" style="padding:14px 6px">No open actions.<br>Assign one from an issue deep dive.</div>';return}
+  const agg={};open.forEach(t=>agg[t.deptName]=(agg[t.deptName]||0)+1);
+  const mx=Math.max(...Object.values(agg));
+  $('deptStats').innerHTML=Object.entries(agg).sort((a,b)=>b[1]-a[1]).map(([d,c])=>
+    `<div class="deptStat"><div class="nm">${d}</div><div class="barBg"><div class="barFill" style="width:${c/mx*100}%"></div></div><b>${c}</b></div>`).join('');
+}
+function openDrawer(){$('drawer').classList.add('open')}
+
+/* ================================================================
+   INTERACTIONS
+================================================================ */
+function selectState(id){selState=id;selDistrict=null;render();}
+$('range').addEventListener('click',e=>{
+  if(e.target.dataset.d){rangeD=+e.target.dataset.d;
+    document.querySelectorAll('#range button').forEach(b=>b.classList.toggle('on',b===e.target));
+    render();}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));$('drawer').classList.remove('open');}});
+
+drawTrend();render();renderTasks();
+</script>
+</body>
+</html>

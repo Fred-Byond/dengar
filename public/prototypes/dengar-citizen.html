@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DENGAR.ai — Bercakap dengan Menteri</title>
+<style>
+:root{
+  --wood-d:#3E2617; --wood-m:#6E4226; --wood-l:#A9713F;
+  --red:#E4002B; --navy:#1B2A6B; --gold:#FFCC00;
+  --ink:#1B1B1F; --grey:#6E6E73; --line:#E8E2DA;
+  --card:rgba(255,253,249,.94);
+  --mic:#5B5FE9;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:radial-gradient(120% 90% at 50% 0%,#2A2A31 0%,#141417 70%);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink);
+}
+#phone{
+  position:relative;width:100%;max-width:430px;height:100vh;max-height:940px;
+  background:#000;overflow:hidden;display:flex;flex-direction:column;
+}
+@media(min-width:480px){
+  #phone{height:92vh;border-radius:38px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 10px #26262b}
+}
+#scene{position:absolute;inset:0;z-index:0}
+#scene svg{width:100%;height:100%;display:block}
+#veil{position:absolute;inset:0;z-index:1;background:rgba(20,14,9,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .4s}
+#phone.veiled #veil{opacity:1}
+
+.screen{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(14px);transition:opacity .38s ease,transform .38s ease;overflow-y:auto;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{opacity:1;pointer-events:auto;transform:none}
+
+/* ============ BRAND ============ */
+.brand{display:flex;justify-content:space-between;align-items:flex-start;padding:22px 20px 0}
+.dengar{display:flex;align-items:center;gap:8px;color:#fff}
+.dengar .wave{width:26px;height:26px}
+.dengar .wm{font-size:23px;font-weight:800;letter-spacing:.4px}
+.dengar .wm span{font-weight:300;color:var(--gold)}
+.madani{display:flex;align-items:center;gap:7px;color:#fff;text-align:left}
+.madani .flag{width:30px;height:30px}
+.madani .t{font-weight:800;font-size:12.5px;line-height:1.05;letter-spacing:.3px}
+.who{padding:10px 20px 0;color:rgba(255,255,255,.85)}
+.who b{display:block;font-size:17px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.who small{font-size:12px;opacity:.85}
+
+/* ============ UI LANGUAGE TOGGLE ============ */
+#uiLangTgl{position:absolute;top:34px;right:0;left:0;display:flex;justify-content:center;z-index:7;pointer-events:none}
+#uiLangTgl .box{pointer-events:auto;display:flex;background:rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:3px}
+#uiLangTgl button{border:0;background:transparent;color:#fff;font-size:11.5px;font-weight:800;padding:6px 14px;border-radius:99px;letter-spacing:.4px}
+#uiLangTgl button.on{background:#fff;color:var(--ink)}
+
+/* ============ SHARED ============ */
+.card{background:var(--card);border-radius:20px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,.28)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;cursor:pointer;
+  background:var(--red);color:#fff;font-size:17px;font-weight:700;padding:16px;border-radius:14px;
+  transition:transform .12s;font-family:inherit}
+.btn:active{transform:scale(.975)}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);font-weight:600}
+.btn.navy{background:var(--navy)}
+.btn:disabled{filter:grayscale(.5) opacity(.55);cursor:default}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--red)}
+h2.title{font-size:22px;font-weight:800;margin:4px 0 2px}
+p.sub{font-size:13.5px;color:var(--grey);line-height:1.45}
+label.f{display:block;font-size:12.5px;font-weight:700;color:var(--ink);margin:14px 0 6px}
+label.f i{font-style:normal;color:var(--grey);font-weight:500}
+input.f,select.f{width:100%;font-family:inherit;font-size:16px;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);outline:none}
+input.f:focus,select.f:focus{border-color:var(--navy)}
+.back{position:absolute;top:20px;left:16px;z-index:5;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.92);font-size:18px;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.25);color:var(--ink);display:flex;align-items:center;justify-content:center}
+.demoTag{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:6;background:var(--gold);color:#3a2c00;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:4px 14px;border-radius:0 0 9px 9px}
+
+/* ============ LANDING ============ */
+#s-landing .hero-spacer{flex:1;min-height:170px}
+#s-landing .sheet{background:linear-gradient(180deg,rgba(20,13,8,0) 0%,rgba(20,13,8,.72) 18%,rgba(16,11,7,.94) 45%);padding:70px 20px 26px;margin-top:auto}
+#s-landing h1{color:#fff;font-size:30px;font-weight:800;line-height:1.12;letter-spacing:-.3px}
+#s-landing h1 em{font-style:normal;color:var(--gold)}
+#s-landing .lead{color:rgba(255,255,255,.82);font-size:14.5px;line-height:1.5;margin:10px 0 18px}
+.steps{display:flex;gap:8px;margin:0 0 18px}
+.step{flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:13px;padding:11px 10px;color:#fff}
+.step b{display:block;font-size:12.5px;margin-top:5px}
+.step small{font-size:10.5px;opacity:.72;line-height:1.3;display:block;margin-top:2px}
+.step .ic{font-size:17px}
+.langrow{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px}
+.langrow span{font-size:11.5px;font-weight:700;color:#fff;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);padding:5px 11px;border-radius:99px}
+.pdpa{color:rgba(255,255,255,.55);font-size:10.5px;line-height:1.45;margin-top:12px}
+.pdpa a{color:rgba(255,255,255,.7)}
+
+/* ============ SLOTS ============ */
+.formwrap{padding:74px 18px 26px;display:flex;flex-direction:column;gap:14px}
+.days{display:flex;gap:8px;overflow-x:auto;padding:2px;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day{min-width:64px;flex:0 0 auto;text-align:center;border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:10px 4px;cursor:pointer;transition:.15s}
+.day small{display:block;font-size:10.5px;color:var(--grey);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.day b{display:block;font-size:19px;margin:2px 0}
+.day em{display:block;font-style:normal;font-size:9.5px;color:var(--grey)}
+.day.sel{border-color:var(--navy);background:var(--navy);color:#fff}
+.day.sel small,.day.sel em{color:rgba(255,255,255,.75)}
+.day.full{opacity:.45;cursor:default}
+.day.full em{color:var(--red);font-weight:700}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:11px 0;text-align:center;font-size:14.5px;font-weight:700;cursor:pointer;transition:.15s}
+.slot.taken{opacity:.35;text-decoration:line-through;cursor:default}
+.slot.sel{border-color:var(--red);background:var(--red);color:#fff}
+.lockNote{font-size:11px;color:var(--grey);text-align:center}
+
+.langGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.langBtn{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:14px 6px;text-align:center;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;color:var(--ink)}
+.langBtn.sel{background:var(--red);border-color:var(--red);color:#fff;font-weight:800}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:11.5px;color:var(--grey);line-height:1.45}
+.check input{margin-top:2px;width:17px;height:17px;accent-color:var(--red);flex:0 0 auto}
+
+.otpRow{display:flex;gap:8px;justify-content:center;margin:16px 0 6px}
+.otpRow input{width:46px;height:56px;text-align:center;font-size:24px;font-weight:800;border:1.5px solid var(--line);border-radius:12px;outline:none}
+.otpRow input:focus{border-color:var(--navy)}
+.hint{background:#FFF7DE;border:1px solid #F2E2A8;border-radius:10px;padding:9px 12px;font-size:12px;color:#6B5900;text-align:center;font-weight:600}
+
+.bigTick{width:76px;height:76px;border-radius:50%;background:#1E9E52;color:#fff;font-size:38px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 10px 30px rgba(30,158,82,.4)}
+.refBox{background:var(--navy);color:#fff;border-radius:14px;padding:14px;text-align:center;margin:14px 0}
+.refBox small{display:block;font-size:10.5px;letter-spacing:1.5px;opacity:.75;font-weight:700}
+.refBox b{font-size:21px;letter-spacing:1px}
+.detail{display:flex;justify-content:space-between;font-size:13.5px;padding:9px 2px;border-bottom:1px solid var(--line)}
+.detail:last-child{border-bottom:0}
+.detail span{color:var(--grey)}
+.detail b{font-weight:700;text-align:right}
+.wa{background:#E7FFE9;border-radius:18px 18px 18px 4px;padding:14px 16px;border:1px solid #BBEFC2;position:relative}
+.wa .from{font-size:11px;font-weight:800;color:#0B7A34;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.wa p{font-size:13.5px;line-height:1.5}
+.wa .time{font-size:10px;color:#7BA383;text-align:right;margin-top:6px}
+.phoneTop{background:#0C1B12;border-radius:16px 16px 0 0;color:#fff;padding:11px 16px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:9px}
+.phoneTop .av{width:30px;height:30px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:13px}
+
+#s-lobby .mid{margin:auto;padding:0 22px;width:100%}
+.countWrap{text-align:center;color:#fff;margin-bottom:18px}
+.countWrap small{font-size:12px;letter-spacing:2px;font-weight:800;text-transform:uppercase;opacity:.8}
+.countNum{font-size:58px;font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums;text-shadow:0 4px 24px rgba(0,0,0,.5)}
+.countWrap .demoNote{letter-spacing:.5px;text-transform:none;font-weight:600;opacity:.7}
+.readyList{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.readyItem{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.95);border-radius:13px;padding:12px 14px;font-size:13.5px;font-weight:600}
+.readyItem .dot{width:26px;height:26px;border-radius:50%;background:#E8E2DA;color:var(--grey);display:flex;align-items:center;justify-content:center;font-size:13px;flex:0 0 auto}
+.readyItem.ok .dot{background:#1E9E52;color:#fff}
+.readyItem button{margin-left:auto;border:0;background:var(--navy);color:#fff;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:9px;cursor:pointer;font-family:inherit}
+
+#s-session{justify-content:flex-end}
+.sessTop{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:16px 16px 0;z-index:4}
+.timerPill{background:rgba(0,0,0,.55);color:#fff;font-weight:800;font-size:14px;padding:7px 14px;border-radius:99px;font-variant-numeric:tabular-nums;display:flex;gap:7px;align-items:center}
+.timerPill .rec{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.langPill{background:rgba(255,255,255,.92);font-weight:800;font-size:12px;padding:8px 13px;border-radius:99px;border:0;cursor:pointer;font-family:inherit}
+.sessBottom{position:relative;z-index:3;padding:14px 16px 22px;background:linear-gradient(180deg,rgba(10,7,4,0),rgba(10,7,4,.82) 40%)}
+.caption{color:#fff;font-size:16.5px;line-height:1.5;font-weight:600;text-shadow:0 2px 12px rgba(0,0,0,.7);min-height:52px;margin-bottom:6px}
+.caption .n{display:block;font-size:10.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.youSaid{color:rgba(255,255,255,.75);font-size:12.5px;font-style:italic;min-height:18px;margin-bottom:12px}
+.micRow{display:flex;align-items:center;justify-content:center;gap:14px}
+.micBtn{width:74px;height:74px;border-radius:50%;background:var(--mic);border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 26px rgba(91,95,233,.5);transition:.2s;position:relative;flex:0 0 auto}
+.micBtn svg{width:30px;height:30px;fill:#fff}
+.micBtn.listening{background:var(--red);box-shadow:0 8px 26px rgba(228,0,43,.55)}
+.micBtn.listening::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:2.5px solid rgba(228,0,43,.6);animation:ring 1.3s infinite}
+@keyframes ring{0%{transform:scale(.85);opacity:1}100%{transform:scale(1.25);opacity:0}}
+.micLbl{color:#fff;font-size:12px;font-weight:700;text-align:center;margin-top:8px;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.txtFallback{display:none;gap:8px;margin-top:12px}
+.txtFallback input{flex:1;font-family:inherit;font-size:14px;padding:12px;border-radius:11px;border:0;outline:none}
+.txtFallback button{border:0;background:var(--mic);color:#fff;font-weight:700;padding:0 18px;border-radius:11px;cursor:pointer;font-family:inherit}
+.ffBtn{position:absolute;bottom:8px;right:10px;z-index:5;background:rgba(255,255,255,.16);color:rgba(255,255,255,.75);border:0;font-size:10px;font-weight:700;padding:5px 10px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.5px}
+#langModal{position:absolute;inset:0;z-index:8;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:24px}
+#langModal.open{display:flex}
+#langModal .card{width:100%}
+#langModal h3{display:flex;justify-content:space-between;align-items:center;font-size:19px;margin-bottom:14px}
+#langModal h3 button{border:0;background:#EEE9E1;width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer}
+
+.stars{display:flex;justify-content:center;gap:9px;margin:12px 0 4px}
+.stars span{font-size:33px;color:#D9D2C7;cursor:pointer;transition:.12s}
+.stars span.on{color:#F5A500;transform:scale(1.08)}
+.shareCard{background:linear-gradient(135deg,var(--navy),#2E44A8);border-radius:16px;color:#fff;padding:16px;text-align:center;margin-top:14px}
+.shareCard b{font-size:15px}
+.shareCard small{display:block;font-size:11px;opacity:.8;margin-top:3px}
+.siteUrl{text-align:center;font-size:11px;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:1px;padding-bottom:10px}
+
+.fadeUp{animation:fadeUp .5s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+[dir="rtl"]{text-align:right}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div class="demoTag" data-i18n="demoTag">DEMO PROTOTAIP</div>
+
+  <!-- UI language toggle: visible on every screen -->
+  <div id="uiLangTgl"><div class="box">
+    <button id="tglMs" class="on" onclick="setUiLang('ms')">BM</button>
+    <button id="tglEn" onclick="setUiLang('en')">EN</button>
+  </div></div>
+
+  <!-- ===== Office + minister scene (SVG) ===== -->
+  <div id="scene">
+    <svg viewBox="0 0 430 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#5A3820"/><stop offset=".55" stop-color="#6E4226"/><stop offset="1" stop-color="#4A2C18"/>
+        </linearGradient>
+        <linearGradient id="desk" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#8A5731"/><stop offset="1" stop-color="#5C3A20"/>
+        </linearGradient>
+        <radialGradient id="glow" cx=".5" cy="0" r="1">
+          <stop offset="0" stop-color="#FFD9A0" stop-opacity=".55"/><stop offset="1" stop-color="#FFD9A0" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="chair" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#C4813F"/><stop offset="1" stop-color="#9A5F2C"/>
+        </linearGradient>
+      </defs>
+      <rect width="430" height="900" fill="url(#wood)"/>
+      <g opacity=".35">
+        <rect x="18" y="60" width="52" height="560" rx="8" fill="#3E2818"/>
+        <rect x="360" y="60" width="52" height="560" rx="8" fill="#3E2818"/>
+        <rect x="26" y="72" width="36" height="536" rx="6" fill="#7A4B2A"/>
+        <rect x="368" y="72" width="36" height="536" rx="6" fill="#7A4B2A"/>
+      </g>
+      <ellipse cx="120" cy="30" rx="130" ry="90" fill="url(#glow)"/>
+      <ellipse cx="330" cy="30" rx="130" ry="90" fill="url(#glow)"/>
+      <circle cx="120" cy="18" r="7" fill="#FFE9C4"/><circle cx="330" cy="18" r="7" fill="#FFE9C4"/>
+      <g transform="translate(332,398)" opacity=".9">
+        <rect x="0" y="60" width="86" height="10" rx="3" fill="#4A2C18"/>
+        <g fill="#D9D4CC">
+          <rect x="14" y="-38" width="13" height="98" rx="5"/><rect x="34" y="-38" width="13" height="98" rx="5"/>
+          <rect x="24" y="6" width="13" height="4" fill="#BDB7AD"/>
+          <rect x="19" y="-50" width="3" height="14"/><rect x="39" y="-50" width="3" height="14"/>
+          <rect x="58" y="-16" width="9" height="76" rx="4"/><rect x="60" y="-30" width="3" height="16"/>
+        </g>
+      </g>
+      <g id="mChair"><rect x="128" y="240" width="174" height="290" rx="52" fill="url(#chair)"/>
+      <rect x="140" y="252" width="150" height="266" rx="44" fill="#B5763A"/></g>
+      <g id="minister">
+        <path d="M138 560 C138 470 168 428 215 428 C262 428 292 470 292 560 Z" fill="#F7F5F0"/>
+        <path d="M138 560 C138 470 168 428 215 428 C262 428 292 470 292 560 Z" fill="none" stroke="#E2DDD3" stroke-width="2"/>
+        <path d="M138 528 C120 540 112 556 110 574 L150 574 Z" fill="#F1EEE7"/>
+        <path d="M292 528 C310 540 318 556 320 574 L280 574 Z" fill="#F1EEE7"/>
+        <path d="M126 574 C138 552 170 546 196 560 L222 574 Z" fill="#C79063"/>
+        <path d="M304 574 C292 552 260 546 234 560 L208 574 Z" fill="#C79063"/>
+        <ellipse cx="215" cy="568" rx="34" ry="16" fill="#D3A075"/>
+        <path d="M196 564 q6 8 12 0 M208 566 q6 8 12 0 M220 566 q6 8 12 0" stroke="#B27F52" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <rect x="264" y="556" width="9" height="18" rx="4" fill="#3A3A40"/>
+        <path d="M196 432 L215 462 L234 432 L226 424 L215 440 L204 424 Z" fill="#FFFFFF" stroke="#E2DDD3" stroke-width="1.5"/>
+        <rect x="212" y="452" width="6" height="106" fill="#EFEBE2"/>
+        <circle cx="215" cy="470" r="2.4" fill="#CFC8BA"/><circle cx="215" cy="494" r="2.4" fill="#CFC8BA"/><circle cx="215" cy="518" r="2.4" fill="#CFC8BA"/><circle cx="215" cy="542" r="2.4" fill="#CFC8BA"/>
+        <rect x="240" y="482" width="34" height="38" rx="4" fill="#F2EFE8" stroke="#E2DDD3"/>
+        <circle cx="257" cy="492" r="5.5" fill="#1B2A6B"/><circle cx="257" cy="492" r="2.2" fill="#FFCC00"/>
+        <circle cx="172" cy="486" r="7" fill="#B22222" opacity=".85"/><circle cx="172" cy="486" r="3" fill="#FFCC00"/>
+        <rect x="200" y="398" width="30" height="38" rx="12" fill="#CE9668"/>
+        <g id="mHead">
+          <ellipse cx="215" cy="352" rx="52" ry="58" fill="#D8A377"/>
+          <ellipse cx="163" cy="356" rx="9" ry="14" fill="#CE9668"/><ellipse cx="267" cy="356" rx="9" ry="14" fill="#CE9668"/>
+          <path d="M163 340 C160 296 186 276 215 276 C248 276 272 298 268 342 C262 322 252 310 240 306 C238 314 232 318 224 318 C196 318 176 326 170 348 C166 346 164 344 163 340 Z" fill="#6E6E70"/>
+          <path d="M170 300 C182 284 200 278 215 278 C202 286 190 294 184 306 Z" fill="#8A8A8C" opacity=".7"/>
+          <path d="M180 336 q13 -6 26 -1" stroke="#585858" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M224 335 q13 -5 26 1" stroke="#585858" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <g id="eyes">
+            <ellipse cx="193" cy="348" rx="6.5" ry="4.6" fill="#fff"/><circle cx="193" cy="348" r="2.8" fill="#2B1E14"/>
+            <ellipse cx="237" cy="348" rx="6.5" ry="4.6" fill="#fff"/><circle cx="237" cy="348" r="2.8" fill="#2B1E14"/>
+          </g>
+          <g id="lids" opacity="0"><rect x="184" y="342" width="18" height="10" rx="5" fill="#D8A377"/><rect x="228" y="342" width="18" height="10" rx="5" fill="#D8A377"/></g>
+          <g stroke="#8A8A8E" stroke-width="1.8" fill="rgba(255,255,255,.14)">
+            <rect x="178" y="338" width="30" height="20" rx="7"/>
+            <rect x="222" y="338" width="30" height="20" rx="7"/>
+            <path d="M208 346 L222 346" fill="none"/>
+            <path d="M178 344 L164 340 M252 344 L266 340" fill="none"/>
+          </g>
+          <path d="M215 352 q-4 14 -7 18 q6 5 14 0" stroke="#B27F52" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path id="mouth" d="M198 388 q17 8 34 0" stroke="#8C5B3C" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+          <path d="M192 396 q23 14 46 0" stroke="#C08B5E" stroke-width="2" fill="none" opacity=".5"/>
+        </g>
+      </g>
+      <rect x="0" y="560" width="430" height="340" fill="url(#desk)"/>
+      <rect x="0" y="560" width="430" height="8" fill="#A06A3A"/>
+      <g transform="translate(196,588) rotate(-3)"><rect width="130" height="66" rx="5" fill="#2B2B30"/><rect x="8" y="-6" width="114" height="60" rx="3" fill="#F3F1EA"/>
+        <g stroke="#B9B4A8" stroke-width="2"><path d="M20 8 h90 M20 18 h90 M20 28 h72 M20 38 h84"/></g></g>
+      <g transform="translate(148,596)"><path d="M0 20 q4 -10 18 -10 q14 0 18 10 l-3 74 q-15 10 -30 0 Z" fill="#1E1E22"/>
+        <g stroke-linecap="round" stroke-width="5"><path d="M8 14 l-3 -30" stroke="#7A4B2A"/><path d="M18 12 l0 -34" stroke="#3A3A40"/><path d="M27 14 l4 -28" stroke="#55555C"/></g></g>
+      <g transform="translate(268,606)"><path d="M0 34 L118 20 L150 66 L28 84 Z" fill="#23262E"/>
+        <path d="M4 36 L116 23 L144 63 L30 79 Z" fill="#2E3340"/>
+        <path d="M0 34 L-14 66 L112 92 L150 66 L28 84 Z" fill="#181A20"/>
+        <g fill="#3A3F4C"><rect x="6" y="52" width="120" height="3" transform="rotate(6 6 52)"/><rect x="8" y="60" width="120" height="3" transform="rotate(6 8 60)"/><rect x="10" y="68" width="118" height="3" transform="rotate(6 10 68)"/></g></g>
+      <g transform="translate(58,540)">
+        <ellipse cx="26" cy="182" rx="30" ry="10" fill="#5C3A20"/>
+        <path d="M22 182 L22 40 L30 40 L30 182 Z" fill="#7A4B2A"/>
+        <circle cx="26" cy="36" r="6" fill="#8A5731"/>
+        <g transform="translate(30,44)">
+          <path id="flagShape" d="M0 0 C34 -6 70 6 104 0 L100 96 C66 102 32 90 -2 96 Z" fill="#fff"/>
+          <clipPath id="fc"><use href="#flagShape"/></clipPath>
+          <g clip-path="url(#fc)">
+            <g fill="#D22030">
+              <rect x="-6" y="0" width="116" height="7"/><rect x="-6" y="14" width="116" height="7"/><rect x="-6" y="28" width="116" height="7"/><rect x="-6" y="42" width="116" height="7"/><rect x="-6" y="56" width="116" height="7"/><rect x="-6" y="70" width="116" height="7"/><rect x="-6" y="84" width="116" height="7"/>
+            </g>
+            <rect x="-6" y="-2" width="60" height="52" fill="#1B2A6B"/>
+            <circle cx="18" cy="22" r="13" fill="#FFCC00"/><circle cx="24" cy="22" r="11" fill="#1B2A6B"/>
+            <g fill="#FFCC00" transform="translate(36,22)">
+              <path d="M0 -10 L2.4 -3.2 L9.5 -3.2 L3.8 1 L6 8 L0 3.8 L-6 8 L-3.8 1 L-9.5 -3.2 L-2.4 -3.2 Z"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g transform="translate(0,640)"><rect x="-6" y="0" width="70" height="16" rx="3" fill="#2E5AA0"/><rect x="-6" y="18" width="62" height="16" rx="3" fill="#3D7ACC"/><rect x="-6" y="36" width="76" height="16" rx="3" fill="#24466E"/></g>
+    </svg>
+  </div>
+  <div id="veil"></div>
+
+  <!-- ================= LANDING ================= -->
+  <section class="screen active" id="s-landing">
+    <div class="brand">
+      <div class="dengar">
+        <svg class="wave" viewBox="0 0 26 26" fill="none"><g stroke="#FFCC00" stroke-width="2.6" stroke-linecap="round"><path d="M4 11 v4"/><path d="M9 7 v12"/><path d="M14 4 v18"/><path d="M19 8 v10"/><path d="M24 11 v4" stroke-opacity=".6"/></g></svg>
+        <div class="wm">DENGAR<span>.ai</span></div>
+      </div>
+      <div class="madani">
+        <svg class="flag" viewBox="0 0 40 40"><g><path d="M8 22 c0-9 5-16 12-16 c7 0 12 7 12 16 l-2 12 H10 Z" fill="#1B2A6B"/><g fill="#D22030"><rect x="12" y="2" width="3" height="10" rx="1.5"/><rect x="17" y="0" width="3" height="12" rx="1.5"/><rect x="22" y="1" width="3" height="11" rx="1.5"/><rect x="27" y="3" width="3" height="9" rx="1.5"/></g><circle cx="17" cy="24" r="7" fill="#FFCC00"/><circle cx="20" cy="24" r="6" fill="#1B2A6B"/><path d="M27 24 l1.6 3.4 3.6.4 -2.7 2.5 .7 3.6 -3.2-1.9 -3.2 1.9 .7-3.6 -2.7-2.5 3.6-.4 Z" fill="#FFCC00"/></g></svg>
+        <div class="t">MALAYSIA<br>MADANI</div>
+      </div>
+    </div>
+    <div class="who"><b>Saifuddin Nasution</b><small data-i18n="minRole">Menteri Dalam Negeri, Malaysia</small></div>
+    <div class="hero-spacer"></div>
+    <div class="sheet">
+      <h1 id="heroTitle"></h1>
+      <p class="lead" data-i18n="lead"></p>
+      <div class="steps">
+        <div class="step"><div class="ic">📅</div><b data-i18n="st1"></b><small data-i18n="st1s"></small></div>
+        <div class="step"><div class="ic">💬</div><b data-i18n="st2"></b><small data-i18n="st2s"></small></div>
+        <div class="step"><div class="ic">✅</div><b data-i18n="st3"></b><small data-i18n="st3s"></small></div>
+      </div>
+      <button class="btn" onclick="go('s-slots')" data-i18n="cta"></button>
+      <div class="langrow"><span>Bahasa Melayu</span><span>English</span><span>中文</span><span>தமிழ்</span><span>العربية</span></div>
+      <p class="pdpa" data-i18n="pdpa"></p>
+      <p class="siteUrl" style="margin-top:10px">www.dengar.ai</p>
+    </div>
+  </section>
+
+  <!-- ================= SLOTS ================= -->
+  <section class="screen" id="s-slots">
+    <button class="back" onclick="go('s-landing')">←</button>
+    <div class="formwrap">
+      <div class="card fadeUp">
+        <div class="eyebrow" data-i18n="step1"></div>
+        <h2 class="title" data-i18n="slotTitle"></h2>
+        <p class="sub" data-i18n="slotSub"></p>
+        <label class="f" data-i18n="dateLbl"></label>
+        <div class="days" id="dayStrip"></div>
+        <label class="f" data-i18n="timeLbl"></label>
+        <div class="slots" id="slotGrid"></div>
+        <p class="lockNote" style="margin-top:12px" data-i18n="lockNote"></p>
+      </div>
+      <button class="btn" id="slotNext" disabled onclick="go('s-register')" data-i18n="continue"></button>
+    </div>
+  </section>
+
+  <!-- ================= REGISTER ================= -->
+  <section class="screen" id="s-register">
+    <button class="back" onclick="go('s-slots')">←</button>
+    <div class="formwrap">
+      <div class="card fadeUp">
+        <div class="eyebrow" data-i18n="step2"></div>
+        <h2 class="title" data-i18n="regTitle"></h2>
+        <p class="sub" data-i18n="regSub"></p>
+        <label class="f" data-i18n="fName"></label>
+        <input class="f" id="fName" autocomplete="name">
+        <label class="f" data-i18n="fPhone"></label>
+        <input class="f" id="fPhone" inputmode="tel">
+        <label class="f"><span data-i18n="fEmail"></span> <i data-i18n="optional"></i></label>
+        <input class="f" id="fEmail" inputmode="email" placeholder="nama@email.com">
+        <label class="f" data-i18n="fState"></label>
+        <select class="f" id="fState"></select>
+        <label class="f" data-i18n="fDistrict"></label>
+        <select class="f" id="fDistrict"></select>
+        <label class="f" data-i18n="fLang"></label>
+        <div class="langGrid" id="langGrid"></div>
+        <label class="f"><span data-i18n="fTopic"></span> <i data-i18n="optional"></i></label>
+        <select class="f" id="fTopic"></select>
+        <label class="check"><input type="checkbox" id="fConsent"><span data-i18n="consent"></span></label>
+      </div>
+      <button class="btn" id="regNext" onclick="toOTP()" data-i18n="verify"></button>
+    </div>
+  </section>
+
+  <!-- ================= OTP ================= -->
+  <section class="screen" id="s-otp">
+    <button class="back" onclick="go('s-register')">←</button>
+    <div class="formwrap" style="justify-content:center;flex:1">
+      <div class="card fadeUp" style="text-align:center">
+        <div class="eyebrow" data-i18n="step3"></div>
+        <h2 class="title" data-i18n="otpTitle"></h2>
+        <p class="sub"><span data-i18n="otpSub"></span> <b id="otpPhone"></b></p>
+        <div class="otpRow" id="otpRow">
+          <input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
+        </div>
+        <div class="hint"><span data-i18n="demoCode"></span> <b id="otpHint"></b> — <a href="#" onclick="fillOTP();return false" style="color:#6B5900" data-i18n="tapFill"></a></div>
+        <button class="btn navy" style="margin-top:16px" onclick="confirmBooking()" data-i18n="confirmBk"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONFIRMED ================= -->
+  <section class="screen" id="s-confirmed">
+    <div class="formwrap" style="justify-content:center;flex:1">
+      <div class="card fadeUp" style="text-align:center">
+        <div class="bigTick">✓</div>
+        <h2 class="title" data-i18n="bookedTitle"></h2>
+        <p class="sub" data-i18n="bookedSub"></p>
+        <div class="refBox"><small data-i18n="refLbl"></small><b id="refCode">TTM-2026-000000</b></div>
+        <div style="text-align:left">
+          <div class="detail"><span data-i18n="dDate"></span><b id="cDate">—</b></div>
+          <div class="detail"><span data-i18n="dTime"></span><b id="cTime">—</b></div>
+          <div class="detail"><span data-i18n="dLang"></span><b id="cLang">—</b></div>
+          <div class="detail"><span data-i18n="dFrom"></span><b id="cLoc">—</b></div>
+        </div>
+        <button class="btn ghost" style="margin-top:16px" onclick="alert(t('calAlert'))" data-i18n="addCal"></button>
+      </div>
+      <button class="btn" onclick="go('s-reminder')" data-i18n="demoJump"></button>
+    </div>
+  </section>
+
+  <!-- ================= WHATSAPP REMINDER ================= -->
+  <section class="screen" id="s-reminder">
+    <div class="formwrap" style="justify-content:center;flex:1">
+      <div class="fadeUp">
+        <div class="phoneTop"><div class="av">🏛️</div>DENGAR.ai · WhatsApp</div>
+        <div style="background:#DCEAD3;padding:16px;border-radius:0 0 16px 16px;display:flex;flex-direction:column;gap:10px">
+          <div class="wa">
+            <div class="from">✔✔ <span data-i18n="waFrom"></span></div>
+            <p id="waBody"></p>
+            <div class="time">1:00 PM</div>
+          </div>
+          <button class="btn navy" onclick="startLobby()">🔗 <span data-i18n="waJoin"></span></button>
+          <p style="font-size:10.5px;color:#5E7A63;text-align:center" data-i18n="waValid"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LOBBY ================= -->
+  <section class="screen" id="s-lobby">
+    <div class="brand">
+      <div class="dengar">
+        <svg class="wave" viewBox="0 0 26 26" fill="none"><g stroke="#FFCC00" stroke-width="2.6" stroke-linecap="round"><path d="M4 11 v4"/><path d="M9 7 v12"/><path d="M14 4 v18"/><path d="M19 8 v10"/><path d="M24 11 v4" stroke-opacity=".6"/></g></svg>
+        <div class="wm">DENGAR<span>.ai</span></div>
+      </div>
+      <div class="madani"><div class="t" style="text-align:right">MALAYSIA<br>MADANI</div></div>
+    </div>
+    <div class="mid">
+      <div class="countWrap">
+        <small data-i18n="lobbyIn"></small>
+        <div class="countNum" id="lobbyCount">00:10</div>
+        <small class="demoNote" data-i18n="lobbyDemo"></small>
+      </div>
+      <div class="card">
+        <p class="sub" style="text-align:center;margin-bottom:4px"><b style="color:var(--ink)" data-i18n="ready"></b></p>
+        <div class="readyList">
+          <div class="readyItem ok"><div class="dot">✓</div><span data-i18n="linkOk"></span></div>
+          <div class="readyItem" id="micCheck"><div class="dot">🎤</div><span data-i18n="micLbl2"></span><button onclick="askMic()" data-i18n="allow"></button></div>
+          <div class="readyItem ok"><div class="dot" style="background:var(--navy)">文</div><span data-i18n="langLbl2"></span>: <b id="lobbyLang" style="margin-left:4px"></b></div>
+        </div>
+        <p class="sub" style="margin-top:12px;font-size:11.5px" data-i18n="etiquette"></p>
+      </div>
+    </div>
+    <div style="height:30px"></div>
+  </section>
+
+  <!-- ================= SESSION ================= -->
+  <section class="screen" id="s-session">
+    <div class="sessTop">
+      <div class="timerPill"><span class="rec"></span><span id="sessTimer">05:00</span></div>
+      <button class="langPill" onclick="document.getElementById('langModal').classList.add('open')">文A · <span id="sessLangCode">MS</span></button>
+    </div>
+    <div class="sessBottom">
+      <div class="caption" id="capBox"><span class="n" data-i18n="minName"></span><span id="capText">…</span></div>
+      <div class="youSaid" id="youSaid"></div>
+      <div class="micRow">
+        <div>
+          <button class="micBtn" id="micBtn" onclick="toggleMic()" aria-label="mic">
+            <svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4Zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2Z"/></svg>
+          </button>
+          <div class="micLbl" id="micLbl"></div>
+        </div>
+      </div>
+      <div class="txtFallback" id="txtFallback">
+        <input id="txtInput">
+        <button onclick="submitText()" data-i18n="send"></button>
+      </div>
+    </div>
+    <button class="ffBtn" onclick="fastForward()">DEMO ⏩ 4:50</button>
+    <div id="langModal">
+      <div class="card">
+        <h3><span data-i18n="langsTitle"></span> <button onclick="document.getElementById('langModal').classList.remove('open')">✕</button></h3>
+        <div class="langGrid" id="langGrid2"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CLOSING ================= -->
+  <section class="screen" id="s-closing">
+    <div class="formwrap" style="justify-content:center;flex:1">
+      <div class="card fadeUp" style="text-align:center">
+        <div class="bigTick" style="background:var(--navy);box-shadow:0 10px 30px rgba(27,42,107,.4)">🙏</div>
+        <h2 class="title" data-i18n="doneTitle"></h2>
+        <p class="sub"><span data-i18n="doneThanks"></span> <b id="closeName"></b>. <span data-i18n="doneSub"></span></p>
+        <div class="refBox"><small data-i18n="yourRef"></small><b id="closeRef"></b></div>
+        <p class="sub" style="font-weight:700;color:var(--ink)" data-i18n="rateQ"></p>
+        <div class="stars" id="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <div class="shareCard">
+          <b data-i18n="shareQuote"></b>
+          <small>DENGAR.ai · Malaysia MADANI · www.dengar.ai</small>
+          <button class="btn ghost" style="margin-top:10px;padding:11px" onclick="alert(t('shareAlert'))" data-i18n="share"></button>
+        </div>
+      </div>
+      <button class="btn ghost" onclick="restart()" data-i18n="restart"></button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ===================== UI I18N ===================== */
+const I18N={
+ ms:{
+  demoTag:"DEMO PROTOTAIP",
+  minRole:"Menteri Dalam Negeri, Malaysia",
+  heroA:"Suara anda, ",heroB:"didengar",heroC:" Menteri",
+  lead:"Tempah sesi peribadi 5 minit bersama insan digital Menteri. Kongsi pandangan anda tentang kerajaan, apa yang boleh diperbaiki, dan cadangan anda.",
+  st1:"1 · Tempah",st1s:"Pilih slot masa",st2:"2 · Bercakap",st2s:"Bercakap selama 5 minit",st3:"3 · Didengar",st3s:"Maklum balas anda direkodkan",
+  cta:"Bercakap dengan Menteri",
+  pdpa:"Sesi anda dirakam untuk semakan Kementerian. Data peribadi dilindungi di bawah PDPA 2010. Pengalaman ini adalah perwakilan AI Menteri.",
+  step1:"Langkah 1 dari 3",step2:"Langkah 2 dari 3",step3:"Langkah 3 dari 3",
+  slotTitle:"Pilih sesi anda",slotSub:"Setiap sesi 5 minit bersama Menteri.",
+  dateLbl:"Tarikh",timeLbl:"Masa",lockNote:"Slot anda dipegang selama 5 minit semasa anda mendaftar.",
+  continue:"Teruskan",fullyBooked:"Penuh",
+  regTitle:"Butiran anda",regSub:"Kurang dari 60 saat. Kami gunakan ini untuk menyapa anda dan menghantar pautan sesi.",
+  fName:"Nama penuh",fPhone:"Nombor telefon bimbit",fEmail:"E-mel",fState:"Negeri",fDistrict:"Daerah",fLang:"Bahasa sesi",fTopic:"Topik",optional:"(pilihan)",
+  namePh:"cth. Ahmad bin Ismail",phonePh:"cth. 012-345 6789",
+  chooseState:"— Pilih negeri —",chooseDistrict:"— Pilih daerah —",chooseStateFirst:"— Pilih negeri dahulu —",chooseTopic:"— Pilih topik —",
+  topics:["Kepolisan & keselamatan komuniti","Imigresen & sempadan","MyKad & pendaftaran","Penipuan & jenayah siber","Pekerja asing","Maklum balas umum","Lain-lain"],
+  consent:"Saya bersetuju sesi saya dirakam dan dianalisis untuk semakan Kementerian, selaras dengan PDPA 2010.",
+  verify:"Sahkan nombor saya",
+  vName:"Sila masukkan nama penuh anda.",vPhone:"Sila masukkan nombor telefon bimbit anda.",vGeo:"Sila pilih negeri dan daerah anda.",vConsent:"Sila tandakan persetujuan PDPA untuk meneruskan.",
+  otpTitle:"Masukkan kod",otpSub:"Kami hantar kod 6 digit melalui SMS ke",demoCode:"Kod demo:",tapFill:"tekan untuk isi",confirmBk:"Sahkan tempahan",
+  bookedTitle:"Tempahan berjaya!",bookedSub:"Pengesahan telah dihantar ke WhatsApp anda.",refLbl:"RUJUKAN SESI",
+  dDate:"Tarikh",dTime:"Masa",dLang:"Bahasa",dFrom:"Dari",addCal:"＋ Tambah ke kalendar",
+  calAlert:"Demo: fail kalendar (.ics) akan dimuat turun di sini.",
+  demoJump:"Demo: langkau ke 15 minit sebelum sesi ⏩",
+  waFrom:"Kementerian Dalam Negeri",
+  waBody:(n,t,r)=>`Salam <b>${n}</b> 👋<br><br>Sesi anda bersama <b>Menteri Saifuddin Nasution</b> bermula dalam <b>15 minit</b> (${t}).<br><br>Rujukan: <b>${r}</b><br>Tekan di bawah apabila anda bersedia.`,
+  waJoin:"Sertai sesi anda",waValid:"Pautan sah dari 15 minit sebelum hingga 10 minit selepas slot anda.",
+  lobbyIn:"Sesi anda bermula dalam",lobbyDemo:"Demo: kiraan detik dipendekkan ke 10 saat",
+  ready:"Menyediakan anda",linkOk:"Pautan sesi disahkan",micLbl2:"Mikrofon",allow:"Benarkan",langLbl2:"Bahasa",
+  micBlocked:"Disekat — guna taipan",micNA:"Tiada — guna taipan",
+  etiquette:"⏱ 5 minit · 💬 Kongsi pandangan & cadangan anda · 🔒 Dirakam untuk semakan Kementerian",
+  minName:"Menteri Saifuddin",
+  tapSpeak:"Tekan untuk bercakap",listening:"Mendengar… tekan untuk berhenti",micFallback:"Mikrofon tiada — taip di sini",
+  txtPh:"Taip apa yang anda ingin sampaikan kepada Menteri…",send:"Hantar",
+  langsTitle:"Bahasa",
+  doneTitle:"Sesi selesai",doneThanks:"Terima kasih,",doneSub:"Maklum balas anda telah direkodkan dan akan disemak oleh Kementerian.",
+  yourRef:"RUJUKAN ANDA",rateQ:"Bagaimana sesi anda?",
+  shareQuote:"\u201CSaya bercakap dengan Menteri Dalam Negeri hari ini.\u201D",share:"Kongsi",
+  shareAlert:"Demo: kad kongsi akan dibuka di sini.",restart:"↺ Mula semula demo",
+  locale:"ms-MY"
+ },
+ en:{
+  demoTag:"DEMO PROTOTYPE",
+  minRole:"Minister of Home Affairs, Malaysia",
+  heroA:"Your voice, ",heroB:"heard",heroC:" by the Minister",
+  lead:"Book a personal 5-minute session with the Minister's digital human. Share your views on the government, what we can improve, and your suggestions.",
+  st1:"1 · Book",st1s:"Pick a time slot",st2:"2 · Talk",st2s:"Speak for 5 minutes",st3:"3 · Heard",st3s:"Your feedback is recorded",
+  cta:"Talk to Minister",
+  pdpa:"Your session is recorded for the Ministry's review. Personal data is protected under PDPA 2010. This experience is an AI representation of the Minister.",
+  step1:"Step 1 of 3",step2:"Step 2 of 3",step3:"Step 3 of 3",
+  slotTitle:"Choose your session",slotSub:"Each session is 5 minutes with the Minister.",
+  dateLbl:"Date",timeLbl:"Time",lockNote:"Your slot is held for 5 minutes while you register.",
+  continue:"Continue",fullyBooked:"Full",
+  regTitle:"Your details",regSub:"Less than 60 seconds. We use this to greet you and send your session link.",
+  fName:"Full name",fPhone:"Mobile number",fEmail:"Email",fState:"State",fDistrict:"District",fLang:"Session language",fTopic:"Topic",optional:"(optional)",
+  namePh:"e.g. Ahmad bin Ismail",phonePh:"e.g. 012-345 6789",
+  chooseState:"— Choose state —",chooseDistrict:"— Choose district —",chooseStateFirst:"— Choose state first —",chooseTopic:"— Choose a topic —",
+  topics:["Policing & community safety","Immigration & borders","MyKad & registration","Scams & cybercrime","Foreign workers","General feedback","Other"],
+  consent:"I consent to my session being recorded and analysed for the Ministry's review, in line with PDPA 2010.",
+  verify:"Verify my number",
+  vName:"Please enter your full name.",vPhone:"Please enter your mobile number.",vGeo:"Please choose your state and district.",vConsent:"Please tick the PDPA consent to continue.",
+  otpTitle:"Enter the code",otpSub:"We sent a 6-digit code by SMS to",demoCode:"Demo code:",tapFill:"tap to autofill",confirmBk:"Confirm booking",
+  bookedTitle:"You're booked!",bookedSub:"A confirmation has been sent to your WhatsApp.",refLbl:"SESSION REFERENCE",
+  dDate:"Date",dTime:"Time",dLang:"Language",dFrom:"From",addCal:"＋ Add to calendar",
+  calAlert:"Demo: calendar file (.ics) would download here.",
+  demoJump:"Demo: jump to 15 min before session ⏩",
+  waFrom:"Ministry of Home Affairs",
+  waBody:(n,t,r)=>`Hello <b>${n}</b> 👋<br><br>Your session with <b>Minister Saifuddin Nasution</b> begins in <b>15 minutes</b> (${t}).<br><br>Ref: <b>${r}</b><br>Tap below when you are ready to join.`,
+  waJoin:"Join your session",waValid:"Link is valid from 15 min before until 10 min after your slot.",
+  lobbyIn:"Your session starts in",lobbyDemo:"Demo: countdown shortened to 10 seconds",
+  ready:"Getting you ready",linkOk:"Session link verified",micLbl2:"Microphone",allow:"Allow",langLbl2:"Language",
+  micBlocked:"Blocked — will use typing",micNA:"Not available — will use typing",
+  etiquette:"⏱ 5 minutes · 💬 Share your views & suggestions · 🔒 Recorded for the Ministry's review",
+  minName:"Minister Saifuddin",
+  tapSpeak:"Tap to speak",listening:"Listening… tap to stop",micFallback:"Mic unavailable here — type instead",
+  txtPh:"Type what you want to tell the Minister…",send:"Send",
+  langsTitle:"Languages",
+  doneTitle:"Session complete",doneThanks:"Thank you,",doneSub:"Your feedback has been recorded and will be reviewed by the Ministry.",
+  yourRef:"YOUR REFERENCE",rateQ:"How was your session?",
+  shareQuote:"\u201CI spoke with the Home Minister today.\u201D",share:"Share",
+  shareAlert:"Demo: share card would open here.",restart:"↺ Restart demo",
+  locale:"en-MY"
+ }
+};
+let uiLang='ms';
+const t=k=>I18N[uiLang][k];
+
+/* ===================== SESSION LANGUAGES ===================== */
+const LANGS=[
+ {code:"MS",label:"Bahasa Melayu",bcp:"ms-MY"},
+ {code:"EN",label:"English",bcp:"en-US"},
+ {code:"ZH",label:"中文 Chinese",bcp:"zh-CN"},
+ {code:"TA",label:"தமிழ் Tamil",bcp:"ta-IN"},
+ {code:"AR",label:"العربية Arabic",bcp:"ar-SA",rtl:true}
+];
+const S={day:null,time:null,name:"",phone:"",state:"",district:"",lang:LANGS[0],topic:"",ref:"",otp:"",stage:0,secs:300,timerId:null,listening:false,wrapSaid:false,closing:false};
+
+/* ===================== NAV ===================== */
+const veiledScreens=new Set(["s-slots","s-register","s-otp","s-confirmed","s-reminder","s-closing"]);
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('phone').classList.toggle('veiled',veiledScreens.has(id));
+}
+
+/* ===================== APPLY I18N ===================== */
+function applyI18n(){
+  document.documentElement.lang=uiLang;
+  document.getElementById('tglMs').classList.toggle('on',uiLang==='ms');
+  document.getElementById('tglEn').classList.toggle('on',uiLang==='en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=I18N[uiLang][el.dataset.i18n];
+    if(typeof v==='string')el.innerHTML=v;
+  });
+  document.getElementById('heroTitle').innerHTML=t('heroA')+'<em>'+t('heroB')+'</em>'+t('heroC');
+  document.getElementById('fName').placeholder=t('namePh');
+  document.getElementById('fPhone').placeholder=t('phonePh');
+  document.getElementById('txtInput').placeholder=t('txtPh');
+  buildTopics();buildDays();buildGeoPlaceholders();
+  if(!S.listening)document.getElementById('micLbl').textContent=t('tapSpeak');
+  document.getElementById('lobbyLang').textContent=S.lang.label;
+}
+function setUiLang(l){
+  uiLang=l;
+  /* default session language follows UI language unless user changed it */
+  if(!S.userPickedLang){S.lang=l==='ms'?LANGS[0]:LANGS[1];renderLangGrid(document.getElementById('langGrid'));renderLangGrid(document.getElementById('langGrid2'));syncLangUI();}
+  applyI18n();
+}
+
+/* ===================== SLOTS ===================== */
+const dayStrip=document.getElementById('dayStrip'),slotGrid=document.getElementById('slotGrid'),slotNext=document.getElementById('slotNext');
+let days=[];
+(function initDays(){
+  const now=new Date();
+  for(let i=1;i<=7;i++){const d=new Date(now);d.setDate(now.getDate()+i);days.push({date:d,full:(i===2||i===5)});}
+})();
+function buildDays(){
+  const selIdx=days.findIndex(d=>S.day&&d.date.getTime()===S.day.getTime());
+  dayStrip.innerHTML='';
+  days.forEach((d,i)=>{
+    const el=document.createElement('div');
+    el.className='day'+(d.full?' full':'')+(i===selIdx?' sel':'');
+    const wd=d.date.toLocaleDateString(t('locale'),{weekday:'short'});
+    const mo=d.date.toLocaleDateString(t('locale'),{month:'short'});
+    el.innerHTML=`<small>${wd}</small><b>${d.date.getDate()}</b><em>${d.full?t('fullyBooked'):mo}</em>`;
+    if(!d.full)el.onclick=()=>{S.day=d.date;S.time=null;slotNext.disabled=true;buildDays();buildSlots(i);};
+    dayStrip.appendChild(el);
+  });
+}
+function buildSlots(seed){
+  slotGrid.innerHTML='';
+  const times=[];
+  for(let h=10;h<=11;h++)for(let m=0;m<60;m+=5)times.push(`${h}:${String(m).padStart(2,'0')} AM`);
+  times.push("2:00 PM","2:05 PM","2:10 PM","2:15 PM","2:20 PM","2:25 PM");
+  times.forEach((tm,j)=>{
+    const taken=((seed*7+j*13)%10)<4;
+    const el=document.createElement('div');
+    el.className='slot'+(taken?' taken':'');
+    el.textContent=tm;
+    if(!taken)el.onclick=()=>{document.querySelectorAll('.slot').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');S.time=tm;slotNext.disabled=false;};
+    slotGrid.appendChild(el);
+  });
+}
+
+/* ===================== GEO ===================== */
+const GEO={
+ "Selangor":["Petaling","Klang","Hulu Langat","Gombak","Sepang","Kuala Langat","Kuala Selangor","Hulu Selangor","Sabak Bernam"],
+ "Kuala Lumpur":["Kuala Lumpur"],
+ "Johor":["Johor Bahru","Batu Pahat","Kluang","Muar","Kulai","Segamat","Pontian","Kota Tinggi","Mersing","Tangkak"],
+ "Pulau Pinang":["Timur Laut","Barat Daya","SP Utara","SP Tengah","SP Selatan"],
+ "Perak":["Kinta","Larut Matang","Manjung","Hilir Perak","Kerian","Kuala Kangsar","Batang Padang"],
+ "Sabah":["Kota Kinabalu","Sandakan","Tawau","Penampang","Lahad Datu","Keningau","Lain-lain"],
+ "Sarawak":["Kuching","Miri","Sibu","Bintulu","Samarahan","Lain-lain"],
+ "Kedah":["Kota Setar","Kuala Muda","Kulim","Kubang Pasu","Langkawi","Lain-lain"],
+ "Kelantan":["Kota Bharu","Pasir Mas","Tumpat","Bachok","Lain-lain"],
+ "Terengganu":["Kuala Terengganu","Kemaman","Dungun","Besut","Lain-lain"],
+ "Pahang":["Kuantan","Temerloh","Bentong","Cameron Highlands","Lain-lain"],
+ "Negeri Sembilan":["Seremban","Port Dickson","Jempol","Lain-lain"],
+ "Melaka":["Melaka Tengah","Alor Gajah","Jasin"],
+ "Perlis":["Kangar","Arau"],
+ "Putrajaya":["Putrajaya"],
+ "Labuan":["Labuan"]
+};
+const stSel=document.getElementById('fState'),diSel=document.getElementById('fDistrict');
+function buildGeoPlaceholders(){
+  const curS=stSel.value, curD=diSel.value;
+  stSel.innerHTML=`<option value="">${t('chooseState')}</option>`+Object.keys(GEO).map(s=>`<option${s===curS?' selected':''}>${s}</option>`).join('');
+  if(curS){diSel.innerHTML=`<option value="">${t('chooseDistrict')}</option>`+(GEO[curS]||[]).map(x=>`<option${x===curD?' selected':''}>${x}</option>`).join('');}
+  else diSel.innerHTML=`<option value="">${t('chooseStateFirst')}</option>`;
+}
+stSel.onchange=()=>{diSel.innerHTML=`<option value="">${t('chooseDistrict')}</option>`+(GEO[stSel.value]||[]).map(x=>`<option>${x}</option>`).join('');};
+function buildTopics(){
+  const cur=document.getElementById('fTopic').selectedIndex;
+  document.getElementById('fTopic').innerHTML=`<option value="">${t('chooseTopic')}</option>`+t('topics').map(x=>`<option>${x}</option>`).join('');
+  if(cur>0)document.getElementById('fTopic').selectedIndex=cur;
+}
+
+/* ===================== LANGUAGE GRIDS ===================== */
+function renderLangGrid(el,cb){
+  el.innerHTML='';
+  LANGS.forEach(l=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='langBtn'+(S.lang.code===l.code?' sel':'');b.textContent=l.label;
+    b.onclick=()=>{S.lang=l;S.userPickedLang=true;renderLangGrid(document.getElementById('langGrid'));renderLangGrid(document.getElementById('langGrid2'),cb);syncLangUI();if(cb)cb();};
+    el.appendChild(b);
+  });
+}
+function syncLangUI(){
+  document.getElementById('sessLangCode').textContent=S.lang.code;
+  document.getElementById('lobbyLang').textContent=S.lang.label;
+}
+
+/* ===================== REGISTER → OTP ===================== */
+function toOTP(){
+  const name=document.getElementById('fName').value.trim();
+  const phone=document.getElementById('fPhone').value.trim();
+  if(!name){alert(t('vName'));return}
+  if(!phone){alert(t('vPhone'));return}
+  if(!stSel.value||!diSel.value){alert(t('vGeo'));return}
+  if(!document.getElementById('fConsent').checked){alert(t('vConsent'));return}
+  S.name=name;S.phone=phone;S.state=stSel.value;S.district=diSel.value;S.topic=document.getElementById('fTopic').value;
+  S.otp=String(Math.floor(100000+Math.random()*900000));
+  document.getElementById('otpPhone').textContent=phone;
+  document.getElementById('otpHint').textContent=S.otp;
+  document.querySelectorAll('#otpRow input').forEach(i=>i.value='');
+  go('s-otp');
+}
+document.querySelectorAll('#otpRow input').forEach((inp,i,arr)=>{
+  inp.addEventListener('input',()=>{if(inp.value&&i<arr.length-1)arr[i+1].focus();});
+  inp.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!inp.value&&i>0)arr[i-1].focus();});
+});
+function fillOTP(){const a=document.querySelectorAll('#otpRow input');S.otp.split('').forEach((d,i)=>a[i].value=d);}
+function confirmBooking(){
+  S.ref='TTM-2026-'+String(Math.floor(1000+Math.random()*9000))+String(Math.floor(10+Math.random()*89));
+  document.getElementById('refCode').textContent=S.ref;
+  document.getElementById('cDate').textContent=S.day?S.day.toLocaleDateString(t('locale'),{weekday:'long',day:'numeric',month:'long'}):'—';
+  document.getElementById('cTime').textContent=S.time||'—';
+  document.getElementById('cLang').textContent=S.lang.label;
+  document.getElementById('cLoc').textContent=S.district+', '+S.state;
+  document.getElementById('waBody').innerHTML=I18N[uiLang].waBody(S.name.split(' ')[0],S.time||'',S.ref);
+  go('s-confirmed');
+}
+
+/* ===================== LOBBY ===================== */
+let lobbyId=null;
+function startLobby(){
+  syncLangUI(); go('s-lobby');
+  let n=10; const el=document.getElementById('lobbyCount');
+  el.textContent='00:10';
+  clearInterval(lobbyId);
+  lobbyId=setInterval(()=>{n--;el.textContent='00:'+String(Math.max(n,0)).padStart(2,'0');if(n<=0){clearInterval(lobbyId);startSession();}},1000);
+}
+function askMic(){
+  const item=document.getElementById('micCheck');
+  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    navigator.mediaDevices.getUserMedia({audio:true}).then(st=>{st.getTracks().forEach(x=>x.stop());item.classList.add('ok');item.querySelector('.dot').textContent='✓';const b=item.querySelector('button');if(b)b.remove();})
+    .catch(()=>{item.querySelector('button').textContent=t('micBlocked');});
+  } else {item.querySelector('button').textContent=t('micNA');}
+}
+
+/* ===================== MINISTER LINES (5 session languages) ===================== */
+const M={
+ greet:{
+  EN:n=>`Welcome, ${n}. This session is for you to tell me what you think of the government — what we can improve, and your suggestions. Please, share with me.`,
+  MS:n=>`Selamat datang, ${n}. Sesi ini untuk anda berkongsi pandangan tentang kerajaan — apa yang boleh kami perbaiki, dan cadangan anda. Silakan, kongsikan dengan saya.`,
+  ZH:n=>`欢迎您，${n}。这次会面是想听听您对政府的看法——我们可以改进什么，以及您的建议。请与我分享。`,
+  TA:n=>`வணக்கம், ${n}. இந்த அமர்வு, அரசாங்கத்தைப் பற்றிய உங்கள் கருத்துகளையும் ஆலோசனைகளையும் பகிர்வதற்காக. தயவுசெய்து பகிருங்கள்.`,
+  AR:n=>`أهلاً بك، ${n}. هذه الجلسة لتخبرني برأيك في الحكومة — ما الذي يمكننا تحسينه، وما هي اقتراحاتك. تفضل، شاركني.`
+ },
+ probe:{
+  EN:()=>`Thank you. Which area does this affect, and what would you like to see done?`,
+  MS:()=>`Terima kasih. Kawasan mana yang terlibat, dan apakah tindakan yang anda harapkan?`,
+  ZH:()=>`谢谢您。这主要影响哪个地区？您希望看到什么样的改进？`,
+  TA:()=>`நன்றி. இது எந்தப் பகுதியை பாதிக்கிறது? என்ன நடவடிக்கை வேண்டும் என விரும்புகிறீர்கள்?`,
+  AR:()=>`شكراً لك. أي منطقة يؤثر عليها هذا الأمر، وما الذي تود أن يتم عمله؟`
+ },
+ ack:{
+  EN:()=>`I hear you. Let me note this down for my team. Is there anything else you would like me to record?`,
+  MS:()=>`Saya faham. Saya akan catatkan untuk pasukan saya. Ada apa-apa lagi yang ingin anda sampaikan?`,
+  ZH:()=>`我明白了。我会记录下来交给我的团队。您还有其他想反映的吗？`,
+  TA:()=>`புரிகிறது. இதை என் குழுவிற்காக பதிவு செய்கிறேன். வேறு ஏதேனும் தெரிவிக்க விரும்புகிறீர்களா?`,
+  AR:()=>`فهمت. سأدوّن هذا لفريقي. هل هناك شيء آخر تود أن أسجله؟`
+ },
+ more:{
+  EN:()=>`Noted. Please continue.`,MS:()=>`Baik, saya catat. Sila teruskan.`,ZH:()=>`好的，我记下了。请继续。`,
+  TA:()=>`சரி, பதிவு செய்தேன். தொடருங்கள்.`,AR:()=>`تم التدوين. تفضل بالمتابعة.`
+ },
+ wrap:{
+  EN:()=>`Before we finish — is there anything else you'd like me to note?`,
+  MS:()=>`Sebelum kita akhiri — ada perkara lain yang ingin anda kongsikan?`,
+  ZH:()=>`在结束之前——还有什么想让我记录的吗？`,
+  TA:()=>`முடிப்பதற்கு முன் — வேறு ஏதேனும் குறிப்பிட விரும்புகிறீர்களா؟`,
+  AR:()=>`قبل أن ننهي — هل هناك أي شيء آخر تود أن أدوّنه؟`
+ },
+ close:{
+  EN:n=>`Thank you, ${n}, for contributing your views to make our government better. I take note of what you have raised, and my team will review it. Please keep in touch.`,
+  MS:n=>`Terima kasih, ${n}, atas sumbangan pandangan anda untuk menjadikan kerajaan kita lebih baik. Saya ambil maklum perkara yang anda bangkitkan, dan pasukan saya akan menelitinya. Kekal berhubung.`,
+  ZH:n=>`谢谢您，${n}，为建设更好的政府贡献您的意见。我已记下您提出的内容，我的团队会认真跟进。请保持联系。`,
+  TA:n=>`நன்றி, ${n}. நமது அரசாங்கத்தை மேம்படுத்த உங்கள் கருத்துகளைப் பகிர்ந்தமைக்கு நன்றி. என் குழு அவற்றை ஆய்வு செய்யும். தொடர்பில் இருங்கள்.`,
+  AR:n=>`شكراً لك، ${n}، على مساهمتك بآرائك لجعل حكومتنا أفضل. لقد أخذت علماً بما طرحته، وسيقوم فريقي بمراجعته. ابقَ على تواصل.`
+ }
+};
+
+/* ===================== TTS + MOUTH ===================== */
+let mouthTimer=null;
+function animateMouth(on){
+  const m=document.getElementById('mouth');
+  clearInterval(mouthTimer);
+  if(on){
+    let open=false;
+    mouthTimer=setInterval(()=>{open=!open;
+      m.setAttribute('d',open?'M199 386 q16 15 32 0 q-16 6 -32 0':'M198 388 q17 8 34 0');},170);
+  } else m.setAttribute('d','M198 388 q17 8 34 0');
+}
+function speak(text,after){
+  const cap=document.getElementById('capText');
+  cap.textContent=text;
+  cap.parentElement.dir=S.lang.rtl?'rtl':'ltr';
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang=S.lang.bcp; u.rate=.96;
+    const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.toLowerCase().startsWith(S.lang.bcp.slice(0,2)));
+    if(v)u.voice=v;
+    u.onstart=()=>animateMouth(true);
+    u.onend=()=>{animateMouth(false);if(after)after();};
+    u.onerror=()=>{animateMouth(false);if(after)setTimeout(after,1500);};
+    speechSynthesis.speak(u);
+  }catch(e){animateMouth(false);if(after)setTimeout(after,2200);}
+}
+
+/* ===================== STT ===================== */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null;
+function initRec(){
+  if(!SR)return null;
+  const r=new SR();
+  r.lang=S.lang.bcp; r.interimResults=true; r.continuous=false;
+  r.onresult=e=>{
+    let txt='';for(const res of e.results)txt+=res[0].transcript;
+    document.getElementById('youSaid').textContent='“'+txt+'”';
+    if(e.results[e.results.length-1].isFinal){userSpoke(txt);}
+  };
+  r.onend=()=>setListening(false);
+  r.onerror=()=>{setListening(false);showFallback();};
+  return r;
+}
+function setListening(on){
+  S.listening=on;
+  document.getElementById('micBtn').classList.toggle('listening',on);
+  document.getElementById('micLbl').textContent=on?t('listening'):t('tapSpeak');
+}
+function toggleMic(){
+  if(S.closing)return;
+  if(S.listening){try{rec&&rec.stop()}catch(e){} setListening(false);return;}
+  speechSynthesis.cancel();animateMouth(false);
+  rec=initRec();
+  if(!rec){showFallback();return;}
+  try{rec.start();setListening(true);document.getElementById('youSaid').textContent='';}
+  catch(e){showFallback();}
+}
+function showFallback(){
+  document.getElementById('txtFallback').style.display='flex';
+  document.getElementById('micLbl').textContent=t('micFallback');
+}
+function submitText(){
+  const i=document.getElementById('txtInput');const v=i.value.trim();
+  if(!v)return;
+  document.getElementById('youSaid').textContent='“'+v+'”';
+  i.value=''; userSpoke(v);
+}
+
+/* ===================== SESSION FLOW ===================== */
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function startSession(){
+  go('s-session'); S.stage=0; S.secs=300; S.wrapSaid=false; S.closing=false;
+  document.getElementById('youSaid').textContent='';
+  document.getElementById('sessTimer').textContent=fmt(S.secs);
+  syncLangUI();
+  clearInterval(S.timerId);
+  S.timerId=setInterval(tick,1000);
+  const first=(S.name||'rakan').split(' ')[0];
+  setTimeout(()=>speak(M.greet[S.lang.code](first)),600);
+}
+function tick(){
+  if(S.closing)return;
+  S.secs--; document.getElementById('sessTimer').textContent=fmt(Math.max(S.secs,0));
+  if(S.secs===60&&!S.wrapSaid&&!S.listening){S.wrapSaid=true;speak(M.wrap[S.lang.code]());}
+  if(S.secs<=0)endSession();
+}
+function userSpoke(){
+  setListening(false);
+  if(S.closing)return;
+  S.stage++;
+  const c=S.lang.code;
+  if(S.stage===1)speak(M.probe[c]());
+  else if(S.stage===2)speak(M.ack[c]());
+  else speak(M.more[c]());
+}
+function fastForward(){if(!S.closing)S.secs=10;}
+function endSession(){
+  S.closing=true; clearInterval(S.timerId);
+  try{rec&&rec.stop()}catch(e){}
+  const first=(S.name||'rakan').split(' ')[0];
+  speak(M.close[S.lang.code](first),()=>setTimeout(showClosing,600));
+  setTimeout(showClosing,14000);
+}
+let closed=false;
+function showClosing(){
+  if(closed)return; closed=true;
+  speechSynthesis.cancel(); animateMouth(false);
+  document.getElementById('closeName').textContent=(S.name||'rakan').split(' ')[0];
+  document.getElementById('closeRef').textContent=S.ref||'TTM-2026-000000';
+  go('s-closing');
+}
+
+/* ===================== CLOSING ===================== */
+document.querySelectorAll('#stars span').forEach((s,i,arr)=>{
+  s.onclick=()=>arr.forEach((x,j)=>x.classList.toggle('on',j<=i));
+});
+function restart(){
+  closed=false; S.stage=0; S.time=null; S.day=null;
+  document.querySelectorAll('.day,.slot').forEach(x=>x.classList.remove('sel'));
+  document.getElementById('slotNext').disabled=true;
+  document.querySelectorAll('#stars span').forEach(x=>x.classList.remove('on'));
+  go('s-landing');
+}
+
+/* ===================== IDLE LIFE ===================== */
+setInterval(()=>{
+  const lids=document.getElementById('lids'),eyes=document.getElementById('eyes');
+  lids.setAttribute('opacity','1');eyes.setAttribute('opacity','0');
+  setTimeout(()=>{lids.setAttribute('opacity','0');eyes.setAttribute('opacity','1');},140);
+},3800);
+(function breathe(){
+  const g=document.getElementById('minister');let tt=0;
+  setInterval(()=>{tt+=.05;g.setAttribute('transform',`translate(0,${Math.sin(tt)*1.6})`);},50);
+})();
+if(window.speechSynthesis)speechSynthesis.getVoices();
+
+/* ===================== INIT ===================== */
+renderLangGrid(document.getElementById('langGrid'));
+renderLangGrid(document.getElementById('langGrid2'),()=>document.getElementById('langModal').classList.remove('open'));
+applyI18n();
+syncLangUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+# DENGAR.ai — Talk to the Minister
+
+> A scheduled digital-human **citizen-listening platform** and national **sentiment intelligence dashboard** for the Ministry of Home Affairs, Malaysia.
+> By **BYOND Asia** × **Malaysia MADANI**.
+
+DENGAR.ai gives every Malaysian a bookable, personal **5-minute audience** with the
+Home Minister&rsquo;s digital human — not an open-ended chatbot, but a purpose-designed
+listening session. Because every session follows the same controlled structure, every
+conversation produces **comparable data**. Thousands of sessions become a continuously
+updating national dataset.
+
+The product has **two halves**:
+
+| Half | Route | What it is |
+|------|-------|------------|
+| **Citizen experience** | `/experience` | Bookable, multilingual, 5-minute controlled session with the Minister&rsquo;s digital human. The political narrative and the source of the data. |
+| **Ministry intelligence** | `/dashboard` | National Pulse — sentiment map, top issues, citizen suggestions, urgent review queue, action tracker. The enduring value and the recurring revenue. |
+
+The **intelligence layer** — the moat — is the [Citizen Voice Intelligence Framework
+(CVIF)](docs/CVIF.md): it scores the *conversation as evidence about an issue*, never the
+citizen as a person.
+
+---
+
+## Repository layout
+
+```
+dengar/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx            Product hub (this README, as a page)
+│   │   ├── experience/         Citizen experience  → /experience
+│   │   └── dashboard/          National Pulse       → /dashboard
+│   └── lib/
+│       ├── types.ts            Domain model (Citizen, Slot, Booking, Session, Insight, AuditLog)
+│       └── cvif/               ★ Citizen Voice Intelligence Framework (the intelligence layer)
+│           ├── types.ts        Session Insight Record + dimension types
+│           ├── dimensions.ts   The 7 dimension rubrics, excluded confounds, review triggers
+│           ├── taxonomy.ts     Home-Ministry topic taxonomy + department routing
+│           ├── scorer.ts       Scoring pipeline (deterministic now, LLM-swappable)
+│           └── index.ts        Public API
+├── public/prototypes/          The two APPROVED prototypes, served verbatim
+│   ├── dengar-citizen.html
+│   └── national-pulse.html
+└── docs/                       CVIF · ARCHITECTURE · ROADMAP
+```
+
+### About the prototypes
+
+`public/prototypes/*` are the **approved** self-contained demos. The app currently serves
+them verbatim at `/experience` and `/dashboard` so there is **zero visual regression** while
+the production React components are built out (see [ROADMAP](docs/ROADMAP.md)). They are the
+single source of truth for the visual identity and copy.
+
+---
+
+## Getting started
+
+```bash
+npm install
+npm run dev       # http://localhost:3000
+npm run build     # production build
+npm run typecheck # tsc --noEmit
+```
+
+Requires Node 18.17+.
+
+### Using the intelligence layer
+
+```ts
+import { deterministicScorer, type TranscriptInput } from "@/lib/cvif";
+
+const insight = deterministicScorer.score(transcript);
+// → { topicL1, sentiment, evidence, impact, actionability, urgency,
+//     confirmation, painPoint, suggestion, summary, humanReview, ... }
+```
+
+The `Scorer` interface is the seam: the production LLM structured-extraction pass
+implements the same interface and drops in behind it — the dashboard aggregations and the
+weekly briefing never change shape.
+
+---
+
+## Status
+
+Demo prototype with synthetic data. Not connected to any Ministry system. The digital human
+is a **disclosed AI representation** of the Minister. Personal data handling follows the
+PDPA-2010 posture described in the Development Plan.
+
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the ~12-week path to public pilot.
