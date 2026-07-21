@@ -24,3 +24,21 @@ body {
   height: 100%;
   border: 0;
 }
+
+/* Weekly Briefing — clean print / Save-as-PDF output */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .briefing-page {
+    margin: 0 !important;
+    max-width: none !important;
+    box-shadow: none !important;
+  }
+  @page {
+    margin: 14mm;
+  }
+}

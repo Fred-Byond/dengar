@@ -69,6 +69,12 @@ export default function Home() {
             >
               Open Session Explorer →
             </Link>
+            <Link
+              href="/briefing"
+              className="rounded-xl bg-gold px-5 py-3 text-sm font-extrabold text-[#3A2C00] transition hover:brightness-105"
+            >
+              Weekly Briefing →
+            </Link>
           </div>
           <p className="mt-4 text-xs font-semibold text-white/55">
             Demo prototype · synthetic data · AI representation of the Minister (disclosed)

@@ -79,6 +79,7 @@ const PACKS: { topic: string; weight: number; variants: Variant[] }[] = [
     variants: [
       { issueEN: "The foreign worker permit renewal at the Shah Alam office took three months and I went back four times.", issueOriginal: "Pembaharuan permit pekerja asing di pejabat Shah Alam mengambil masa tiga bulan dan saya ke sana empat kali.", impactEN: "My worker could not start, so I lost income for weeks and nearly lost a contract.", askEN: "Please let us renew permits online with a status tracking number.", weight: 3 },
       { issueEN: "Passport appointment slots in JB are gone within minutes every morning, the queue is impossible.", issueOriginal: "Slot temujanji pasport di JB habis dalam beberapa minit setiap pagi, beratur memang susah.", impactEN: "I took three days of unpaid leave just to try to get a slot.", askEN: "Please open more passport counters or an online status system.", weight: 2 },
+      { issueEN: "I checked the current processing time for a work permit renewal for my staff, just planning ahead.", issueOriginal: "Saya menyemak tempoh pemprosesan semasa untuk pembaharuan permit pekerja bagi kakitangan saya, sekadar merancang awal.", impactEN: "It is for planning our hiring next quarter.", askEN: "Please publish standard processing times on the website.", weight: 2 },
     ],
   },
   {
@@ -86,6 +87,7 @@ const PACKS: { topic: string; weight: number; variants: Variant[] }[] = [
     variants: [
       { issueEN: "My mother lost RM18,000 to a phone scam and the bank freeze came too late to stop it.", issueOriginal: "Ibu saya kehilangan RM18,000 kepada penipuan telefon dan pembekuan bank terlalu lewat.", impactEN: "The money was our family savings and we could not recover any of it.", askEN: "Please create a one-call scam-freeze hotline connected to all banks.", weight: 3 },
       { issueEN: "Students in our area are offered RM300 to rent out their bank accounts as mule accounts.", issueOriginal: "Pelajar di kawasan kami ditawarkan RM300 untuk menyewakan akaun bank sebagai akaun keldai.", impactEN: "Several young people have already been recruited and are now under investigation.", askEN: "Please run school awareness programmes on mule account recruitment.", weight: 2 },
+      { issueEN: "The bank added a new verification step and I wanted to say it feels much safer now.", issueOriginal: "Bank menambah langkah pengesahan baharu dan saya rasa jauh lebih selamat sekarang.", impactEN: "My family feels more confident using online banking.", askEN: "Please keep improving the bank verification safeguards.", weight: 2 },
     ],
   },
   {
@@ -93,18 +95,21 @@ const PACKS: { topic: string; weight: number; variants: Variant[] }[] = [
     variants: [
       { issueEN: "We need more visible night patrols around the flats near the CIQ area, break-ins are rising.", issueOriginal: "Kami perlukan lebih banyak rondaan malam di sekitar flat berhampiran CIQ, kes pecah rumah meningkat.", impactEN: "Elderly residents are scared to go out after dark now.", askEN: "Please schedule regular neighbourhood patrols after 10pm.", weight: 2 },
       { issueEN: "A report I made two weeks ago at the balai still has no update, and loan sharks keep harassing us.", issueOriginal: "Laporan yang saya buat dua minggu lalu di balai masih tiada maklum balas, along terus mengganggu kami.", impactEN: "The harassment is getting worse and neighbours are afraid to help.", askEN: "Please give a status update system for police reports.", weight: 2 },
+      { issueEN: "I would like to know the patrol schedule for our neighbourhood, and to thank the local balai for the recent help.", issueOriginal: "Saya ingin tahu jadual rondaan untuk kawasan kami, dan berterima kasih kepada balai tempatan atas bantuan baru-baru ini.", impactEN: "The officers were responsive last month.", askEN: "Please share the community patrol schedule with residents.", weight: 2 },
     ],
   },
   {
     topic: "foreign_workers", weight: 12,
     variants: [
       { issueEN: "The new levy portal works but agents still charge extra above the official fees.", issueOriginal: "Portal levi baharu berfungsi tetapi ejen masih mengenakan bayaran tambahan melebihi kadar rasmi.", impactEN: "Small restaurants like ours pay thousands more than we should.", askEN: "Please publish the official agent fees for work pass applications.", weight: 2 },
+      { issueEN: "The new levy portal is a real improvement over last year, I just wanted to acknowledge that.", issueOriginal: "Portal levi baharu ialah penambahbaikan sebenar berbanding tahun lepas, saya ingin mengiktiraf itu.", impactEN: "Processing our worker paperwork was faster this time.", askEN: "Please keep the portal updated with any fee changes.", weight: 2 },
     ],
   },
   {
     topic: "registration", weight: 10,
     variants: [
       { issueEN: "Villagers here travel four hours to the JPN office to replace a MyKad, there is no kiosk nearby.", issueOriginal: "Penduduk kampung di sini bergerak empat jam ke pejabat JPN untuk menggantikan MyKad, tiada kiosk berhampiran.", impactEN: "Many elderly people simply give up and stay without a valid MyKad.", askEN: "Please bring mobile MyKad replacement kiosks to rural districts.", weight: 2 },
+      { issueEN: "I renewed my MyKad at the JPN kiosk and it was quick, just sharing feedback.", issueOriginal: "Saya memperbaharui MyKad di kiosk JPN dan ia pantas, sekadar berkongsi maklum balas.", impactEN: "The self-service kiosk worked well for me.", askEN: "Please add more kiosks in shopping malls.", weight: 2 },
     ],
   },
   {

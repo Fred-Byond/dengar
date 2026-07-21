@@ -30,7 +30,13 @@ export interface Scorer {
 
 const CRITICAL_SIGNALS = ["bunuh diri", "self-harm", "kill myself", "violence", "senjata", "weapon", "trafficking", "pukul", "bomb"];
 const URGENT_SIGNALS = ["ah long", "loan shark", "corruption", "rasuah", "abuse", "dera", "threat", "ugut", "dadah", "trafficking"];
-const NEG_WORDS = ["delay", "lambat", "slow", "queue", "tak", "lost", "hilang", "scam", "tipu", "problem", "masalah", "frustrated", "marah", "gagal", "months", "bulan"];
+const NEG_WORDS = [
+  "delay", "lambat", "slow", "queue", "tak", "lost", "hilang", "scam", "tipu",
+  "problem", "masalah", "frustrated", "marah", "gagal", "months", "bulan",
+  "break-in", "scared", "rising", "no update", "harass", "afraid", "charge extra",
+  "give up", "spreading", "worried", "impossible", "unpaid", "recruit",
+  "stuck", "backlog", "overcharge", "still no",
+];
 const POS_WORDS = ["thank", "terima kasih", "good", "bagus", "improve", "better", "proud", "bangga", "fast", "cepat", "appreciate", "hargai"];
 
 const TOPIC_KEYWORDS: Record<string, string[]> = {
@@ -63,6 +69,19 @@ function firstQuoteContaining(input: TranscriptInput, words: string[]): string |
   }
   const citizenTurns = input.turns.filter((t) => t.speaker === "citizen");
   return citizenTurns[0]?.text.trim() ?? null;
+}
+
+const ASK_CUES = ["please", "sila", "boleh", "harap", "should", "let us", "publish", "bring", "add more", "open more", "create a", "keep"];
+
+/** Extract just the citizen's request sentence, not the whole turn. */
+function askSentence(input: TranscriptInput): string | null {
+  const text = input.turns.filter((t) => t.speaker === "citizen").map((t) => t.text).join(" ");
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  for (const s of sentences) {
+    const l = s.toLowerCase();
+    if (ASK_CUES.some((c) => l.includes(c))) return s.trim();
+  }
+  return null;
 }
 
 function classifyTopic(text: string, hint?: string): string {
@@ -141,8 +160,8 @@ export const deterministicScorer: Scorer = {
     const hasLocation = input.locationsMentioned?.length || /(office|pejabat|shah alam|kuala|johor|penang|sabah)/i.test(text);
     const clarity: 1 | 2 | 3 | 4 | 5 = text.length < 40 ? 2 : hasLocation ? 4 : 3;
 
-    // Actionability: did the citizen state a concrete improvement?
-    const askQuote = firstQuoteContaining(input, ["please", "sila", "boleh", "should", "harap", "want", "online", "system", "kiosk"]);
+    // Actionability: did the citizen state a concrete improvement request?
+    const askQuote = askSentence(input);
     const actionability: 1 | 2 | 3 | 4 | 5 = askQuote && /(online|system|kiosk|hotline|track|publish|patrol)/i.test(askQuote) ? 5 : askQuote ? 3 : 2;
 
     // Confirmation: did the minister reflect a summary and the citizen agree?
