@@ -65,6 +65,10 @@ Legend: ✅ built · 🟡 works, needs productionising · 🟥 to build.
   approved prototypes in `public/prototypes` are the baseline — do not regress them).
 - Componentise the citizen experience prototype into the React PWA with the full-stack team
   (installable, WCAG 2.1 AA, RTL for Arabic, five languages).
+- The closing screen now includes a **reflected session summary** (built from topic + district +
+  the citizen's own words) and a **"you are the Nth Malaysian to speak" counter** — in production
+  the counter is fed by the live sessions-count endpoint (see the aggregation API), and the summary
+  should reuse the CVIF `SessionInsightRecord` (topic / pain point) rather than a client heuristic.
 - Weekly-briefing print/PDF template polish.
 
 ### Head of AI
