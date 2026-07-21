@@ -38,6 +38,8 @@ dengar/
 │   └── lib/
 │       ├── types.ts            Domain model (Citizen, Slot, Booking, Session, Insight, AuditLog)
 │       ├── seed.ts             Deterministic session generator (feeds the Session Explorer)
+│       ├── briefing.ts         Weekly Ministry Briefing generator
+│       ├── digital-human/      ★ Digital-human SDK seam (interface + mock; team implements adapter)
 │       └── cvif/               ★ Citizen Voice Intelligence Framework (the intelligence layer)
 │           ├── types.ts        Session Insight Record + dimension types
 │           ├── dimensions.ts   The 7 dimension rubrics, excluded confounds, review triggers
@@ -47,8 +49,11 @@ dengar/
 ├── public/prototypes/          The two APPROVED prototypes, served verbatim
 │   ├── dengar-citizen.html
 │   └── national-pulse.html
-└── docs/                       CVIF · ARCHITECTURE · ROADMAP
+└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP
 ```
+
+> **Team taking this over?** Start at [`docs/ENGINEERING-HANDOFF.md`](docs/ENGINEERING-HANDOFF.md) —
+> the role split, the two integration seams, and the Phase-1 build order.
 
 ### About the prototypes
 
