@@ -37,7 +37,7 @@ Read next, in order: this file → `ARCHITECTURE.md` → `INTEGRATION-DIGITAL-HU
 |---|---|---|---|
 | Product hub | `src/app/page.tsx` | ✅ built | Full-stack + UIX |
 | Citizen experience | `src/app/experience` + `public/prototypes/dengar-citizen.html` | 🟡 approved prototype, served verbatim — **componentise into the PWA** | Full-stack + UIX |
-| Dashboard (National Pulse) | `src/app/dashboard` + `public/prototypes/national-pulse.html` | 🟡 approved prototype — **wire to live aggregation API** | Full-stack |
+| DENGAR Intelligence dashboard | `src/app/dashboard` + `public/prototypes/national-pulse.html` | 🟡 approved prototype — **wire to live aggregation API** | Full-stack |
 | Session Explorer | `src/components/SessionExplorer.tsx` | ✅ React-native, on the CVIF engine | Full-stack |
 | Weekly Briefing | `src/lib/briefing.ts` + `src/components/WeeklyBriefing.tsx` | ✅ generator built | Full-stack + AI |
 | CVIF engine | `src/lib/cvif` | ✅ typed engine + deterministic scorer — **swap in LLM scorer** | Head of AI |
@@ -59,6 +59,10 @@ Legend: ✅ built · 🟡 works, needs productionising · 🟥 to build.
   transcripts/audio; immutable audit log.
 - **Dashboard API:** replace the in-page synthetic dataset with a live CVIF aggregation
   endpoint feeding the same shapes the components already consume.
+- **Role-gated views:** the dashboard's **Minister ↔ Secretary General** toggle is the front
+  end of RBAC (Admin API issue) — Minister = read/insights, Secretary General = the
+  operational assign/track/resolve surface. Back it with real roles + the audit log; do not
+  rely on the client-side `body.sg` class for authorisation.
 
 ### UI/UX designer
 - Own the **7 citizen screens + 5 dashboard views** as the design source of truth (the

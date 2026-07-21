@@ -99,9 +99,9 @@ export default function Home() {
           <ProductCard
             href="/dashboard"
             eyebrow="Ministry intelligence"
-            title="National Pulse dashboard"
+            title="DENGAR Intelligence"
             body="Near-real-time national listening: sentiment map, top issues, citizen suggestions, urgent review queue, and an action tracker that routes issues to agencies. The enduring value and the recurring revenue."
-            points={["Sentiment by state → district drill-down", "Suggestions ranked by frequency × spread", "Assign → track → “you said, we did”"]}
+            points={["Two role views: Minister (the pulse) vs Secretary General (assign, track, resolve)", "Sentiment by state → district drill-down", "Assign → track → “you said, we did”"]}
             accent="navy"
           />
         </div>

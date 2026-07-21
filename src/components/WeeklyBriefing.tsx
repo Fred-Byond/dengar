@@ -11,7 +11,7 @@ export default function WeeklyBriefing() {
     <div className="min-h-screen bg-canvas pb-16 text-ink">
       {/* action bar — hidden in print */}
       <div className="no-print sticky top-0 z-20 flex flex-wrap items-center gap-3 bg-gradient-to-r from-navy-deep via-navy to-navy-light px-5 py-3 text-white sm:px-7">
-        <Link href="/dashboard" className="text-sm font-bold text-white/80 hover:text-white">← National Pulse</Link>
+        <Link href="/dashboard" className="text-sm font-bold text-white/80 hover:text-white">← DENGAR Intelligence</Link>
         <span className="border-l border-white/25 pl-3 text-sm font-extrabold">Weekly Ministry Briefing</span>
         <div className="ml-auto flex items-center gap-2">
           <button

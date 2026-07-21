@@ -14,7 +14,7 @@ The product has **two halves**:
 | Half | Route | What it is |
 |------|-------|------------|
 | **Citizen experience** | `/experience` | Bookable, multilingual, 5-minute controlled session with the Minister&rsquo;s digital human. The political narrative and the source of the data. |
-| **Ministry intelligence** | `/dashboard` | National Pulse — sentiment map, top issues, citizen suggestions, urgent review queue, action tracker. The enduring value and the recurring revenue. |
+| **Ministry intelligence** | `/dashboard` | DENGAR Intelligence — sentiment map, top issues, citizen suggestions, urgent review queue, action tracker. Two role views: **Minister** (the pulse) and **Secretary General** (assign, track, resolve). The enduring value and the recurring revenue. |
 | **Session Explorer** | `/sessions` | Dashboard view 5, **React-native**. Search/filter every session, open the CVIF Session Insight Record, read the transcript (original + English), work the urgent queue. PII masked by default; reveal is audit-logged. Wired to the real CVIF scorer. |
 
 The **intelligence layer** — the moat — is the [Citizen Voice Intelligence Framework

@@ -119,7 +119,7 @@ export default function SessionExplorer() {
     <div className="min-h-screen bg-canvas text-ink">
       {/* header */}
       <header className="sticky top-0 z-20 flex flex-wrap items-center gap-4 bg-gradient-to-r from-navy-deep via-navy to-navy-light px-5 py-3 text-white sm:px-7">
-        <Link href="/dashboard" className="text-sm font-bold text-white/80 hover:text-white">← National Pulse</Link>
+        <Link href="/dashboard" className="text-sm font-bold text-white/80 hover:text-white">← DENGAR Intelligence</Link>
         <div className="border-l border-white/25 pl-4">
           <h1 className="text-lg font-extrabold">Session Explorer</h1>
           <p className="text-[11px] text-white/70">Every confirmed session becomes one record · CVIF Session Insight Record</p>

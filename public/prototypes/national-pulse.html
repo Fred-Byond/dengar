@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>National Pulse v2 — Talk to Minister Dashboard</title>
+<title>DENGAR Intelligence — Ministry of Home Affairs</title>
 <style>
 :root{
   --navy:#1B2A6B; --navy-d:#121C4A; --red:#D22030; --gold:#FFCC00;
@@ -33,6 +33,36 @@ header{background:linear-gradient(100deg,var(--navy-d),var(--navy) 60%,#24368a);
 .brief{border:0;background:var(--gold);color:#3A2C00;font-weight:800;font-size:12px;padding:9px 15px;border-radius:11px}
 .actBtn{border:0;background:rgba(255,255,255,.15);color:#fff;font-weight:800;font-size:12px;padding:9px 15px;border-radius:11px;position:relative}
 .actBtn .n{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.dwave{width:26px;height:26px;flex:0 0 auto}
+.viewTgl{display:flex;background:rgba(255,255,255,.12);border-radius:11px;padding:3px}
+.viewTgl button{border:0;background:transparent;color:#fff;font-size:12px;font-weight:800;padding:8px 14px;border-radius:9px;opacity:.72;letter-spacing:.2px;transition:.15s}
+.viewTgl button.on{background:#fff;color:var(--navy);opacity:1;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+/* mode visibility: default (Minister) hides sg-only; body.sg reveals it */
+.sg-only{display:none!important}
+body.sg .sg-only{display:revert!important}
+body.sg .actBtn.sg-only{display:inline-flex!important}
+body.sg .grid-3.sg-only,body.sg .cmdStrip.sg-only{display:grid!important}
+/* Action command strip (Secretary General) */
+.cmdStrip{grid-template-columns:auto auto auto 1fr auto;gap:16px;align-items:center;
+  background:linear-gradient(100deg,#12235E,#1B2A6B 55%,#26317f);color:#fff;border-radius:16px;padding:16px 20px;
+  box-shadow:0 1px 3px rgba(20,25,40,.06),0 8px 24px rgba(20,25,40,.08)}
+.cmdStrip .cLbl{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:.7}
+.cmdStrip .cNum{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.cmdStrip .cNum.warn{color:#FFB4B4}.cmdStrip .cNum.good{color:#8FE9AE}
+.cmdStrip .divider{width:1px;height:38px;background:rgba(255,255,255,.2)}
+.cmdDept{display:flex;flex-direction:column;gap:5px;min-width:0}
+.cmdDept .dh{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;opacity:.7;margin-bottom:1px}
+.cmdDeptRow{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600}
+.cmdDeptRow .nm{width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.92}
+.cmdDeptRow .barBg{flex:1;height:7px;background:rgba(255,255,255,.18);border-radius:5px;overflow:hidden}
+.cmdDeptRow .barFill{height:100%;background:var(--gold);border-radius:5px}
+.cmdDeptRow b{width:18px;text-align:right}
+.cmdActs{display:flex;gap:9px}
+.cmdBtn{border:0;background:#fff;color:var(--navy);font-weight:800;font-size:12.5px;padding:11px 16px;border-radius:11px;white-space:nowrap}
+.cmdBtn.gold{background:var(--gold);color:#3A2C00}
+.flowTag{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--grey);letter-spacing:.5px;text-transform:uppercase;margin:2px 2px -4px}
+.flowTag i{width:22px;height:2px;background:var(--line);border-radius:2px;display:inline-block}
+.flowTag.act{color:var(--navy)}
 
 .filterBar{padding:12px 26px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .chip{background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:7px 8px 7px 14px;border-radius:99px;display:none;align-items:center;gap:8px}
@@ -224,21 +254,25 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
 
 <header>
   <div class="hLogo">
-    <svg class="flag" viewBox="0 0 40 40"><g><path d="M8 22 c0-9 5-16 12-16 c7 0 12 7 12 16 l-2 12 H10 Z" fill="#fff" opacity=".16"/><path d="M8 22 c0-9 5-16 12-16 c7 0 12 7 12 16 l-2 12 H10 Z" fill="none" stroke="#fff" stroke-width="1.4"/><g fill="#D22030"><rect x="12" y="2" width="3" height="10" rx="1.5"/><rect x="17" y="0" width="3" height="12" rx="1.5"/><rect x="22" y="1" width="3" height="11" rx="1.5"/><rect x="27" y="3" width="3" height="9" rx="1.5"/></g><circle cx="17" cy="24" r="7" fill="#FFCC00"/><circle cx="20" cy="24" r="6" fill="#1B2A6B"/><path d="M27 24 l1.6 3.4 3.6.4 -2.7 2.5 .7 3.6 -3.2-1.9 -3.2 1.9 .7-3.6 -2.7-2.5 3.6-.4 Z" fill="#FFCC00"/></g></svg>
-    <div class="t"><b>MALAYSIA MADANI</b><small>MINISTRY OF HOME AFFAIRS</small></div>
+    <svg class="dwave" viewBox="0 0 28 28" fill="none"><g stroke="#FFCC00" stroke-width="2.8" stroke-linecap="round"><path d="M4 12 v4"/><path d="M9.5 7 v14"/><path d="M15 3 v22"/><path d="M20.5 8 v12"/><path d="M26 12 v4" stroke-opacity=".55"/></g></svg>
+    <div class="t"><b>DENGAR<span style="font-weight:300">.ai</span></b><small>EVERY VOICE MATTERS</small></div>
   </div>
   <div class="hTitle">
-    <h1>National Pulse — Talk to Minister</h1>
-    <p>What citizens are telling Minister Saifuddin Nasution · powered by BYOND asia</p>
+    <h1>DENGAR Intelligence</h1>
+    <p>What citizens are telling the Ministry of Home Affairs · Malaysia MADANI</p>
   </div>
   <div class="hRight">
+    <div class="viewTgl" id="viewTgl">
+      <button data-v="min" class="on" onclick="setView('min')">👤 Minister View</button>
+      <button data-v="sg" onclick="setView('sg')">🛠️ Secretary General</button>
+    </div>
     <div class="live"><i></i>LIVE</div>
     <div class="range" id="range">
-      <button data-d="7" class="on">7 days</button>
-      <button data-d="30">30 days</button>
-      <button data-d="90">90 days</button>
+      <button data-d="7" class="on">7d</button>
+      <button data-d="30">30d</button>
+      <button data-d="90">90d</button>
     </div>
-    <button class="actBtn" onclick="openDrawer()">📋 Action Tracker<span class="n" id="taskCount">0</span></button>
+    <button class="actBtn sg-only" onclick="openDrawer()">📋 Action Tracker<span class="n" id="taskCount">0</span></button>
     <button class="brief" onclick="document.getElementById('briefModal').classList.add('open')">📄 Weekly Briefing</button>
   </div>
 </header>
@@ -246,17 +280,36 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
 <div class="filterBar">
   <span class="scope">Showing: <b id="scopeLbl">All Malaysia</b></span>
   <span class="chip" id="stateChip"><span id="stateChipNm"></span><button onclick="selectState(null)">✕</button></span>
-  <span class="scope" style="margin-left:auto">Demo prototype · synthetic data · actions reset on refresh</span>
+  <span class="scope" id="viewNote" style="margin-left:auto"></span>
 </div>
 
 <div class="wrap">
 
   <!-- KPI TILES -->
+  <div class="flowTag"><span>Insights</span><i></i></div>
   <div class="kpis">
     <div class="kpi"><div class="lbl">Sessions</div><div class="val" id="kSess">—</div><div class="delta up">▲ 12% vs prior period</div></div>
     <div class="kpi k2"><div class="lbl">Citizens Reached</div><div class="val" id="kCit">—</div><div class="delta up">▲ 9% vs prior period</div></div>
     <div class="kpi k3"><div class="lbl">Avg Satisfaction</div><div class="val" id="kSat">4.6 / 5</div><div class="delta up">▲ 0.1 vs prior period</div></div>
     <div class="kpi k4"><div class="lbl">Net Sentiment</div><div class="val" id="kSent">—</div><div class="delta down">▼ 3 pts vs prior period</div></div>
+  </div>
+
+  <!-- ACTION COMMAND STRIP (Secretary General only) -->
+  <div class="flowTag act sg-only"><span>Action</span><i></i></div>
+  <div class="cmdStrip sg-only">
+    <div><div class="cLbl">Open actions</div><div class="cNum" id="cmdOpen">0</div></div>
+    <div class="divider"></div>
+    <div><div class="cLbl">Overdue</div><div class="cNum warn" id="cmdOver">0</div></div>
+    <div class="divider"></div>
+    <div><div class="cLbl">Resolved</div><div class="cNum good" id="cmdDone">0</div></div>
+    <div class="cmdDept">
+      <div class="dh">Department workload</div>
+      <div id="cmdDeptList"></div>
+    </div>
+    <div class="cmdActs">
+      <button class="cmdBtn gold" onclick="openAssign('','General feedback','normal')">⚡ Assign action</button>
+      <button class="cmdBtn" onclick="openDrawer()">📋 Tracker</button>
+    </div>
   </div>
 
   <!-- MAP + SIDE -->
@@ -321,13 +374,15 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
     <div class="card">
       <div class="cardHead"><h2>🔥 Top issues raised</h2><small id="topicScope">All Malaysia</small></div>
       <div id="topicList"></div>
-      <div class="hintLine">👉 Click an issue to open the deep dive &amp; assign action</div>
+      <div class="hintLine" id="topicHint">👉 Click an issue to open the deep dive</div>
     </div>
     <div class="card">
       <div class="cardHead"><h2>💬 Trending keywords</h2><small>growth-weighted</small></div>
       <div class="kwWrap" id="kwWrap"></div>
-      <div class="cardHead" style="margin-top:20px"><h2>🏛️ Department workload</h2><small>open actions assigned via this dashboard</small></div>
-      <div id="deptStats"><div class="emptyT" style="padding:14px 6px">No actions assigned yet.<br>Open an issue deep dive to assign one.</div></div>
+      <div class="sg-only">
+        <div class="cardHead" style="margin-top:20px"><h2>🏛️ Department workload</h2><small>open actions assigned via this platform</small></div>
+        <div id="deptStats"><div class="emptyT" style="padding:14px 6px">No actions assigned yet.<br>Open an issue deep dive to assign one.</div></div>
+      </div>
     </div>
     <div class="card">
       <div class="cardHead"><h2>💡 Top citizen suggestions</h2><small>ranked by frequency × spread</small></div>
@@ -343,15 +398,16 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
     </div>
     <div class="card">
       <div class="cardHead"><h2>🚨 Urgent review queue</h2><small>safety-critical · same-day human review</small></div>
-      <div class="urgent"><b>⚑ FLAGGED · 2h ago</b><p><b>Sandakan, Sabah</b> — suspected human-trafficking activity reported near a jetty area.</p><button class="assignMini" onclick="openAssign('Urgent: suspected trafficking activity — Sandakan','Policing & safety','high')">⚡ Assign action</button></div>
-      <div class="urgent"><b>⚑ FLAGGED · 5h ago</b><p><b>Klang, Selangor</b> — loan-shark harassment targeting elderly residents in one flat block.</p><button class="assignMini" onclick="openAssign('Urgent: loan-shark harassment of elderly — Klang','Policing & safety','high')">⚡ Assign action</button></div>
-      <div class="cardHead" style="margin-top:18px"><h2>✅ You said, we did</h2><small>closing the loop with citizens</small></div>
+      <div class="urgent"><b>⚑ FLAGGED · 2h ago</b><p><b>Sandakan, Sabah</b> — suspected human-trafficking activity reported near a jetty area.</p><button class="assignMini sg-only" onclick="openAssign('Urgent: suspected trafficking activity — Sandakan','Policing & safety','high')">⚡ Assign action</button></div>
+      <div class="urgent"><b>⚑ FLAGGED · 5h ago</b><p><b>Klang, Selangor</b> — loan-shark harassment targeting elderly residents in one flat block.</p><button class="assignMini sg-only" onclick="openAssign('Urgent: loan-shark harassment of elderly — Klang','Policing & safety','high')">⚡ Assign action</button></div>
+      <div class="flowTag act" style="margin-top:16px"><span>Outcomes</span><i></i></div>
+      <div class="cardHead" style="margin-top:6px"><h2>✅ You said, we did</h2><small>closing the loop with citizens</small></div>
       <div class="sug"><div class="top"><b>Online foreign-worker permit renewal — pilot announced for Selangor &amp; Johor</b><span class="tag act">ACTIONED</span></div><div class="meta"><span>Driven by <b>214 sessions</b></span><span>Citizens notified via WhatsApp: <b>214</b></span></div></div>
     </div>
   </div>
 </div>
 
-<footer>Talk to Minister · National Pulse Dashboard v2 · Demo prototype with synthetic data · BYOND asia × Malaysia MADANI</footer>
+<footer>DENGAR Intelligence · every voice matters · Demo prototype with synthetic data · BYOND asia × Malaysia MADANI</footer>
 
 <!-- ============ TOPIC DEEP-DIVE MODAL ============ -->
 <div class="modal" id="topicModal" onclick="if(event.target===this)this.classList.remove('open')">
@@ -370,7 +426,7 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
     <div class="qList" id="tmQuotes"></div>
     <div class="mFoot">
       <button class="btnS" onclick="toast('Demo: full session list would open in Session Explorer.')">View all sessions</button>
-      <button class="btnP" id="tmAssign">⚡ Assign action to department</button>
+      <button class="btnP sg-only" id="tmAssign">⚡ Assign action to department</button>
     </div>
   </div>
 </div>
@@ -704,7 +760,7 @@ function render(){
     return `<div class="sug"><div class="top"><b>${s.b}</b><span class="tag ${assigned?'asg':s.tag}">${assigned?'ASSIGNED':s.lbl}</span></div>
      <div class="meta"><span><b>${fmtN(scale(s.c))}</b> sessions</span><span>Spread: <b>${s.sp}</b></span></div>
      ${assigned?`<div class="assignedNote">→ ${assigned.deptName} · due ${assigned.due}</div>`
-       :`<button class="assignMini" onclick="openAssign('${s.b.replace(/'/g,"\\'")}','${s.topic}','normal','sug${i}')">⚡ Assign action</button>`}
+       :`<button class="assignMini sg-only" onclick="openAssign('${s.b.replace(/'/g,"\\'")}','${s.topic}','normal','sug${i}')">⚡ Assign action</button>`}
     </div>`;}).join('');
 
   /* feed */
@@ -822,7 +878,13 @@ function createTask(){
   toast('✓ Action assigned to '+dept.n+' — tracked in Action Tracker');
 }
 function renderTasks(){
-  $('taskCount').textContent=tasks.filter(t=>t.status!=='Resolved').length;
+  const openN=tasks.filter(t=>t.status!=='Resolved').length;
+  const overN=tasks.filter(t=>new Date(t.due)<new Date()&&t.status!=='Resolved').length;
+  const doneN=tasks.filter(t=>t.status==='Resolved').length;
+  $('taskCount').textContent=openN;
+  /* command strip */
+  if($('cmdOpen')){$('cmdOpen').textContent=openN;$('cmdOver').textContent=overN;$('cmdDone').textContent=doneN;}
+  renderCmdDept();
   if(!tasks.length){$('taskList').innerHTML='<div class="emptyT">No actions yet.<br><br>Open any issue deep dive, urgent flag, or suggestion and tap <b>Assign action</b>.</div>';return}
   $('taskList').innerHTML=tasks.map((t,i)=>{
     const over=new Date(t.due)<new Date()&&t.status!=='Resolved';
@@ -856,7 +918,47 @@ function renderDeptStats(){
   $('deptStats').innerHTML=Object.entries(agg).sort((a,b)=>b[1]-a[1]).map(([d,c])=>
     `<div class="deptStat"><div class="nm">${d}</div><div class="barBg"><div class="barFill" style="width:${c/mx*100}%"></div></div><b>${c}</b></div>`).join('');
 }
+function renderCmdDept(){
+  if(!$('cmdDeptList'))return;
+  const open=tasks.filter(t=>t.status!=='Resolved');
+  if(!open.length){$('cmdDeptList').innerHTML='<div class="cmdDeptRow" style="opacity:.6">No open actions</div>';return}
+  const agg={};open.forEach(t=>agg[t.deptName]=(agg[t.deptName]||0)+1);
+  const mx=Math.max(...Object.values(agg));
+  $('cmdDeptList').innerHTML=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([d,c])=>
+    `<div class="cmdDeptRow"><div class="nm">${d}</div><div class="barBg"><div class="barFill" style="width:${c/mx*100}%"></div></div><b>${c}</b></div>`).join('');
+}
 function openDrawer(){$('drawer').classList.add('open')}
+
+/* ================================================================
+   VIEW MODE  (Minister vs Secretary General)
+================================================================ */
+let view='min';
+function setView(v){
+  view=v;
+  document.body.classList.toggle('sg',v==='sg');
+  document.querySelectorAll('#viewTgl button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  $('viewNote').textContent = v==='min'
+    ? 'Minister View — the national pulse at a glance'
+    : 'Secretary General View — operational: assign, track & resolve';
+  $('topicHint').innerHTML = v==='sg'
+    ? '👉 Click an issue to open the deep dive &amp; assign action'
+    : '👉 Click an issue to open the deep dive';
+  render();renderTasks();
+}
+
+/* ================================================================
+   SEED SAMPLE ACTIONS (demo — so SG view shows a live operation)
+================================================================ */
+function seedTasks(){
+  const today=new Date();
+  const d=(n)=>{const x=new Date(today);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);};
+  tasks=[
+    {id:'ACT-1004',issue:'Foreign-worker permit backlog at Shah Alam & JB',dept:'jim',deptName:'Immigration Dept (JIM)',prio:'elevated',due:d(4),note:'Report recovery plan and online-renewal pilot readiness.',status:'In progress',created:'14 Jul',src:'seed1'},
+    {id:'ACT-1003',issue:'Urgent: suspected trafficking activity — Sandakan',dept:'pdrm',deptName:'Royal Malaysia Police (PDRM)',prio:'high',due:d(-1),note:'Duty officer to verify and escalate to state CID.',status:'Assigned',created:'19 Jul',src:'seed2'},
+    {id:'ACT-1002',issue:'Scam bank-freeze delays — coordinate with FIs',dept:'jsjk',deptName:'PDRM Commercial Crime (JSJK)',prio:'elevated',due:d(6),note:'',status:'Assigned',created:'17 Jul',src:'seed3'},
+    {id:'ACT-1001',issue:'Mobile MyKad kiosks feasibility — rural Sabah',dept:'jpn',deptName:'National Registration (JPN)',prio:'normal',due:d(9),note:'',status:'Resolved',created:'11 Jul',src:'seed4'}
+  ];
+}
 
 /* ================================================================
    INTERACTIONS
@@ -869,7 +971,8 @@ $('range').addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));$('drawer').classList.remove('open');}});
 
-drawTrend();render();renderTasks();
+seedTasks();
+drawTrend();setView('min');
 </script>
 </body>
 </html>
