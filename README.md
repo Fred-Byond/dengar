@@ -15,6 +15,7 @@ The product has **two halves**:
 |------|-------|------------|
 | **Citizen experience** | `/experience` | Bookable, multilingual, 5-minute controlled session with the Minister&rsquo;s digital human. The political narrative and the source of the data. |
 | **Ministry intelligence** | `/dashboard` | National Pulse — sentiment map, top issues, citizen suggestions, urgent review queue, action tracker. The enduring value and the recurring revenue. |
+| **Session Explorer** | `/sessions` | Dashboard view 5, **React-native**. Search/filter every session, open the CVIF Session Insight Record, read the transcript (original + English), work the urgent queue. PII masked by default; reveal is audit-logged. Wired to the real CVIF scorer. |
 
 The **intelligence layer** — the moat — is the [Citizen Voice Intelligence Framework
 (CVIF)](docs/CVIF.md): it scores the *conversation as evidence about an issue*, never the
@@ -30,9 +31,13 @@ dengar/
 │   ├── app/
 │   │   ├── page.tsx            Product hub (this README, as a page)
 │   │   ├── experience/         Citizen experience  → /experience
-│   │   └── dashboard/          National Pulse       → /dashboard
+│   │   ├── dashboard/          National Pulse       → /dashboard
+│   │   └── sessions/           Session Explorer     → /sessions  (dashboard view 5)
+│   ├── components/
+│   │   └── SessionExplorer.tsx React-native view over the CVIF scorer
 │   └── lib/
 │       ├── types.ts            Domain model (Citizen, Slot, Booking, Session, Insight, AuditLog)
+│       ├── seed.ts             Deterministic session generator (feeds the Session Explorer)
 │       └── cvif/               ★ Citizen Voice Intelligence Framework (the intelligence layer)
 │           ├── types.ts        Session Insight Record + dimension types
 │           ├── dimensions.ts   The 7 dimension rubrics, excluded confounds, review triggers

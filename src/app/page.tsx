@@ -63,6 +63,12 @@ export default function Home() {
             >
               Open Ministry dashboard →
             </Link>
+            <Link
+              href="/sessions"
+              className="rounded-xl bg-white/15 px-5 py-3 text-sm font-extrabold text-white ring-1 ring-white/25 transition hover:bg-white/25"
+            >
+              Open Session Explorer →
+            </Link>
           </div>
           <p className="mt-4 text-xs font-semibold text-white/55">
             Demo prototype · synthetic data · AI representation of the Minister (disclosed)

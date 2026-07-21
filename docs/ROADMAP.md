@@ -26,7 +26,10 @@ depends only on the transcript pipeline, not on public traffic volume.
 
 - Pipeline: translate → CVIF classify → aggregate. Wire the dashboard to the live
   aggregation API instead of the in-page synthetic dataset.
-- Dashboard views 1–3; weekly briefing generator; **add view 5 — Session Explorer**.
+- Dashboard views 1–3; weekly briefing generator.
+- **View 5 — Session Explorer: BUILT** (`/sessions`, `src/components/SessionExplorer.tsx`),
+  wired to the real `deterministicScorer` over a seeded dataset. Next: point it at the live
+  aggregation API and add audio playback where retained.
 - Swap `deterministicScorer` for the LLM structured-extraction `Scorer`.
 - Load test, pen test, accessibility audit (WCAG 2.1 AA), edge journeys.
 - **Exit:** dashboard populates within 15 min of a session; security sign-off.
