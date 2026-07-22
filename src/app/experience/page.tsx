@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ExperienceClient } from "./ExperienceClient";
 
 export const metadata: Metadata = {
   title: "Citizen Experience — DENGAR.ai",
@@ -7,18 +8,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * The citizen experience. Serves the approved prototype
- * (public/prototypes/dengar-citizen.html) full-bleed. Phase 1 of the roadmap
- * replaces this with the React/Next PWA implementation of the same flow
- * (booking → session gateway → session → close), reusing the CVIF layer.
+ * Citizen experience — React/TypeScript PWA journey (Phase 1).
+ * The frozen HTML prototype remains at /prototypes/dengar-citizen.html for reference.
  */
 export default function ExperiencePage() {
-  return (
-    <iframe
-      className="prototype-frame"
-      src="/prototypes/dengar-citizen.html"
-      title="DENGAR.ai — Citizen Experience"
-      allow="microphone"
-    />
-  );
+  const sdkKey = process.env.NEXT_PUBLIC_KLLEON_SDK_KEY ?? "";
+  return <ExperienceClient sdkKey={sdkKey} />;
 }

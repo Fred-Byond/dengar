@@ -1,9 +1,12 @@
 <!DOCTYPE html>
+<!-- FROZEN REFERENCE: citizen journey lives in src/components/experience (React/TS). Do not extend this file for product work. -->
+
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DENGAR.ai — Bercakap dengan Menteri</title>
+<script src="https://web.sdk.klleon.io/1.3.0/klleon-chat.umd.js"></script>
 <style>
 :root{
   --wood-d:#3E2617; --wood-m:#6E4226; --wood-l:#A9713F;
@@ -27,8 +30,18 @@ body{
 @media(min-width:480px){
   #phone{height:92vh;border-radius:38px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 10px #26262b}
 }
-#scene{position:absolute;inset:0;z-index:0}
-#scene svg{width:100%;height:100%;display:block}
+#scene{position:absolute;inset:0;z-index:0;overflow:hidden;background:#1a1410}
+#klleonAvatar{
+  position:absolute;inset:32px 0 0 0;width:100%;height:auto;
+  z-index:1;overflow:hidden;pointer-events:none;
+  border-radius:0;
+}
+#klleonAvatar.ready{opacity:1}
+#klleonErr{
+  position:absolute;left:16px;right:16px;bottom:120px;z-index:9;
+  background:rgba(228,0,43,.92);color:#fff;font-size:12px;font-weight:600;
+  padding:10px 12px;border-radius:10px;display:none;text-align:center;
+}
 #veil{position:absolute;inset:0;z-index:1;background:rgba(20,14,9,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .4s}
 #phone.veiled #veil{opacity:1}
 
@@ -50,7 +63,7 @@ body{
 .who small{font-size:12px;opacity:.85}
 
 /* ============ UI LANGUAGE TOGGLE ============ */
-#uiLangTgl{position:absolute;top:34px;right:0;left:0;display:flex;justify-content:center;z-index:7;pointer-events:none}
+#uiLangTgl{position:absolute;top:22px;right:0;left:0;display:flex;justify-content:center;z-index:7;pointer-events:none}
 #uiLangTgl .box{pointer-events:auto;display:flex;background:rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:3px}
 #uiLangTgl button{border:0;background:transparent;color:#fff;font-size:11.5px;font-weight:800;padding:6px 14px;border-radius:99px;letter-spacing:.4px}
 #uiLangTgl button.on{background:#fff;color:var(--ink)}
@@ -204,117 +217,12 @@ input.f:focus,select.f:focus{border-color:var(--navy)}
     <button id="tglEn" onclick="setUiLang('en')">EN</button>
   </div></div>
 
-  <!-- ===== Office + minister scene (SVG) ===== -->
+  <!-- ===== Klleon avatar scene (full-bleed) ===== -->
   <div id="scene">
-    <svg viewBox="0 0 430 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#5A3820"/><stop offset=".55" stop-color="#6E4226"/><stop offset="1" stop-color="#4A2C18"/>
-        </linearGradient>
-        <linearGradient id="desk" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#8A5731"/><stop offset="1" stop-color="#5C3A20"/>
-        </linearGradient>
-        <radialGradient id="glow" cx=".5" cy="0" r="1">
-          <stop offset="0" stop-color="#FFD9A0" stop-opacity=".55"/><stop offset="1" stop-color="#FFD9A0" stop-opacity="0"/>
-        </radialGradient>
-        <linearGradient id="chair" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#C4813F"/><stop offset="1" stop-color="#9A5F2C"/>
-        </linearGradient>
-      </defs>
-      <rect width="430" height="900" fill="url(#wood)"/>
-      <g opacity=".35">
-        <rect x="18" y="60" width="52" height="560" rx="8" fill="#3E2818"/>
-        <rect x="360" y="60" width="52" height="560" rx="8" fill="#3E2818"/>
-        <rect x="26" y="72" width="36" height="536" rx="6" fill="#7A4B2A"/>
-        <rect x="368" y="72" width="36" height="536" rx="6" fill="#7A4B2A"/>
-      </g>
-      <ellipse cx="120" cy="30" rx="130" ry="90" fill="url(#glow)"/>
-      <ellipse cx="330" cy="30" rx="130" ry="90" fill="url(#glow)"/>
-      <circle cx="120" cy="18" r="7" fill="#FFE9C4"/><circle cx="330" cy="18" r="7" fill="#FFE9C4"/>
-      <g transform="translate(332,398)" opacity=".9">
-        <rect x="0" y="60" width="86" height="10" rx="3" fill="#4A2C18"/>
-        <g fill="#D9D4CC">
-          <rect x="14" y="-38" width="13" height="98" rx="5"/><rect x="34" y="-38" width="13" height="98" rx="5"/>
-          <rect x="24" y="6" width="13" height="4" fill="#BDB7AD"/>
-          <rect x="19" y="-50" width="3" height="14"/><rect x="39" y="-50" width="3" height="14"/>
-          <rect x="58" y="-16" width="9" height="76" rx="4"/><rect x="60" y="-30" width="3" height="16"/>
-        </g>
-      </g>
-      <g id="mChair"><rect x="128" y="240" width="174" height="290" rx="52" fill="url(#chair)"/>
-      <rect x="140" y="252" width="150" height="266" rx="44" fill="#B5763A"/></g>
-      <g id="minister">
-        <path d="M138 560 C138 470 168 428 215 428 C262 428 292 470 292 560 Z" fill="#F7F5F0"/>
-        <path d="M138 560 C138 470 168 428 215 428 C262 428 292 470 292 560 Z" fill="none" stroke="#E2DDD3" stroke-width="2"/>
-        <path d="M138 528 C120 540 112 556 110 574 L150 574 Z" fill="#F1EEE7"/>
-        <path d="M292 528 C310 540 318 556 320 574 L280 574 Z" fill="#F1EEE7"/>
-        <path d="M126 574 C138 552 170 546 196 560 L222 574 Z" fill="#C79063"/>
-        <path d="M304 574 C292 552 260 546 234 560 L208 574 Z" fill="#C79063"/>
-        <ellipse cx="215" cy="568" rx="34" ry="16" fill="#D3A075"/>
-        <path d="M196 564 q6 8 12 0 M208 566 q6 8 12 0 M220 566 q6 8 12 0" stroke="#B27F52" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-        <rect x="264" y="556" width="9" height="18" rx="4" fill="#3A3A40"/>
-        <path d="M196 432 L215 462 L234 432 L226 424 L215 440 L204 424 Z" fill="#FFFFFF" stroke="#E2DDD3" stroke-width="1.5"/>
-        <rect x="212" y="452" width="6" height="106" fill="#EFEBE2"/>
-        <circle cx="215" cy="470" r="2.4" fill="#CFC8BA"/><circle cx="215" cy="494" r="2.4" fill="#CFC8BA"/><circle cx="215" cy="518" r="2.4" fill="#CFC8BA"/><circle cx="215" cy="542" r="2.4" fill="#CFC8BA"/>
-        <rect x="240" y="482" width="34" height="38" rx="4" fill="#F2EFE8" stroke="#E2DDD3"/>
-        <circle cx="257" cy="492" r="5.5" fill="#1B2A6B"/><circle cx="257" cy="492" r="2.2" fill="#FFCC00"/>
-        <circle cx="172" cy="486" r="7" fill="#B22222" opacity=".85"/><circle cx="172" cy="486" r="3" fill="#FFCC00"/>
-        <rect x="200" y="398" width="30" height="38" rx="12" fill="#CE9668"/>
-        <g id="mHead">
-          <ellipse cx="215" cy="352" rx="52" ry="58" fill="#D8A377"/>
-          <ellipse cx="163" cy="356" rx="9" ry="14" fill="#CE9668"/><ellipse cx="267" cy="356" rx="9" ry="14" fill="#CE9668"/>
-          <path d="M163 340 C160 296 186 276 215 276 C248 276 272 298 268 342 C262 322 252 310 240 306 C238 314 232 318 224 318 C196 318 176 326 170 348 C166 346 164 344 163 340 Z" fill="#6E6E70"/>
-          <path d="M170 300 C182 284 200 278 215 278 C202 286 190 294 184 306 Z" fill="#8A8A8C" opacity=".7"/>
-          <path d="M180 336 q13 -6 26 -1" stroke="#585858" stroke-width="4" fill="none" stroke-linecap="round"/>
-          <path d="M224 335 q13 -5 26 1" stroke="#585858" stroke-width="4" fill="none" stroke-linecap="round"/>
-          <g id="eyes">
-            <ellipse cx="193" cy="348" rx="6.5" ry="4.6" fill="#fff"/><circle cx="193" cy="348" r="2.8" fill="#2B1E14"/>
-            <ellipse cx="237" cy="348" rx="6.5" ry="4.6" fill="#fff"/><circle cx="237" cy="348" r="2.8" fill="#2B1E14"/>
-          </g>
-          <g id="lids" opacity="0"><rect x="184" y="342" width="18" height="10" rx="5" fill="#D8A377"/><rect x="228" y="342" width="18" height="10" rx="5" fill="#D8A377"/></g>
-          <g stroke="#8A8A8E" stroke-width="1.8" fill="rgba(255,255,255,.14)">
-            <rect x="178" y="338" width="30" height="20" rx="7"/>
-            <rect x="222" y="338" width="30" height="20" rx="7"/>
-            <path d="M208 346 L222 346" fill="none"/>
-            <path d="M178 344 L164 340 M252 344 L266 340" fill="none"/>
-          </g>
-          <path d="M215 352 q-4 14 -7 18 q6 5 14 0" stroke="#B27F52" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-          <path id="mouth" d="M198 388 q17 8 34 0" stroke="#8C5B3C" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-          <path d="M192 396 q23 14 46 0" stroke="#C08B5E" stroke-width="2" fill="none" opacity=".5"/>
-        </g>
-      </g>
-      <rect x="0" y="560" width="430" height="340" fill="url(#desk)"/>
-      <rect x="0" y="560" width="430" height="8" fill="#A06A3A"/>
-      <g transform="translate(196,588) rotate(-3)"><rect width="130" height="66" rx="5" fill="#2B2B30"/><rect x="8" y="-6" width="114" height="60" rx="3" fill="#F3F1EA"/>
-        <g stroke="#B9B4A8" stroke-width="2"><path d="M20 8 h90 M20 18 h90 M20 28 h72 M20 38 h84"/></g></g>
-      <g transform="translate(148,596)"><path d="M0 20 q4 -10 18 -10 q14 0 18 10 l-3 74 q-15 10 -30 0 Z" fill="#1E1E22"/>
-        <g stroke-linecap="round" stroke-width="5"><path d="M8 14 l-3 -30" stroke="#7A4B2A"/><path d="M18 12 l0 -34" stroke="#3A3A40"/><path d="M27 14 l4 -28" stroke="#55555C"/></g></g>
-      <g transform="translate(268,606)"><path d="M0 34 L118 20 L150 66 L28 84 Z" fill="#23262E"/>
-        <path d="M4 36 L116 23 L144 63 L30 79 Z" fill="#2E3340"/>
-        <path d="M0 34 L-14 66 L112 92 L150 66 L28 84 Z" fill="#181A20"/>
-        <g fill="#3A3F4C"><rect x="6" y="52" width="120" height="3" transform="rotate(6 6 52)"/><rect x="8" y="60" width="120" height="3" transform="rotate(6 8 60)"/><rect x="10" y="68" width="118" height="3" transform="rotate(6 10 68)"/></g></g>
-      <g transform="translate(58,540)">
-        <ellipse cx="26" cy="182" rx="30" ry="10" fill="#5C3A20"/>
-        <path d="M22 182 L22 40 L30 40 L30 182 Z" fill="#7A4B2A"/>
-        <circle cx="26" cy="36" r="6" fill="#8A5731"/>
-        <g transform="translate(30,44)">
-          <path id="flagShape" d="M0 0 C34 -6 70 6 104 0 L100 96 C66 102 32 90 -2 96 Z" fill="#fff"/>
-          <clipPath id="fc"><use href="#flagShape"/></clipPath>
-          <g clip-path="url(#fc)">
-            <g fill="#D22030">
-              <rect x="-6" y="0" width="116" height="7"/><rect x="-6" y="14" width="116" height="7"/><rect x="-6" y="28" width="116" height="7"/><rect x="-6" y="42" width="116" height="7"/><rect x="-6" y="56" width="116" height="7"/><rect x="-6" y="70" width="116" height="7"/><rect x="-6" y="84" width="116" height="7"/>
-            </g>
-            <rect x="-6" y="-2" width="60" height="52" fill="#1B2A6B"/>
-            <circle cx="18" cy="22" r="13" fill="#FFCC00"/><circle cx="24" cy="22" r="11" fill="#1B2A6B"/>
-            <g fill="#FFCC00" transform="translate(36,22)">
-              <path d="M0 -10 L2.4 -3.2 L9.5 -3.2 L3.8 1 L6 8 L0 3.8 L-6 8 L-3.8 1 L-9.5 -3.2 L-2.4 -3.2 Z"/>
-            </g>
-          </g>
-        </g>
-      </g>
-      <g transform="translate(0,640)"><rect x="-6" y="0" width="70" height="16" rx="3" fill="#2E5AA0"/><rect x="-6" y="18" width="62" height="16" rx="3" fill="#3D7ACC"/><rect x="-6" y="36" width="76" height="16" rx="3" fill="#24466E"/></g>
-    </svg>
+    <avatar-container id="klleonAvatar"></avatar-container>
   </div>
   <div id="veil"></div>
+  <div id="klleonErr"></div>
 
   <!-- ================= LANDING ================= -->
   <section class="screen active" id="s-landing">
@@ -469,6 +377,7 @@ input.f:focus,select.f:focus{border-color:var(--navy)}
           <div class="readyItem ok"><div class="dot" style="background:var(--navy)">文</div><span data-i18n="langLbl2"></span>: <b id="lobbyLang" style="margin-left:4px"></b></div>
         </div>
         <p class="sub" style="margin-top:12px;font-size:11.5px" data-i18n="etiquette"></p>
+        <button class="btn" id="lobbyEnterBtn" onclick="enterSessionFromLobby()" style="margin-top:14px" data-i18n="enterSession"></button>
       </div>
     </div>
     <div style="height:30px"></div>
@@ -574,7 +483,8 @@ const I18N={
   waFrom:"Kementerian Dalam Negeri",
   waBody:(n,t,r)=>`Salam <b>${n}</b> 👋<br><br>Sesi anda bersama <b>Menteri Saifuddin Nasution</b> bermula dalam <b>15 minit</b> (${t}).<br><br>Rujukan: <b>${r}</b><br>Tekan di bawah apabila anda bersedia.`,
   waJoin:"Sertai sesi anda",waValid:"Pautan sah dari 15 minit sebelum hingga 10 minit selepas slot anda.",
-  lobbyIn:"Sesi anda bermula dalam",lobbyDemo:"Demo: kiraan detik dipendekkan ke 10 saat",
+  lobbyIn:"Sesi anda bermula dalam",lobbyDemo:"Demo: ketik butang di bawah untuk mula (audio perlu gestur anda)",
+  enterSession:"Mula sesi — ketik untuk dengar",
   ready:"Menyediakan anda",linkOk:"Pautan sesi disahkan",micLbl2:"Mikrofon",allow:"Benarkan",langLbl2:"Bahasa",
   micBlocked:"Disekat — guna taipan",micNA:"Tiada — guna taipan",
   etiquette:"⏱ 5 minit · 💬 Kongsi pandangan & cadangan anda · 🔒 Dirakam untuk semakan Kementerian",
@@ -624,7 +534,8 @@ const I18N={
   waFrom:"Ministry of Home Affairs",
   waBody:(n,t,r)=>`Hello <b>${n}</b> 👋<br><br>Your session with <b>Minister Saifuddin Nasution</b> begins in <b>15 minutes</b> (${t}).<br><br>Ref: <b>${r}</b><br>Tap below when you are ready to join.`,
   waJoin:"Join your session",waValid:"Link is valid from 15 min before until 10 min after your slot.",
-  lobbyIn:"Your session starts in",lobbyDemo:"Demo: countdown shortened to 10 seconds",
+  lobbyIn:"Your session starts in",lobbyDemo:"Demo: tap the button below to start (audio needs your gesture)",
+  enterSession:"Start session — tap to hear audio",
   ready:"Getting you ready",linkOk:"Session link verified",micLbl2:"Microphone",allow:"Allow",langLbl2:"Language",
   micBlocked:"Blocked — will use typing",micNA:"Not available — will use typing",
   etiquette:"⏱ 5 minutes · 💬 Share your views & suggestions · 🔒 Recorded for the Ministry's review",
@@ -812,9 +723,16 @@ function startLobby(){
   let n=10; const el=document.getElementById('lobbyCount');
   el.textContent='00:10';
   clearInterval(lobbyId);
-  lobbyId=setInterval(()=>{n--;el.textContent='00:'+String(Math.max(n,0)).padStart(2,'0');if(n<=0){clearInterval(lobbyId);startSession();}},1000);
+  /* Do not auto-startSession() — browsers block WebRTC/TTS audio without a fresh user gesture. */
+  lobbyId=setInterval(()=>{n--;el.textContent='00:'+String(Math.max(n,0)).padStart(2,'0');if(n<=0)clearInterval(lobbyId);},1000);
+}
+function enterSessionFromLobby(){
+  clearInterval(lobbyId);
+  ensureAvatarAudio();
+  startSession();
 }
 function askMic(){
+  ensureAvatarAudio();
   const item=document.getElementById('micCheck');
   if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
     navigator.mediaDevices.getUserMedia({audio:true}).then(st=>{st.getTracks().forEach(x=>x.stop());item.classList.add('ok');item.querySelector('.dot').textContent='✓';const b=item.querySelector('button');if(b)b.remove();})
@@ -865,49 +783,112 @@ const M={
  }
 };
 
-/* ===================== TTS + MOUTH ===================== */
-let mouthTimer=null;
-function animateMouth(on){
-  const m=document.getElementById('mouth');
-  clearInterval(mouthTimer);
-  if(on){
-    let open=false;
-    mouthTimer=setInterval(()=>{open=!open;
-      m.setAttribute('d',open?'M199 386 q16 15 32 0 q-16 6 -32 0':'M198 388 q17 8 34 0');},170);
-  } else m.setAttribute('d','M198 388 q17 8 34 0');
+/* ===================== KLLEON AVATAR ===================== */
+const KLLEON_AVATAR_ID='e9da27d3-9f03-4043-aa35-3bb369baf994';
+const KLLEON={ready:false,recording:false,inSession:false,pendingEcho:null,echoAfter:null,expectScriptReply:false,scriptReply:null,scriptTimer:null,audioUnlocked:false,lastEchoToken:0};
+
+function klleonVoiceCodes(langCode){
+  if(langCode==='MS')return{voice_code:'id_id',subtitle_code:'id_id'};
+  return{voice_code:'en_us',subtitle_code:'en_us'};
+}
+function showKlleonErr(msg){
+  const el=document.getElementById('klleonErr');
+  if(!el)return;
+  el.textContent=msg; el.style.display='block';
+}
+function hideKlleonErr(){
+  const el=document.getElementById('klleonErr');
+  if(el)el.style.display='none';
+}
+function collectAvatarVideos(){
+  const videos=[];
+  const root=document.getElementById('klleonAvatar');
+  if(root){
+    if(root.tagName==='VIDEO')videos.push(root);
+    root.querySelectorAll&&root.querySelectorAll('video').forEach(v=>videos.push(v));
+    if(root.shadowRoot)root.shadowRoot.querySelectorAll('video').forEach(v=>videos.push(v));
+  }
+  document.querySelectorAll('video').forEach(v=>{if(videos.indexOf(v)<0)videos.push(v);});
+  return videos;
+}
+function setAvatarVolume(vol){
+  /* Klleon <avatar-container>.volume is 0–100. Never park at 0 after stream is up —
+     Agora remote audio often stays silent after 0→100. */
+  const want=Math.max(0,Math.min(100,Number(vol)||0));
+  const klleonVol=(KLLEON.ready||KLLEON.inSession)?Math.max(want,100):want;
+  const el=document.getElementById('klleonAvatar');
+  if(el){
+    try{el.volume=klleonVol;}catch(e){}
+    try{el.muted=false;}catch(e){}
+  }
+  const videos=collectAvatarVideos();
+  const videoStates=[];
+  videos.forEach(v=>{
+    try{
+      v.volume=1;
+      v.muted=false;
+      videoStates.push({muted:v.muted,volume:v.volume});
+    }catch(e){videoStates.push({err:String(e)});}
+  });
+}
+function ensureAvatarAudio(){
+  const el=document.getElementById('klleonAvatar');
+  if(el){
+    try{el.volume=100;}catch(e){}
+    try{el.muted=false;}catch(e){}
+  }
+  const videos=collectAvatarVideos();
+  const states=[];
+  videos.forEach(v=>{
+    try{
+      v.muted=false;
+      v.volume=1;
+      const p=v.play&&v.play();
+      if(p&&p.catch)p.catch(()=>{});
+      states.push({muted:v.muted,volume:v.volume,paused:v.paused});
+    }catch(e){states.push({err:String(e)});}
+  });
+  KLLEON.audioUnlocked=true;
+}
+function markMicReady(){
+  const item=document.getElementById('micCheck');
+  if(!item||item.classList.contains('ok'))return;
+  item.classList.add('ok');
+  item.querySelector('.dot').textContent='✓';
+  const b=item.querySelector('button'); if(b)b.remove();
+}
+function setCaption(text){
+  const cap=document.getElementById('capText');
+  if(!cap)return;
+  cap.textContent=text||'…';
+  cap.parentElement.dir=S.lang.rtl?'rtl':'ltr';
 }
 function speak(text,after){
-  const cap=document.getElementById('capText');
-  cap.textContent=text;
-  cap.parentElement.dir=S.lang.rtl?'rtl':'ltr';
+  setCaption(text);
+  KLLEON.echoAfter=after||null;
+  ensureAvatarAudio();
+  if(!window.KlleonChat||!KLLEON.ready){
+    KLLEON.pendingEcho=text;
+    if(after)setTimeout(after,2200);
+    return;
+  }
   try{
-    speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(text);
-    u.lang=S.lang.bcp; u.rate=.96;
-    const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.toLowerCase().startsWith(S.lang.bcp.slice(0,2)));
-    if(v)u.voice=v;
-    u.onstart=()=>animateMouth(true);
-    u.onend=()=>{animateMouth(false);if(after)after();};
-    u.onerror=()=>{animateMouth(false);if(after)setTimeout(after,1500);};
-    speechSynthesis.speak(u);
-  }catch(e){animateMouth(false);if(after)setTimeout(after,2200);}
+    /* Do not stopSpeech() immediately before echo — it can cancel the new TTS. */
+    const echoToken=Date.now();
+    KLLEON.lastEchoToken=echoToken;
+    window.KlleonChat.echo(text);
+    setTimeout(()=>{
+      if(KLLEON.lastEchoToken!==echoToken)return;
+    },3000);
+  }catch(e){
+    console.warn('Klleon echo failed',e);
+    if(after)setTimeout(after,1500);
+  }
 }
-
-/* ===================== STT ===================== */
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let rec=null;
-function initRec(){
-  if(!SR)return null;
-  const r=new SR();
-  r.lang=S.lang.bcp; r.interimResults=true; r.continuous=false;
-  r.onresult=e=>{
-    let txt='';for(const res of e.results)txt+=res[0].transcript;
-    document.getElementById('youSaid').textContent='“'+txt+'”';
-    if(e.results[e.results.length-1].isFinal){userSpoke(txt);}
-  };
-  r.onend=()=>setListening(false);
-  r.onerror=()=>{setListening(false);showFallback();};
-  return r;
+function flushPendingEcho(){
+  if(!KLLEON.pendingEcho||!KLLEON.ready)return;
+  const text=KLLEON.pendingEcho; KLLEON.pendingEcho=null;
+  try{window.KlleonChat.echo(text);}catch(e){console.warn(e);}
 }
 function setListening(on){
   S.listening=on;
@@ -915,13 +896,25 @@ function setListening(on){
   document.getElementById('micLbl').textContent=on?t('listening'):t('tapSpeak');
 }
 function toggleMic(){
+  ensureAvatarAudio();
   if(S.closing)return;
-  if(S.listening){try{rec&&rec.stop()}catch(e){} setListening(false);return;}
-  speechSynthesis.cancel();animateMouth(false);
-  rec=initRec();
-  if(!rec){showFallback();return;}
-  try{rec.start();setListening(true);document.getElementById('youSaid').textContent='';}
-  catch(e){showFallback();}
+  if(!window.KlleonChat||!KLLEON.ready){showFallback();return;}
+  if(S.listening||KLLEON.recording){
+    try{window.KlleonChat.endStt();}catch(e){console.warn(e);}
+    KLLEON.recording=false;
+    setListening(false);
+    return;
+  }
+  try{window.KlleonChat.stopSpeech();}catch(e){}
+  document.getElementById('youSaid').textContent='';
+  try{
+    window.KlleonChat.startStt();
+    KLLEON.recording=true;
+    setListening(true);
+  }catch(e){
+    console.warn('Klleon startStt failed',e);
+    showFallback();
+  }
 }
 function showFallback(){
   document.getElementById('txtFallback').style.display='flex';
@@ -931,13 +924,146 @@ function submitText(){
   const i=document.getElementById('txtInput');const v=i.value.trim();
   if(!v)return;
   document.getElementById('youSaid').textContent='“'+v+'”';
-  i.value=''; userSpoke(v);
+  i.value='';
+  /* Controlled-listening demo: do not send to Klleon freeform AI — use scripted replies. */
+  noteUserUtterance(v);
 }
+function pickScriptReply(){
+  const code=S.lang.code;
+  if(S.stage<=0)return M.probe[code]();
+  if(S.stage===1)return M.ack[code]();
+  return M.more[code]();
+}
+function queueScriptReply(){
+  const reply=pickScriptReply();
+  KLLEON.expectScriptReply=true;
+  KLLEON.scriptReply=reply;
+  setCaption(reply);
+  clearTimeout(KLLEON.scriptTimer);
+  /* endStt() also triggers Klleon AI. Prefer preempting that PREPARING_RESPONSE;
+     if AI never starts, echo ourselves. Never stopSpeech after our own echo is in flight. */
+  KLLEON.scriptTimer=setTimeout(()=>{
+    if(!KLLEON.scriptReply)return;
+    const text=KLLEON.scriptReply;
+    KLLEON.scriptReply=null;
+    try{window.KlleonChat&&window.KlleonChat.stopSpeech();}catch(e){}
+    speak(text);
+  },700);
+}
+function noteUserUtterance(txt){
+  setListening(false);
+  KLLEON.recording=false;
+  if(S.closing)return;
+  if(txt&&txt.trim()&&!S.saidText)S.saidText=txt.trim();
+  queueScriptReply();
+  S.stage++;
+}
+function handleKlleonChat(chatData){
+  const type=(chatData&&chatData.chat_type)||'';
+  const msg=(chatData&&chatData.message)||'';
+  if(type==='STT_RESULT'){
+    if(msg){
+      document.getElementById('youSaid').textContent='“'+msg+'”';
+      noteUserUtterance(msg);
+    }
+    setListening(false);
+    KLLEON.recording=false;
+  } else if(type==='STT_ERROR'){
+    setListening(false);
+    KLLEON.recording=false;
+    showFallback();
+  } else if(type==='PREPARING_RESPONSE'){
+    KLLEON.lastEchoToken=0;
+    /* Only preempt while a scripted line is still pending. If scriptReply is null,
+       PREPARING_RESPONSE is for our own echo — do NOT stopSpeech (that killed TTS). */
+    if(KLLEON.expectScriptReply&&KLLEON.scriptReply){
+      const text=KLLEON.scriptReply;
+      KLLEON.scriptReply=null;
+      clearTimeout(KLLEON.scriptTimer);
+      try{window.KlleonChat.stopSpeech();}catch(e){}
+      ensureAvatarAudio();
+      try{window.KlleonChat.echo(text);}catch(e){console.warn(e);}
+    }
+  } else if(type==='TEXT'&&msg){
+    if(KLLEON.expectScriptReply)return;
+    setCaption(msg);
+  } else if(type==='RESPONSE_IS_ENDED'){
+    if(KLLEON.expectScriptReply)KLLEON.expectScriptReply=false;
+    const cb=KLLEON.echoAfter; KLLEON.echoAfter=null;
+    if(cb)cb();
+  } else if(type==='USER_SPEECH_STARTED'){
+    setListening(true);
+  } else if(type==='USER_SPEECH_STOPPED'){
+    /* waiting for STT_RESULT */
+  }
+}
+async function initKlleon(){
+  const sdkKey=new URLSearchParams(location.search).get('sdk_key')||'';
+  const avatar=document.getElementById('klleonAvatar');
+  if(avatar){
+    avatar.videoStyle={
+      objectFit:'cover',
+      objectPosition:'center top',
+      width:'100%',
+      height:'100%'
+    };
+    setAvatarVolume(100);
+  }
+  if(!sdkKey){
+    showKlleonErr('Missing Klleon SDK key. Open this page with ?sdk_key=... (same value as NEXT_PUBLIC_KLLEON_SDK_KEY for /experience).');
+    return;
+  }
+  if(!window.KlleonChat){
+    showKlleonErr('Klleon Chat SDK failed to load.');
+    return;
+  }
+  const {KlleonChat}=window;
+  const codes=klleonVoiceCodes(S.lang.code);
+  KlleonChat.onStatusEvent((status)=>{
+    if(status==='VIDEO_CAN_PLAY'){
+      KLLEON.ready=true;
+      hideKlleonErr();
+      markMicReady();
+      setAvatarVolume(100);
+      ensureAvatarAudio();
+      flushPendingEcho();
+    } else if(status==='DESTROYED'){
+      KLLEON.ready=false;
+    } else if(status==='CONNECTING_FAILED'||status==='SOCKET_FAILED'||status==='STREAMING_FAILED'){
+      showKlleonErr('Klleon connection failed ('+status+'). Check SDK key and domain registration.');
+    }
+  });
+  KlleonChat.onChatEvent(handleKlleonChat);
+  KlleonChat.onErrorEvent((err)=>{
+    console.error('Klleon error',err);
+    if(err&&err.message)showKlleonErr(err.message);
+  });
+  try{
+    await KlleonChat.init({
+      sdk_key:sdkKey,
+      avatar_id:KLLEON_AVATAR_ID,
+      voice_code:codes.voice_code,
+      subtitle_code:codes.subtitle_code,
+      enable_microphone:true,
+      log_level:'warn'
+    });
+  }catch(e){
+    console.error(e);
+    showKlleonErr('Klleon init failed: '+(e&&e.message?e.message:e));
+  }
+}
+window.addEventListener('pagehide',()=>{
+  try{if(window.KlleonChat)window.KlleonChat.destroy();}catch(e){}
+});
 
 /* ===================== SESSION FLOW ===================== */
 function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 function startSession(){
-  go('s-session'); S.stage=0; S.secs=300; S.wrapSaid=false; S.closing=false; S.saidText=""; S.voiceNo=null; closed=false;
+  go('s-session');
+  KLLEON.inSession=true;
+  setAvatarVolume(100);
+  ensureAvatarAudio();
+  S.stage=0; S.secs=300; S.wrapSaid=false; S.closing=false; S.saidText=""; S.voiceNo=null; closed=false;
   document.getElementById('youSaid').textContent='';
   document.getElementById('sessTimer').textContent=fmt(S.secs);
   syncLangUI();
@@ -952,21 +1078,13 @@ function tick(){
   if(S.secs===60&&!S.wrapSaid&&!S.listening){S.wrapSaid=true;speak(M.wrap[S.lang.code]());}
   if(S.secs<=0)endSession();
 }
-function userSpoke(txt){
-  setListening(false);
-  if(S.closing)return;
-  /* remember the citizen's first substantive utterance for the summary */
-  if(txt&&txt.trim()&&!S.saidText)S.saidText=txt.trim();
-  S.stage++;
-  const c=S.lang.code;
-  if(S.stage===1)speak(M.probe[c]());
-  else if(S.stage===2)speak(M.ack[c]());
-  else speak(M.more[c]());
-}
 function fastForward(){if(!S.closing)S.secs=10;}
 function endSession(){
   S.closing=true; clearInterval(S.timerId);
-  try{rec&&rec.stop()}catch(e){}
+  if(KLLEON.recording){
+    try{window.KlleonChat&&window.KlleonChat.cancelStt();}catch(e){}
+    KLLEON.recording=false; setListening(false);
+  }
   const first=(S.name||'rakan').split(' ')[0];
   speak(M.close[S.lang.code](first),()=>setTimeout(showClosing,600));
   setTimeout(showClosing,14000);
@@ -997,7 +1115,8 @@ function animateCounter(target){
 }
 function showClosing(){
   if(closed)return; closed=true;
-  speechSynthesis.cancel(); animateMouth(false);
+  try{window.KlleonChat&&window.KlleonChat.stopSpeech();}catch(e){}
+  KLLEON.inSession=false;
   document.getElementById('closeName').textContent=(S.name||'rakan').split(' ')[0];
   document.getElementById('closeRef').textContent=S.ref||'TTM-2026-000000';
   document.getElementById('summaryText').innerHTML=buildSummary();
@@ -1013,29 +1132,22 @@ document.querySelectorAll('#stars span').forEach((s,i,arr)=>{
 });
 function restart(){
   closed=false; S.stage=0; S.time=null; S.day=null; S.saidText=""; S.voiceNo=null;
+  KLLEON.inSession=false; KLLEON.recording=false; KLLEON.echoAfter=null; KLLEON.pendingEcho=null;
   document.querySelectorAll('.day,.slot').forEach(x=>x.classList.remove('sel'));
   document.getElementById('slotNext').disabled=true;
   document.querySelectorAll('#stars span').forEach(x=>x.classList.remove('on'));
   go('s-landing');
 }
 
-/* ===================== IDLE LIFE ===================== */
-setInterval(()=>{
-  const lids=document.getElementById('lids'),eyes=document.getElementById('eyes');
-  lids.setAttribute('opacity','1');eyes.setAttribute('opacity','0');
-  setTimeout(()=>{lids.setAttribute('opacity','0');eyes.setAttribute('opacity','1');},140);
-},3800);
-(function breathe(){
-  const g=document.getElementById('minister');let tt=0;
-  setInterval(()=>{tt+=.05;g.setAttribute('transform',`translate(0,${Math.sin(tt)*1.6})`);},50);
-})();
-if(window.speechSynthesis)speechSynthesis.getVoices();
-
 /* ===================== INIT ===================== */
 renderLangGrid(document.getElementById('langGrid'));
 renderLangGrid(document.getElementById('langGrid2'),()=>document.getElementById('langModal').classList.remove('open'));
 applyI18n();
 syncLangUI();
+document.getElementById('phone').addEventListener('pointerdown',()=>{
+  if((KLLEON.inSession||KLLEON.ready)&&!KLLEON.audioUnlocked)ensureAvatarAudio();
+},{passive:true});
+initKlleon();
 </script>
 </body>
 </html>

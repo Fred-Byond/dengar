@@ -12,3 +12,9 @@ export {
   MockDigitalHumanGateway,
   toTranscriptInput,
 } from "./gateway";
+export {
+  KLLEON_AVATAR_ID,
+  KLLEON_SDK_URL,
+  klleonVoiceCodes,
+  loadKlleonScript,
+} from "./adapters/klleon";
