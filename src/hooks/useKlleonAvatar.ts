@@ -74,7 +74,7 @@ export function useKlleonAvatar({
     if (!enabled) return;
     if (!sdkKey) {
       setError(
-        "Missing Klleon SDK key. Set NEXT_PUBLIC_KLLEON_SDK_KEY in .env.local and restart Next."
+        "Missing Klleon SDK key. Set KLLEON_SDK_KEY (or NEXT_PUBLIC_KLLEON_SDK_KEY) in .env and restart."
       );
       return;
     }

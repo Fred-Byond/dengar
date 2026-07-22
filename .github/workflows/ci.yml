@@ -19,6 +19,7 @@ jobs:
           NEXT_PUBLIC_KLLEON_SDK_KEY: ${{ secrets.NEXT_PUBLIC_KLLEON_SDK_KEY }}
         run: |
           printf '%s\n' \
+            "KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
             "NEXT_PUBLIC_KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
             'PORT=8081' > .env
 

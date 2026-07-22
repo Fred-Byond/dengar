@@ -33,9 +33,12 @@ jobs:
             git checkout main
             git reset --hard origin/main
 
-            # Runtime env for compose (never commit .env)
+            # Runtime env for compose (never commit .env).
+            # Write both names: KLLEON_SDK_KEY is read at runtime (not inlined
+            # at next build); NEXT_PUBLIC_* kept for local-dev compatibility.
             umask 077
             printf '%s\n' \
+              "KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
               "NEXT_PUBLIC_KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
               'PORT=8081' > .env
 
@@ -43,5 +46,5 @@ jobs:
             # running projects' images are retained while their containers are up)
             docker image prune -af
             docker builder prune -af
-            docker compose up -d --build
+            docker compose up -d --build --force-recreate
             docker image prune -f
