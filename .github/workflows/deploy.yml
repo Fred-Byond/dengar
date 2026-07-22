@@ -1,0 +1,47 @@
+name: Deploy
+
+# Auto-deploy on every push to main; also runnable manually.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Repo secrets required:
+#   DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_PATH, NEXT_PUBLIC_KLLEON_SDK_KEY
+# Optional:
+#   DEPLOY_PORT (default 22)
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          NEXT_PUBLIC_KLLEON_SDK_KEY: ${{ secrets.NEXT_PUBLIC_KLLEON_SDK_KEY }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          envs: NEXT_PUBLIC_KLLEON_SDK_KEY
+          script: |
+            set -e
+            cd "${{ secrets.DEPLOY_PATH }}"
+            git fetch origin main
+            git checkout main
+            git reset --hard origin/main
+
+            # Runtime env for compose (never commit .env)
+            umask 077
+            printf '%s\n' \
+              "NEXT_PUBLIC_KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
+              'PORT=8081' > .env
+
+            # Free image/build-cache space before rebuild (keeps volumes; other
+            # running projects' images are retained while their containers are up)
+            docker image prune -af
+            docker builder prune -af
+            docker compose up -d --build
+            docker image prune -f

@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Repo secret (optional for CI; required for avatar in deploy):
+#   NEXT_PUBLIC_KLLEON_SDK_KEY
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write .env (Klleon)
+        env:
+          NEXT_PUBLIC_KLLEON_SDK_KEY: ${{ secrets.NEXT_PUBLIC_KLLEON_SDK_KEY }}
+        run: |
+          printf '%s\n' \
+            "NEXT_PUBLIC_KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
+            'PORT=8081' > .env
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Free Docker disk space
+        run: |
+          docker system prune -af --volumes
+          docker builder prune -af
+
+      - name: Docker build
+        run: docker build -t dengar:ci .

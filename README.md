@@ -91,6 +91,49 @@ weekly briefing never change shape.
 
 ---
 
+## Deploy with Docker
+
+The image is **Node only** (no nginx inside). On a shared server, run **host
+nginx** for TLS and routing; each project is a container on its own localhost
+port (Wooby: `8080`, Dengar: `8081`).
+
+```bash
+cp .env.example .env   # put real keys in .env only — never commit it
+docker compose up -d --build
+# app: http://127.0.0.1:8081
+```
+
+Host nginx example (on the server, not in this image):
+
+```nginx
+server {
+  server_name dengar.example.com;
+  location / {
+    proxy_pass http://127.0.0.1:8081;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+```
+
+Compose binds `127.0.0.1:8081` only so the container is not public except through
+host nginx.
+
+### GitHub Actions
+
+- **CI** (`.github/workflows/ci.yml`) — on push/PR to `main`: `npm ci`, lint, typecheck, build, `docker build`.
+- **Deploy** (`.github/workflows/deploy.yml`) — on push to `main` (and manual **Run workflow**): SSH + `docker compose up -d --build`.
+
+Set these repository secrets for deploy: `DEPLOY_HOST`, `DEPLOY_USER`,
+`DEPLOY_SSH_KEY`, `DEPLOY_PATH`, `NEXT_PUBLIC_KLLEON_SDK_KEY` (and optionally `DEPLOY_PORT`).
+
+Both workflows write a `.env` with your `NEXT_PUBLIC_KLLEON_SDK_KEY` secret (deploy
+writes it on the server before `docker compose up`).
+
+---
+
 ## Status
 
 Demo prototype with synthetic data. Not connected to any Ministry system. The digital human
