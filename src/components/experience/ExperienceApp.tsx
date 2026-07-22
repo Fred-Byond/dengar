@@ -369,8 +369,22 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
     }, 600);
   }, [go, klleon, name, sessionLang.code]);
 
-  const enterSessionFromLobby = () => {
+  const enterSessionFromLobby = async () => {
     if (lobbyTimerRef.current) clearInterval(lobbyTimerRef.current);
+    // Browser autoplay: TTS/video often stay blocked unless getUserMedia (or
+    // similar) ran under a user gesture. "Benarkan" does that; if the citizen
+    // skips it, do the same unlock here on "Mula sesi".
+    klleon.unlockAudio();
+    if (!micOk && navigator.mediaDevices?.getUserMedia) {
+      try {
+        const st = await navigator.mediaDevices.getUserMedia({ audio: true });
+        st.getTracks().forEach((x) => x.stop());
+        setMicOk(true);
+        setMicBtnLabel(null);
+      } catch {
+        /* mic denied — typing fallback; unlockAudio may still help on some browsers */
+      }
+    }
     klleon.unlockAudio();
     startSession();
   };

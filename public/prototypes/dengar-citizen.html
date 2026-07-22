@@ -729,6 +729,20 @@ function startLobby(){
 function enterSessionFromLobby(){
   clearInterval(lobbyId);
   ensureAvatarAudio();
+  const item=document.getElementById('micCheck');
+  const alreadyOk=item&&item.classList.contains('ok');
+  if(!alreadyOk&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    navigator.mediaDevices.getUserMedia({audio:true}).then(st=>{
+      st.getTracks().forEach(x=>x.stop());
+      markMicReady();
+      ensureAvatarAudio();
+      startSession();
+    }).catch(()=>{
+      ensureAvatarAudio();
+      startSession();
+    });
+    return;
+  }
   startSession();
 }
 function askMic(){
