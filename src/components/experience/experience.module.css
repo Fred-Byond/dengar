@@ -1054,33 +1054,6 @@
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
 }
 
-.txtFallback {
-  display: none;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.txtFallback input {
-  flex: 1;
-  font-family: inherit;
-  font-size: 14px;
-  padding: 12px;
-  border-radius: 11px;
-  border: 0;
-  outline: none;
-}
-
-.txtFallback button {
-  border: 0;
-  background: var(--mic);
-  color: #fff;
-  font-weight: 700;
-  padding: 0 18px;
-  border-radius: 11px;
-  cursor: pointer;
-  font-family: inherit;
-}
-
 .ffBtn {
   position: absolute;
   bottom: 8px;

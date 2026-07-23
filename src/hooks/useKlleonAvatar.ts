@@ -28,7 +28,10 @@ export type UseKlleonAvatarResult = {
   error: string | null;
   avatarRef: RefObject<HTMLElement | null>;
   speak: (text: string, after?: () => void) => void;
-  startStt: () => void;
+  /** Wait until VIDEO_CAN_PLAY (or timeout). Needed before startStt. */
+  waitUntilReady: (timeoutMs?: number) => Promise<boolean>;
+  /** Starts STT; returns false if SDK/avatar not ready or start throws. */
+  startStt: () => boolean;
   endStt: () => void;
   cancelStt: () => void;
   stopSpeech: () => void;
@@ -50,9 +53,11 @@ export function useKlleonAvatar({
   const avatarRef = useRef<HTMLElement | null>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const readyRef = useRef(false);
   const echoAfterRef = useRef<(() => void) | null>(null);
   const pendingEchoRef = useRef<string | null>(null);
   const chatHandlersRef = useRef(new Set<(data: KlleonChatData) => void>());
+  readyRef.current = ready;
 
   const setVolume = useCallback((vol: number) => {
     setKlleonContainerVolume(avatarRef.current, vol);
@@ -200,16 +205,32 @@ export function useKlleonAvatar({
     [ready, unlockAudio]
   );
 
+  const waitUntilReady = useCallback(async (timeoutMs = 4000) => {
+    if (readyRef.current || hasKlleonVideoCanPlay()) return true;
+    const t0 = Date.now();
+    while (Date.now() - t0 < timeoutMs) {
+      await new Promise((r) => setTimeout(r, 100));
+      if (readyRef.current || hasKlleonVideoCanPlay()) return true;
+    }
+    return readyRef.current || hasKlleonVideoCanPlay();
+  }, []);
+
   const startStt = useCallback(() => {
-    if (!window.KlleonChat || !ready) return;
+    if (!window.KlleonChat) return false;
+    if (!readyRef.current && !hasKlleonVideoCanPlay()) return false;
     try {
       ensureKlleonSendReady();
       window.KlleonChat.stopSpeech();
     } catch {
       /* ignore */
     }
-    window.KlleonChat.startStt();
-  }, [ready]);
+    try {
+      window.KlleonChat.startStt();
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
 
   const endStt = useCallback(() => {
     try {
@@ -248,6 +269,7 @@ export function useKlleonAvatar({
       error,
       avatarRef,
       speak,
+      waitUntilReady,
       startStt,
       endStt,
       cancelStt,
@@ -260,6 +282,7 @@ export function useKlleonAvatar({
       ready,
       error,
       speak,
+      waitUntilReady,
       startStt,
       endStt,
       cancelStt,

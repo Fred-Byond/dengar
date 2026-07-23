@@ -133,8 +133,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
   const [youSaid, setYouSaid] = useState("");
   const [stage, setStage] = useState(0);
   const [saidText, setSaidText] = useState("");
-  const [txtFallback, setTxtFallback] = useState(false);
-  const [txtInput, setTxtInput] = useState("");
+  const [micUnavailable, setMicUnavailable] = useState(false);
   const [langModalOpen, setLangModalOpen] = useState(false);
   const [stars, setStars] = useState(-1);
   const [voiceNo, setVoiceNo] = useState(0);
@@ -307,9 +306,10 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
         }
         setListening(false);
       } else if (type === "STT_ERROR") {
+        // Klleon fires STT_ERROR mainly when there is no voice data (e.g. stop
+        // without speaking) — not a broken mic. Keep the turn moving.
         setListening(false);
         if (!closingRef.current) queueScriptReplyRef.current();
-        setTxtFallback(true);
       } else if (type === "PREPARING_RESPONSE") {
         if (awaitingEchoAckRef.current) {
           if (echoAckTimerRef.current) {
@@ -444,7 +444,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
       sessionTimerStartedRef.current = false;
       setSaidText("");
       setYouSaid("");
-      setTxtFallback(false);
+      setMicUnavailable(false);
 
       if (timerRef.current) clearInterval(timerRef.current);
 
@@ -555,26 +555,23 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
       return;
     }
     // Mic tap is a user gesture — prime permission + audio unlock before STT.
-    await primeMicAndUnlock();
-    if (!klleon.ready) {
-      setTxtFallback(true);
+    const micPrimed = await primeMicAndUnlock();
+    if (!micPrimed) {
+      setMicUnavailable(true);
+      return;
+    }
+    const avatarReady = await klleon.waitUntilReady();
+    if (!avatarReady) {
+      setMicUnavailable(true);
       return;
     }
     setYouSaid("");
-    try {
-      klleon.startStt();
-      setListening(true);
-    } catch {
-      setTxtFallback(true);
+    setMicUnavailable(false);
+    if (!klleon.startStt()) {
+      setMicUnavailable(true);
+      return;
     }
-  };
-
-  const submitText = () => {
-    const v = txtInput.trim();
-    if (!v) return;
-    setYouSaid(`“${v}”`);
-    setTxtInput("");
-    noteUserUtterance(v);
+    setListening(true);
   };
 
   const toOtp = () => {
@@ -1131,7 +1128,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
                 <div className={styles.micLbl}>
                   {awaitingAudioTap
                     ? t.tapToHear
-                    : txtFallback
+                    : micUnavailable
                       ? t.micFallback
                       : listening
                         ? t.listening
@@ -1139,18 +1136,6 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
                 </div>
               </div>
             </div>
-            {txtFallback ? (
-              <div className={styles.txtFallback} style={{ display: "flex" }}>
-                <input
-                  value={txtInput}
-                  onChange={(e) => setTxtInput(e.target.value)}
-                  placeholder={t.txtPh}
-                />
-                <button type="button" onClick={submitText}>
-                  {t.send}
-                </button>
-              </div>
-            ) : null}
           </div>
           {awaitingAudioTap ? (
             <button

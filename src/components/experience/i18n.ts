@@ -84,8 +84,6 @@ export type I18nStrings = {
   tapSpeak: string;
   listening: string;
   micFallback: string;
-  txtPh: string;
-  send: string;
   langsTitle: string;
   doneTitle: string;
   doneThanks: string;
@@ -196,16 +194,14 @@ export const I18N: Record<UiLang, I18nStrings> = {
     micLbl2: "Mikrofon",
     allow: "Benarkan",
     langLbl2: "Bahasa",
-    micBlocked: "Disekat — guna taipan",
-    micNA: "Tiada — guna taipan",
+    micBlocked: "Disekat — benarkan mikrofon",
+    micNA: "Tidak tersedia",
     etiquette:
       "⏱ 5 minit · 💬 Kongsi pandangan & cadangan anda · 🔒 Dirakam untuk semakan Kementerian",
     minName: "Menteri Saifuddin",
     tapSpeak: "Tekan untuk bercakap",
     listening: "Mendengar… tekan untuk berhenti",
-    micFallback: "Mikrofon tiada — taip di sini",
-    txtPh: "Taip apa yang anda ingin sampaikan kepada Menteri…",
-    send: "Hantar",
+    micFallback: "Mikrofon tidak tersedia — cuba lagi",
     langsTitle: "Bahasa",
     doneTitle: "Sesi selesai",
     doneThanks: "Terima kasih,",
@@ -319,16 +315,14 @@ export const I18N: Record<UiLang, I18nStrings> = {
     micLbl2: "Microphone",
     allow: "Allow",
     langLbl2: "Language",
-    micBlocked: "Blocked — will use typing",
-    micNA: "Not available — will use typing",
+    micBlocked: "Blocked — allow microphone",
+    micNA: "Not available",
     etiquette:
       "⏱ 5 minutes · 💬 Share your views & suggestions · 🔒 Recorded for the Ministry's review",
     minName: "Minister Saifuddin",
     tapSpeak: "Tap to speak",
     listening: "Listening… tap to stop",
-    micFallback: "Mic unavailable here — type instead",
-    txtPh: "Type what you want to tell the Minister…",
-    send: "Send",
+    micFallback: "Mic unavailable — try again",
     langsTitle: "Languages",
     doneTitle: "Session complete",
     doneThanks: "Thank you,",

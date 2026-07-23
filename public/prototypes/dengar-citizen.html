@@ -175,9 +175,6 @@ input.f:focus,select.f:focus{border-color:var(--navy)}
 .micBtn.listening::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:2.5px solid rgba(228,0,43,.6);animation:ring 1.3s infinite}
 @keyframes ring{0%{transform:scale(.85);opacity:1}100%{transform:scale(1.25);opacity:0}}
 .micLbl{color:#fff;font-size:12px;font-weight:700;text-align:center;margin-top:8px;text-shadow:0 1px 6px rgba(0,0,0,.6)}
-.txtFallback{display:none;gap:8px;margin-top:12px}
-.txtFallback input{flex:1;font-family:inherit;font-size:14px;padding:12px;border-radius:11px;border:0;outline:none}
-.txtFallback button{border:0;background:var(--mic);color:#fff;font-weight:700;padding:0 18px;border-radius:11px;cursor:pointer;font-family:inherit}
 .ffBtn{position:absolute;bottom:8px;right:10px;z-index:5;background:rgba(255,255,255,.16);color:rgba(255,255,255,.75);border:0;font-size:10px;font-weight:700;padding:5px 10px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.5px}
 #langModal{position:absolute;inset:0;z-index:8;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:24px}
 #langModal.open{display:flex}
@@ -400,10 +397,6 @@ input.f:focus,select.f:focus{border-color:var(--navy)}
           <div class="micLbl" id="micLbl"></div>
         </div>
       </div>
-      <div class="txtFallback" id="txtFallback">
-        <input id="txtInput">
-        <button onclick="submitText()" data-i18n="send"></button>
-      </div>
     </div>
     <button class="ffBtn" onclick="fastForward()">DEMO ⏩ 4:50</button>
     <div id="langModal">
@@ -486,11 +479,10 @@ const I18N={
   lobbyIn:"Sesi anda bermula dalam",lobbyDemo:"Demo: ketik butang di bawah untuk mula (audio perlu gestur anda)",
   enterSession:"Mula sesi — ketik untuk dengar",
   ready:"Menyediakan anda",linkOk:"Pautan sesi disahkan",micLbl2:"Mikrofon",allow:"Benarkan",langLbl2:"Bahasa",
-  micBlocked:"Disekat — guna taipan",micNA:"Tiada — guna taipan",
+  micBlocked:"Disekat — benarkan mikrofon",micNA:"Tidak tersedia",
   etiquette:"⏱ 5 minit · 💬 Kongsi pandangan & cadangan anda · 🔒 Dirakam untuk semakan Kementerian",
   minName:"Menteri Saifuddin",
-  tapSpeak:"Tekan untuk bercakap",listening:"Mendengar… tekan untuk berhenti",micFallback:"Mikrofon tiada — taip di sini",
-  txtPh:"Taip apa yang anda ingin sampaikan kepada Menteri…",send:"Hantar",
+  tapSpeak:"Tekan untuk bercakap",listening:"Mendengar… tekan untuk berhenti",micFallback:"Mikrofon tidak tersedia — cuba lagi",
   langsTitle:"Bahasa",
   doneTitle:"Sesi selesai",doneThanks:"Terima kasih,",doneSub:"Maklum balas anda telah direkodkan dan akan disemak oleh Kementerian.",
   yourRef:"RUJUKAN ANDA",rateQ:"Bagaimana sesi anda?",
@@ -537,11 +529,10 @@ const I18N={
   lobbyIn:"Your session starts in",lobbyDemo:"Demo: tap the button below to start (audio needs your gesture)",
   enterSession:"Start session — tap to hear audio",
   ready:"Getting you ready",linkOk:"Session link verified",micLbl2:"Microphone",allow:"Allow",langLbl2:"Language",
-  micBlocked:"Blocked — will use typing",micNA:"Not available — will use typing",
+  micBlocked:"Blocked — allow microphone",micNA:"Not available",
   etiquette:"⏱ 5 minutes · 💬 Share your views & suggestions · 🔒 Recorded for the Ministry's review",
   minName:"Minister Saifuddin",
-  tapSpeak:"Tap to speak",listening:"Listening… tap to stop",micFallback:"Mic unavailable here — type instead",
-  txtPh:"Type what you want to tell the Minister…",send:"Send",
+  tapSpeak:"Tap to speak",listening:"Listening… tap to stop",micFallback:"Mic unavailable — try again",
   langsTitle:"Languages",
   doneTitle:"Session complete",doneThanks:"Thank you,",doneSub:"Your feedback has been recorded and will be reviewed by the Ministry.",
   yourRef:"YOUR REFERENCE",rateQ:"How was your session?",
@@ -590,7 +581,6 @@ function applyI18n(){
   document.getElementById('heroTitle').innerHTML=t('heroA')+'<em>'+t('heroB')+'</em>'+t('heroC');
   document.getElementById('fName').placeholder=t('namePh');
   document.getElementById('fPhone').placeholder=t('phonePh');
-  document.getElementById('txtInput').placeholder=t('txtPh');
   buildTopics();buildDays();buildGeoPlaceholders();
   if(!S.listening)document.getElementById('micLbl').textContent=t('tapSpeak');
   document.getElementById('lobbyLang').textContent=S.lang.label;
@@ -912,7 +902,7 @@ function setListening(on){
 function toggleMic(){
   ensureAvatarAudio();
   if(S.closing)return;
-  if(!window.KlleonChat||!KLLEON.ready){showFallback();return;}
+  if(!window.KlleonChat||!KLLEON.ready){showMicUnavailable();return;}
   if(S.listening||KLLEON.recording){
     try{window.KlleonChat.endStt();}catch(e){console.warn(e);}
     KLLEON.recording=false;
@@ -927,20 +917,11 @@ function toggleMic(){
     setListening(true);
   }catch(e){
     console.warn('Klleon startStt failed',e);
-    showFallback();
+    showMicUnavailable();
   }
 }
-function showFallback(){
-  document.getElementById('txtFallback').style.display='flex';
+function showMicUnavailable(){
   document.getElementById('micLbl').textContent=t('micFallback');
-}
-function submitText(){
-  const i=document.getElementById('txtInput');const v=i.value.trim();
-  if(!v)return;
-  document.getElementById('youSaid').textContent='“'+v+'”';
-  i.value='';
-  /* Controlled-listening demo: do not send to Klleon freeform AI — use scripted replies. */
-  noteUserUtterance(v);
 }
 function pickScriptReply(){
   const code=S.lang.code;
@@ -983,9 +964,10 @@ function handleKlleonChat(chatData){
     setListening(false);
     KLLEON.recording=false;
   } else if(type==='STT_ERROR'){
+    /* Klleon: mainly no voice data — not a broken mic. */
     setListening(false);
     KLLEON.recording=false;
-    showFallback();
+    if(!S.closing)queueScriptReply();
   } else if(type==='PREPARING_RESPONSE'){
     KLLEON.lastEchoToken=0;
     /* Only preempt while a scripted line is still pending. If scriptReply is null,
