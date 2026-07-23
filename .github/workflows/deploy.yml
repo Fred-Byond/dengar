@@ -1,7 +1,6 @@
 name: Deploy
 
-# Build the image on GitHub (plenty of RAM), then ship it to the VPS.
-# Building Next.js on a small server OOMs / thrashing-swaps and hangs.
+# Build/push on GitHub (avoids VPS OOM). Server only pulls the image and restarts.
 on:
   push:
     branches: [main]
@@ -11,49 +10,54 @@ on:
 #   DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_PATH, NEXT_PUBLIC_KLLEON_SDK_KEY
 # Optional:
 #   DEPLOY_PORT (default 22)
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}:latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Lowercase image name
+        run: echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]'):latest" >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build image on runner
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: false
-          load: true
-          tags: dengar:latest
+          push: true
+          tags: ${{ env.IMAGE }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Export image archive
-        run: docker save dengar:latest | gzip -1 > dengar.tar.gz
-
-      - name: Copy image to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          port: ${{ secrets.DEPLOY_PORT || 22 }}
-          source: dengar.tar.gz
-          target: /tmp/
-
-      - name: Load image and restart
+      - name: Pull image and restart on server
         uses: appleboy/ssh-action@v1.2.0
         env:
           NEXT_PUBLIC_KLLEON_SDK_KEY: ${{ secrets.NEXT_PUBLIC_KLLEON_SDK_KEY }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          DENGAR_IMAGE: ${{ env.IMAGE }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
           command_timeout: 15m
-          envs: NEXT_PUBLIC_KLLEON_SDK_KEY
+          envs: NEXT_PUBLIC_KLLEON_SDK_KEY,GHCR_TOKEN,GHCR_USER,DENGAR_IMAGE
           script: |
             set -e
             cd "${{ secrets.DEPLOY_PATH }}"
@@ -65,11 +69,11 @@ jobs:
             printf '%s\n' \
               "KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
               "NEXT_PUBLIC_KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
+              "DENGAR_IMAGE=${DENGAR_IMAGE}" \
               'PORT=8081' > .env
 
-            gunzip -c /tmp/dengar.tar.gz | docker load
-            rm -f /tmp/dengar.tar.gz
-
-            # No --build: image was built on GitHub Actions.
+            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+            docker compose pull
             docker compose up -d --force-recreate --no-build
+            docker logout ghcr.io || true
             docker image prune -f

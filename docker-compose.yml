@@ -1,7 +1,9 @@
 services:
   dengar:
+    # Production deploy sets DENGAR_IMAGE=ghcr.io/...:latest and uses --no-build.
+    # Local: docker compose up --build (defaults to dengar:latest from build).
+    image: ${DENGAR_IMAGE:-dengar:latest}
     build: .
-    image: dengar:latest
     ports:
       # Localhost only — expose publicly via host nginx (Wooby uses 8080).
       - "127.0.0.1:8081:8081"
