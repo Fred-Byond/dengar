@@ -151,6 +151,15 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
   const closedRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lobbyTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [awaitingAudioTap, setAwaitingAudioTap] = useState(false);
+  const awaitingAudioTapRef = useRef(false);
+  const lobbyAutoStartedRef = useRef(false);
+  const startSessionRef = useRef<(opts?: { hasUserGesture?: boolean }) => void>(
+    () => {}
+  );
+  const saidTextRef = useRef("");
+  const noteUserUtteranceRef = useRef<(txt: string) => void>(() => {});
+  const sessionTimerStartedRef = useRef(false);
 
   const t = I18N[uiLang];
   const veiled = VEILED_SCREENS.has(screen);
@@ -160,6 +169,14 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
     langCode: sessionLang.code,
     enabled: true,
   });
+
+  const speakRef = useRef(klleon.speak);
+  const stopSpeechRef = useRef(klleon.stopSpeech);
+  const unlockAudioRef = useRef(klleon.unlockAudio);
+  speakRef.current = klleon.speak;
+  stopSpeechRef.current = klleon.stopSpeech;
+  unlockAudioRef.current = klleon.unlockAudio;
+  saidTextRef.current = saidText;
 
   const days: DayOption[] = useMemo(() => {
     const now = new Date();
@@ -217,34 +234,35 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
       const text = scriptReplyRef.current;
       scriptReplyRef.current = null;
       try {
-        klleon.stopSpeech();
+        stopSpeechRef.current();
       } catch {
         /* ignore */
       }
-      klleon.speak(text);
+      speakRef.current(text);
     }, 700);
-  }, [klleon, sessionLang.code]);
+  }, [sessionLang.code]);
 
   const noteUserUtterance = useCallback(
     (txt: string) => {
       setListening(false);
       if (closingRef.current) return;
-      if (txt.trim() && !saidText) setSaidText(txt.trim());
+      if (txt.trim() && !saidTextRef.current) setSaidText(txt.trim());
       queueScriptReply();
       stageRef.current += 1;
       setStage(stageRef.current);
     },
-    [queueScriptReply, saidText]
+    [queueScriptReply]
   );
+  noteUserUtteranceRef.current = noteUserUtterance;
 
   useEffect(() => {
-    return klleon.onChat((data: KlleonChatData) => {
+    const unsub = klleon.onChat((data: KlleonChatData) => {
       const type = data.chat_type || "";
       const msg = data.message || "";
       if (type === "STT_RESULT") {
         if (msg) {
           setYouSaid(`“${msg}”`);
-          noteUserUtterance(msg);
+          noteUserUtteranceRef.current(msg);
         }
         setListening(false);
       } else if (type === "STT_ERROR") {
@@ -255,9 +273,9 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
           const text = scriptReplyRef.current;
           scriptReplyRef.current = null;
           if (scriptTimerRef.current) clearTimeout(scriptTimerRef.current);
-          klleon.stopSpeech();
-          klleon.unlockAudio();
-          klleon.speak(text);
+          stopSpeechRef.current();
+          unlockAudioRef.current();
+          speakRef.current(text);
         }
       } else if (type === "TEXT" && msg) {
         if (expectScriptRef.current) return;
@@ -268,12 +286,15 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
         setListening(true);
       }
     });
-  }, [klleon, noteUserUtterance]);
+    return () => {
+      unsub();
+    };
+  }, [klleon.onChat]);
 
   const showClosing = useCallback(() => {
     if (closedRef.current) return;
     closedRef.current = true;
-    klleon.stopSpeech();
+    stopSpeechRef.current();
     closingRef.current = false;
     if (timerRef.current) clearInterval(timerRef.current);
 
@@ -301,7 +322,6 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
   }, [
     district,
     go,
-    klleon,
     refCode,
     saidText,
     state,
@@ -316,11 +336,11 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
     klleon.cancelStt();
     setListening(false);
     const first = (name || "rakan").split(" ")[0];
-    klleon.speak(M.close[sessionLang.code](first), () => {
+    speakRef.current(M.close[sessionLang.code](first), () => {
       setTimeout(showClosing, 600);
     });
     setTimeout(showClosing, 14000);
-  }, [klleon, name, sessionLang.code, showClosing]);
+  }, [klleon.cancelStt, name, sessionLang.code, showClosing]);
 
   useEffect(() => {
     listeningRef.current = listening;
@@ -330,21 +350,9 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
     endSessionRef.current = endSession;
   }, [endSession]);
 
-  const startSession = useCallback(() => {
-    go("session");
-    klleon.unlockAudio();
-    klleon.setVolume(100);
-    stageRef.current = 0;
-    setStage(0);
-    setSecs(300);
-    wrapSaidRef.current = false;
-    closingRef.current = false;
-    closedRef.current = false;
-    setSaidText("");
-    setYouSaid("");
-    setTxtFallback(false);
-    setCaption("…");
-
+  const startSessionTimer = useCallback(() => {
+    if (sessionTimerStartedRef.current) return;
+    sessionTimerStartedRef.current = true;
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setSecs((prev) => {
@@ -352,7 +360,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
         const next = prev - 1;
         if (next <= 60 && !wrapSaidRef.current && !listeningRef.current) {
           wrapSaidRef.current = true;
-          klleon.speak(M.wrap[sessionLang.code]());
+          speakRef.current(M.wrap[sessionLang.code]());
         }
         if (next <= 0) {
           endSessionRef.current();
@@ -361,35 +369,100 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
         return next;
       });
     }, 1000);
+  }, [sessionLang.code]);
 
+  const speakGreeting = useCallback(() => {
     const first = (name || "rakan").split(" ")[0];
-    setTimeout(() => {
-      klleon.unlockAudio();
-      klleon.speak(M.greet[sessionLang.code](first));
-    }, 600);
-  }, [go, klleon, name, sessionLang.code]);
+    const text = M.greet[sessionLang.code](first);
+    // Caption comes from SDK TEXT chunks as TTS streams — do not fake full text.
+    setCaption("…");
+    unlockAudioRef.current();
+    speakRef.current(text);
+  }, [name, sessionLang.code]);
 
-  const enterSessionFromLobby = async () => {
-    if (lobbyTimerRef.current) clearInterval(lobbyTimerRef.current);
-    // Browser autoplay: TTS/video often stay blocked unless getUserMedia (or
-    // similar) ran under a user gesture. "Benarkan" does that; if the citizen
-    // skips it, do the same unlock here on "Mula sesi".
-    klleon.unlockAudio();
+  const startSession = useCallback(
+    (opts?: { hasUserGesture?: boolean }) => {
+      const hasGesture = !!opts?.hasUserGesture;
+      go("session");
+      unlockAudioRef.current();
+      klleon.setVolume(100);
+      stageRef.current = 0;
+      setStage(0);
+      setSecs(300);
+      wrapSaidRef.current = false;
+      closingRef.current = false;
+      closedRef.current = false;
+      sessionTimerStartedRef.current = false;
+      setSaidText("");
+      setYouSaid("");
+      setTxtFallback(false);
+
+      if (timerRef.current) clearInterval(timerRef.current);
+
+      if (hasGesture) {
+        awaitingAudioTapRef.current = false;
+        setAwaitingAudioTap(false);
+        setCaption("…");
+        startSessionTimer();
+        setTimeout(() => speakGreeting(), 600);
+      } else {
+        // Timer auto-start has no user gesture — browsers block audible TTS.
+        // Enter the session UI, then wait for a tap before greeting.
+        awaitingAudioTapRef.current = true;
+        setAwaitingAudioTap(true);
+        setCaption(t.tapToHear);
+      }
+    },
+    [go, klleon.setVolume, speakGreeting, startSessionTimer, t.tapToHear]
+  );
+
+  startSessionRef.current = startSession;
+
+  const primeMicAndUnlock = useCallback(async () => {
+    unlockAudioRef.current();
+    let ok = micOk;
     if (!micOk && navigator.mediaDevices?.getUserMedia) {
       try {
         const st = await navigator.mediaDevices.getUserMedia({ audio: true });
         st.getTracks().forEach((x) => x.stop());
         setMicOk(true);
         setMicBtnLabel(null);
+        ok = true;
       } catch {
-        /* mic denied — typing fallback; unlockAudio may still help on some browsers */
+        /* ignore — mic permission denied or unavailable */
       }
     }
-    klleon.unlockAudio();
-    startSession();
-  };
+    unlockAudioRef.current();
+    return ok;
+  }, [micOk]);
+
+  const beginFromGesture = useCallback(async () => {
+    if (!awaitingAudioTapRef.current) return;
+    awaitingAudioTapRef.current = false;
+    setAwaitingAudioTap(false);
+    await primeMicAndUnlock();
+    setCaption("…");
+    startSessionTimer();
+    speakGreeting();
+  }, [primeMicAndUnlock, speakGreeting, startSessionTimer]);
+
+  const enterSessionFromLobby = useCallback(async () => {
+    if (lobbyTimerRef.current) clearInterval(lobbyTimerRef.current);
+    lobbyAutoStartedRef.current = true;
+    await primeMicAndUnlock();
+    startSessionRef.current({ hasUserGesture: true });
+  }, [primeMicAndUnlock]);
+
+  // Auto-enter session UI when lobby countdown reaches 0 — greeting waits for a tap
+  // (browser autoplay blocks audible TTS without a user gesture).
+  useEffect(() => {
+    if (screen !== "lobby" || lobbyCount !== 0 || lobbyAutoStartedRef.current) return;
+    lobbyAutoStartedRef.current = true;
+    startSessionRef.current({ hasUserGesture: false });
+  }, [lobbyCount, screen]);
 
   const startLobby = () => {
+    lobbyAutoStartedRef.current = false;
     go("lobby");
     setLobbyCount(10);
     if (lobbyTimerRef.current) clearInterval(lobbyTimerRef.current);
@@ -405,7 +478,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
   };
 
   const askMic = async () => {
-    klleon.unlockAudio();
+    unlockAudioRef.current();
     if (!navigator.mediaDevices?.getUserMedia) {
       setMicBtnLabel(t.micNA);
       return;
@@ -418,18 +491,24 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
     } catch {
       setMicBtnLabel(t.micBlocked);
     }
+    unlockAudioRef.current();
   };
 
-  const toggleMic = () => {
+  const toggleMic = async () => {
     if (closingRef.current) return;
-    klleon.unlockAudio();
-    if (!klleon.ready) {
-      setTxtFallback(true);
+    if (awaitingAudioTapRef.current) {
+      await beginFromGesture();
       return;
     }
-    if (listening) {
+    if (listeningRef.current) {
       klleon.endStt();
       setListening(false);
+      return;
+    }
+    // Mic tap is a user gesture — prime permission + audio unlock before STT.
+    await primeMicAndUnlock();
+    if (!klleon.ready) {
+      setTxtFallback(true);
       return;
     }
     setYouSaid("");
@@ -515,7 +594,13 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
       <div
         className={`${styles.phone} ${veiled ? styles.veiled : ""}`}
         onPointerDown={() => {
-          if (screen === "session" || klleon.ready) klleon.unlockAudio();
+          // Only unlock during session / audio gate — lobby pointer spam
+          // was thrashing Agora volume/play and dropping echo signaling.
+          if (awaitingAudioTapRef.current) {
+            void beginFromGesture();
+            return;
+          }
+          if (screen === "session") unlockAudioRef.current();
         }}
       >
         <div className={styles.demoTag}>{t.demoTag}</div>
@@ -986,7 +1071,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
               <div>
                 <button
                   type="button"
-                  className={`${styles.micBtn}${listening ? ` ${styles.listening}` : ""}`}
+                  className={`${styles.micBtn}${listening ? ` ${styles.listening}` : ""}${awaitingAudioTap ? ` ${styles.micPulse}` : ""}`}
                   onClick={toggleMic}
                   aria-label="mic"
                 >
@@ -995,11 +1080,13 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
                   </svg>
                 </button>
                 <div className={styles.micLbl}>
-                  {txtFallback
-                    ? t.micFallback
-                    : listening
-                      ? t.listening
-                      : t.tapSpeak}
+                  {awaitingAudioTap
+                    ? t.tapToHear
+                    : txtFallback
+                      ? t.micFallback
+                      : listening
+                        ? t.listening
+                        : t.tapSpeak}
                 </div>
               </div>
             </div>
@@ -1016,6 +1103,15 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
               </div>
             ) : null}
           </div>
+          {awaitingAudioTap ? (
+            <button
+              type="button"
+              className={styles.audioGate}
+              onClick={() => void beginFromGesture()}
+            >
+              {t.tapToHear}
+            </button>
+          ) : null}
           <button
             type="button"
             className={styles.ffBtn}

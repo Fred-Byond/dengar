@@ -1,13 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, RefObject } from "react";
 import {
-  destroyKlleonClient,
+  ensureKlleonSendReady,
+  hasKlleonVideoCanPlay,
   initKlleonClient,
   KLLEON_AVATAR_ID,
   klleonVoiceCodes,
+  releaseKlleonClient,
+  retainKlleonClient,
   setKlleonContainerVolume,
+  setKlleonListeners,
   unlockKlleonAudio,
 } from "@/lib/digital-human/adapters/klleon";
 import type { KlleonChatData, KlleonStatus } from "@/types/klleon";
@@ -36,8 +40,7 @@ export type UseKlleonAvatarResult = {
 
 /**
  * Client hook wrapping the Klleon Chat SDK.
- * Preserves debug-proven behaviour: volume stays at 100 after connect;
- * callers must not stopSpeech on their own echo's PREPARING_RESPONSE.
+ * TTS audio is Agora remoteAudioTrack — unlockAudio() must run under a gesture.
  */
 export function useKlleonAvatar({
   sdkKey,
@@ -79,8 +82,48 @@ export function useKlleonAvatar({
       return;
     }
 
-    let cancelled = false;
+    retainKlleonClient();
+    let alive = true;
     const codes = klleonVoiceCodes(langCode);
+
+    const onStatus = (status: KlleonStatus) => {
+      if (!alive) return;
+      if (status === "VIDEO_CAN_PLAY") {
+        setReady(true);
+        setError(null);
+        setKlleonContainerVolume(avatarRef.current, 100);
+        unlockKlleonAudio(avatarRef.current);
+        flushPending();
+      } else if (status === "DESTROYED") {
+        setReady(false);
+      } else if (
+        status === "CONNECTING_FAILED" ||
+        status === "SOCKET_FAILED" ||
+        status === "STREAMING_FAILED"
+      ) {
+        setError(
+          `Klleon connection failed (${status}). Check SDK key and domain registration.`
+        );
+      }
+    };
+
+    const onChat = (data: KlleonChatData) => {
+      if (!alive) return;
+      if (data.chat_type === "RESPONSE_IS_ENDED") {
+        const cb = echoAfterRef.current;
+        echoAfterRef.current = null;
+        cb?.();
+      }
+      chatHandlersRef.current.forEach((h) => h(data));
+    };
+
+    const onError = (err: { message?: string }) => {
+      if (!alive) return;
+      if (err?.message) setError(err.message);
+    };
+
+    // Install live listeners BEFORE any await so Strict Mode remount owns events.
+    setKlleonListeners({ onStatus, onChat, onError });
 
     (async () => {
       try {
@@ -93,44 +136,12 @@ export function useKlleonAvatar({
             enable_microphone: true,
             log_level: "warn",
           },
-          {
-            onStatus: (status: KlleonStatus) => {
-              if (cancelled) return;
-              if (status === "VIDEO_CAN_PLAY") {
-                setReady(true);
-                setError(null);
-                setKlleonContainerVolume(avatarRef.current, 100);
-                unlockKlleonAudio(avatarRef.current);
-                flushPending();
-              } else if (status === "DESTROYED") {
-                setReady(false);
-              } else if (
-                status === "CONNECTING_FAILED" ||
-                status === "SOCKET_FAILED" ||
-                status === "STREAMING_FAILED"
-              ) {
-                setError(
-                  `Klleon connection failed (${status}). Check SDK key and domain registration.`
-                );
-              }
-            },
-            onChat: (data) => {
-              if (cancelled) return;
-              if (data.chat_type === "RESPONSE_IS_ENDED") {
-                const cb = echoAfterRef.current;
-                echoAfterRef.current = null;
-                cb?.();
-              }
-              chatHandlersRef.current.forEach((h) => h(data));
-            },
-            onError: (err) => {
-              if (cancelled) return;
-              if (err?.message) setError(err.message);
-            },
-          }
+          { onStatus, onChat, onError }
         );
 
-        if (!cancelled && avatarRef.current) {
+        if (!alive) return;
+
+        if (avatarRef.current) {
           const el = avatarRef.current as HTMLElement & {
             videoStyle?: CSSProperties;
           };
@@ -142,8 +153,18 @@ export function useKlleonAvatar({
           };
           setKlleonContainerVolume(el, 100);
         }
+
+        // VIDEO_CAN_PLAY may have fired while the previous Strict Mode mount
+        // was tearing down — recover ready from the module flag.
+        if (hasKlleonVideoCanPlay()) {
+          setReady(true);
+          setError(null);
+          unlockKlleonAudio(avatarRef.current);
+          flushPending();
+        }
+
       } catch (e) {
-        if (!cancelled) {
+        if (alive) {
           setError(
             `Klleon init failed: ${e instanceof Error ? e.message : String(e)}`
           );
@@ -152,11 +173,9 @@ export function useKlleonAvatar({
     })();
 
     return () => {
-      cancelled = true;
-      destroyKlleonClient();
-      setReady(false);
+      alive = false;
+      releaseKlleonClient();
     };
-    // Re-init only when key/enable change; lang is set at first init for demo.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sdkKey, enabled, flushPending]);
 
@@ -170,6 +189,8 @@ export function useKlleonAvatar({
         return;
       }
       try {
+        // Restore VIDEO_CAN_PLAY gate — CONNECTED_FINISH otherwise drops echo.
+        ensureKlleonSendReady();
         window.KlleonChat.echo(text);
       } catch {
         if (after) setTimeout(after, 1500);
@@ -181,6 +202,7 @@ export function useKlleonAvatar({
   const startStt = useCallback(() => {
     if (!window.KlleonChat || !ready) return;
     try {
+      ensureKlleonSendReady();
       window.KlleonChat.stopSpeech();
     } catch {
       /* ignore */
@@ -219,17 +241,31 @@ export function useKlleonAvatar({
     };
   }, []);
 
-  return {
-    ready,
-    error,
-    avatarRef,
-    speak,
-    startStt,
-    endStt,
-    cancelStt,
-    stopSpeech,
-    unlockAudio,
-    setVolume,
-    onChat,
-  };
+  return useMemo(
+    () => ({
+      ready,
+      error,
+      avatarRef,
+      speak,
+      startStt,
+      endStt,
+      cancelStt,
+      stopSpeech,
+      unlockAudio,
+      setVolume,
+      onChat,
+    }),
+    [
+      ready,
+      error,
+      speak,
+      startStt,
+      endStt,
+      cancelStt,
+      stopSpeech,
+      unlockAudio,
+      setVolume,
+      onChat,
+    ]
+  );
 }

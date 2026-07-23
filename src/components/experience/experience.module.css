@@ -992,6 +992,39 @@
   box-shadow: 0 8px 26px rgba(228, 0, 43, 0.55);
 }
 
+.micBtn.micPulse {
+  animation: micGatePulse 1.4s ease-in-out infinite;
+}
+
+@keyframes micGatePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 14px rgba(37, 99, 235, 0);
+  }
+}
+
+.audioGate {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border: 0;
+  cursor: pointer;
+  background: rgba(10, 7, 4, 0.55);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 24px 28px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  text-align: center;
+}
+
 .micBtn.listening::after {
   content: "";
   position: absolute;

@@ -70,6 +70,8 @@ export type I18nStrings = {
   lobbyIn: string;
   lobbyDemo: string;
   enterSession: string;
+  /** Shown when session opened without a user gesture (autoplay gate). */
+  tapToHear: string;
   ready: string;
   linkOk: string;
   micLbl2: string;
@@ -188,6 +190,7 @@ export const I18N: Record<UiLang, I18nStrings> = {
     lobbyDemo:
       "Demo: ketik butang di bawah untuk mula (audio perlu gestur anda)",
     enterSession: "Mula sesi — ketik untuk dengar",
+    tapToHear: "Ketik di sini untuk mula — supaya audio berfungsi",
     ready: "Menyediakan anda",
     linkOk: "Pautan sesi disahkan",
     micLbl2: "Mikrofon",
@@ -310,6 +313,7 @@ export const I18N: Record<UiLang, I18nStrings> = {
     lobbyDemo:
       "Demo: tap the button below to start (audio needs your gesture)",
     enterSession: "Start session — tap to hear audio",
+    tapToHear: "Tap here to begin — required for audio",
     ready: "Getting you ready",
     linkOk: "Session link verified",
     micLbl2: "Microphone",
