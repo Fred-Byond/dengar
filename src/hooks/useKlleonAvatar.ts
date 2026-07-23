@@ -67,6 +67,7 @@ export function useKlleonAvatar({
     const text = pendingEchoRef.current;
     pendingEchoRef.current = null;
     try {
+      ensureKlleonSendReady();
       window.KlleonChat.echo(text);
     } catch {
       /* ignore */

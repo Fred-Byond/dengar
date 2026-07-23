@@ -148,6 +148,11 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
   const scriptReplyRef = useRef<string | null>(null);
   const expectScriptRef = useRef(false);
   const scriptTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Text pending until SDK PREPARING_RESPONSE / RESPONSE_IS_ENDED; retry once if silent-dropped. */
+  const awaitingEchoAckRef = useRef<string | null>(null);
+  const echoAckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const echoRetryUsedRef = useRef(false);
+  const queueScriptReplyRef = useRef<() => void>(() => {});
   const closedRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lobbyTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -223,6 +228,38 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
     : -1;
   const slots = selectedDayIdx >= 0 ? buildSlots(selectedDayIdx) : [];
 
+  const clearEchoAckWatch = useCallback(() => {
+    awaitingEchoAckRef.current = null;
+    echoRetryUsedRef.current = false;
+    if (echoAckTimerRef.current) {
+      clearTimeout(echoAckTimerRef.current);
+      echoAckTimerRef.current = null;
+    }
+  }, []);
+
+  /** Speak scripted line and retry once if SDK never acks (silent echo drop). */
+  const deliverScriptSpeak = useCallback(
+    (text: string) => {
+      unlockAudioRef.current();
+      awaitingEchoAckRef.current = text;
+      echoRetryUsedRef.current = false;
+      if (echoAckTimerRef.current) clearTimeout(echoAckTimerRef.current);
+      speakRef.current(text);
+      echoAckTimerRef.current = setTimeout(() => {
+        if (awaitingEchoAckRef.current !== text || echoRetryUsedRef.current) return;
+        echoRetryUsedRef.current = true;
+        unlockAudioRef.current();
+        speakRef.current(text);
+        echoAckTimerRef.current = setTimeout(() => {
+          if (awaitingEchoAckRef.current === text) {
+            clearEchoAckWatch();
+          }
+        }, 1500);
+      }, 1200);
+    },
+    [clearEchoAckWatch]
+  );
+
   const queueScriptReply = useCallback(() => {
     const reply = pickScriptReply(stageRef.current, sessionLang.code);
     expectScriptRef.current = true;
@@ -238,9 +275,10 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
       } catch {
         /* ignore */
       }
-      speakRef.current(text);
+      deliverScriptSpeak(text);
     }, 700);
-  }, [sessionLang.code]);
+  }, [deliverScriptSpeak, sessionLang.code]);
+  queueScriptReplyRef.current = queueScriptReply;
 
   const noteUserUtterance = useCallback(
     (txt: string) => {
@@ -260,27 +298,38 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
       const type = data.chat_type || "";
       const msg = data.message || "";
       if (type === "STT_RESULT") {
-        if (msg) {
+        if (msg.trim()) {
           setYouSaid(`“${msg}”`);
           noteUserUtteranceRef.current(msg);
+        } else if (!closingRef.current) {
+          // Empty transcript — still speak so the turn never goes silent.
+          queueScriptReplyRef.current();
         }
         setListening(false);
       } else if (type === "STT_ERROR") {
         setListening(false);
+        if (!closingRef.current) queueScriptReplyRef.current();
         setTxtFallback(true);
       } else if (type === "PREPARING_RESPONSE") {
+        if (awaitingEchoAckRef.current) {
+          if (echoAckTimerRef.current) {
+            clearTimeout(echoAckTimerRef.current);
+            echoAckTimerRef.current = null;
+          }
+          awaitingEchoAckRef.current = null;
+        }
         if (expectScriptRef.current && scriptReplyRef.current) {
           const text = scriptReplyRef.current;
           scriptReplyRef.current = null;
           if (scriptTimerRef.current) clearTimeout(scriptTimerRef.current);
           stopSpeechRef.current();
-          unlockAudioRef.current();
-          speakRef.current(text);
+          deliverScriptSpeak(text);
         }
       } else if (type === "TEXT" && msg) {
         if (expectScriptRef.current) return;
         setCaption(msg);
       } else if (type === "RESPONSE_IS_ENDED") {
+        clearEchoAckWatch();
         expectScriptRef.current = false;
       } else if (type === "USER_SPEECH_STARTED") {
         setListening(true);
@@ -289,7 +338,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
     return () => {
       unsub();
     };
-  }, [klleon.onChat]);
+  }, [clearEchoAckWatch, deliverScriptSpeak, klleon.onChat]);
 
   const showClosing = useCallback(() => {
     if (closedRef.current) return;
