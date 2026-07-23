@@ -1,6 +1,7 @@
 name: Deploy
 
-# Auto-deploy on every push to main; also runnable manually.
+# Build the image on GitHub (plenty of RAM), then ship it to the VPS.
+# Building Next.js on a small server OOMs / thrashing-swaps and hangs.
 on:
   push:
     branches: [main]
@@ -16,7 +17,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy over SSH
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image on runner
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: dengar:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Export image archive
+        run: docker save dengar:latest | gzip -1 > dengar.tar.gz
+
+      - name: Copy image to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          source: dengar.tar.gz
+          target: /tmp/
+
+      - name: Load image and restart
         uses: appleboy/ssh-action@v1.2.0
         env:
           NEXT_PUBLIC_KLLEON_SDK_KEY: ${{ secrets.NEXT_PUBLIC_KLLEON_SDK_KEY }}
@@ -25,8 +52,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
-          # Cold npm ci + next build regularly exceeds the default 10m.
-          command_timeout: 30m
+          command_timeout: 15m
           envs: NEXT_PUBLIC_KLLEON_SDK_KEY
           script: |
             set -e
@@ -35,16 +61,15 @@ jobs:
             git checkout main
             git reset --hard origin/main
 
-            # Runtime env for compose (never commit .env).
-            # Write both names: KLLEON_SDK_KEY is read at runtime (not inlined
-            # at next build); NEXT_PUBLIC_* kept for local-dev compatibility.
             umask 077
             printf '%s\n' \
               "KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
               "NEXT_PUBLIC_KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
               'PORT=8081' > .env
 
-            # Keep BuildKit layer cache (npm ci / next build) so deploys finish
-            # under timeout. Only drop dangling images after recreate.
-            docker compose up -d --build --force-recreate
+            gunzip -c /tmp/dengar.tar.gz | docker load
+            rm -f /tmp/dengar.tar.gz
+
+            # No --build: image was built on GitHub Actions.
+            docker compose up -d --force-recreate --no-build
             docker image prune -f

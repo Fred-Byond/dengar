@@ -4,12 +4,14 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Build
+# Build — cap heap so small hosts (local/manual builds) do not thrash.
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS=--max-old-space-size=768
+ENV NEXT_CPU_COUNT=1
 RUN npm run build
 
 # Runtime — Node only (no nginx). Sit behind host nginx for TLS / multi-app routing.
