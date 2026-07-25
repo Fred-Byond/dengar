@@ -1,0 +1,1205 @@
+<title>MIROME — participant assessment session</title>
+
+<style>
+/* ============================================================
+   MIROME Team Intelligence — clickable prototype
+   Design system carried over from the built product
+   (mirome/tailwind.config.ts + experience.module.css).
+   The review shell adapts to the viewer's theme; the two product
+   surfaces stay in their own committed worlds — the dashboard is a
+   light operations screen, the participant portal is a dark room —
+   because this page is a faithful mock of the shipped product.
+   ============================================================ */
+
+:root {
+  --indigo: #22306e;
+  --indigo-deep: #161f4c;
+  --indigo-light: #2f3f8f;
+  --violet: #6b4ee6;
+  --teal: #0e9f8f;
+  --gold: #f2b705;
+
+  --strength: #1e9e52;
+  --functional: #7fb13b;
+  --developing: #e8a400;
+  --priority: #c6222f;
+  --insufficient: #a9b0bf;
+
+  --ink: #17181c;
+  --grey: #6b7180;
+  --line: #e3e6ec;
+  --canvas: #eef0f4;
+
+  /* review shell only */
+  --shell-bg: #e9ebf1;
+  --shell-panel: #ffffff;
+  --shell-ink: #17181c;
+  --shell-grey: #5f6472;
+  --shell-line: #d8dbe4;
+
+  --card-shadow: 0 1px 3px rgba(20, 25, 40, 0.06), 0 8px 24px rgba(20, 25, 40, 0.05);
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --shell-bg: #14161d;
+    --shell-panel: #1c1f28;
+    --shell-ink: #eef0f4;
+    --shell-grey: #9aa1b1;
+    --shell-line: #2b2f3b;
+  }
+}
+
+:root[data-theme="dark"] {
+  --shell-bg: #14161d;
+  --shell-panel: #1c1f28;
+  --shell-ink: #eef0f4;
+  --shell-grey: #9aa1b1;
+  --shell-line: #2b2f3b;
+}
+
+:root[data-theme="light"] {
+  --shell-bg: #e9ebf1;
+  --shell-panel: #ffffff;
+  --shell-ink: #17181c;
+  --shell-grey: #5f6472;
+  --shell-line: #d8dbe4;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  background: var(--shell-bg);
+  color: var(--shell-ink);
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+button { font-family: inherit; cursor: pointer; }
+:focus-visible { outline: 2.5px solid var(--violet); outline-offset: 2px; }
+
+/* ================= REVIEW SHELL ================= */
+.shellbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 22px;
+  background: var(--shell-panel);
+  border-bottom: 1px solid var(--shell-line);
+}
+.shellbar .who {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--shell-ink);
+}
+.shellbar .who svg { width: 22px; height: 22px; }
+.shellbar .who span { color: var(--shell-grey); font-weight: 700; }
+.tabs { display: flex; gap: 4px; background: var(--shell-bg); padding: 4px; border-radius: 12px; }
+.tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--shell-grey);
+  font-size: 12.5px;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 9px;
+  transition: background 0.15s, color 0.15s;
+}
+.tabs button[aria-selected="true"] { background: var(--indigo); color: #fff; }
+.shellnote {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--shell-grey);
+  max-width: 430px;
+  line-height: 1.45;
+}
+.view { display: none; }
+.view.on { display: block; }
+
+/* ================= PRODUCT: DASHBOARD ================= */
+.app { background: var(--canvas); color: var(--ink); min-height: 82vh; }
+
+.apphead {
+  position: sticky;
+  top: 52px;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 22px;
+  color: #fff;
+  background: linear-gradient(100deg, var(--indigo-deep), var(--indigo) 55%, var(--indigo-light));
+}
+.brandmark { display: flex; align-items: center; gap: 10px; }
+.brandmark svg { width: 28px; height: 28px; flex: 0 0 auto; }
+.brandmark b { display: block; font-size: 15px; font-weight: 800; letter-spacing: 0.04em; }
+.brandmark small { font-size: 9.5px; font-weight: 800; letter-spacing: 0.15em; opacity: 0.75; }
+.apptitle { padding-left: 16px; border-left: 1px solid rgba(255, 255, 255, 0.25); }
+.apptitle h1 { margin: 0; font-size: 18px; font-weight: 800; }
+.apptitle p { margin: 2px 0 0; font-size: 11px; opacity: 0.75; }
+.appright { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.seg { display: flex; background: rgba(255, 255, 255, 0.12); border-radius: 11px; padding: 3px; }
+.seg button {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 13px;
+  border-radius: 9px;
+}
+.seg button[aria-pressed="true"] { background: #fff; color: var(--indigo); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); }
+.btn-track {
+  position: relative;
+  border: 0;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 10px 15px;
+  border-radius: 11px;
+}
+.btn-track .n {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: var(--violet);
+  font-size: 10.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-pack { border: 0; background: var(--gold); color: #3a2c00; font-weight: 800; font-size: 12px; padding: 10px 15px; border-radius: 11px; }
+
+.scopebar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 22px 0; }
+.scopebar .scope { font-size: 12.5px; font-weight: 600; color: var(--grey); }
+.scopebar .scope b { color: var(--ink); }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--indigo);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 8px 6px 14px;
+  border-radius: 99px;
+}
+.chip button { border: 0; background: rgba(255, 255, 255, 0.25); color: #fff; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; line-height: 1; }
+.viewnote { margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--grey); }
+
+.wrap { max-width: 1540px; margin: 0 auto; padding: 14px 22px 40px; display: flex; flex-direction: column; gap: 16px; }
+.flowtag { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); margin: 2px 2px -6px; }
+.flowtag i { display: inline-block; width: 22px; height: 2px; background: var(--line); border-radius: 2px; }
+.flowtag.act { color: var(--indigo); }
+
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.kpi { position: relative; overflow: hidden; background: #fff; border-radius: 16px; padding: 15px 18px; box-shadow: var(--card-shadow); }
+.kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--indigo); }
+.kpi.k2::before { background: var(--priority); }
+.kpi.k3::before { background: var(--developing); }
+.kpi.k4::before { background: var(--violet); }
+.kpi .lbl { font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--grey); }
+.kpi .val { font-size: 29px; font-weight: 800; letter-spacing: -0.02em; margin: 3px 0 2px; }
+.kpi .delta { font-size: 11.5px; font-weight: 700; color: var(--grey); }
+.kpi .delta.down { color: var(--priority); }
+
+.cmd {
+  display: grid;
+  grid-template-columns: auto 1px auto 1px auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+  border-radius: 16px;
+  padding: 16px 20px;
+  color: #fff;
+  background: linear-gradient(100deg, #141c46, var(--indigo) 55%, #33409b);
+  box-shadow: var(--card-shadow);
+}
+.cmd .lbl { font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; }
+.cmd .num { font-size: 26px; font-weight: 800; line-height: 1; }
+.cmd .num.warn { color: #ffb4b4; }
+.cmd .num.good { color: #8fe9ae; }
+.cmd .divider { width: 1px; height: 38px; background: rgba(255, 255, 255, 0.2); }
+.cmd .ownerrow { display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 600; }
+.cmd .ownerrow .nm { width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.92; }
+.cmd .ownerrow .bar { flex: 1; height: 7px; background: rgba(255, 255, 255, 0.18); border-radius: 5px; overflow: hidden; }
+.cmd .ownerrow .bar i { display: block; height: 100%; background: var(--gold); border-radius: 5px; }
+.cmd .acts { display: flex; gap: 9px; }
+.cmd .acts button { border: 0; font-weight: 800; font-size: 12.5px; padding: 11px 16px; border-radius: 11px; white-space: nowrap; }
+.cmd .acts .gold { background: var(--gold); color: #3a2c00; }
+.cmd .acts .white { background: #fff; color: var(--indigo); }
+
+.grid-main { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 16px; }
+.grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
+.col { display: flex; flex-direction: column; gap: 16px; }
+@media (max-width: 1180px) {
+  .grid-main, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .cmd { grid-template-columns: 1fr 1fr; }
+  .cmd .divider { display: none; }
+}
+
+.card { background: #fff; border-radius: 16px; padding: 18px 20px; box-shadow: var(--card-shadow); }
+.cardhead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.cardhead h2 { margin: 0; font-size: 14.5px; font-weight: 800; }
+.cardhead small { font-size: 11px; font-weight: 600; color: var(--grey); }
+
+.crow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.crow:last-child { border-bottom: 0; }
+.crow .nm { width: 190px; font-size: 12.5px; font-weight: 700; line-height: 1.2; }
+.crow .bar { flex: 1; min-width: 110px; height: 10px; background: #edeff4; border-radius: 6px; overflow: hidden; }
+.crow .bar i { display: block; height: 100%; border-radius: 6px; }
+.crow .val { width: 42px; text-align: right; font-size: 12px; font-weight: 800; }
+.crow .n { width: 46px; text-align: right; font-size: 10.5px; font-weight: 700; color: var(--grey); }
+
+.pill { display: inline-block; padding: 4px 8px; border-radius: 7px; font-size: 10px; font-weight: 800; letter-spacing: 0.03em; color: #fff; white-space: nowrap; }
+.conf { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; color: var(--grey); }
+.conf i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; }
+.legend span { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; color: var(--grey); }
+.legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+
+.matrixwrap { overflow-x: auto; }
+table.matrix { border-collapse: separate; border-spacing: 3px; width: 100%; min-width: 860px; }
+table.matrix th { font-size: 9.5px; font-weight: 700; color: var(--grey); text-align: center; padding-bottom: 2px; }
+table.matrix th.deptcol { width: 168px; text-align: left; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; }
+.deptbtn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 0;
+  background: #f5f7fb;
+  border-radius: 10px;
+  padding: 9px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: left;
+}
+.deptbtn:hover { background: #e9edf6; }
+.deptbtn[aria-pressed="true"] { background: var(--indigo); color: #fff; }
+.deptbtn .n { font-size: 10px; font-weight: 700; color: var(--grey); }
+.deptbtn[aria-pressed="true"] .n { color: rgba(255, 255, 255, 0.75); }
+.cell { display: flex; align-items: center; justify-content: center; height: 36px; border-radius: 10px; font-size: 11px; font-weight: 800; color: #fff; }
+.cell.sup {
+  background: repeating-linear-gradient(45deg, #e9ebf1, #e9ebf1 4px, #f5f6fa 4px, #f5f6fa 8px);
+  color: var(--grey);
+  font-size: 9px;
+}
+
+.gaprow + .gaprow { margin-top: 12px; }
+.gaphead { display: flex; align-items: baseline; justify-content: space-between; font-size: 12px; font-weight: 700; }
+.gapbar { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.gapbar span.k { width: 52px; font-size: 10px; font-weight: 700; color: var(--grey); }
+.gapbar .bar { flex: 1; height: 8px; background: #edeff4; border-radius: 5px; overflow: hidden; }
+.gapbar .bar i { display: block; height: 100%; border-radius: 5px; }
+.gapbar b { width: 30px; text-align: right; font-size: 10.5px; }
+
+.distrow + .distrow { margin-top: 10px; }
+.disthead { display: flex; align-items: baseline; justify-content: space-between; font-size: 12px; font-weight: 700; }
+.disthead span { color: var(--grey); }
+.dist { display: flex; height: 10px; border-radius: 6px; overflow: hidden; margin-top: 4px; }
+.dist i { display: block; height: 100%; }
+
+.prio {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 12px 6px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 9px;
+}
+.prio:last-of-type { border-bottom: 0; }
+.prio:hover { background: #f5f7fb; }
+.prio .top { display: flex; align-items: center; gap: 10px; }
+.prio .rank { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 8px; background: var(--indigo); color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.prio .nm { flex: 1; font-size: 13px; font-weight: 800; }
+.prio p { margin: 0; font-size: 12px; line-height: 1.4; color: var(--grey); }
+.prio .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 700; color: var(--grey); }
+.tagsm { border-radius: 99px; padding: 3px 9px; background: #eef0f6; }
+.tagsm.hot { background: #fdecec; color: #a31c28; }
+.hint { font-size: 11px; font-weight: 600; color: var(--grey); margin-top: 8px; }
+
+.themerow { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+.themerow .nm { width: 46%; font-size: 12px; font-weight: 700; line-height: 1.2; }
+.themerow .bar { flex: 1; height: 8px; background: #edeff4; border-radius: 5px; overflow: hidden; }
+.themerow .bar i { display: block; height: 100%; background: var(--indigo); border-radius: 5px; }
+.themerow b { width: 30px; text-align: right; font-size: 11.5px; }
+.themerow .tr { width: 34px; text-align: right; font-size: 11px; font-weight: 800; }
+.tr.up { color: var(--priority); }
+.tr.down { color: var(--strength); }
+
+.sug { border: 1px solid var(--line); border-radius: 13px; padding: 13px 14px; }
+.sug + .sug { margin-top: 10px; }
+.sug .top { display: flex; align-items: flex-start; gap: 9px; }
+.sug .top b { flex: 1; font-size: 13px; line-height: 1.35; }
+.tag { font-size: 10px; font-weight: 800; letter-spacing: 0.04em; padding: 4px 9px; border-radius: 7px; white-space: nowrap; }
+.tag.raised { background: #e7ecff; color: var(--indigo); }
+.tag.asg { background: #f1e6ff; color: #5a2ca0; }
+.tag.prog { background: #dff3ff; color: #0a6c9e; }
+.tag.done { background: #e2f6e9; color: #137a3d; }
+.sug .meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 11px; font-weight: 600; color: var(--grey); margin-top: 7px; }
+.sug .meta b { color: var(--ink); }
+.mini { border: 1.5px solid var(--indigo); background: #fff; color: var(--indigo); font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 9px; margin-top: 9px; }
+.mini:hover { background: var(--indigo); color: #fff; }
+.assigned { font-size: 11px; font-weight: 700; color: #5a2ca0; margin-top: 8px; }
+
+.voice { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.voice:last-child { border-bottom: 0; }
+.voice .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex: 0 0 auto; }
+.voice .qx { flex: 1; font-size: 12.5px; line-height: 1.45; }
+.voice .qx em { font-style: italic; color: #3c3f48; }
+.voice .qx small { display: block; font-size: 11px; font-weight: 600; color: var(--grey); margin-top: 3px; }
+
+.flag { background: #fff1f1; border: 1px solid #f5c9c9; border-radius: 13px; padding: 12px 14px; }
+.flag + .flag { margin-top: 10px; }
+.flag b { color: var(--priority); font-size: 12px; letter-spacing: 0.05em; }
+.flag p { font-size: 12.5px; margin: 5px 0 0; line-height: 1.45; }
+.flag .ref { font-size: 11px; font-weight: 600; color: var(--grey); margin-top: 6px; }
+
+.note { font-size: 11px; font-weight: 600; color: var(--grey); line-height: 1.5; margin-top: 10px; }
+.appfoot { padding: 8px 22px 28px; text-align: center; font-size: 11px; font-weight: 600; color: var(--grey); }
+
+/* modal + drawer + toast */
+.modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: flex-start; justify-content: center; padding: 34px 20px; overflow-y: auto; background: rgba(10, 14, 30, 0.55); }
+.modal.open { display: flex; }
+.mcard { background: #fff; color: var(--ink); border-radius: 18px; width: 100%; max-width: 760px; padding: 24px 26px; animation: pop 0.22s ease; }
+@keyframes pop { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+.mcard h3 { margin: 0; font-size: 19px; font-weight: 800; padding-right: 44px; }
+.mcard .sub { font-size: 12px; font-weight: 600; color: var(--grey); margin: 3px 0 14px; }
+.mclose { float: right; border: 0; background: var(--canvas); width: 34px; height: 34px; border-radius: 50%; font-size: 15px; }
+.diag { border-left: 3px solid var(--indigo); background: #f7f8fb; border-radius: 0 12px 12px 0; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+.diag b { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--indigo); margin-bottom: 4px; }
+.mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+@media (max-width: 700px) { .mgrid { grid-template-columns: 1fr; } }
+.mgrid h4 { margin: 0 0 6px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--indigo); }
+.mgrid ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.mgrid li { display: flex; gap: 8px; font-size: 12.5px; line-height: 1.4; }
+.mgrid li::before { content: "▸"; color: var(--violet); }
+.mgrid p { margin: 0; font-size: 12.5px; line-height: 1.5; }
+.mfoot { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.mfoot button { flex: 1; min-width: 180px; border: 0; font-size: 13.5px; font-weight: 800; padding: 13px; border-radius: 12px; }
+.mfoot .ghost { border: 1.5px solid var(--line); background: #fff; color: var(--ink); font-weight: 700; }
+.mfoot .primary { background: var(--indigo); color: #fff; }
+
+label.f { display: block; font-size: 11.5px; font-weight: 800; margin: 14px 0 6px; }
+.f-in { width: 100%; font-family: inherit; font-size: 14px; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 11px; background: #fff; color: var(--ink); outline: none; }
+textarea.f-in { resize: vertical; min-height: 72px; }
+.f-in:focus { border-color: var(--indigo); }
+.deptHint { font-size: 11px; font-weight: 700; color: var(--teal); margin-top: 6px; }
+.prios { display: flex; gap: 8px; }
+.prios button { flex: 1; border: 1.5px solid var(--line); background: #fff; border-radius: 11px; padding: 10px; font-size: 12.5px; font-weight: 800; text-transform: capitalize; color: var(--ink); }
+.prios button[aria-pressed="true"] { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+.prios button.hi[aria-pressed="true"] { background: var(--priority); border-color: var(--priority); }
+
+#drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 210;
+  width: min(460px, 94vw);
+  background: #fff;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(105%);
+  transition: transform 0.3s ease;
+  box-shadow: -14px 0 44px rgba(10, 14, 30, 0.25);
+}
+#drawer.open { transform: none; }
+#drawer .dh { display: flex; align-items: center; gap: 10px; background: var(--indigo); color: #fff; padding: 17px 20px; }
+#drawer .dh h3 { flex: 1; margin: 0; font-size: 15.5px; font-weight: 800; }
+#drawer .dh button { border: 0; background: rgba(255, 255, 255, 0.2); color: #fff; width: 32px; height: 32px; border-radius: 50%; }
+#drawer .body { flex: 1; overflow-y: auto; padding: 16px 18px; }
+.task { border: 1px solid var(--line); border-radius: 13px; padding: 13px 14px; }
+.task + .task { margin-top: 11px; }
+.task .t1 { display: flex; align-items: flex-start; gap: 9px; }
+.task .t1 b { flex: 1; font-size: 13px; line-height: 1.35; }
+.task .meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; font-weight: 600; color: var(--grey); margin-top: 7px; }
+.task .meta b { color: var(--ink); }
+.task .over { color: var(--priority); }
+.task select { width: 100%; margin-top: 9px; font-family: inherit; font-size: 12px; font-weight: 700; padding: 8px 9px; border-radius: 9px; border: 1.5px solid var(--line); }
+.empty { text-align: center; color: var(--grey); font-size: 12.5px; padding: 30px 10px; line-height: 1.6; }
+
+.toast {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  z-index: 300;
+  transform: translateX(-50%) translateY(90px);
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 13px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition: transform 0.3s;
+}
+.toast.show { transform: translateX(-50%); }
+
+/* ================= PRODUCT: PARTICIPANT PORTAL ================= */
+.stage {
+  background: radial-gradient(120% 90% at 50% 0%, #2b2f3d 0%, #12141b 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 26px 16px 40px;
+  min-height: 82vh;
+}
+.phone {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 860px;
+  background: #10131c;
+  border-radius: 38px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 10px #26262b;
+  color: var(--ink);
+}
+.scene { position: absolute; inset: 0; background: linear-gradient(180deg, #1b2136, #10131c); }
+.avatarslot {
+  position: absolute;
+  left: 50%;
+  top: 120px;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 260px;
+  border-radius: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: center;
+  padding: 0 18px;
+  line-height: 1.5;
+}
+.wavebars { display: flex; align-items: flex-end; gap: 5px; height: 44px; }
+.wavebars i { width: 6px; border-radius: 3px; background: var(--violet); height: 12px; }
+.speaking .wavebars i { animation: talk 900ms ease-in-out infinite; }
+.wavebars i:nth-child(2) { animation-delay: 120ms; }
+.wavebars i:nth-child(3) { animation-delay: 240ms; }
+.wavebars i:nth-child(4) { animation-delay: 360ms; }
+.wavebars i:nth-child(5) { animation-delay: 480ms; }
+@keyframes talk { 0%, 100% { height: 10px; } 50% { height: 40px; } }
+@media (prefers-reduced-motion: reduce) { .wavebars i { animation: none !important; } }
+
+.pveil { position: absolute; inset: 0; background: rgba(12, 15, 26, 0.68); backdrop-filter: blur(6px); opacity: 0; transition: opacity 0.35s; pointer-events: none; }
+.phone.veiled .pveil { opacity: 1; }
+
+.pscreen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.pscreen::-webkit-scrollbar { display: none; }
+.pscreen.on { display: flex; animation: fadeUp 0.35s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+.demotag { position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 6; background: var(--gold); color: #3a2c00; font-size: 10px; font-weight: 800; letter-spacing: 0.15em; padding: 4px 14px; border-radius: 0 0 9px 9px; }
+
+.pbrand { display: grid; grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr); align-items: flex-start; padding: 22px 20px 0; column-gap: 8px; }
+.pbrand .m { grid-column: 1; display: flex; align-items: center; gap: 8px; color: #fff; }
+.pbrand .m svg { width: 26px; height: 26px; }
+.pbrand .m b { font-size: 18px; font-weight: 800; letter-spacing: 0.08em; line-height: 1; display: block; }
+.pbrand .m small { display: block; font-size: 8.5px; font-weight: 800; letter-spacing: 0.2em; opacity: 0.7; margin-top: 3px; }
+.pbrand .b { grid-column: 3; justify-self: end; text-align: right; color: rgba(255, 255, 255, 0.7); font-size: 10px; font-weight: 800; letter-spacing: 0.12em; line-height: 1.35; }
+.pwho { padding: 12px 20px 0; color: rgba(255, 255, 255, 0.85); }
+.pwho b { display: block; font-size: 16px; color: #fff; }
+.pwho small { font-size: 12px; opacity: 0.85; }
+
+.sheet {
+  margin-top: auto;
+  padding: 60px 20px 24px;
+  background: linear-gradient(180deg, rgba(12, 15, 26, 0), rgba(12, 15, 26, 0.75) 18%, rgba(10, 12, 20, 0.96) 45%);
+}
+.sheet h1 { color: #fff; font-size: 26px; font-weight: 800; line-height: 1.16; margin: 0; text-wrap: balance; }
+.sheet h1 em { font-style: normal; color: var(--gold); }
+.sheet p.lead { color: rgba(255, 255, 255, 0.82); font-size: 13.5px; line-height: 1.5; margin: 10px 0 16px; }
+.steps { display: flex; gap: 8px; margin-bottom: 16px; }
+.steps div { flex: 1; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 13px; padding: 11px 10px; color: #fff; }
+.steps b { display: block; font-size: 12.5px; margin-top: 5px; }
+.steps small { display: block; font-size: 10.5px; opacity: 0.72; line-height: 1.3; margin-top: 2px; }
+.langrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 4px; }
+.langrow span { font-size: 11.5px; font-weight: 700; color: #fff; background: rgba(255, 255, 255, 0.13); border: 1px solid rgba(255, 255, 255, 0.2); padding: 5px 11px; border-radius: 99px; }
+.pdpa { color: rgba(255, 255, 255, 0.55); font-size: 10.5px; line-height: 1.45; margin: 12px 0 0; }
+
+.formwrap { padding: 62px 18px 26px; display: flex; flex-direction: column; gap: 14px; }
+.pcard { background: rgba(255, 255, 255, 0.97); border-radius: 20px; padding: 20px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.28); }
+.eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--violet); }
+.ptitle { font-size: 21px; font-weight: 800; margin: 4px 0 2px; line-height: 1.2; }
+.psub { font-size: 13.5px; color: var(--grey); line-height: 1.5; margin: 0; }
+.pback { position: absolute; top: 18px; left: 14px; z-index: 5; width: 38px; height: 38px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.92); font-size: 18px; }
+.pbtn { display: flex; align-items: center; justify-content: center; width: 100%; border: 0; background: var(--violet); color: #fff; font-size: 16px; font-weight: 700; padding: 15px; border-radius: 14px; margin-top: 16px; }
+.pbtn.ghost { background: #fff; color: var(--ink); border: 1.5px solid var(--line); font-weight: 600; }
+.pbtn:disabled { filter: grayscale(0.5) opacity(0.55); }
+.pbtnrow { display: flex; gap: 9px; }
+.pbtnrow .pbtn { flex: 1; font-size: 14.5px; padding: 14px 10px; }
+
+.consentitem { display: flex; gap: 10px; background: #f5f6fa; border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; font-size: 12.5px; line-height: 1.45; }
+.consentitem + .consentitem { margin-top: 8px; }
+.consentitem i { font-style: normal; color: var(--teal); font-weight: 800; }
+.pcheck { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: 12.5px; font-weight: 600; line-height: 1.45; }
+.pcheck input { width: 18px; height: 18px; accent-color: var(--violet); margin-top: 2px; }
+label.pf { display: block; font-size: 12.5px; font-weight: 700; margin: 14px 0 6px; }
+select.pf-in { width: 100%; font-family: inherit; font-size: 15px; padding: 12px 13px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); }
+textarea.pf-in { width: 100%; font-family: inherit; font-size: 14px; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 12px; min-height: 62px; resize: vertical; }
+.pillrow { display: flex; gap: 8px; }
+.pillrow button { flex: 1; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 11px 6px; font-size: 14px; font-weight: 700; color: var(--ink); }
+.pillrow button[aria-pressed="true"] { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+
+.pbar { height: 6px; border-radius: 4px; background: #e9ebf2; overflow: hidden; margin: 6px 0 4px; }
+.pbar i { display: block; height: 100%; background: var(--violet); border-radius: 4px; transition: width 0.25s ease; }
+.pcount { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); }
+.construct { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--indigo); margin-top: 12px; }
+.statement { font-size: 17px; font-weight: 700; line-height: 1.4; margin: 6px 0 0; }
+.scale { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.scale button { display: flex; align-items: center; gap: 11px; border: 1.5px solid var(--line); background: #fff; border-radius: 13px; padding: 12px 14px; font-size: 14px; font-weight: 600; color: var(--ink); text-align: left; }
+.scale button i { width: 21px; height: 21px; border-radius: 50%; border: 2px solid var(--line); flex: 0 0 auto; }
+.scale button[aria-pressed="true"] { border-color: var(--violet); background: #f3f0ff; }
+.scale button[aria-pressed="true"] i { background: var(--violet); border-color: var(--violet); box-shadow: inset 0 0 0 3px #fff; }
+
+.countwrap { text-align: center; color: #fff; margin: auto 0 18px; }
+.countwrap small { font-size: 12px; letter-spacing: 0.16em; font-weight: 800; text-transform: uppercase; opacity: 0.8; }
+.countnum { font-size: 54px; font-weight: 800; }
+.readyitem { display: flex; align-items: center; gap: 11px; background: rgba(255, 255, 255, 0.95); border-radius: 13px; padding: 12px 14px; font-size: 13.5px; font-weight: 600; }
+.readyitem + .readyitem { margin-top: 9px; }
+.readyitem .dot { width: 26px; height: 26px; border-radius: 50%; background: var(--teal); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; flex: 0 0 auto; }
+.mid { margin: auto; padding: 0 20px; width: 100%; display: flex; flex-direction: column; }
+
+.sesstop { position: absolute; top: 0; left: 0; right: 0; z-index: 4; display: flex; justify-content: space-between; padding: 16px 16px 0; }
+.timerpill { background: rgba(0, 0, 0, 0.55); color: #fff; font-weight: 800; font-size: 14px; padding: 7px 14px; border-radius: 99px; display: flex; align-items: center; gap: 7px; }
+.timerpill i { width: 8px; height: 8px; border-radius: 50%; background: var(--violet); }
+.langpill { background: rgba(255, 255, 255, 0.92); border: 0; font-weight: 800; font-size: 12px; padding: 8px 13px; border-radius: 99px; }
+.stagepill { position: absolute; top: 58px; left: 16px; z-index: 4; background: rgba(107, 78, 230, 0.9); color: #fff; font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 11px; border-radius: 99px; }
+.sessbottom { margin-top: auto; padding: 14px 16px 22px; background: linear-gradient(180deg, rgba(8, 10, 18, 0), rgba(8, 10, 18, 0.88) 38%); }
+.caption { color: #fff; font-size: 15.5px; line-height: 1.5; font-weight: 600; min-height: 96px; }
+.caption .n { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 5px; }
+.yousaid { color: rgba(255, 255, 255, 0.75); font-size: 12.5px; font-style: italic; min-height: 34px; margin: 8px 0 10px; }
+.micwrap { display: flex; flex-direction: column; align-items: center; }
+.micbtn { width: 72px; height: 72px; border-radius: 50%; background: var(--violet); border: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 26px rgba(107, 78, 230, 0.5); }
+.micbtn svg { width: 30px; height: 30px; fill: #fff; }
+.micbtn.listening { background: var(--teal); box-shadow: 0 8px 26px rgba(14, 159, 143, 0.55); }
+.miclbl { color: #fff; font-size: 12px; font-weight: 700; margin-top: 8px; text-align: center; }
+
+.tick { width: 72px; height: 72px; border-radius: 50%; background: var(--teal); color: #fff; font-size: 36px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+.refbox { background: var(--indigo); color: #fff; border-radius: 14px; padding: 14px; text-align: center; margin: 14px 0; }
+.refbox small { display: block; font-size: 10.5px; letter-spacing: 0.14em; opacity: 0.75; font-weight: 700; }
+.refbox b { font-size: 20px; letter-spacing: 0.06em; }
+.summarybox { background: #f4f5fa; border: 1px solid var(--line); border-radius: 14px; padding: 14px 15px; margin: 14px 0; }
+.summarybox .sh { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--indigo); margin-bottom: 7px; }
+.summarybox p { margin: 0; font-size: 13.5px; line-height: 1.55; }
+.summarybox ul { margin: 8px 0 0; padding-left: 18px; font-size: 12.5px; line-height: 1.5; }
+.nextitem { display: flex; gap: 10px; font-size: 12.5px; line-height: 1.45; }
+.nextitem + .nextitem { margin-top: 8px; }
+.nextitem b { color: var(--violet); }
+.privacycard { background: #eef7f5; border: 1px solid #cfe8e3; border-radius: 13px; padding: 12px 14px; font-size: 12px; line-height: 1.5; color: #0b5c53; font-weight: 600; margin-top: 12px; }
+
+/* ================= PRODUCT: FACILITATOR PACK ================= */
+.packwrap { background: var(--canvas); color: var(--ink); padding: 26px 16px 46px; min-height: 82vh; }
+.pack { max-width: 900px; margin: 0 auto; background: #fff; padding: 44px 46px; box-shadow: 0 8px 30px rgba(20, 25, 40, 0.08); }
+.pack .cover { display: flex; justify-content: space-between; gap: 24px; border-bottom: 2px solid var(--indigo); padding-bottom: 22px; }
+.pack .cover p.k { margin: 0; font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--violet); }
+.pack h1 { margin: 8px 0 4px; font-size: 30px; font-weight: 800; }
+.pack .cover .r { text-align: right; font-size: 11px; font-weight: 700; color: var(--grey); line-height: 1.6; }
+.confid { background: #fff8e1; color: #6b5900; border-radius: 12px; padding: 12px 16px; font-size: 12px; font-weight: 600; margin-top: 16px; }
+.packsec { margin-top: 30px; }
+.packsec .h { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.packsec .h span { font-size: 13px; font-weight: 800; color: var(--violet); }
+.packsec .h h2 { margin: 0; font-size: 18px; font-weight: 800; }
+.packsec p { font-size: 13.5px; line-height: 1.6; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stat { background: var(--canvas); border-radius: 12px; padding: 12px 14px; }
+.stat small { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); }
+.stat b { display: block; font-size: 20px; margin-top: 2px; }
+.care { border-left: 3px solid var(--developing); background: #fffbf0; border-radius: 0 12px 12px 0; padding: 12px 16px; font-size: 13px; line-height: 1.55; }
+.finding { border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.finding + .finding { margin-top: 14px; }
+.finding .top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.finding .rank { width: 24px; height: 24px; border-radius: 8px; background: var(--indigo); color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.finding h3 { flex: 1; margin: 0; font-size: 15.5px; font-weight: 800; }
+.block h3 { font-size: 14px; font-weight: 800; color: var(--indigo); margin: 0 0 4px; }
+.block + .block { margin-top: 22px; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
+@media (max-width: 720px) { .cols, .stats { grid-template-columns: 1fr 1fr; } .pack { padding: 28px 20px; } }
+.cols h4 { margin: 0 0 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); }
+.cols ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.cols li { display: flex; gap: 8px; font-size: 12.5px; line-height: 1.4; }
+.cols li::before { content: "▸"; color: var(--violet); }
+blockquote.q { margin: 0; border-left: 3px solid var(--indigo); background: #f7f8fb; border-radius: 0 12px 12px 0; padding: 12px 16px; font-size: 13px; font-style: italic; line-height: 1.55; }
+blockquote.q + blockquote.q { margin-top: 9px; }
+blockquote.q small { display: block; font-style: normal; font-weight: 700; font-size: 11px; color: var(--grey); margin-top: 5px; }
+.packlist { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.65; }
+.packfoot { margin-top: 36px; border-top: 1px solid var(--line); padding-top: 16px; text-align: center; font-size: 11px; font-weight: 600; color: var(--grey); }
+
+/* ---------- focused-page overrides ---------- */
+.pagebar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  padding: 10px 22px;
+  background: var(--shell-panel);
+  border-bottom: 1px solid var(--shell-line);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--shell-grey);
+  line-height: 1.45;
+}
+.pagebar b { color: var(--shell-ink); font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; font-size: 11px; }
+.pagebar .sep { opacity: 0.4; }
+.pagebar .short { display: none; }
+@media (max-width: 640px) {
+  .pagebar .long { display: none; }
+  .pagebar .short { display: inline; }
+}
+
+.pageframe { display: flex; flex-direction: column; min-height: 100dvh; }
+#view-experience { flex: 1; display: flex; min-height: 0; }
+/* The portal is already a phone UI — on a phone it should BE the page, not a
+   mock of a phone inside a phone. The device frame is a desktop affordance. */
+.stage { flex: 1; min-height: 0; padding: 22px 16px 34px; }
+.phone { height: min(860px, calc(100dvh - 120px)); }
+@media (max-width: 640px) {
+  .stage { padding: 0; min-height: 0; }
+  .phone { max-width: none; height: 100%; border-radius: 0; box-shadow: none; }
+  .sheet h1 { font-size: 24px; }
+  .formwrap { padding: 54px 16px 24px; }
+  .pbrand { grid-template-columns: 1fr auto; }
+  .pbrand .b { grid-column: 2; font-size: 9px; }
+}
+/* Keep the interviewer panel from competing with a screen that has its own
+   content — it only carries meaning on the landing and session screens. */
+.phone:not([data-screen="landing"]):not([data-screen="session"]) .avatarslot { opacity: 0.12; }
+.pscreen[data-screen="lobby"] { background: rgba(12, 15, 26, 0.55); backdrop-filter: blur(4px); }
+</style>
+<div class="pageframe">
+<div class="pagebar">
+  <b>MIROME participant assessment</b>
+  <span class="sep">·</span>
+  <span class="long">Prototype of the confidential 15-minute session. Tap through it as an employee would; the digital-human video stream is the one thing a static page cannot carry.</span>
+  <span class="short">Prototype · tap through it as an employee would</span>
+</div>
+
+<!-- ============================================================ EXPERIENCE -->
+<section id="view-experience">
+  <div class="stage">
+    <div class="phone" id="phone">
+      <div class="scene">
+        <div class="avatarslot" id="avatarSlot">
+          <div class="wavebars" id="waveBars"><i></i><i></i><i></i><i></i><i></i></div>
+          DIGITAL INTERVIEWER<br />video stream not included in the static prototype
+        </div>
+      </div>
+      <div class="pveil"></div>
+      <div class="demotag">DEMO · SYNTHETIC DATA</div>
+
+      <!-- landing -->
+      <section class="pscreen on" data-screen="landing">
+        <div class="pbrand">
+          <div class="m">
+            <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
+              <circle cx="14" cy="14" r="12.5" stroke="#F2B705" stroke-width="1.6" opacity=".5"></circle>
+              <g stroke="#F2B705" stroke-width="2.6" stroke-linecap="round">
+                <path d="M8 17 v-6"></path><path d="M14 20 v-12"></path><path d="M20 17 v-6"></path>
+              </g>
+            </svg>
+            <span><b>MIROME</b><small>TEAM INTELLIGENCE</small></span>
+          </div>
+          <div class="b">BYOND ASIA<br /><span style="opacity:.7">ASSESSMENT PORTAL</span></div>
+        </div>
+        <div class="pwho"><b>Meridian Group · Team Diagnosis 2026</b><small>Confidential team diagnosis · 15 minutes</small></div>
+        <div class="sheet">
+          <h1>Fifteen minutes to say how <em>this team actually works</em> — before anyone designs a workshop.</h1>
+          <p class="lead">A confidential conversation with MIROME's digital interviewer. Your answers are combined with everyone else's to show where the team is strong and where it is stuck. No individual report goes to your manager.</p>
+          <div class="steps">
+            <div><span style="font-size:17px">🔒</span><b>Consent</b><small>What is collected and who sees it</small></div>
+            <div><span style="font-size:17px">💬</span><b>Interview</b><small>15 minutes, your own words</small></div>
+            <div><span style="font-size:17px">✅</span><b>Confirm</b><small>You correct the summary</small></div>
+          </div>
+          <button class="pbtn" data-go="consent" style="margin-top:0">Start — 15 minutes</button>
+          <div class="langrow"><span>English</span><span>Bahasa Melayu</span><span>中文</span><span>தமிழ்</span></div>
+          <p class="pdpa">Confidential · results reported at team level only · minimum group size of 5 · you may stop at any point.</p>
+        </div>
+      </section>
+
+      <!-- consent -->
+      <section class="pscreen" data-screen="consent">
+        <button class="pback" data-go="landing" aria-label="Back">←</button>
+        <div class="formwrap">
+          <div class="pcard">
+            <div class="eyebrow">Step 1 of 5</div>
+            <h2 class="ptitle">Before we begin</h2>
+            <p class="psub">This is a team diagnosis. It is not a performance review and it is not used for discipline, pay or promotion.</p>
+            <div style="margin-top:14px">
+              <div class="consentitem"><i>✓</i><span>Your responses are stored against a reference number, not your name.</span></div>
+              <div class="consentitem"><i>✓</i><span>Your manager and HR see team-level results only, never your individual answers.</span></div>
+              <div class="consentitem"><i>✓</i><span>No group smaller than five people is ever displayed.</span></div>
+              <div class="consentitem"><i>✓</i><span>A trained reviewer reads anything that raises a welfare or safety concern.</span></div>
+              <div class="consentitem"><i>✓</i><span>You can skip any question, or stop the session, without giving a reason.</span></div>
+              <div class="consentitem"><i>✓</i><span>Your data is retained for 24 months and then deleted.</span></div>
+            </div>
+            <label class="pcheck"><input type="checkbox" id="consentBox" /><span>I have read the above and agree to take part on these terms.</span></label>
+            <button class="pbtn" id="consentBtn">I agree — continue</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- context -->
+      <section class="pscreen" data-screen="context">
+        <button class="pback" data-go="consent" aria-label="Back">←</button>
+        <div class="formwrap">
+          <div class="pcard">
+            <div class="eyebrow">Step 2 of 5</div>
+            <h2 class="ptitle">A little context</h2>
+            <p class="psub">Only what the analysis needs to compare groups fairly. Nothing here identifies you on its own.</p>
+            <label class="pf" for="ctxDept">Department</label>
+            <select class="pf-in" id="ctxDept">
+              <option value="">Choose…</option>
+              <option>Operations</option><option>Sales</option><option>Customer Service</option>
+              <option>Finance</option><option>Marketing</option><option>IT &amp; Systems</option><option>Legal &amp; Compliance</option>
+            </select>
+            <label class="pf" for="ctxRole">Role level</label>
+            <select class="pf-in" id="ctxRole">
+              <option value="">Choose…</option>
+              <option>Executive</option><option>Senior manager</option><option>Manager</option>
+              <option>Team lead</option><option>Individual contributor</option>
+            </select>
+            <label class="pf" for="ctxTenure">Time in this team</label>
+            <select class="pf-in" id="ctxTenure">
+              <option value="">Choose…</option>
+              <option>&lt;1 year</option><option>1–3 years</option><option>3–7 years</option><option>7+ years</option>
+            </select>
+            <label class="pf">Do you manage people?</label>
+            <div class="pillrow" id="managesRow">
+              <button data-manages="yes" aria-pressed="false">Yes</button>
+              <button data-manages="no" aria-pressed="false">No</button>
+            </div>
+            <label class="pf">Interview language</label>
+            <div class="pillrow" id="langRow">
+              <button data-lang="EN" aria-pressed="true">English</button>
+              <button data-lang="MS" aria-pressed="false">Bahasa Melayu</button>
+            </div>
+            <p class="note">If a combination of answers would make a group smaller than five people, that group is merged before reporting.</p>
+            <button class="pbtn" id="contextBtn">Continue</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- pulse -->
+      <section class="pscreen" data-screen="pulse">
+        <button class="pback" data-go="context" aria-label="Back">←</button>
+        <div class="formwrap">
+          <div class="pcard">
+            <div class="eyebrow">Step 3 of 5</div>
+            <h2 class="ptitle">How true is this of your team?</h2>
+            <p class="psub">Ten statements. Answer for the team as you experience it, not as you think it should be.</p>
+            <div class="pbar"><i id="pulseFill" style="width:10%"></i></div>
+            <div class="pcount" id="pulseCount">Statement 1 of 10</div>
+            <div class="construct" id="pulseConstruct">—</div>
+            <p class="statement" id="pulseStatement">—</p>
+            <div class="scale" id="pulseScale"></div>
+            <div class="pbtnrow" style="margin-top:16px">
+              <button class="pbtn ghost" id="pulsePrev" style="margin-top:0">Back</button>
+              <button class="pbtn" id="pulseNext" style="margin-top:0">Next</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- lobby -->
+      <section class="pscreen" data-screen="lobby">
+        <div class="pbrand">
+          <div class="m">
+            <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
+              <circle cx="14" cy="14" r="12.5" stroke="#F2B705" stroke-width="1.6" opacity=".5"></circle>
+              <g stroke="#F2B705" stroke-width="2.6" stroke-linecap="round">
+                <path d="M8 17 v-6"></path><path d="M14 20 v-12"></path><path d="M20 17 v-6"></path>
+              </g>
+            </svg>
+            <span><b>MIROME</b><small>TEAM INTELLIGENCE</small></span>
+          </div>
+          <div class="b">BYOND ASIA<br /><span style="opacity:.7">ASSESSMENT PORTAL</span></div>
+        </div>
+        <div class="mid">
+          <div class="countwrap">
+            <small>Interview starts in</small>
+            <div class="countnum" id="lobbyCount">00:10</div>
+            <small style="letter-spacing:.02em;text-transform:none;font-weight:600;opacity:.7">demo — shortened countdown</small>
+          </div>
+          <div class="pcard">
+            <p class="psub" style="text-align:center;margin-bottom:8px"><b style="color:var(--ink)">Ready check</b></p>
+            <div class="readyitem"><span class="dot">✓</span><span>Connection is good</span></div>
+            <div class="readyitem"><span class="dot">✓</span><span>Microphone allowed</span></div>
+            <div class="readyitem"><span class="dot" style="background:var(--indigo)">文</span><span>Language: <b id="lobbyLang">English</b></span></div>
+            <p class="note">Speak normally. There are no right answers, and nothing is scored on how well you speak — accent, grammar and fluency are excluded from every result.</p>
+            <button class="pbtn" data-go="session">Enter the interview</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- session -->
+      <section class="pscreen" data-screen="session">
+        <div class="sesstop">
+          <div class="timerpill"><i></i><span id="sessTimer">10:00</span></div>
+          <button class="langpill">文A · <span id="sessLang">EN</span></button>
+        </div>
+        <div class="stagepill" id="stagePill">Team experience</div>
+        <div class="sessbottom">
+          <div class="caption"><span class="n">MIROME Interviewer</span><span id="caption">—</span></div>
+          <div class="yousaid" id="youSaid"></div>
+          <div class="micwrap">
+            <button class="micbtn" id="micBtn" aria-label="Answer">
+              <svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4Zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2Z"></path></svg>
+            </button>
+            <div class="miclbl" id="micLbl">Tap to answer</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- reflect -->
+      <section class="pscreen" data-screen="reflect">
+        <div class="formwrap">
+          <div class="pcard">
+            <div class="eyebrow">Step 4 of 5</div>
+            <h2 class="ptitle">Four short reflections</h2>
+            <p class="psub">These become the team's own words in the results — quoted anonymously, never attributed.</p>
+            <label class="pf" for="rStrength">One strength of this team</label>
+            <textarea class="pf-in" id="rStrength">Inside my own team, people help each other without being asked.</textarea>
+            <label class="pf" for="rObstacle">The biggest obstacle to doing good work here</label>
+            <textarea class="pf-in" id="rObstacle">The handover to operations has no agreed standard, so half of what we send back is rework.</textarea>
+            <label class="pf" for="rPriority">If one thing changed, what should it be?</label>
+            <textarea class="pf-in" id="rPriority">make it clear who owns each handover</textarea>
+            <label class="pf" for="rAction">One thing you will do yourself</label>
+            <textarea class="pf-in" id="rAction">I will write down what a complete handover looks like for my part.</textarea>
+            <button class="pbtn" data-go="confirm">Continue</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- confirm -->
+      <section class="pscreen" data-screen="confirm">
+        <div class="formwrap">
+          <div class="pcard">
+            <div class="eyebrow">Step 5 of 5</div>
+            <h2 class="ptitle">Is this right?</h2>
+            <p class="psub">This is what has been recorded from your session. Correct anything that is wrong — the corrected version is what goes into the analysis.</p>
+            <div class="summarybox">
+              <div class="sh">Recorded summary</div>
+              <p id="summaryLead">—</p>
+              <ul id="summaryPoints"></ul>
+            </div>
+            <div id="correctionWrap" hidden>
+              <label class="pf" for="correction">What should it say instead?</label>
+              <textarea class="pf-in" id="correction"></textarea>
+            </div>
+            <div class="pbtnrow" style="margin-top:16px">
+              <button class="pbtn ghost" id="btnCorrect" style="margin-top:0">Something is wrong</button>
+              <button class="pbtn" data-go="done" style="margin-top:0">Yes, that is accurate</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- done -->
+      <section class="pscreen" data-screen="done">
+        <div class="formwrap">
+          <div class="pcard">
+            <div class="tick">✓</div>
+            <h2 class="ptitle" style="text-align:center">Done — thank you</h2>
+            <p class="psub" style="text-align:center">Your session is complete. It joins the team results as one anonymous data point.</p>
+            <div class="refbox"><small>YOUR REFERENCE</small><b id="doneRef">MTI-2026-4821</b></div>
+            <div class="summarybox">
+              <div class="sh">What happens next</div>
+              <div class="nextitem"><b>1</b><span>Results are aggregated once enough of your team has taken part.</span></div>
+              <div class="nextitem"><b>2</b><span>The facilitator designs the programme around what the data actually shows.</span></div>
+              <div class="nextitem"><b>3</b><span>You will be asked four short questions again 30 days after the programme.</span></div>
+              <div class="nextitem"><b>4</b><span>Actions agreed by management are published back to everyone who took part.</span></div>
+            </div>
+            <div class="privacycard">No individual report is produced from this session. Nothing here is shared with your manager.</div>
+            <button class="pbtn ghost" id="restartBtn">Run the journey again</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const DATA = {"climateSpecs": [{"id": "psychSafety", "name": "Psychological safety", "pulseItem": "In this team I can raise a mistake or disagree with a senior colleague without it being held against me.", "purpose": "Can people ask questions, admit mistakes, challenge ideas and disagree with leaders without fear of penalty?"}, {"id": "trust", "name": "Trust", "pulseItem": "When colleagues in this team commit to something, I can rely on it being done.", "purpose": "Do people believe colleagues and leaders keep commitments, act consistently and avoid unfair blame?"}, {"id": "roleClarity", "name": "Role clarity", "pulseItem": "It is clear who owns each decision and each handover in the work I do.", "purpose": "Do people know who decides, who owns each task, how handovers work and when to escalate?"}, {"id": "goalAlignment", "name": "Goal alignment", "pulseItem": "My department's targets pull in the same direction as the departments we depend on.", "purpose": "Does the team share priorities and outcomes, including across departments?"}, {"id": "collaboration", "name": "Collaboration", "pulseItem": "Working across departments here is straightforward when I need something.", "purpose": "Does the team coordinate, resolve dependencies and work across departments?"}, {"id": "conflict", "name": "Constructive conflict", "pulseItem": "Disagreements in this team get discussed openly and resolved.", "purpose": "Can people disagree openly, separate ideas from personalities and reach a workable decision?"}, {"id": "leadershipOpenness", "name": "Leadership openness", "pulseItem": "My manager invites input before deciding, and explains decisions afterwards.", "purpose": "Do leaders listen, invite input, explain decisions and respond to concerns?"}, {"id": "inclusion", "name": "Inclusion and belonging", "pulseItem": "In team discussions, my contribution is heard and taken seriously.", "purpose": "Do people feel respected, heard and able to contribute to decisions that affect them?"}, {"id": "accountability", "name": "Accountability", "pulseItem": "In this team, agreed actions are followed through and reviewed.", "purpose": "Does the team keep commitments, address underperformance and follow through?"}, {"id": "resilience", "name": "Collective resilience", "pulseItem": "When priorities change suddenly, this team adapts without breaking down.", "purpose": "Can the team adapt, re-prioritise and support each other through setbacks and pressure?"}], "scenarios": [{"id": "missedDeadline", "title": "Missed deadline", "setup": "A colleague in another department has delayed a deliverable you depend on. Your own commitment to a customer is now at risk, and this is the second time it has happened.", "ask": "What do you do next, and what exactly do you say to them?", "probe": "And if the delay happens again the following week \u2014 what changes?"}, {"id": "disagreeManager", "title": "Disagreement with a manager", "setup": "Your manager has decided to bring a launch date forward. You believe the new date creates a real operational risk that senior management cannot see from where they sit.", "ask": "What do you do?", "probe": "Suppose the decision stands after you raise it. What do you do then?"}, {"id": "departmentConflict", "title": "Departmental conflict", "setup": "Two departments are blaming each other for a failed handover to a customer. You are in the meeting where it surfaces, and both sides are describing the same events differently.", "ask": "How do you handle the conversation?", "probe": "What would you put in place so it does not happen a third time?"}, {"id": "overloadedColleague", "title": "Overloaded colleague", "setup": "A teammate tells you privately that they cannot complete their part of the work this week. Your own workload is already full, and the deadline is shared.", "ask": "What do you say and what do you do?", "probe": "What do you tell your manager, and when?"}, {"id": "suddenChange", "title": "Sudden change", "setup": "Three days before delivery, the requirement changes materially. Half the work already done no longer applies, and the team is tired.", "ask": "What are your first three moves?", "probe": "How do you communicate it to the rest of the team?"}]};
+/* ============================================================
+   Shared helpers
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+const LEVEL_COLOUR = {
+  "Established Strength": "#1E9E52",
+  Functional: "#7FB13B",
+  Developing: "#E8A400",
+  "Priority Attention": "#C6222F",
+  "Insufficient Evidence": "#A9B0BF",
+};
+const CONF_COLOUR = { high: "#1E9E52", moderate: "#E8A400", low: "#C6222F", insufficient: "#A9B0BF" };
+const OWNERS = [
+  { id: "hrbp", name: "HR Business Partner" },
+  { id: "od", name: "Organisational Development" },
+  { id: "lineMgmt", name: "Line management (department head)" },
+  { id: "exco", name: "Executive committee" },
+  { id: "facilitator", name: "Programme facilitator" },
+  { id: "lnd", name: "Learning & Development" },
+  { id: "pmo", name: "Operations / PMO" },
+];
+const CONSTRUCT_OWNER = {
+  psychSafety: "exco", trust: "lineMgmt", roleClarity: "pmo", goalAlignment: "exco",
+  collaboration: "pmo", conflict: "facilitator", leadershipOpenness: "exco",
+  inclusion: "hrbp", accountability: "lineMgmt", resilience: "od",
+};
+const SHORT = {
+  "Psychological safety": "Psych. safety", Trust: "Trust", "Role clarity": "Role clarity",
+  "Goal alignment": "Goal align.", Collaboration: "Collab.", "Constructive conflict": "Conflict",
+  "Leadership openness": "Leader open.", "Inclusion and belonging": "Inclusion",
+  Accountability: "Account.", "Collective resilience": "Resilience",
+};
+const MIN_N = 5;
+
+function indexColour(index) {
+  const t = Math.max(0, Math.min(1, (index - 40) / 50));
+  const lerp = (a, b, u) => Math.round(a + (b - a) * u);
+  let c1, c2, u;
+  if (t < 0.5) { c1 = [198, 34, 47]; c2 = [232, 164, 0]; u = t / 0.5; }
+  else { c1 = [232, 164, 0]; c2 = [30, 158, 82]; u = (t - 0.5) / 0.5; }
+  return `rgb(${lerp(c1[0], c2[0], u)},${lerp(c1[1], c2[1], u)},${lerp(c1[2], c2[2], u)})`;
+}
+function levelFromIndex(i) {
+  if (i >= 78) return "Established Strength";
+  if (i >= 66) return "Functional";
+  if (i >= 54) return "Developing";
+  return "Priority Attention";
+}
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+let toastTimer;
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+/* ============================================================
+   Participant experience
+   ============================================================ */
+const VEILED = new Set(["consent", "context", "pulse", "lobby", "reflect", "confirm", "done"]);
+const SCALE = ["Strongly disagree", "Disagree", "Neither", "Agree", "Strongly agree"];
+const answers = {};
+let pulseIdx = 0;
+let lobbyTimer = null;
+let sessionTimer = null;
+
+function goScreen(id) {
+  // Entering the interview by hand must cancel the lobby countdown, or it
+  // fires later and restarts the session under the participant.
+  if (id !== "lobby") clearInterval(lobbyTimer);
+  document.querySelectorAll(".pscreen").forEach((s) => s.classList.toggle("on", s.dataset.screen === id));
+  $("phone").dataset.screen = id;
+  $("phone").classList.toggle("veiled", VEILED.has(id));
+  if (id === "pulse") renderPulse();
+  if (id === "lobby") startLobby();
+  if (id === "session") startSession();
+  if (id === "confirm") renderSummary();
+}
+document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => goScreen(b.dataset.go)));
+
+$("consentBtn").addEventListener("click", () => {
+  if (!$("consentBox").checked) { toast("Please confirm you agree before continuing."); return; }
+  goScreen("context");
+});
+
+document.querySelectorAll("#managesRow button, #langRow button").forEach((b) =>
+  b.addEventListener("click", () => {
+    b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    if (b.dataset.lang) {
+      $("lobbyLang").textContent = b.textContent;
+      $("sessLang").textContent = b.dataset.lang;
+    }
+  })
+);
+
+$("contextBtn").addEventListener("click", () => {
+  const manages = document.querySelector("#managesRow button[aria-pressed='true']");
+  if (!$("ctxDept").value || !$("ctxRole").value || !$("ctxTenure").value || !manages) {
+    toast("Please complete the department, role level, tenure and whether you manage people.");
+    return;
+  }
+  goScreen("pulse");
+});
+
+function renderPulse() {
+  const spec = DATA.climateSpecs[pulseIdx];
+  $("pulseFill").style.width = ((pulseIdx + 1) / DATA.climateSpecs.length) * 100 + "%";
+  $("pulseCount").textContent = `Statement ${pulseIdx + 1} of ${DATA.climateSpecs.length}`;
+  $("pulseConstruct").textContent = spec.name;
+  $("pulseStatement").textContent = spec.pulseItem;
+  $("pulseScale").innerHTML = SCALE.map((label, i) =>
+    `<button data-v="${i + 1}" aria-pressed="${answers[spec.id] === i + 1}"><i></i>${label}</button>`
+  ).join("");
+  $("pulseScale").querySelectorAll("button").forEach((b) =>
+    b.addEventListener("click", () => {
+      answers[spec.id] = +b.dataset.v;
+      if (pulseIdx < DATA.climateSpecs.length - 1) { pulseIdx++; renderPulse(); }
+      else renderPulse();
+    })
+  );
+  $("pulsePrev").disabled = pulseIdx === 0;
+  const last = pulseIdx === DATA.climateSpecs.length - 1;
+  const answeredAll = DATA.climateSpecs.every((c) => answers[c.id]);
+  $("pulseNext").textContent = last ? "Continue to the interview" : "Next";
+  $("pulseNext").disabled = last ? !answeredAll : !answers[spec.id];
+}
+$("pulsePrev").addEventListener("click", () => { if (pulseIdx > 0) { pulseIdx--; renderPulse(); } });
+$("pulseNext").addEventListener("click", () => {
+  if (pulseIdx < DATA.climateSpecs.length - 1) { pulseIdx++; renderPulse(); }
+  else goScreen("lobby");
+});
+
+function startLobby() {
+  let n = 10;
+  $("lobbyCount").textContent = "00:10";
+  clearInterval(lobbyTimer);
+  lobbyTimer = setInterval(() => {
+    n--;
+    $("lobbyCount").textContent = "00:" + String(Math.max(n, 0)).padStart(2, "0");
+    if (n <= 0) { clearInterval(lobbyTimer); goScreen("session"); }
+  }, 1000);
+}
+
+/* the scripted interview — the same ladder the product runs */
+let turn = 0;
+const SCRIPT = [
+  { stage: "Team experience", line: "Thank you for making the time. This is a team diagnosis, not an assessment of you. Nothing you say is reported against your name, and your manager sees team-level results only. Tell me about a recent piece of work that did not go smoothly — what happened, and where did it get stuck?", said: "" },
+  { stage: "Team experience", line: "Who was supposed to decide, and how did you find out? Keep it to what happened, not who is at fault.", said: "“The handover sat for nine days. Nobody knew who signed it off — I found out by asking three people.”" },
+  { stage: "Scenario 1", line: "", said: "“I would check what happened first and ask what got in the way — from their side there may be a constraint I cannot see.”", scenario: 0 },
+  { stage: "Scenario 1", line: "And if it happened again the following week — what changes?", said: "“I would raise it as a process issue rather than a personal one, and agree a next step with a named owner.”" },
+  { stage: "Scenario 2", line: "", said: "“I would step back, prioritise what has to ship and defer the rest, then tell the customer early.”", scenario: 1 },
+  { stage: "Wrap-up", line: "We are close to time. Before we finish — one thing you would change about how this team works?", said: "“Make it clear who owns each handover.”" },
+];
+
+function startSession() {
+  turn = 0;
+  $("youSaid").textContent = "";
+  speak(SCRIPT[0].line, SCRIPT[0].stage);
+  let secs = 600;
+  clearInterval(sessionTimer);
+  sessionTimer = setInterval(() => {
+    secs--;
+    $("sessTimer").textContent = String(Math.floor(secs / 60)).padStart(2, "0") + ":" + String(secs % 60).padStart(2, "0");
+    if (secs <= 0) clearInterval(sessionTimer);
+  }, 1000);
+}
+
+function speak(text, stage) {
+  $("stagePill").textContent = stage;
+  $("caption").textContent = text;
+  $("avatarSlot").classList.add("speaking");
+  setTimeout(() => $("avatarSlot").classList.remove("speaking"), 2200);
+}
+
+$("micBtn").addEventListener("click", () => {
+  const step = SCRIPT[turn];
+  $("micBtn").classList.add("listening");
+  $("micLbl").textContent = "Listening…";
+  setTimeout(() => {
+    $("micBtn").classList.remove("listening");
+    $("micLbl").textContent = "Tap to answer";
+    $("youSaid").textContent = step.said || "";
+    turn++;
+    if (turn >= SCRIPT.length) {
+      clearInterval(sessionTimer);
+      speak("Thank you. I will show you a short summary of what I recorded so you can correct anything that is wrong.", "Wrap-up");
+      setTimeout(() => goScreen("reflect"), 2200);
+      return;
+    }
+    const next = SCRIPT[turn];
+    if (next.scenario !== undefined) {
+      const sc = DATA.scenarios[next.scenario];
+      speak(`Now a short workplace situation. There is no right answer — tell me what you would actually do. ${sc.setup} ${sc.ask}`, next.stage);
+    } else {
+      speak(next.line, next.stage);
+    }
+  }, 1400);
+});
+
+$("btnCorrect").addEventListener("click", () => {
+  $("correctionWrap").hidden = false;
+  $("correction").focus();
+  toast("Correction recorded with the original kept in the audit trail.");
+});
+
+function renderSummary() {
+  const dept = $("ctxDept").value || "your department";
+  const roleLvl = ($("ctxRole").value || "team member").toLowerCase();
+  const weakest = DATA.climateSpecs
+    .map((c) => ({ c, v: answers[c.id] || 3 }))
+    .sort((a, b) => a.v - b.v)[0];
+  $("summaryLead").textContent =
+    `A ${roleLvl} in ${dept} described ${weakest.c.name.toLowerCase()} as the main constraint on getting work done.`;
+  $("summaryPoints").innerHTML = [
+    ["Strength", $("rStrength").value],
+    ["Obstacle", $("rObstacle").value],
+    ["Change asked for", $("rPriority").value],
+    ["Own commitment", $("rAction").value],
+  ].filter((x) => x[1].trim()).map((x) => `<li>${esc(x[0])}: ${esc(x[1])}</li>`).join("");
+}
+
+$("restartBtn").addEventListener("click", () => {
+  pulseIdx = 0;
+  Object.keys(answers).forEach((k) => delete answers[k]);
+  $("consentBox").checked = false;
+  $("correctionWrap").hidden = true;
+  goScreen("landing");
+});
+
+
+/* boot */
+renderPulse();
+$("phone").dataset.screen = "landing";
+</script>

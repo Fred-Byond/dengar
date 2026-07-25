@@ -92,6 +92,28 @@ Rules the pipeline enforces, in code:
 
 See [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md) for where each rule is enforced.
 
+## Clickable prototypes
+
+`public/prototypes/` holds self-contained demo pages — the same convention
+DENGAR.ai uses for its approved prototypes. The two published pages are split by
+audience so each one opens straight into its own surface, and both are usable on
+a phone:
+
+| File | What it is |
+|------|------------|
+| `mirome-dashboard.html` | The organisational-intelligence half: team health, department heat map, perception gap, ranked priorities, the intervention modal, the action tracker, and the Facilitator Pack behind the header button |
+| `mirome-interview.html` | The employee half: the confidential 15-minute session, consent → context → pulse → interview → scenarios → reflection → summary confirmation |
+| `mirome-demo.html` | The combined source both are generated from |
+
+The numbers are not mocked: the profiles for all five measurement waves are
+exported from the scoring pipeline (82 synthetic transcripts through
+`src/lib/tif`) and inlined, so the prototypes and the app show the same
+diagnosis. Regenerate the two published pages after editing the source:
+
+```bash
+python3 scripts/split-prototype.py
+```
+
 ## Getting started
 
 ```bash
