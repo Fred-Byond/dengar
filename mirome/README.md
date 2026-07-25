@@ -63,7 +63,7 @@ mirome/
 │           ├── interventions.ts Diagnosis → intervention recommendation engine
 │           ├── scorer.ts       Scoring pipeline (deterministic now, LLM-swappable)
 │           └── aggregate.ts    Team Intelligence Engine
-└── docs/                       TIF · ARCHITECTURE · INTEGRATION-DIGITAL-HUMAN · GOVERNANCE · ROADMAP
+└── docs/                       TIF · ARCHITECTURE · INTEGRATION-DIGITAL-HUMAN · GOVERNANCE · ROADMAP · MIROME-STYLE
 ```
 
 ## The framework in one screen
@@ -91,6 +91,24 @@ Rules the pipeline enforces, in code:
 - welfare, safety and named-individual disclosures route to a human reviewer.
 
 See [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md) for where each rule is enforced.
+
+## Layer 0 — MIROME Style (specified, not built)
+
+[`docs/MIROME-STYLE.md`](docs/MIROME-STYLE.md) specifies a seven-minute
+behavioural style session — the four-factor D/I/S/C model delivered as a
+conversation instead of a twenty-four-item form. It is the commercial land for
+the team diagnosis: providers already buy style profiles per participant, so it
+replaces an existing line item rather than creating one.
+
+It drops in behind the same seams: `Scorer` is unchanged, `ParticipantInsightRecord`
+gains an optional `style`, and the only new aggregate is team composition. The
+spec covers the instrument, the elicitation script per dimension, the data
+contract, the four-study validation protocol and the pricing model.
+
+Two design rules are non-negotiable there: the profile is **normative** (classic
+forced-choice DISC is ipsative and cannot support between-person team
+composition), and it is **never sold for selection** — development, self-awareness
+and team composition only.
 
 ## Clickable prototypes
 
