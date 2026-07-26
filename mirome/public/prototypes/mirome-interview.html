@@ -2,1204 +2,1763 @@
 
 <style>
 /* ============================================================
-   MIROME Team Intelligence — clickable prototype
-   Design system carried over from the built product
-   (mirome/tailwind.config.ts + experience.module.css).
-   The review shell adapts to the viewer's theme; the two product
-   surfaces stay in their own committed worlds — the dashboard is a
-   light operations screen, the participant portal is a dark room —
-   because this page is a faithful mock of the shipped product.
+   MIROME participant assessment — light edition, six languages.
+
+   Ground is white because the session is asking for candour: a dark
+   "broadcast studio" reads as production, a bright quiet room reads as a
+   private conversation. Brand colour is spent only on the interviewer layer
+   (violet) and on what is guaranteed (teal); everything else is ink on paper.
+
+   Arabic runs the whole journey in RTL, so every directional rule below uses
+   logical properties (inline-start / inline-end) — nothing is hard-coded to
+   left or right.
    ============================================================ */
 
 :root {
   --indigo: #22306e;
-  --indigo-deep: #161f4c;
-  --indigo-light: #2f3f8f;
   --violet: #6b4ee6;
+  --violet-soft: #f1edff;
   --teal: #0e9f8f;
-  --gold: #f2b705;
+  --teal-soft: #e8f6f4;
 
-  --strength: #1e9e52;
-  --functional: #7fb13b;
-  --developing: #e8a400;
-  --priority: #c6222f;
-  --insufficient: #a9b0bf;
+  --ink: #191c24;
+  --ink-2: #5b6273;
+  --ink-3: #878da0;
+  --line: #e6e8ef;
+  --line-2: #f0f2f7;
+  --paper: #ffffff;
+  --canvas: #f6f7fb;
 
-  --ink: #17181c;
-  --grey: #6b7180;
-  --line: #e3e6ec;
-  --canvas: #eef0f4;
-
-  /* review shell only */
-  --shell-bg: #e9ebf1;
+  --shell-bg: #eceef4;
   --shell-panel: #ffffff;
-  --shell-ink: #17181c;
-  --shell-grey: #5f6472;
-  --shell-line: #d8dbe4;
+  --shell-ink: #191c24;
+  --shell-grey: #5b6273;
+  --shell-line: #dde0e9;
 
-  --card-shadow: 0 1px 3px rgba(20, 25, 40, 0.06), 0 8px 24px rgba(20, 25, 40, 0.05);
+  --shadow-device: 0 30px 80px rgba(25, 28, 36, 0.22), 0 0 0 1px rgba(25, 28, 36, 0.06);
+
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sans-ar: "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", "Segoe UI", Tahoma, var(--sans);
+  --sans-zh: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", var(--sans);
+  --sans-ko: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", var(--sans);
+  --sans-ja: "Hiragino Sans", "Yu Gothic", Meiryo, "Noto Sans JP", var(--sans);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --shell-bg: #14161d;
-    --shell-panel: #1c1f28;
-    --shell-ink: #eef0f4;
-    --shell-grey: #9aa1b1;
-    --shell-line: #2b2f3b;
+    --shell-bg: #15171e;
+    --shell-panel: #1d2029;
+    --shell-ink: #eef0f5;
+    --shell-grey: #99a0b1;
+    --shell-line: #2a2e3a;
   }
 }
-
 :root[data-theme="dark"] {
-  --shell-bg: #14161d;
-  --shell-panel: #1c1f28;
-  --shell-ink: #eef0f4;
-  --shell-grey: #9aa1b1;
-  --shell-line: #2b2f3b;
+  --shell-bg: #15171e;
+  --shell-panel: #1d2029;
+  --shell-ink: #eef0f5;
+  --shell-grey: #99a0b1;
+  --shell-line: #2a2e3a;
 }
-
 :root[data-theme="light"] {
-  --shell-bg: #e9ebf1;
+  --shell-bg: #eceef4;
   --shell-panel: #ffffff;
-  --shell-ink: #17181c;
-  --shell-grey: #5f6472;
-  --shell-line: #d8dbe4;
+  --shell-ink: #191c24;
+  --shell-grey: #5b6273;
+  --shell-line: #dde0e9;
 }
 
 * { box-sizing: border-box; }
-
 body {
   margin: 0;
   font-family: var(--sans);
   background: var(--shell-bg);
   color: var(--shell-ink);
   -webkit-font-smoothing: antialiased;
-  font-variant-numeric: tabular-nums;
+}
+button { font-family: inherit; cursor: pointer; }
+:focus-visible { outline: 2.5px solid var(--violet); outline-offset: 2px; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
 }
 
-button { font-family: inherit; cursor: pointer; }
-:focus-visible { outline: 2.5px solid var(--violet); outline-offset: 2px; }
-
-/* ================= REVIEW SHELL ================= */
-.shellbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
+/* ---------- review shell ---------- */
+/* Definite height, so the stage below can stretch the device to fill it. */
+.frame { display: flex; flex-direction: column; height: 100dvh; }
+.bar {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 22px;
+  align-items: baseline;
+  gap: 6px 14px;
+  padding: 10px 20px;
   background: var(--shell-panel);
   border-bottom: 1px solid var(--shell-line);
-}
-.shellbar .who {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--shell-ink);
-}
-.shellbar .who svg { width: 22px; height: 22px; }
-.shellbar .who span { color: var(--shell-grey); font-weight: 700; }
-.tabs { display: flex; gap: 4px; background: var(--shell-bg); padding: 4px; border-radius: 12px; }
-.tabs button {
-  border: 0;
-  background: transparent;
-  color: var(--shell-grey);
-  font-size: 12.5px;
-  font-weight: 800;
-  padding: 8px 14px;
-  border-radius: 9px;
-  transition: background 0.15s, color 0.15s;
-}
-.tabs button[aria-selected="true"] { background: var(--indigo); color: #fff; }
-.shellnote {
-  margin-left: auto;
   font-size: 11.5px;
   font-weight: 600;
   color: var(--shell-grey);
-  max-width: 430px;
   line-height: 1.45;
 }
-.view { display: none; }
-.view.on { display: block; }
-
-/* ================= PRODUCT: DASHBOARD ================= */
-.app { background: var(--canvas); color: var(--ink); min-height: 82vh; }
-
-.apphead {
-  position: sticky;
-  top: 52px;
-  z-index: 30;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 22px;
-  color: #fff;
-  background: linear-gradient(100deg, var(--indigo-deep), var(--indigo) 55%, var(--indigo-light));
-}
-.brandmark { display: flex; align-items: center; gap: 10px; }
-.brandmark svg { width: 28px; height: 28px; flex: 0 0 auto; }
-.brandmark b { display: block; font-size: 15px; font-weight: 800; letter-spacing: 0.04em; }
-.brandmark small { font-size: 9.5px; font-weight: 800; letter-spacing: 0.15em; opacity: 0.75; }
-.apptitle { padding-left: 16px; border-left: 1px solid rgba(255, 255, 255, 0.25); }
-.apptitle h1 { margin: 0; font-size: 18px; font-weight: 800; }
-.apptitle p { margin: 2px 0 0; font-size: 11px; opacity: 0.75; }
-.appright { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.seg { display: flex; background: rgba(255, 255, 255, 0.12); border-radius: 11px; padding: 3px; }
-.seg button {
-  border: 0;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 12px;
+.bar b {
+  color: var(--shell-ink);
+  font-size: 11px;
   font-weight: 800;
-  padding: 8px 13px;
-  border-radius: 9px;
-}
-.seg button[aria-pressed="true"] { background: #fff; color: var(--indigo); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); }
-.btn-track {
-  position: relative;
-  border: 0;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-weight: 800;
-  font-size: 12px;
-  padding: 10px 15px;
-  border-radius: 11px;
-}
-.btn-track .n {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 19px;
-  height: 19px;
-  padding: 0 5px;
-  border-radius: 99px;
-  background: var(--violet);
-  font-size: 10.5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.btn-pack { border: 0; background: var(--gold); color: #3a2c00; font-weight: 800; font-size: 12px; padding: 10px 15px; border-radius: 11px; }
-
-.scopebar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 22px 0; }
-.scopebar .scope { font-size: 12.5px; font-weight: 600; color: var(--grey); }
-.scopebar .scope b { color: var(--ink); }
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--indigo);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 6px 8px 6px 14px;
-  border-radius: 99px;
-}
-.chip button { border: 0; background: rgba(255, 255, 255, 0.25); color: #fff; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; line-height: 1; }
-.viewnote { margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--grey); }
-
-.wrap { max-width: 1540px; margin: 0 auto; padding: 14px 22px 40px; display: flex; flex-direction: column; gap: 16px; }
-.flowtag { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); margin: 2px 2px -6px; }
-.flowtag i { display: inline-block; width: 22px; height: 2px; background: var(--line); border-radius: 2px; }
-.flowtag.act { color: var(--indigo); }
-
-.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-.kpi { position: relative; overflow: hidden; background: #fff; border-radius: 16px; padding: 15px 18px; box-shadow: var(--card-shadow); }
-.kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--indigo); }
-.kpi.k2::before { background: var(--priority); }
-.kpi.k3::before { background: var(--developing); }
-.kpi.k4::before { background: var(--violet); }
-.kpi .lbl { font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--grey); }
-.kpi .val { font-size: 29px; font-weight: 800; letter-spacing: -0.02em; margin: 3px 0 2px; }
-.kpi .delta { font-size: 11.5px; font-weight: 700; color: var(--grey); }
-.kpi .delta.down { color: var(--priority); }
-
-.cmd {
-  display: grid;
-  grid-template-columns: auto 1px auto 1px auto 1fr auto;
-  gap: 16px;
-  align-items: center;
-  border-radius: 16px;
-  padding: 16px 20px;
-  color: #fff;
-  background: linear-gradient(100deg, #141c46, var(--indigo) 55%, #33409b);
-  box-shadow: var(--card-shadow);
-}
-.cmd .lbl { font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; }
-.cmd .num { font-size: 26px; font-weight: 800; line-height: 1; }
-.cmd .num.warn { color: #ffb4b4; }
-.cmd .num.good { color: #8fe9ae; }
-.cmd .divider { width: 1px; height: 38px; background: rgba(255, 255, 255, 0.2); }
-.cmd .ownerrow { display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 600; }
-.cmd .ownerrow .nm { width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.92; }
-.cmd .ownerrow .bar { flex: 1; height: 7px; background: rgba(255, 255, 255, 0.18); border-radius: 5px; overflow: hidden; }
-.cmd .ownerrow .bar i { display: block; height: 100%; background: var(--gold); border-radius: 5px; }
-.cmd .acts { display: flex; gap: 9px; }
-.cmd .acts button { border: 0; font-weight: 800; font-size: 12.5px; padding: 11px 16px; border-radius: 11px; white-space: nowrap; }
-.cmd .acts .gold { background: var(--gold); color: #3a2c00; }
-.cmd .acts .white { background: #fff; color: var(--indigo); }
-
-.grid-main { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; }
-.grid-3 { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 16px; }
-.grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
-.col { display: flex; flex-direction: column; gap: 16px; }
-@media (max-width: 1180px) {
-  .grid-main, .grid-3, .grid-2 { grid-template-columns: 1fr; }
-  .kpis { grid-template-columns: repeat(2, 1fr); }
-  .cmd { grid-template-columns: 1fr 1fr; }
-  .cmd .divider { display: none; }
-}
-
-.card { background: #fff; border-radius: 16px; padding: 18px 20px; box-shadow: var(--card-shadow); }
-.cardhead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-.cardhead h2 { margin: 0; font-size: 14.5px; font-weight: 800; }
-.cardhead small { font-size: 11px; font-weight: 600; color: var(--grey); }
-
-.crow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
-.crow:last-child { border-bottom: 0; }
-.crow .nm { width: 190px; font-size: 12.5px; font-weight: 700; line-height: 1.2; }
-.crow .bar { flex: 1; min-width: 110px; height: 10px; background: #edeff4; border-radius: 6px; overflow: hidden; }
-.crow .bar i { display: block; height: 100%; border-radius: 6px; }
-.crow .val { width: 42px; text-align: right; font-size: 12px; font-weight: 800; }
-.crow .n { width: 46px; text-align: right; font-size: 10.5px; font-weight: 700; color: var(--grey); }
-
-.pill { display: inline-block; padding: 4px 8px; border-radius: 7px; font-size: 10px; font-weight: 800; letter-spacing: 0.03em; color: #fff; white-space: nowrap; }
-.conf { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; color: var(--grey); }
-.conf i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-
-.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; }
-.legend span { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; color: var(--grey); }
-.legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
-
-.matrixwrap { overflow-x: auto; }
-table.matrix { border-collapse: separate; border-spacing: 3px; width: 100%; min-width: 860px; }
-table.matrix th { font-size: 9.5px; font-weight: 700; color: var(--grey); text-align: center; padding-bottom: 2px; }
-table.matrix th.deptcol { width: 168px; text-align: left; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; }
-.deptbtn {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  border: 0;
-  background: #f5f7fb;
-  border-radius: 10px;
-  padding: 9px 11px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--ink);
-  text-align: left;
-}
-.deptbtn:hover { background: #e9edf6; }
-.deptbtn[aria-pressed="true"] { background: var(--indigo); color: #fff; }
-.deptbtn .n { font-size: 10px; font-weight: 700; color: var(--grey); }
-.deptbtn[aria-pressed="true"] .n { color: rgba(255, 255, 255, 0.75); }
-.cell { display: flex; align-items: center; justify-content: center; height: 36px; border-radius: 10px; font-size: 11px; font-weight: 800; color: #fff; }
-.cell.sup {
-  background: repeating-linear-gradient(45deg, #e9ebf1, #e9ebf1 4px, #f5f6fa 4px, #f5f6fa 8px);
-  color: var(--grey);
-  font-size: 9px;
-}
-
-.gaprow + .gaprow { margin-top: 12px; }
-.gaphead { display: flex; align-items: baseline; justify-content: space-between; font-size: 12px; font-weight: 700; }
-.gapbar { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-.gapbar span.k { width: 52px; font-size: 10px; font-weight: 700; color: var(--grey); }
-.gapbar .bar { flex: 1; height: 8px; background: #edeff4; border-radius: 5px; overflow: hidden; }
-.gapbar .bar i { display: block; height: 100%; border-radius: 5px; }
-.gapbar b { width: 30px; text-align: right; font-size: 10.5px; }
-
-.distrow + .distrow { margin-top: 10px; }
-.disthead { display: flex; align-items: baseline; justify-content: space-between; font-size: 12px; font-weight: 700; }
-.disthead span { color: var(--grey); }
-.dist { display: flex; height: 10px; border-radius: 6px; overflow: hidden; margin-top: 4px; }
-.dist i { display: block; height: 100%; }
-
-.prio {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  border: 0;
-  background: transparent;
-  text-align: left;
-  padding: 12px 6px;
-  border-bottom: 1px solid var(--line);
-  border-radius: 9px;
-}
-.prio:last-of-type { border-bottom: 0; }
-.prio:hover { background: #f5f7fb; }
-.prio .top { display: flex; align-items: center; gap: 10px; }
-.prio .rank { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 8px; background: var(--indigo); color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
-.prio .nm { flex: 1; font-size: 13px; font-weight: 800; }
-.prio p { margin: 0; font-size: 12px; line-height: 1.4; color: var(--grey); }
-.prio .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 700; color: var(--grey); }
-.tagsm { border-radius: 99px; padding: 3px 9px; background: #eef0f6; }
-.tagsm.hot { background: #fdecec; color: #a31c28; }
-.hint { font-size: 11px; font-weight: 600; color: var(--grey); margin-top: 8px; }
-
-.themerow { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
-.themerow .nm { width: 46%; font-size: 12px; font-weight: 700; line-height: 1.2; }
-.themerow .bar { flex: 1; height: 8px; background: #edeff4; border-radius: 5px; overflow: hidden; }
-.themerow .bar i { display: block; height: 100%; background: var(--indigo); border-radius: 5px; }
-.themerow b { width: 30px; text-align: right; font-size: 11.5px; }
-.themerow .tr { width: 34px; text-align: right; font-size: 11px; font-weight: 800; }
-.tr.up { color: var(--priority); }
-.tr.down { color: var(--strength); }
-
-.sug { border: 1px solid var(--line); border-radius: 13px; padding: 13px 14px; }
-.sug + .sug { margin-top: 10px; }
-.sug .top { display: flex; align-items: flex-start; gap: 9px; }
-.sug .top b { flex: 1; font-size: 13px; line-height: 1.35; }
-.tag { font-size: 10px; font-weight: 800; letter-spacing: 0.04em; padding: 4px 9px; border-radius: 7px; white-space: nowrap; }
-.tag.raised { background: #e7ecff; color: var(--indigo); }
-.tag.asg { background: #f1e6ff; color: #5a2ca0; }
-.tag.prog { background: #dff3ff; color: #0a6c9e; }
-.tag.done { background: #e2f6e9; color: #137a3d; }
-.sug .meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 11px; font-weight: 600; color: var(--grey); margin-top: 7px; }
-.sug .meta b { color: var(--ink); }
-.mini { border: 1.5px solid var(--indigo); background: #fff; color: var(--indigo); font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 9px; margin-top: 9px; }
-.mini:hover { background: var(--indigo); color: #fff; }
-.assigned { font-size: 11px; font-weight: 700; color: #5a2ca0; margin-top: 8px; }
-
-.voice { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
-.voice:last-child { border-bottom: 0; }
-.voice .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex: 0 0 auto; }
-.voice .qx { flex: 1; font-size: 12.5px; line-height: 1.45; }
-.voice .qx em { font-style: italic; color: #3c3f48; }
-.voice .qx small { display: block; font-size: 11px; font-weight: 600; color: var(--grey); margin-top: 3px; }
-
-.flag { background: #fff1f1; border: 1px solid #f5c9c9; border-radius: 13px; padding: 12px 14px; }
-.flag + .flag { margin-top: 10px; }
-.flag b { color: var(--priority); font-size: 12px; letter-spacing: 0.05em; }
-.flag p { font-size: 12.5px; margin: 5px 0 0; line-height: 1.45; }
-.flag .ref { font-size: 11px; font-weight: 600; color: var(--grey); margin-top: 6px; }
-
-.note { font-size: 11px; font-weight: 600; color: var(--grey); line-height: 1.5; margin-top: 10px; }
-.appfoot { padding: 8px 22px 28px; text-align: center; font-size: 11px; font-weight: 600; color: var(--grey); }
-
-/* modal + drawer + toast */
-.modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: flex-start; justify-content: center; padding: 34px 20px; overflow-y: auto; background: rgba(10, 14, 30, 0.55); }
-.modal.open { display: flex; }
-.mcard { background: #fff; color: var(--ink); border-radius: 18px; width: 100%; max-width: 760px; padding: 24px 26px; animation: pop 0.22s ease; }
-@keyframes pop { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
-.mcard h3 { margin: 0; font-size: 19px; font-weight: 800; padding-right: 44px; }
-.mcard .sub { font-size: 12px; font-weight: 600; color: var(--grey); margin: 3px 0 14px; }
-.mclose { float: right; border: 0; background: var(--canvas); width: 34px; height: 34px; border-radius: 50%; font-size: 15px; }
-.diag { border-left: 3px solid var(--indigo); background: #f7f8fb; border-radius: 0 12px 12px 0; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
-.diag b { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--indigo); margin-bottom: 4px; }
-.mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
-@media (max-width: 700px) { .mgrid { grid-template-columns: 1fr; } }
-.mgrid h4 { margin: 0 0 6px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--indigo); }
-.mgrid ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; }
-.mgrid li { display: flex; gap: 8px; font-size: 12.5px; line-height: 1.4; }
-.mgrid li::before { content: "▸"; color: var(--violet); }
-.mgrid p { margin: 0; font-size: 12.5px; line-height: 1.5; }
-.mfoot { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-.mfoot button { flex: 1; min-width: 180px; border: 0; font-size: 13.5px; font-weight: 800; padding: 13px; border-radius: 12px; }
-.mfoot .ghost { border: 1.5px solid var(--line); background: #fff; color: var(--ink); font-weight: 700; }
-.mfoot .primary { background: var(--indigo); color: #fff; }
-
-label.f { display: block; font-size: 11.5px; font-weight: 800; margin: 14px 0 6px; }
-.f-in { width: 100%; font-family: inherit; font-size: 14px; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 11px; background: #fff; color: var(--ink); outline: none; }
-textarea.f-in { resize: vertical; min-height: 72px; }
-.f-in:focus { border-color: var(--indigo); }
-.deptHint { font-size: 11px; font-weight: 700; color: var(--teal); margin-top: 6px; }
-.prios { display: flex; gap: 8px; }
-.prios button { flex: 1; border: 1.5px solid var(--line); background: #fff; border-radius: 11px; padding: 10px; font-size: 12.5px; font-weight: 800; text-transform: capitalize; color: var(--ink); }
-.prios button[aria-pressed="true"] { background: var(--indigo); border-color: var(--indigo); color: #fff; }
-.prios button.hi[aria-pressed="true"] { background: var(--priority); border-color: var(--priority); }
-
-#drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 210;
-  width: min(460px, 94vw);
-  background: #fff;
-  color: var(--ink);
-  display: flex;
-  flex-direction: column;
-  transform: translateX(105%);
-  transition: transform 0.3s ease;
-  box-shadow: -14px 0 44px rgba(10, 14, 30, 0.25);
-}
-#drawer.open { transform: none; }
-#drawer .dh { display: flex; align-items: center; gap: 10px; background: var(--indigo); color: #fff; padding: 17px 20px; }
-#drawer .dh h3 { flex: 1; margin: 0; font-size: 15.5px; font-weight: 800; }
-#drawer .dh button { border: 0; background: rgba(255, 255, 255, 0.2); color: #fff; width: 32px; height: 32px; border-radius: 50%; }
-#drawer .body { flex: 1; overflow-y: auto; padding: 16px 18px; }
-.task { border: 1px solid var(--line); border-radius: 13px; padding: 13px 14px; }
-.task + .task { margin-top: 11px; }
-.task .t1 { display: flex; align-items: flex-start; gap: 9px; }
-.task .t1 b { flex: 1; font-size: 13px; line-height: 1.35; }
-.task .meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; font-weight: 600; color: var(--grey); margin-top: 7px; }
-.task .meta b { color: var(--ink); }
-.task .over { color: var(--priority); }
-.task select { width: 100%; margin-top: 9px; font-family: inherit; font-size: 12px; font-weight: 700; padding: 8px 9px; border-radius: 9px; border: 1.5px solid var(--line); }
-.empty { text-align: center; color: var(--grey); font-size: 12.5px; padding: 30px 10px; line-height: 1.6; }
-
-.toast {
-  position: fixed;
-  bottom: 26px;
-  left: 50%;
-  z-index: 300;
-  transform: translateX(-50%) translateY(90px);
-  background: var(--ink);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 13px 20px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  transition: transform 0.3s;
-}
-.toast.show { transform: translateX(-50%); }
-
-/* ================= PRODUCT: PARTICIPANT PORTAL ================= */
-.stage {
-  background: radial-gradient(120% 90% at 50% 0%, #2b2f3d 0%, #12141b 70%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 26px 16px 40px;
-  min-height: 82vh;
-}
-.phone {
-  position: relative;
-  width: 100%;
-  max-width: 430px;
-  height: 860px;
-  background: #10131c;
-  border-radius: 38px;
-  overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 10px #26262b;
-  color: var(--ink);
-}
-.scene { position: absolute; inset: 0; background: linear-gradient(180deg, #1b2136, #10131c); }
-.avatarslot {
-  position: absolute;
-  left: 50%;
-  top: 120px;
-  transform: translateX(-50%);
-  width: 220px;
-  height: 260px;
-  border-radius: 24px;
-  border: 1px dashed rgba(255, 255, 255, 0.22);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 10.5px;
-  font-weight: 700;
   letter-spacing: 0.1em;
-  text-align: center;
-  padding: 0 18px;
-  line-height: 1.5;
+  text-transform: uppercase;
 }
-.wavebars { display: flex; align-items: flex-end; gap: 5px; height: 44px; }
-.wavebars i { width: 6px; border-radius: 3px; background: var(--violet); height: 12px; }
-.speaking .wavebars i { animation: talk 900ms ease-in-out infinite; }
-.wavebars i:nth-child(2) { animation-delay: 120ms; }
-.wavebars i:nth-child(3) { animation-delay: 240ms; }
-.wavebars i:nth-child(4) { animation-delay: 360ms; }
-.wavebars i:nth-child(5) { animation-delay: 480ms; }
-@keyframes talk { 0%, 100% { height: 10px; } 50% { height: 40px; } }
-@media (prefers-reduced-motion: reduce) { .wavebars i { animation: none !important; } }
+.bar .short { display: none; }
+@media (max-width: 640px) {
+  .bar .long { display: none; }
+  .bar .short { display: inline; }
+}
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px 16px 32px;
+}
 
-.pveil { position: absolute; inset: 0; background: rgba(12, 15, 26, 0.68); backdrop-filter: blur(6px); opacity: 0; transition: opacity 0.35s; pointer-events: none; }
-.phone.veiled .pveil { opacity: 1; }
+/* ---------- device ---------- */
+.device {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: min(880px, calc(100dvh - 120px));
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 34px;
+  overflow: hidden;
+  box-shadow: var(--shadow-device);
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 640px) {
+  /* On a phone the portal IS the page. Stretch rather than height:100% —
+     a percentage height against an auto-height flex parent collapses to zero. */
+  .stage { padding: 0; align-items: stretch; }
+  .device { max-width: none; height: auto; border-radius: 0; box-shadow: none; }
+}
+.device[lang="ar"] { font-family: var(--sans-ar); }
+.device[lang="zh"] { font-family: var(--sans-zh); }
+.device[lang="ko"] { font-family: var(--sans-ko); }
+.device[lang="ja"] { font-family: var(--sans-ja); }
 
-.pscreen {
+.screen {
   position: absolute;
   inset: 0;
   display: none;
   flex-direction: column;
   overflow-y: auto;
   scrollbar-width: none;
+  background: var(--paper);
 }
-.pscreen::-webkit-scrollbar { display: none; }
-.pscreen.on { display: flex; animation: fadeUp 0.35s ease both; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.screen::-webkit-scrollbar { display: none; }
+.screen.on { display: flex; animation: rise 0.34s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-.demotag { position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 6; background: var(--gold); color: #3a2c00; font-size: 10px; font-weight: 800; letter-spacing: 0.15em; padding: 4px 14px; border-radius: 0 0 9px 9px; }
+.pad { padding: 22px 22px 26px; display: flex; flex-direction: column; flex: 1; }
+/* Never centre with justify-content inside a scroll container: content taller
+   than the screen overflows upward, above the scroll origin, and becomes
+   unreachable. Auto margins push down but still yield to overflow. */
+.pad.center > :first-child { margin-block-start: auto; }
+.pad.center > :last-child { margin-block-end: auto; }
 
-.pbrand { display: grid; grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr); align-items: flex-start; padding: 22px 20px 0; column-gap: 8px; }
-.pbrand .m { grid-column: 1; display: flex; align-items: center; gap: 8px; color: #fff; }
-.pbrand .m svg { width: 26px; height: 26px; }
-.pbrand .m b { font-size: 18px; font-weight: 800; letter-spacing: 0.08em; line-height: 1; display: block; }
-.pbrand .m small { display: block; font-size: 8.5px; font-weight: 800; letter-spacing: 0.2em; opacity: 0.7; margin-top: 3px; }
-.pbrand .b { grid-column: 3; justify-self: end; text-align: right; color: rgba(255, 255, 255, 0.7); font-size: 10px; font-weight: 800; letter-spacing: 0.12em; line-height: 1.35; }
-.pwho { padding: 12px 20px 0; color: rgba(255, 255, 255, 0.85); }
-.pwho b { display: block; font-size: 16px; color: #fff; }
-.pwho small { font-size: 12px; opacity: 0.85; }
-
-.sheet {
-  margin-top: auto;
-  padding: 60px 20px 24px;
-  background: linear-gradient(180deg, rgba(12, 15, 26, 0), rgba(12, 15, 26, 0.75) 18%, rgba(10, 12, 20, 0.96) 45%);
+/* ---------- chrome ---------- */
+.top { display: flex; align-items: center; gap: 10px; padding: 16px 18px 0; }
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand svg { width: 24px; height: 24px; flex: 0 0 auto; }
+.brand b { font-size: 14.5px; font-weight: 800; letter-spacing: 0.06em; line-height: 1; display: block; }
+.brand small {
+  display: block;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--ink-3);
+  margin-top: 3px;
 }
-.sheet h1 { color: #fff; font-size: 26px; font-weight: 800; line-height: 1.16; margin: 0; text-wrap: balance; }
-.sheet h1 em { font-style: normal; color: var(--gold); }
-.sheet p.lead { color: rgba(255, 255, 255, 0.82); font-size: 13.5px; line-height: 1.5; margin: 10px 0 16px; }
-.steps { display: flex; gap: 8px; margin-bottom: 16px; }
-.steps div { flex: 1; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 13px; padding: 11px 10px; color: #fff; }
-.steps b { display: block; font-size: 12.5px; margin-top: 5px; }
-.steps small { display: block; font-size: 10.5px; opacity: 0.72; line-height: 1.3; margin-top: 2px; }
-.langrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 4px; }
-.langrow span { font-size: 11.5px; font-weight: 700; color: #fff; background: rgba(255, 255, 255, 0.13); border: 1px solid rgba(255, 255, 255, 0.2); padding: 5px 11px; border-radius: 99px; }
-.pdpa { color: rgba(255, 255, 255, 0.55); font-size: 10.5px; line-height: 1.45; margin: 12px 0 0; }
-
-.formwrap { padding: 62px 18px 26px; display: flex; flex-direction: column; gap: 14px; }
-.pcard { background: rgba(255, 255, 255, 0.97); border-radius: 20px; padding: 20px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.28); }
-.eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--violet); }
-.ptitle { font-size: 21px; font-weight: 800; margin: 4px 0 2px; line-height: 1.2; }
-.psub { font-size: 13.5px; color: var(--grey); line-height: 1.5; margin: 0; }
-.pback { position: absolute; top: 18px; left: 14px; z-index: 5; width: 38px; height: 38px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.92); font-size: 18px; }
-.pbtn { display: flex; align-items: center; justify-content: center; width: 100%; border: 0; background: var(--violet); color: #fff; font-size: 16px; font-weight: 700; padding: 15px; border-radius: 14px; margin-top: 16px; }
-.pbtn.ghost { background: #fff; color: var(--ink); border: 1.5px solid var(--line); font-weight: 600; }
-.pbtn:disabled { filter: grayscale(0.5) opacity(0.55); }
-.pbtnrow { display: flex; gap: 9px; }
-.pbtnrow .pbtn { flex: 1; font-size: 14.5px; padding: 14px 10px; }
-
-.consentitem { display: flex; gap: 10px; background: #f5f6fa; border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; font-size: 12.5px; line-height: 1.45; }
-.consentitem + .consentitem { margin-top: 8px; }
-.consentitem i { font-style: normal; color: var(--teal); font-weight: 800; }
-.pcheck { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: 12.5px; font-weight: 600; line-height: 1.45; }
-.pcheck input { width: 18px; height: 18px; accent-color: var(--violet); margin-top: 2px; }
-label.pf { display: block; font-size: 12.5px; font-weight: 700; margin: 14px 0 6px; }
-select.pf-in { width: 100%; font-family: inherit; font-size: 15px; padding: 12px 13px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); }
-textarea.pf-in { width: 100%; font-family: inherit; font-size: 14px; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 12px; min-height: 62px; resize: vertical; }
-.pillrow { display: flex; gap: 8px; }
-.pillrow button { flex: 1; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 11px 6px; font-size: 14px; font-weight: 700; color: var(--ink); }
-.pillrow button[aria-pressed="true"] { background: var(--indigo); border-color: var(--indigo); color: #fff; }
-
-.pbar { height: 6px; border-radius: 4px; background: #e9ebf2; overflow: hidden; margin: 6px 0 4px; }
-.pbar i { display: block; height: 100%; background: var(--violet); border-radius: 4px; transition: width 0.25s ease; }
-.pcount { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); }
-.construct { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--indigo); margin-top: 12px; }
-.statement { font-size: 17px; font-weight: 700; line-height: 1.4; margin: 6px 0 0; }
-.scale { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
-.scale button { display: flex; align-items: center; gap: 11px; border: 1.5px solid var(--line); background: #fff; border-radius: 13px; padding: 12px 14px; font-size: 14px; font-weight: 600; color: var(--ink); text-align: left; }
-.scale button i { width: 21px; height: 21px; border-radius: 50%; border: 2px solid var(--line); flex: 0 0 auto; }
-.scale button[aria-pressed="true"] { border-color: var(--violet); background: #f3f0ff; }
-.scale button[aria-pressed="true"] i { background: var(--violet); border-color: var(--violet); box-shadow: inset 0 0 0 3px #fff; }
-
-.countwrap { text-align: center; color: #fff; margin: auto 0 18px; }
-.countwrap small { font-size: 12px; letter-spacing: 0.16em; font-weight: 800; text-transform: uppercase; opacity: 0.8; }
-.countnum { font-size: 54px; font-weight: 800; }
-.readyitem { display: flex; align-items: center; gap: 11px; background: rgba(255, 255, 255, 0.95); border-radius: 13px; padding: 12px 14px; font-size: 13.5px; font-weight: 600; }
-.readyitem + .readyitem { margin-top: 9px; }
-.readyitem .dot { width: 26px; height: 26px; border-radius: 50%; background: var(--teal); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; flex: 0 0 auto; }
-.mid { margin: auto; padding: 0 20px; width: 100%; display: flex; flex-direction: column; }
-
-.sesstop { position: absolute; top: 0; left: 0; right: 0; z-index: 4; display: flex; justify-content: space-between; padding: 16px 16px 0; }
-.timerpill { background: rgba(0, 0, 0, 0.55); color: #fff; font-weight: 800; font-size: 14px; padding: 7px 14px; border-radius: 99px; display: flex; align-items: center; gap: 7px; }
-.timerpill i { width: 8px; height: 8px; border-radius: 50%; background: var(--violet); }
-.langpill { background: rgba(255, 255, 255, 0.92); border: 0; font-weight: 800; font-size: 12px; padding: 8px 13px; border-radius: 99px; }
-.stagepill { position: absolute; top: 58px; left: 16px; z-index: 4; background: rgba(107, 78, 230, 0.9); color: #fff; font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 11px; border-radius: 99px; }
-.sessbottom { margin-top: auto; padding: 14px 16px 22px; background: linear-gradient(180deg, rgba(8, 10, 18, 0), rgba(8, 10, 18, 0.88) 38%); }
-.caption { color: #fff; font-size: 15.5px; line-height: 1.5; font-weight: 600; min-height: 96px; }
-.caption .n { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 5px; }
-.yousaid { color: rgba(255, 255, 255, 0.75); font-size: 12.5px; font-style: italic; min-height: 34px; margin: 8px 0 10px; }
-.micwrap { display: flex; flex-direction: column; align-items: center; }
-.micbtn { width: 72px; height: 72px; border-radius: 50%; background: var(--violet); border: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 26px rgba(107, 78, 230, 0.5); }
-.micbtn svg { width: 30px; height: 30px; fill: #fff; }
-.micbtn.listening { background: var(--teal); box-shadow: 0 8px 26px rgba(14, 159, 143, 0.55); }
-.miclbl { color: #fff; font-size: 12px; font-weight: 700; margin-top: 8px; text-align: center; }
-
-.tick { width: 72px; height: 72px; border-radius: 50%; background: var(--teal); color: #fff; font-size: 36px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
-.refbox { background: var(--indigo); color: #fff; border-radius: 14px; padding: 14px; text-align: center; margin: 14px 0; }
-.refbox small { display: block; font-size: 10.5px; letter-spacing: 0.14em; opacity: 0.75; font-weight: 700; }
-.refbox b { font-size: 20px; letter-spacing: 0.06em; }
-.summarybox { background: #f4f5fa; border: 1px solid var(--line); border-radius: 14px; padding: 14px 15px; margin: 14px 0; }
-.summarybox .sh { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--indigo); margin-bottom: 7px; }
-.summarybox p { margin: 0; font-size: 13.5px; line-height: 1.55; }
-.summarybox ul { margin: 8px 0 0; padding-left: 18px; font-size: 12.5px; line-height: 1.5; }
-.nextitem { display: flex; gap: 10px; font-size: 12.5px; line-height: 1.45; }
-.nextitem + .nextitem { margin-top: 8px; }
-.nextitem b { color: var(--violet); }
-.privacycard { background: #eef7f5; border: 1px solid #cfe8e3; border-radius: 13px; padding: 12px 14px; font-size: 12px; line-height: 1.5; color: #0b5c53; font-weight: 600; margin-top: 12px; }
-
-/* ================= PRODUCT: FACILITATOR PACK ================= */
-.packwrap { background: var(--canvas); color: var(--ink); padding: 26px 16px 46px; min-height: 82vh; }
-.pack { max-width: 900px; margin: 0 auto; background: #fff; padding: 44px 46px; box-shadow: 0 8px 30px rgba(20, 25, 40, 0.08); }
-.pack .cover { display: flex; justify-content: space-between; gap: 24px; border-bottom: 2px solid var(--indigo); padding-bottom: 22px; }
-.pack .cover p.k { margin: 0; font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--violet); }
-.pack h1 { margin: 8px 0 4px; font-size: 30px; font-weight: 800; }
-.pack .cover .r { text-align: right; font-size: 11px; font-weight: 700; color: var(--grey); line-height: 1.6; }
-.confid { background: #fff8e1; color: #6b5900; border-radius: 12px; padding: 12px 16px; font-size: 12px; font-weight: 600; margin-top: 16px; }
-.packsec { margin-top: 30px; }
-.packsec .h { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
-.packsec .h span { font-size: 13px; font-weight: 800; color: var(--violet); }
-.packsec .h h2 { margin: 0; font-size: 18px; font-weight: 800; }
-.packsec p { font-size: 13.5px; line-height: 1.6; }
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.stat { background: var(--canvas); border-radius: 12px; padding: 12px 14px; }
-.stat small { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); }
-.stat b { display: block; font-size: 20px; margin-top: 2px; }
-.care { border-left: 3px solid var(--developing); background: #fffbf0; border-radius: 0 12px 12px 0; padding: 12px 16px; font-size: 13px; line-height: 1.55; }
-.finding { border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
-.finding + .finding { margin-top: 14px; }
-.finding .top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.finding .rank { width: 24px; height: 24px; border-radius: 8px; background: var(--indigo); color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
-.finding h3 { flex: 1; margin: 0; font-size: 15.5px; font-weight: 800; }
-.block h3 { font-size: 14px; font-weight: 800; color: var(--indigo); margin: 0 0 4px; }
-.block + .block { margin-top: 22px; }
-.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
-@media (max-width: 720px) { .cols, .stats { grid-template-columns: 1fr 1fr; } .pack { padding: 28px 20px; } }
-.cols h4 { margin: 0 0 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); }
-.cols ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; }
-.cols li { display: flex; gap: 8px; font-size: 12.5px; line-height: 1.4; }
-.cols li::before { content: "▸"; color: var(--violet); }
-blockquote.q { margin: 0; border-left: 3px solid var(--indigo); background: #f7f8fb; border-radius: 0 12px 12px 0; padding: 12px 16px; font-size: 13px; font-style: italic; line-height: 1.55; }
-blockquote.q + blockquote.q { margin-top: 9px; }
-blockquote.q small { display: block; font-style: normal; font-weight: 700; font-size: 11px; color: var(--grey); margin-top: 5px; }
-.packlist { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.65; }
-.packfoot { margin-top: 36px; border-top: 1px solid var(--line); padding-top: 16px; text-align: center; font-size: 11px; font-weight: 600; color: var(--grey); }
-
-/* ---------- focused-page overrides ---------- */
-.pagebar {
+.back {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px 14px;
-  padding: 10px 22px;
-  background: var(--shell-panel);
-  border-bottom: 1px solid var(--shell-line);
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 0;
+}
+.back svg { width: 17px; height: 17px; }
+.device[dir="rtl"] .back svg { transform: scaleX(-1); }
+.top .spacer { flex: 1; }
+.langbtn {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink-2);
   font-size: 11.5px;
+  font-weight: 800;
+  padding: 7px 11px;
+  border-radius: 99px;
+}
+
+.rail { display: flex; gap: 4px; padding: 12px 22px 0; }
+.rail i { height: 3px; flex: 1; border-radius: 99px; background: var(--line); transition: background 0.3s; }
+.rail i.done { background: var(--violet); }
+
+/* ---------- type ---------- */
+.eyebrow {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+h1.title { margin: 8px 0 0; font-size: 25px; font-weight: 800; line-height: 1.2; letter-spacing: -0.01em; text-wrap: balance; }
+h2.title { margin: 8px 0 0; font-size: 21px; font-weight: 800; line-height: 1.25; text-wrap: balance; }
+.lead { margin: 10px 0 0; font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
+.note { margin: 12px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--ink-3); }
+.device[lang="ar"] h1.title, .device[lang="ar"] h2.title { line-height: 1.45; }
+.device[lang="ar"] .lead { line-height: 1.75; }
+
+/* ---------- controls ---------- */
+.btn {
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  background: var(--violet);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 15px 16px;
+  margin-top: 14px;
+  transition: transform 0.12s, filter 0.15s;
+}
+.btn:active { transform: scale(0.985); }
+.btn:hover { filter: brightness(1.06); }
+.btn.ghost { background: var(--paper); color: var(--ink); border: 1.5px solid var(--line); font-weight: 600; }
+.btn.ghost:hover { background: var(--canvas); filter: none; }
+.btn:disabled { background: var(--line); color: var(--ink-3); cursor: default; transform: none; filter: none; }
+.btnrow { display: flex; gap: 9px; }
+.btnrow .btn { flex: 1; font-size: 14.5px; padding: 14px 10px; }
+
+.field { display: block; font-size: 12.5px; font-weight: 700; margin: 16px 0 6px; }
+select.input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 15px;
+  padding: 13px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+}
+select.input:focus { border-color: var(--violet); outline: none; }
+textarea.input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14.5px;
+  line-height: 1.5;
+  padding: 12px 13px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 66px;
+  resize: vertical;
+}
+textarea.input:focus { border-color: var(--violet); outline: none; }
+.pillrow { display: flex; gap: 8px; }
+.pillrow button {
+  flex: 1;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 12px 6px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.pillrow button[aria-pressed="true"] { border-color: var(--indigo); background: var(--indigo); color: #fff; }
+
+/* ---------- language picker ---------- */
+.langgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.langcard {
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  border-radius: 14px;
+  padding: 15px 14px;
+  text-align: start;
+  color: var(--ink);
+  transition: border-color 0.15s, background 0.15s;
+}
+.langcard:hover { border-color: var(--violet); background: var(--violet-soft); }
+.langcard b { display: block; font-size: 16px; font-weight: 700; }
+.langcard small { display: block; font-size: 11px; color: var(--ink-3); margin-top: 3px; letter-spacing: 0.04em; }
+
+/* ---------- trust chip ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--teal-soft);
+  color: #0a6055;
+  border-radius: 99px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.chip svg { width: 13px; height: 13px; flex: 0 0 auto; }
+
+/* ---------- consent ---------- */
+.list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.item { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.5; color: var(--ink); }
+.item svg { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 2px; color: var(--teal); }
+.who { margin-top: 18px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.who .h {
+  background: var(--canvas);
+  padding: 9px 14px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.who .r { display: flex; gap: 12px; padding: 11px 14px; border-top: 1px solid var(--line-2); font-size: 12.5px; line-height: 1.45; }
+.who .r b { flex: 0 0 34%; font-weight: 700; }
+.who .r span { color: var(--ink-2); }
+.check { display: flex; gap: 11px; align-items: flex-start; margin-top: 18px; font-size: 13px; font-weight: 600; line-height: 1.5; }
+.check input { width: 19px; height: 19px; accent-color: var(--violet); margin-top: 1px; flex: 0 0 auto; }
+
+/* ---------- pulse ---------- */
+.count { margin-top: 14px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+.construct { margin-top: 14px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--indigo); }
+.statement { margin: 7px 0 0; font-size: 19px; font-weight: 700; line-height: 1.4; text-wrap: balance; }
+.device[lang="ar"] .statement { line-height: 1.6; }
+.scale { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+.scale button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  border-radius: 13px;
+  padding: 13px 15px;
+  font-size: 14.5px;
   font-weight: 600;
-  color: var(--shell-grey);
-  line-height: 1.45;
+  color: var(--ink);
+  text-align: start;
 }
-.pagebar b { color: var(--shell-ink); font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; font-size: 11px; }
-.pagebar .sep { opacity: 0.4; }
-.pagebar .short { display: none; }
-@media (max-width: 640px) {
-  .pagebar .long { display: none; }
-  .pagebar .short { display: inline; }
+.scale button i { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); flex: 0 0 auto; }
+.scale button:hover { border-color: var(--violet); }
+.scale button[aria-pressed="true"] { border-color: var(--violet); background: var(--violet-soft); }
+.scale button[aria-pressed="true"] i { background: var(--violet); border-color: var(--violet); box-shadow: inset 0 0 0 3.5px #fff; }
+
+/* ---------- ready ---------- */
+.ready { display: flex; flex-direction: column; gap: 9px; margin-top: 18px; }
+.ready .row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 13px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.ready .dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--teal-soft);
+  color: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.ready .dot svg { width: 14px; height: 14px; }
+.countdown { text-align: center; margin-top: 6px; }
+.countdown .n { font-size: 44px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.countdown small { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+
+/* ---------- session ---------- */
+.sess { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.sesshead { display: flex; align-items: center; gap: 8px; padding: 16px 18px 0; }
+.pill {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 11px;
+  border-radius: 99px;
+  background: var(--violet-soft);
+  color: var(--violet);
+}
+.timer {
+  margin-inline-start: auto;
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.timer i { width: 7px; height: 7px; border-radius: 50%; background: var(--violet); animation: blink 1.6s infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+.avatar {
+  margin: 16px 18px 0;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #f4f1ff 0%, #eef3fb 55%, #f7f8fb 100%);
+  border: 1px solid var(--line);
+  flex: 0 0 auto;
+  height: 176px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  padding: 0 22px;
+}
+.bars { display: flex; align-items: flex-end; gap: 5px; height: 40px; }
+.bars i { width: 6px; height: 10px; border-radius: 3px; background: var(--violet); opacity: 0.5; }
+.avatar.speaking .bars i { animation: talk 1s ease-in-out infinite; opacity: 1; }
+.bars i:nth-child(2) { animation-delay: 0.12s; }
+.bars i:nth-child(3) { animation-delay: 0.24s; }
+.bars i:nth-child(4) { animation-delay: 0.36s; }
+.bars i:nth-child(5) { animation-delay: 0.48s; }
+@keyframes talk { 0%, 100% { height: 9px; } 50% { height: 36px; } }
+.avatar span { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); line-height: 1.7; }
+
+.talkwrap { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 18px 0; scrollbar-width: none; }
+.talkwrap::-webkit-scrollbar { display: none; }
+.said { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--violet); }
+.line { margin: 6px 0 0; font-size: 16px; line-height: 1.55; font-weight: 500; }
+.device[lang="ar"] .line { line-height: 1.85; }
+.you {
+  margin-top: 14px;
+  border-inline-start: 3px solid var(--line);
+  padding-inline-start: 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  font-style: italic;
+  min-height: 20px;
+}
+.micwrap { padding: 14px 18px 22px; display: flex; flex-direction: column; align-items: center; gap: 9px; }
+.mic {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--violet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 26px rgba(107, 78, 230, 0.32);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.mic svg { width: 28px; height: 28px; fill: #fff; }
+.mic.listening { background: var(--teal); box-shadow: 0 10px 26px rgba(14, 159, 143, 0.32); }
+.mic.listening::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 2px solid rgba(14, 159, 143, 0.5);
+  animation: ring 1.3s infinite;
+}
+@keyframes ring { 0% { transform: scale(0.92); opacity: 1; } 100% { transform: scale(1.35); opacity: 0; } }
+.miclbl { font-size: 12.5px; font-weight: 700; color: var(--ink-2); }
+
+/* ---------- summary / done ---------- */
+.summary { margin-top: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--canvas); padding: 15px 16px; }
+.summary .h { font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--indigo); }
+.summary p { margin: 8px 0 0; font-size: 14px; line-height: 1.6; }
+.summary ul { margin: 10px 0 0; padding-inline-start: 18px; }
+.summary li { font-size: 13px; line-height: 1.55; margin-bottom: 5px; }
+.tick {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: var(--teal-soft);
+  color: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 4px;
+}
+.tick svg { width: 28px; height: 28px; }
+.ref { margin-top: 16px; border: 1px dashed var(--line); border-radius: 14px; padding: 13px; text-align: center; }
+.ref small { display: block; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+.ref b { font-size: 19px; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.steps { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.steps .s { display: flex; gap: 11px; font-size: 13px; line-height: 1.5; }
+.steps .s b {
+  flex: 0 0 auto;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: var(--violet-soft);
+  color: var(--violet);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.yours {
+  margin-top: 16px;
+  background: var(--teal-soft);
+  border-radius: 14px;
+  padding: 13px 15px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #0a6055;
+  font-weight: 600;
 }
 
-.pageframe { display: flex; flex-direction: column; min-height: 100dvh; }
-#view-experience { flex: 1; display: flex; min-height: 0; }
-/* The portal is already a phone UI — on a phone it should BE the page, not a
-   mock of a phone inside a phone. The device frame is a desktop affordance. */
-.stage { flex: 1; min-height: 0; padding: 22px 16px 34px; }
-.phone { height: min(860px, calc(100dvh - 120px)); }
-@media (max-width: 640px) {
-  .stage { padding: 0; min-height: 0; }
-  .phone { max-width: none; height: 100%; border-radius: 0; box-shadow: none; }
-  .sheet h1 { font-size: 24px; }
-  .formwrap { padding: 54px 16px 24px; }
-  .pbrand { grid-template-columns: 1fr auto; }
-  .pbrand .b { grid-column: 2; font-size: 9px; }
+.toast {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 26px;
+  margin-inline: auto;
+  width: max-content;
+  max-width: 88vw;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 18px;
+  border-radius: 12px;
+  transform: translateY(120px);
+  transition: transform 0.3s;
+  z-index: 90;
 }
-/* Keep the interviewer panel from competing with a screen that has its own
-   content — it only carries meaning on the landing and session screens. */
-.phone:not([data-screen="landing"]):not([data-screen="session"]) .avatarslot { opacity: 0.12; }
-.pscreen[data-screen="lobby"] { background: rgba(12, 15, 26, 0.55); backdrop-filter: blur(4px); }
+.toast.show { transform: none; }
+
+@media print {
+  body * { visibility: hidden !important; }
+  #printable, #printable * { visibility: visible !important; }
+  #printable { position: absolute; inset-block-start: 0; inset-inline-start: 0; width: 100%; padding: 24px; }
+  @page { margin: 16mm; }
+}
 </style>
-<div class="pageframe">
-<div class="pagebar">
-  <b>MIROME participant assessment</b>
-  <span class="sep">·</span>
-  <span class="long">Prototype of the confidential 15-minute session. Tap through it as an employee would; the digital-human video stream is the one thing a static page cannot carry.</span>
-  <span class="short">Prototype · tap through it as an employee would</span>
-</div>
 
-<!-- ============================================================ EXPERIENCE -->
-<section id="view-experience">
+<div class="frame">
+  <div class="bar">
+    <b>MIROME participant assessment</b>
+    <span class="long">Prototype of the confidential session, in six languages. Tap through it as an employee would — the digital-human video stream is the one thing a static page cannot carry.</span>
+    <span class="short">Prototype · six languages · tap through as an employee</span>
+  </div>
+
   <div class="stage">
-    <div class="phone" id="phone">
-      <div class="scene">
-        <div class="avatarslot" id="avatarSlot">
-          <div class="wavebars" id="waveBars"><i></i><i></i><i></i><i></i><i></i></div>
-          DIGITAL INTERVIEWER<br />video stream not included in the static prototype
-        </div>
-      </div>
-      <div class="pveil"></div>
-      <div class="demotag">DEMO · SYNTHETIC DATA</div>
+    <main class="device" id="device" lang="en" dir="ltr">
 
-      <!-- landing -->
-      <section class="pscreen on" data-screen="landing">
-        <div class="pbrand">
-          <div class="m">
+      <!-- 1 · language -->
+      <section class="screen on" data-screen="lang">
+        <div class="top">
+          <span class="brand">
             <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
-              <circle cx="14" cy="14" r="12.5" stroke="#F2B705" stroke-width="1.6" opacity=".5"></circle>
-              <g stroke="#F2B705" stroke-width="2.6" stroke-linecap="round">
+              <circle cx="14" cy="14" r="12.5" stroke="#6B4EE6" stroke-width="1.5" opacity=".45"></circle>
+              <g stroke="#6B4EE6" stroke-width="2.6" stroke-linecap="round">
                 <path d="M8 17 v-6"></path><path d="M14 20 v-12"></path><path d="M20 17 v-6"></path>
               </g>
             </svg>
             <span><b>MIROME</b><small>TEAM INTELLIGENCE</small></span>
-          </div>
-          <div class="b">BYOND ASIA<br /><span style="opacity:.7">ASSESSMENT PORTAL</span></div>
+          </span>
         </div>
-        <div class="pwho"><b>Meridian Group · Team Diagnosis 2026</b><small>Confidential team diagnosis · 15 minutes</small></div>
-        <div class="sheet">
-          <h1>Fifteen minutes to say how <em>this team actually works</em> — before anyone designs a workshop.</h1>
-          <p class="lead">A confidential conversation with MIROME's digital interviewer. Your answers are combined with everyone else's to show where the team is strong and where it is stuck. No individual report goes to your manager.</p>
-          <div class="steps">
-            <div><span style="font-size:17px">🔒</span><b>Consent</b><small>What is collected and who sees it</small></div>
-            <div><span style="font-size:17px">💬</span><b>Interview</b><small>15 minutes, your own words</small></div>
-            <div><span style="font-size:17px">✅</span><b>Confirm</b><small>You correct the summary</small></div>
-          </div>
-          <button class="pbtn" data-go="consent" style="margin-top:0">Start — 15 minutes</button>
-          <div class="langrow"><span>English</span><span>Bahasa Melayu</span><span>中文</span><span>தமிழ்</span></div>
-          <p class="pdpa">Confidential · results reported at team level only · minimum group size of 5 · you may stop at any point.</p>
+        <div class="pad center">
+          <h1 class="title" data-t="lang.title"></h1>
+          <p class="lead" data-t="lang.sub"></p>
+          <div class="langgrid" id="langGrid"></div>
+          <p class="note" data-t="lang.note"></p>
         </div>
       </section>
 
-      <!-- consent -->
-      <section class="pscreen" data-screen="consent">
-        <button class="pback" data-go="landing" aria-label="Back">←</button>
-        <div class="formwrap">
-          <div class="pcard">
-            <div class="eyebrow">Step 1 of 5</div>
-            <h2 class="ptitle">Before we begin</h2>
-            <p class="psub">This is a team diagnosis. It is not a performance review and it is not used for discipline, pay or promotion.</p>
-            <div style="margin-top:14px">
-              <div class="consentitem"><i>✓</i><span>Your responses are stored against a reference number, not your name.</span></div>
-              <div class="consentitem"><i>✓</i><span>Your manager and HR see team-level results only, never your individual answers.</span></div>
-              <div class="consentitem"><i>✓</i><span>No group smaller than five people is ever displayed.</span></div>
-              <div class="consentitem"><i>✓</i><span>A trained reviewer reads anything that raises a welfare or safety concern.</span></div>
-              <div class="consentitem"><i>✓</i><span>You can skip any question, or stop the session, without giving a reason.</span></div>
-              <div class="consentitem"><i>✓</i><span>Your data is retained for 24 months and then deleted.</span></div>
-            </div>
-            <label class="pcheck"><input type="checkbox" id="consentBox" /><span>I have read the above and agree to take part on these terms.</span></label>
-            <button class="pbtn" id="consentBtn">I agree — continue</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- context -->
-      <section class="pscreen" data-screen="context">
-        <button class="pback" data-go="consent" aria-label="Back">←</button>
-        <div class="formwrap">
-          <div class="pcard">
-            <div class="eyebrow">Step 2 of 5</div>
-            <h2 class="ptitle">A little context</h2>
-            <p class="psub">Only what the analysis needs to compare groups fairly. Nothing here identifies you on its own.</p>
-            <label class="pf" for="ctxDept">Department</label>
-            <select class="pf-in" id="ctxDept">
-              <option value="">Choose…</option>
-              <option>Operations</option><option>Sales</option><option>Customer Service</option>
-              <option>Finance</option><option>Marketing</option><option>IT &amp; Systems</option><option>Legal &amp; Compliance</option>
-            </select>
-            <label class="pf" for="ctxRole">Role level</label>
-            <select class="pf-in" id="ctxRole">
-              <option value="">Choose…</option>
-              <option>Executive</option><option>Senior manager</option><option>Manager</option>
-              <option>Team lead</option><option>Individual contributor</option>
-            </select>
-            <label class="pf" for="ctxTenure">Time in this team</label>
-            <select class="pf-in" id="ctxTenure">
-              <option value="">Choose…</option>
-              <option>&lt;1 year</option><option>1–3 years</option><option>3–7 years</option><option>7+ years</option>
-            </select>
-            <label class="pf">Do you manage people?</label>
-            <div class="pillrow" id="managesRow">
-              <button data-manages="yes" aria-pressed="false">Yes</button>
-              <button data-manages="no" aria-pressed="false">No</button>
-            </div>
-            <label class="pf">Interview language</label>
-            <div class="pillrow" id="langRow">
-              <button data-lang="EN" aria-pressed="true">English</button>
-              <button data-lang="MS" aria-pressed="false">Bahasa Melayu</button>
-            </div>
-            <p class="note">If a combination of answers would make a group smaller than five people, that group is merged before reporting.</p>
-            <button class="pbtn" id="contextBtn">Continue</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- pulse -->
-      <section class="pscreen" data-screen="pulse">
-        <button class="pback" data-go="context" aria-label="Back">←</button>
-        <div class="formwrap">
-          <div class="pcard">
-            <div class="eyebrow">Step 3 of 5</div>
-            <h2 class="ptitle">How true is this of your team?</h2>
-            <p class="psub">Ten statements. Answer for the team as you experience it, not as you think it should be.</p>
-            <div class="pbar"><i id="pulseFill" style="width:10%"></i></div>
-            <div class="pcount" id="pulseCount">Statement 1 of 10</div>
-            <div class="construct" id="pulseConstruct">—</div>
-            <p class="statement" id="pulseStatement">—</p>
-            <div class="scale" id="pulseScale"></div>
-            <div class="pbtnrow" style="margin-top:16px">
-              <button class="pbtn ghost" id="pulsePrev" style="margin-top:0">Back</button>
-              <button class="pbtn" id="pulseNext" style="margin-top:0">Next</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- lobby -->
-      <section class="pscreen" data-screen="lobby">
-        <div class="pbrand">
-          <div class="m">
+      <!-- 2 · welcome -->
+      <section class="screen" data-screen="welcome">
+        <div class="top">
+          <button class="back" data-go="lang" aria-label="Back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+          </button>
+          <span class="brand">
             <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
-              <circle cx="14" cy="14" r="12.5" stroke="#F2B705" stroke-width="1.6" opacity=".5"></circle>
-              <g stroke="#F2B705" stroke-width="2.6" stroke-linecap="round">
+              <circle cx="14" cy="14" r="12.5" stroke="#6B4EE6" stroke-width="1.5" opacity=".45"></circle>
+              <g stroke="#6B4EE6" stroke-width="2.6" stroke-linecap="round">
                 <path d="M8 17 v-6"></path><path d="M14 20 v-12"></path><path d="M20 17 v-6"></path>
               </g>
             </svg>
             <span><b>MIROME</b><small>TEAM INTELLIGENCE</small></span>
-          </div>
-          <div class="b">BYOND ASIA<br /><span style="opacity:.7">ASSESSMENT PORTAL</span></div>
+          </span>
+          <span class="spacer"></span>
+          <button class="langbtn" data-go="lang" id="langBtn"></button>
         </div>
-        <div class="mid">
-          <div class="countwrap">
-            <small>Interview starts in</small>
-            <div class="countnum" id="lobbyCount">00:10</div>
-            <small style="letter-spacing:.02em;text-transform:none;font-weight:600;opacity:.7">demo — shortened countdown</small>
+        <div class="pad">
+          <div class="eyebrow" data-t="w.eyebrow"></div>
+          <h1 class="title" data-t="w.title"></h1>
+          <p class="lead" data-t="w.lead"></p>
+          <div style="margin-top:16px">
+            <span class="chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+              <span data-t="chip.private"></span>
+            </span>
           </div>
-          <div class="pcard">
-            <p class="psub" style="text-align:center;margin-bottom:8px"><b style="color:var(--ink)">Ready check</b></p>
-            <div class="readyitem"><span class="dot">✓</span><span>Connection is good</span></div>
-            <div class="readyitem"><span class="dot">✓</span><span>Microphone allowed</span></div>
-            <div class="readyitem"><span class="dot" style="background:var(--indigo)">文</span><span>Language: <b id="lobbyLang">English</b></span></div>
-            <p class="note">Speak normally. There are no right answers, and nothing is scored on how well you speak — accent, grammar and fluency are excluded from every result.</p>
-            <button class="pbtn" data-go="session">Enter the interview</button>
+          <div class="steps" style="margin-top:20px">
+            <div class="s"><b>1</b><span data-t="w.s1"></span></div>
+            <div class="s"><b>2</b><span data-t="w.s2"></span></div>
+            <div class="s"><b>3</b><span data-t="w.s3"></span></div>
+          </div>
+          <div style="flex:1"></div>
+          <button class="btn" data-go="consent" data-t="w.cta"></button>
+          <p class="note" data-t="w.privacy"></p>
+        </div>
+      </section>
+
+      <!-- 3 · consent -->
+      <section class="screen" data-screen="consent">
+        <div class="top">
+          <button class="back" data-go="welcome" aria-label="Back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+          </button>
+          <span class="spacer"></span>
+        </div>
+        <div class="rail" data-rail="1"></div>
+        <div class="pad">
+          <div class="eyebrow" data-t="c.step"></div>
+          <h2 class="title" data-t="c.title"></h2>
+          <p class="lead" data-t="c.sub"></p>
+          <div class="list" id="consentList"></div>
+          <div class="who">
+            <div class="h" data-t="c.whoTitle"></div>
+            <div class="r"><b data-t="c.who1"></b><span data-t="c.who1v"></span></div>
+            <div class="r"><b data-t="c.who2"></b><span data-t="c.who2v"></span></div>
+            <div class="r"><b data-t="c.who3"></b><span data-t="c.who3v"></span></div>
+          </div>
+          <label class="check"><input type="checkbox" id="consentBox" /><span data-t="c.check"></span></label>
+          <button class="btn" id="consentBtn" data-t="c.cta"></button>
+        </div>
+      </section>
+
+      <!-- 4 · context -->
+      <section class="screen" data-screen="context">
+        <div class="top">
+          <button class="back" data-go="consent" aria-label="Back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+          </button>
+          <span class="spacer"></span>
+        </div>
+        <div class="rail" data-rail="2"></div>
+        <div class="pad">
+          <div class="eyebrow" data-t="x.step"></div>
+          <h2 class="title" data-t="x.title"></h2>
+          <p class="lead" data-t="x.sub"></p>
+          <label class="field" for="dept" data-t="x.dept"></label>
+          <select class="input" id="dept"></select>
+          <label class="field" for="role" data-t="x.role"></label>
+          <select class="input" id="role"></select>
+          <label class="field" for="tenure" data-t="x.tenure"></label>
+          <select class="input" id="tenure"></select>
+          <label class="field" data-t="x.manage"></label>
+          <div class="pillrow" id="manageRow">
+            <button data-v="yes" aria-pressed="false" data-t="x.yes"></button>
+            <button data-v="no" aria-pressed="false" data-t="x.no"></button>
+          </div>
+          <p class="note" data-t="x.note"></p>
+          <button class="btn" id="contextBtn" data-t="common.continue"></button>
+        </div>
+      </section>
+
+      <!-- 5 · pulse -->
+      <section class="screen" data-screen="pulse">
+        <div class="top">
+          <button class="back" data-go="context" aria-label="Back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+          </button>
+          <span class="spacer"></span>
+        </div>
+        <div class="rail" data-rail="3"></div>
+        <div class="pad">
+          <div class="eyebrow" data-t="p.step"></div>
+          <h2 class="title" data-t="p.title"></h2>
+          <p class="lead" data-t="p.sub"></p>
+          <div class="count" id="pulseCount"></div>
+          <div class="construct" id="pulseConstruct"></div>
+          <p class="statement" id="pulseStatement"></p>
+          <div class="scale" id="pulseScale"></div>
+          <div style="flex:1"></div>
+          <div class="btnrow" style="margin-top:16px">
+            <button class="btn ghost" id="pulsePrev" style="margin-top:0" data-t="common.back"></button>
+            <button class="btn" id="pulseNext" style="margin-top:0"></button>
           </div>
         </div>
       </section>
 
-      <!-- session -->
-      <section class="pscreen" data-screen="session">
-        <div class="sesstop">
-          <div class="timerpill"><i></i><span id="sessTimer">10:00</span></div>
-          <button class="langpill">文A · <span id="sessLang">EN</span></button>
+      <!-- 6 · ready -->
+      <section class="screen" data-screen="ready">
+        <div class="top"><span class="spacer"></span></div>
+        <div class="rail" data-rail="4"></div>
+        <div class="pad">
+          <div class="eyebrow" data-t="r.step"></div>
+          <h2 class="title" data-t="r.title"></h2>
+          <div class="countdown" style="margin-top:18px">
+            <div class="n" id="countdown">00:10</div>
+            <small data-t="r.starts"></small>
+          </div>
+          <div class="ready">
+            <div class="row">
+              <span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>
+              <span data-t="r.conn"></span>
+            </div>
+            <div class="row">
+              <span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>
+              <span data-t="r.mic"></span>
+            </div>
+            <div class="row">
+              <span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>
+              <span><span data-t="r.lang"></span>: <b id="readyLang"></b></span>
+            </div>
+          </div>
+          <div style="margin-top:16px">
+            <span class="chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+              <span data-t="r.promise"></span>
+            </span>
+          </div>
+          <p class="note" data-t="r.note"></p>
+          <div style="flex:1"></div>
+          <button class="btn" data-go="session" data-t="r.cta"></button>
         </div>
-        <div class="stagepill" id="stagePill">Team experience</div>
-        <div class="sessbottom">
-          <div class="caption"><span class="n">MIROME Interviewer</span><span id="caption">—</span></div>
-          <div class="yousaid" id="youSaid"></div>
+      </section>
+
+      <!-- 7 · session -->
+      <section class="screen" data-screen="session">
+        <div class="sess">
+          <div class="sesshead">
+            <span class="pill" id="stagePill"></span>
+            <span class="timer"><i></i><span id="sessTimer">10:00</span></span>
+          </div>
+          <div class="avatar" id="avatar">
+            <div class="bars"><i></i><i></i><i></i><i></i><i></i></div>
+            <span data-t="s.avatar"></span>
+          </div>
+          <div class="talkwrap">
+            <div class="said" data-t="s.interviewer"></div>
+            <p class="line" id="line"></p>
+            <div class="you" id="you"></div>
+          </div>
           <div class="micwrap">
-            <button class="micbtn" id="micBtn" aria-label="Answer">
+            <button class="mic" id="mic" aria-label="Answer">
               <svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4Zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2Z"></path></svg>
             </button>
-            <div class="miclbl" id="micLbl">Tap to answer</div>
+            <span class="miclbl" id="micLbl"></span>
           </div>
         </div>
       </section>
 
-      <!-- reflect -->
-      <section class="pscreen" data-screen="reflect">
-        <div class="formwrap">
-          <div class="pcard">
-            <div class="eyebrow">Step 4 of 5</div>
-            <h2 class="ptitle">Four short reflections</h2>
-            <p class="psub">These become the team's own words in the results — quoted anonymously, never attributed.</p>
-            <label class="pf" for="rStrength">One strength of this team</label>
-            <textarea class="pf-in" id="rStrength">Inside my own team, people help each other without being asked.</textarea>
-            <label class="pf" for="rObstacle">The biggest obstacle to doing good work here</label>
-            <textarea class="pf-in" id="rObstacle">The handover to operations has no agreed standard, so half of what we send back is rework.</textarea>
-            <label class="pf" for="rPriority">If one thing changed, what should it be?</label>
-            <textarea class="pf-in" id="rPriority">make it clear who owns each handover</textarea>
-            <label class="pf" for="rAction">One thing you will do yourself</label>
-            <textarea class="pf-in" id="rAction">I will write down what a complete handover looks like for my part.</textarea>
-            <button class="pbtn" data-go="confirm">Continue</button>
+      <!-- 8 · reflect -->
+      <section class="screen" data-screen="reflect">
+        <div class="top"><span class="spacer"></span></div>
+        <div class="rail" data-rail="5"></div>
+        <div class="pad">
+          <div class="eyebrow" data-t="f.step"></div>
+          <h2 class="title" data-t="f.title"></h2>
+          <p class="lead" data-t="f.sub"></p>
+          <label class="field" for="q1" data-t="f.q1"></label>
+          <textarea class="input" id="q1"></textarea>
+          <label class="field" for="q2" data-t="f.q2"></label>
+          <textarea class="input" id="q2"></textarea>
+          <label class="field" for="q3" data-t="f.q3"></label>
+          <textarea class="input" id="q3"></textarea>
+          <label class="field" for="q4" data-t="f.q4"></label>
+          <textarea class="input" id="q4"></textarea>
+          <button class="btn" data-go="confirm" data-t="common.continue"></button>
+        </div>
+      </section>
+
+      <!-- 9 · confirm -->
+      <section class="screen" data-screen="confirm">
+        <div class="top"><span class="spacer"></span></div>
+        <div class="rail" data-rail="6"></div>
+        <div class="pad">
+          <div class="eyebrow" data-t="cf.step"></div>
+          <h2 class="title" data-t="cf.title"></h2>
+          <p class="lead" data-t="cf.sub"></p>
+          <div class="summary">
+            <div class="h" data-t="cf.head"></div>
+            <p id="sumLead"></p>
+            <ul id="sumPoints"></ul>
+          </div>
+          <div id="fixWrap" hidden>
+            <label class="field" for="fix" data-t="cf.fixLabel"></label>
+            <textarea class="input" id="fix"></textarea>
+          </div>
+          <p class="note" id="fixedNote" hidden data-t="cf.noted"></p>
+          <div style="flex:1"></div>
+          <div class="btnrow" style="margin-top:16px">
+            <button class="btn ghost" id="btnFix" style="margin-top:0" data-t="cf.wrong"></button>
+            <button class="btn" data-go="done" style="margin-top:0" data-t="cf.right"></button>
           </div>
         </div>
       </section>
 
-      <!-- confirm -->
-      <section class="pscreen" data-screen="confirm">
-        <div class="formwrap">
-          <div class="pcard">
-            <div class="eyebrow">Step 5 of 5</div>
-            <h2 class="ptitle">Is this right?</h2>
-            <p class="psub">This is what has been recorded from your session. Correct anything that is wrong — the corrected version is what goes into the analysis.</p>
-            <div class="summarybox">
-              <div class="sh">Recorded summary</div>
-              <p id="summaryLead">—</p>
-              <ul id="summaryPoints"></ul>
-            </div>
-            <div id="correctionWrap" hidden>
-              <label class="pf" for="correction">What should it say instead?</label>
-              <textarea class="pf-in" id="correction"></textarea>
-            </div>
-            <div class="pbtnrow" style="margin-top:16px">
-              <button class="pbtn ghost" id="btnCorrect" style="margin-top:0">Something is wrong</button>
-              <button class="pbtn" data-go="done" style="margin-top:0">Yes, that is accurate</button>
+      <!-- 10 · done -->
+      <section class="screen" data-screen="done">
+        <div class="top"><span class="spacer"></span></div>
+        <div class="rail" data-rail="7"></div>
+        <div class="pad" id="printable">
+          <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></div>
+          <h2 class="title" style="text-align:center" data-t="d.title"></h2>
+          <p class="lead" style="text-align:center" data-t="d.sub"></p>
+          <div class="ref"><small data-t="d.ref"></small><b id="refCode">MTI-2026-4821</b></div>
+          <div class="summary">
+            <div class="h" data-t="d.nextTitle"></div>
+            <div class="steps">
+              <div class="s"><b>1</b><span data-t="d.n1"></span></div>
+              <div class="s"><b>2</b><span data-t="d.n2"></span></div>
+              <div class="s"><b>3</b><span data-t="d.n3"></span></div>
+              <div class="s"><b>4</b><span data-t="d.n4"></span></div>
             </div>
           </div>
+          <div class="yours" data-t="d.yours"></div>
+          <button class="btn ghost" id="btnPrint" data-t="d.print"></button>
+          <button class="btn ghost" id="btnRestart" data-t="d.restart"></button>
         </div>
       </section>
-
-      <!-- done -->
-      <section class="pscreen" data-screen="done">
-        <div class="formwrap">
-          <div class="pcard">
-            <div class="tick">✓</div>
-            <h2 class="ptitle" style="text-align:center">Done — thank you</h2>
-            <p class="psub" style="text-align:center">Your session is complete. It joins the team results as one anonymous data point.</p>
-            <div class="refbox"><small>YOUR REFERENCE</small><b id="doneRef">MTI-2026-4821</b></div>
-            <div class="summarybox">
-              <div class="sh">What happens next</div>
-              <div class="nextitem"><b>1</b><span>Results are aggregated once enough of your team has taken part.</span></div>
-              <div class="nextitem"><b>2</b><span>The facilitator designs the programme around what the data actually shows.</span></div>
-              <div class="nextitem"><b>3</b><span>You will be asked four short questions again 30 days after the programme.</span></div>
-              <div class="nextitem"><b>4</b><span>Actions agreed by management are published back to everyone who took part.</span></div>
-            </div>
-            <div class="privacycard">No individual report is produced from this session. Nothing here is shared with your manager.</div>
-            <button class="pbtn ghost" id="restartBtn">Run the journey again</button>
-          </div>
-        </div>
-      </section>
-    </div>
+    </main>
   </div>
-</section>
-
 </div>
+
 <div class="toast" id="toast"></div>
+
 <script>
-const DATA = {"climateSpecs": [{"id": "psychSafety", "name": "Psychological safety", "pulseItem": "In this team I can raise a mistake or disagree with a senior colleague without it being held against me.", "purpose": "Can people ask questions, admit mistakes, challenge ideas and disagree with leaders without fear of penalty?"}, {"id": "trust", "name": "Trust", "pulseItem": "When colleagues in this team commit to something, I can rely on it being done.", "purpose": "Do people believe colleagues and leaders keep commitments, act consistently and avoid unfair blame?"}, {"id": "roleClarity", "name": "Role clarity", "pulseItem": "It is clear who owns each decision and each handover in the work I do.", "purpose": "Do people know who decides, who owns each task, how handovers work and when to escalate?"}, {"id": "goalAlignment", "name": "Goal alignment", "pulseItem": "My department's targets pull in the same direction as the departments we depend on.", "purpose": "Does the team share priorities and outcomes, including across departments?"}, {"id": "collaboration", "name": "Collaboration", "pulseItem": "Working across departments here is straightforward when I need something.", "purpose": "Does the team coordinate, resolve dependencies and work across departments?"}, {"id": "conflict", "name": "Constructive conflict", "pulseItem": "Disagreements in this team get discussed openly and resolved.", "purpose": "Can people disagree openly, separate ideas from personalities and reach a workable decision?"}, {"id": "leadershipOpenness", "name": "Leadership openness", "pulseItem": "My manager invites input before deciding, and explains decisions afterwards.", "purpose": "Do leaders listen, invite input, explain decisions and respond to concerns?"}, {"id": "inclusion", "name": "Inclusion and belonging", "pulseItem": "In team discussions, my contribution is heard and taken seriously.", "purpose": "Do people feel respected, heard and able to contribute to decisions that affect them?"}, {"id": "accountability", "name": "Accountability", "pulseItem": "In this team, agreed actions are followed through and reviewed.", "purpose": "Does the team keep commitments, address underperformance and follow through?"}, {"id": "resilience", "name": "Collective resilience", "pulseItem": "When priorities change suddenly, this team adapts without breaking down.", "purpose": "Can the team adapt, re-prioritise and support each other through setbacks and pressure?"}], "scenarios": [{"id": "missedDeadline", "title": "Missed deadline", "setup": "A colleague in another department has delayed a deliverable you depend on. Your own commitment to a customer is now at risk, and this is the second time it has happened.", "ask": "What do you do next, and what exactly do you say to them?", "probe": "And if the delay happens again the following week \u2014 what changes?"}, {"id": "disagreeManager", "title": "Disagreement with a manager", "setup": "Your manager has decided to bring a launch date forward. You believe the new date creates a real operational risk that senior management cannot see from where they sit.", "ask": "What do you do?", "probe": "Suppose the decision stands after you raise it. What do you do then?"}, {"id": "departmentConflict", "title": "Departmental conflict", "setup": "Two departments are blaming each other for a failed handover to a customer. You are in the meeting where it surfaces, and both sides are describing the same events differently.", "ask": "How do you handle the conversation?", "probe": "What would you put in place so it does not happen a third time?"}, {"id": "overloadedColleague", "title": "Overloaded colleague", "setup": "A teammate tells you privately that they cannot complete their part of the work this week. Your own workload is already full, and the deadline is shared.", "ask": "What do you say and what do you do?", "probe": "What do you tell your manager, and when?"}, {"id": "suddenChange", "title": "Sudden change", "setup": "Three days before delivery, the requirement changes materially. Half the work already done no longer applies, and the team is tired.", "ask": "What are your first three moves?", "probe": "How do you communicate it to the rest of the team?"}]};
 /* ============================================================
-   Shared helpers
+   Copy — six languages, one shape. Arabic drives RTL for the whole device.
+   ============================================================ */
+const LANGS = [
+  { id: "en", label: "English", native: "English", dir: "ltr", tag: "EN" },
+  { id: "ms", label: "Malay", native: "Bahasa Melayu", dir: "ltr", tag: "BM" },
+  { id: "zh", label: "Chinese", native: "中文", dir: "ltr", tag: "中文" },
+  { id: "ar", label: "Arabic", native: "العربية", dir: "rtl", tag: "ع" },
+  { id: "ko", label: "Korean", native: "한국어", dir: "ltr", tag: "한" },
+  { id: "ja", label: "Japanese", native: "日本語", dir: "ltr", tag: "日" },
+];
+
+const T = {
+  en: {
+    "common.continue": "Continue", "common.back": "Back", "common.next": "Next",
+    "lang.title": "Choose your language",
+    "lang.sub": "The whole session runs in the language you pick — the questions, the interviewer, and your summary.",
+    "lang.note": "Meridian Group · Team Diagnosis 2026 · about 15 minutes",
+    "w.eyebrow": "Meridian Group · Team Diagnosis 2026",
+    "w.title": "Fifteen minutes to say how this team actually works.",
+    "w.lead": "A confidential conversation with MIROME's digital interviewer. Your answers are combined with everyone else's to show where the team is strong and where it is stuck.",
+    "chip.private": "No person is listening to this conversation",
+    "w.s1": "You agree to what is collected, and see exactly who can read what.",
+    "w.s2": "You talk. There are no right answers, and nothing is scored on how you speak.",
+    "w.s3": "You read back what was recorded, and correct anything that is wrong.",
+    "w.cta": "Begin",
+    "w.privacy": "Team-level results only · no group under five people is ever shown · you may stop at any point.",
+    "c.step": "Step 1 of 5", "c.title": "Before we begin",
+    "c.sub": "This is a team diagnosis. It is not a performance review, and it is not used for discipline, pay or promotion.",
+    "c.i1": "Your answers are stored against a reference number, not your name.",
+    "c.i2": "No person listens to the session live, and no recording is passed to your manager.",
+    "c.i3": "No group smaller than five people is ever displayed.",
+    "c.i4": "A trained reviewer reads anything that raises a welfare or safety concern.",
+    "c.i5": "You can skip any question, or stop, without giving a reason.",
+    "c.i6": "The recording is deleted after 90 days. The anonymous results are kept for 24 months.",
+    "c.whoTitle": "Who sees what",
+    "c.who1": "You", "c.who1v": "Your own summary, first, before anyone else sees anything.",
+    "c.who2": "Facilitator", "c.who2v": "Team-level patterns and anonymous quotes. Never your individual answers.",
+    "c.who3": "HR & management", "c.who3v": "Aggregate results only. Never an individual profile.",
+    "c.check": "I have read this and agree to take part on these terms.",
+    "c.cta": "I agree — continue",
+    "x.step": "Step 2 of 5", "x.title": "A little context",
+    "x.sub": "Only what the analysis needs to compare groups fairly. Nothing here identifies you on its own.",
+    "x.dept": "Department", "x.role": "Role level", "x.tenure": "Time in this team",
+    "x.manage": "Do you manage people?", "x.choose": "Choose…", "x.yes": "Yes", "x.no": "No",
+    "x.note": "If a combination of answers would make a group smaller than five people, that group is merged before reporting.",
+    "x.depts": ["Operations", "Sales", "Customer Service", "Finance", "Marketing", "IT & Systems", "Legal & Compliance"],
+    "x.roles": ["Executive", "Senior manager", "Manager", "Team lead", "Individual contributor"],
+    "x.tenures": ["Less than 1 year", "1–3 years", "3–7 years", "More than 7 years"],
+    "p.step": "Step 3 of 5", "p.title": "How true is this of your team?",
+    "p.sub": "Ten statements. Answer for the team as you experience it, not as you think it should be.",
+    "p.count": "Statement {n} of {m}",
+    "p.scale": ["Strongly disagree", "Disagree", "Neither", "Agree", "Strongly agree"],
+    "p.done": "Continue to the interview",
+    "r.step": "Step 4 of 5", "r.title": "Ready check", "r.starts": "Interview starts in",
+    "r.conn": "Connection is good", "r.mic": "Microphone is working", "r.lang": "Language",
+    "r.promise": "Nobody is listening live. Speak freely.",
+    "r.note": "Speak normally. Accent, grammar and fluency are excluded from every result — only what you describe is analysed.",
+    "r.cta": "Enter the interview",
+    "s.interviewer": "MIROME interviewer",
+    "s.avatar": "Digital interviewer · video stream not included in this prototype",
+    "s.tap": "Tap to answer", "s.listening": "Listening…",
+    "s.stage1": "Team experience", "s.stage2": "Situation 1", "s.stage3": "Situation 2", "s.stage4": "Closing",
+    "s.greet": "Thank you for making the time. This is a diagnosis of how the team works, not an assessment of you. Nothing you say is reported against your name. Tell me about a recent piece of work that did not go smoothly — what happened, and where did it get stuck?",
+    "s.probe": "Who was supposed to decide, and how did you find out? Keep it to what happened, not who is at fault.",
+    "s.ack": "Noted, thank you. Is there anything about how the team works together that you would add?",
+    "s.scenarioIntro": "Now a short workplace situation. There is no right answer — tell me what you would actually do.",
+    "s.scenario1": "A colleague in another department has delayed something you depend on, and your commitment to a customer is now at risk. This is the second time. What do you do next, and what exactly do you say to them?",
+    "s.scenario2": "Three days before delivery the requirement changes materially. Half the work already done no longer applies, and the team is tired. What are your first three moves?",
+    "s.wrap": "We are close to time. Before we finish — one thing you would change about how this team works?",
+    "s.close": "Thank you. I will show you a short summary of what I recorded, so you can correct anything that is wrong.",
+    "s.a1": "The handover sat for nine days. Nobody knew who was supposed to sign it off.",
+    "s.a2": "I found out by asking three different people. There is no agreed owner for that step.",
+    "s.a3": "I would check what happened first and ask what got in the way — from their side there may be a constraint I cannot see.",
+    "s.a4": "I would step back, prioritise what has to ship, defer the rest and tell the customer early.",
+    "s.a5": "Make it clear who owns each handover.",
+    "f.step": "Step 5 of 5", "f.title": "Four short reflections",
+    "f.sub": "These become the team's own words in the results — quoted anonymously, never attributed to you.",
+    "f.q1": "One strength of this team", "f.q2": "The biggest obstacle to doing good work here",
+    "f.q3": "If one thing changed, what should it be?", "f.q4": "One thing you will do yourself",
+    "f.a1": "Inside my own team, people help each other without being asked.",
+    "f.a2": "The handover to operations has no agreed standard, so half of what we send back is rework.",
+    "f.a3": "Make it clear who owns each handover.",
+    "f.a4": "I will write down what a complete handover looks like for my part.",
+    "cf.step": "Confirm", "cf.title": "Is this right?",
+    "cf.sub": "This is what was recorded from your session. Correct anything that is wrong — the corrected version is what goes into the analysis.",
+    "cf.head": "Recorded summary", "cf.wrong": "Something is wrong", "cf.right": "Yes, that is accurate",
+    "cf.fixLabel": "What should it say instead?",
+    "cf.noted": "Correction recorded. The original is kept in the audit trail.",
+    "cf.lead": "A {role} in {dept} described {construct} as the main constraint on getting work done.",
+    "d.title": "Done — thank you",
+    "d.sub": "Your session is complete. It joins the team results as one anonymous data point.",
+    "d.ref": "Your reference", "d.nextTitle": "What happens next",
+    "d.n1": "Results are combined once enough of your team has taken part.",
+    "d.n2": "The facilitator designs the programme around what the data actually shows.",
+    "d.n3": "You will be asked four short questions again 30 days after the programme.",
+    "d.n4": "Actions agreed by management are published back to everyone who took part.",
+    "d.yours": "This summary is yours first. No individual report is produced from this session, and nothing here is shared with your manager.",
+    "d.print": "Save my copy", "d.restart": "Run the journey again"
+  },
+
+  ms: {
+    "common.continue": "Teruskan", "common.back": "Kembali", "common.next": "Seterusnya",
+    "lang.title": "Pilih bahasa anda",
+    "lang.sub": "Keseluruhan sesi berjalan dalam bahasa yang anda pilih — soalan, penemu duga, dan ringkasan anda.",
+    "lang.note": "Meridian Group · Diagnosis Pasukan 2026 · lebih kurang 15 minit",
+    "w.eyebrow": "Meridian Group · Diagnosis Pasukan 2026",
+    "w.title": "Lima belas minit untuk beritahu bagaimana pasukan ini sebenarnya berfungsi.",
+    "w.lead": "Perbualan sulit dengan penemu duga digital MIROME. Jawapan anda digabungkan dengan jawapan rakan sekerja untuk menunjukkan di mana pasukan kuat dan di mana ia tersekat.",
+    "chip.private": "Tiada sesiapa mendengar perbualan ini",
+    "w.s1": "Anda bersetuju dengan apa yang dikumpul, dan melihat dengan tepat siapa boleh baca apa.",
+    "w.s2": "Anda bercakap. Tiada jawapan yang betul, dan tiada markah diberi atas cara anda bercakap.",
+    "w.s3": "Anda semak semula apa yang direkodkan, dan betulkan jika ada yang salah.",
+    "w.cta": "Mula",
+    "w.privacy": "Keputusan peringkat pasukan sahaja · kumpulan kurang lima orang tidak dipaparkan · anda boleh berhenti bila-bila masa.",
+    "c.step": "Langkah 1 daripada 5", "c.title": "Sebelum kita mula",
+    "c.sub": "Ini diagnosis pasukan. Ia bukan penilaian prestasi, dan tidak digunakan untuk tindakan disiplin, gaji atau kenaikan pangkat.",
+    "c.i1": "Jawapan anda disimpan dengan nombor rujukan, bukan nama anda.",
+    "c.i2": "Tiada sesiapa mendengar sesi ini secara langsung, dan tiada rakaman diberikan kepada pengurus anda.",
+    "c.i3": "Tiada kumpulan kurang daripada lima orang dipaparkan.",
+    "c.i4": "Penilai terlatih akan membaca apa-apa yang menimbulkan kebimbangan kebajikan atau keselamatan.",
+    "c.i5": "Anda boleh langkau mana-mana soalan, atau berhenti, tanpa memberi sebab.",
+    "c.i6": "Rakaman dipadam selepas 90 hari. Keputusan tanpa nama disimpan selama 24 bulan.",
+    "c.whoTitle": "Siapa melihat apa",
+    "c.who1": "Anda", "c.who1v": "Ringkasan anda sendiri, dahulu, sebelum sesiapa melihat apa-apa.",
+    "c.who2": "Fasilitator", "c.who2v": "Corak peringkat pasukan dan petikan tanpa nama. Bukan jawapan individu anda.",
+    "c.who3": "HR & pengurusan", "c.who3v": "Keputusan agregat sahaja. Tidak pernah profil individu.",
+    "c.check": "Saya telah membaca dan bersetuju untuk mengambil bahagian.",
+    "c.cta": "Saya setuju — teruskan",
+    "x.step": "Langkah 2 daripada 5", "x.title": "Sedikit konteks",
+    "x.sub": "Hanya apa yang diperlukan untuk membandingkan kumpulan secara adil. Tiada apa di sini mengenal pasti anda secara bersendirian.",
+    "x.dept": "Jabatan", "x.role": "Tahap jawatan", "x.tenure": "Tempoh dalam pasukan ini",
+    "x.manage": "Adakah anda menyelia orang?", "x.choose": "Pilih…", "x.yes": "Ya", "x.no": "Tidak",
+    "x.note": "Jika gabungan jawapan menjadikan kumpulan kurang daripada lima orang, kumpulan itu digabungkan sebelum pelaporan.",
+    "x.depts": ["Operasi", "Jualan", "Khidmat Pelanggan", "Kewangan", "Pemasaran", "IT & Sistem", "Undang-undang & Pematuhan"],
+    "x.roles": ["Eksekutif kanan", "Pengurus kanan", "Pengurus", "Ketua pasukan", "Kakitangan"],
+    "x.tenures": ["Kurang 1 tahun", "1–3 tahun", "3–7 tahun", "Lebih 7 tahun"],
+    "p.step": "Langkah 3 daripada 5", "p.title": "Sejauh mana ini benar tentang pasukan anda?",
+    "p.sub": "Sepuluh pernyataan. Jawab mengikut pengalaman sebenar anda, bukan bagaimana ia sepatutnya.",
+    "p.count": "Pernyataan {n} daripada {m}",
+    "p.scale": ["Sangat tidak setuju", "Tidak setuju", "Neutral", "Setuju", "Sangat setuju"],
+    "p.done": "Teruskan ke temu bual",
+    "r.step": "Langkah 4 daripada 5", "r.title": "Semakan kesediaan", "r.starts": "Temu bual bermula dalam",
+    "r.conn": "Sambungan baik", "r.mic": "Mikrofon berfungsi", "r.lang": "Bahasa",
+    "r.promise": "Tiada sesiapa mendengar secara langsung. Bercakap dengan bebas.",
+    "r.note": "Bercakap seperti biasa. Loghat, tatabahasa dan kefasihan dikecualikan daripada semua keputusan — hanya apa yang anda ceritakan dianalisis.",
+    "r.cta": "Masuk ke temu bual",
+    "s.interviewer": "Penemu duga MIROME",
+    "s.avatar": "Penemu duga digital · strim video tidak disertakan dalam prototaip ini",
+    "s.tap": "Ketik untuk menjawab", "s.listening": "Sedang mendengar…",
+    "s.stage1": "Pengalaman pasukan", "s.stage2": "Situasi 1", "s.stage3": "Situasi 2", "s.stage4": "Penutup",
+    "s.greet": "Terima kasih kerana meluangkan masa. Ini diagnosis tentang cara pasukan berfungsi, bukan penilaian terhadap anda. Tiada apa yang anda katakan dilaporkan atas nama anda. Ceritakan satu kerja baru-baru ini yang tidak berjalan lancar — apa yang berlaku, dan di mana ia tersekat?",
+    "s.probe": "Siapa sepatutnya membuat keputusan, dan bagaimana anda mengetahuinya? Fokus pada apa yang berlaku, bukan siapa yang bersalah.",
+    "s.ack": "Saya catatkan, terima kasih. Ada apa-apa lagi tentang cara pasukan bekerjasama yang ingin anda tambah?",
+    "s.scenarioIntro": "Sekarang satu situasi tempat kerja yang ringkas. Tiada jawapan yang betul — beritahu apa yang anda benar-benar akan lakukan.",
+    "s.scenario1": "Rakan sekerja di jabatan lain melewatkan sesuatu yang anda bergantung kepadanya, dan komitmen anda kepada pelanggan kini berisiko. Ini kali kedua. Apa langkah anda seterusnya, dan apa yang anda akan katakan kepadanya?",
+    "s.scenario2": "Tiga hari sebelum penghantaran, keperluan berubah dengan ketara. Separuh kerja yang siap tidak lagi relevan, dan pasukan sudah penat. Apakah tiga tindakan pertama anda?",
+    "s.wrap": "Masa kita hampir tamat. Sebelum kita akhiri — satu perkara yang anda ingin ubah tentang cara pasukan ini bekerja?",
+    "s.close": "Terima kasih. Saya akan tunjukkan ringkasan pendek apa yang saya catatkan, supaya anda boleh betulkan jika ada yang salah.",
+    "s.a1": "Serahan itu tergendala sembilan hari. Tiada siapa tahu siapa sepatutnya meluluskannya.",
+    "s.a2": "Saya tahu selepas bertanya kepada tiga orang berbeza. Tiada pemilik yang dipersetujui untuk langkah itu.",
+    "s.a3": "Saya akan semak dahulu apa yang berlaku dan tanya apa yang menghalang — mungkin ada kekangan di pihak mereka yang saya tidak nampak.",
+    "s.a4": "Saya akan berundur sebentar, utamakan apa yang mesti dihantar, tangguhkan yang lain dan maklumkan pelanggan lebih awal.",
+    "s.a5": "Jelaskan siapa pemilik bagi setiap serahan.",
+    "f.step": "Langkah 5 daripada 5", "f.title": "Empat refleksi ringkas",
+    "f.sub": "Ini menjadi suara pasukan dalam keputusan — dipetik tanpa nama, tidak pernah dikaitkan dengan anda.",
+    "f.q1": "Satu kekuatan pasukan ini", "f.q2": "Halangan terbesar untuk kerja yang baik di sini",
+    "f.q3": "Jika satu perkara berubah, apakah ia?", "f.q4": "Satu perkara yang anda sendiri akan lakukan",
+    "f.a1": "Dalam pasukan saya sendiri, orang saling membantu tanpa diminta.",
+    "f.a2": "Serahan kepada operasi tiada standard yang dipersetujui, jadi separuh daripada apa yang kami hantar menjadi kerja semula.",
+    "f.a3": "Jelaskan siapa pemilik bagi setiap serahan.",
+    "f.a4": "Saya akan tuliskan maksud serahan yang lengkap untuk bahagian saya.",
+    "cf.step": "Sahkan", "cf.title": "Betulkah ini?",
+    "cf.sub": "Ini yang telah direkodkan daripada sesi anda. Betulkan jika ada yang salah — versi yang dibetulkan itulah yang masuk ke analisis.",
+    "cf.head": "Ringkasan direkodkan", "cf.wrong": "Ada yang tidak tepat", "cf.right": "Ya, ini tepat",
+    "cf.fixLabel": "Apa yang sepatutnya?",
+    "cf.noted": "Pembetulan direkodkan. Versi asal disimpan dalam jejak audit.",
+    "cf.lead": "Seorang {role} di {dept} menyatakan {construct} sebagai kekangan utama untuk menyiapkan kerja.",
+    "d.title": "Selesai — terima kasih",
+    "d.sub": "Sesi anda selesai. Ia menyertai keputusan pasukan sebagai satu titik data tanpa nama.",
+    "d.ref": "Rujukan anda", "d.nextTitle": "Apa yang seterusnya",
+    "d.n1": "Keputusan digabungkan setelah cukup ahli pasukan mengambil bahagian.",
+    "d.n2": "Fasilitator mereka bentuk program berdasarkan apa yang ditunjukkan oleh data.",
+    "d.n3": "Anda akan ditanya empat soalan ringkas semula 30 hari selepas program.",
+    "d.n4": "Tindakan yang dipersetujui pengurusan diumumkan semula kepada semua peserta.",
+    "d.yours": "Ringkasan ini milik anda dahulu. Tiada laporan individu dihasilkan daripada sesi ini, dan tiada apa-apa dikongsi dengan pengurus anda.",
+    "d.print": "Simpan salinan saya", "d.restart": "Jalankan semula"
+  },
+
+  zh: {
+    "common.continue": "继续", "common.back": "返回", "common.next": "下一题",
+    "lang.title": "请选择语言",
+    "lang.sub": "整个环节都会以您选择的语言进行——问题、访谈者，以及您的摘要。",
+    "lang.note": "Meridian Group · 2026 团队诊断 · 约 15 分钟",
+    "w.eyebrow": "Meridian Group · 2026 团队诊断",
+    "w.title": "用十五分钟，说说这个团队实际是怎么运作的。",
+    "w.lead": "与 MIROME 数字访谈者的一次保密对话。您的回答会与其他同事的回答合并，用来显示团队哪里强、哪里卡住。",
+    "chip.private": "没有任何人在旁收听这段对话",
+    "w.s1": "您先同意收集范围，并清楚看到谁能看到什么。",
+    "w.s2": "您来讲。没有标准答案，也不会因为您怎么说话而评分。",
+    "w.s3": "您回看记录内容，有不准确的地方可以更正。",
+    "w.cta": "开始",
+    "w.privacy": "只呈现团队层面的结果 · 少于五人的群组一律不显示 · 您可以随时停止。",
+    "c.step": "第 1 步，共 5 步", "c.title": "开始之前",
+    "c.sub": "这是团队诊断，不是绩效考核，也不会用于纪律处分、薪酬或晋升。",
+    "c.i1": "您的回答以编号存储，不记录姓名。",
+    "c.i2": "没有人实时收听，录音也不会转交给您的主管。",
+    "c.i3": "少于五人的群组一律不显示。",
+    "c.i4": "涉及安全或身心健康的内容，会由受过训练的审阅人查看。",
+    "c.i5": "任何问题都可以跳过，也可以随时停止，无需说明理由。",
+    "c.i6": "录音在 90 天后删除。匿名结果保留 24 个月。",
+    "c.whoTitle": "谁能看到什么",
+    "c.who1": "您本人", "c.who1v": "您的摘要，最先给您，在任何人看到之前。",
+    "c.who2": "引导师", "c.who2v": "团队层面的模式与匿名引述。绝不包括您的个人回答。",
+    "c.who3": "人力资源与管理层", "c.who3v": "仅汇总结果。绝不提供个人档案。",
+    "c.check": "我已阅读并同意在上述条件下参与。",
+    "c.cta": "我同意，继续",
+    "x.step": "第 2 步，共 5 步", "x.title": "一点背景信息",
+    "x.sub": "仅收集用于公平比较群组所需的信息。这些信息本身无法识别您的身份。",
+    "x.dept": "部门", "x.role": "职级", "x.tenure": "在本团队的时间",
+    "x.manage": "您是否带团队？", "x.choose": "请选择…", "x.yes": "是", "x.no": "否",
+    "x.note": "若某组答案组合导致群组少于五人，该群组会在报告前被合并。",
+    "x.depts": ["运营", "销售", "客户服务", "财务", "市场", "IT 与系统", "法务与合规"],
+    "x.roles": ["高层管理", "资深经理", "经理", "组长", "个人贡献者"],
+    "x.tenures": ["不到 1 年", "1–3 年", "3–7 年", "超过 7 年"],
+    "p.step": "第 3 步，共 5 步", "p.title": "这在您的团队里有多符合实际？",
+    "p.sub": "共十条陈述。请按您实际的体验作答，而不是按应该怎样。",
+    "p.count": "第 {n} 条，共 {m} 条",
+    "p.scale": ["非常不同意", "不同意", "一般", "同意", "非常同意"],
+    "p.done": "进入访谈",
+    "r.step": "第 4 步，共 5 步", "r.title": "准备检查", "r.starts": "访谈开始倒计时",
+    "r.conn": "网络连接正常", "r.mic": "麦克风正常", "r.lang": "语言",
+    "r.promise": "无人实时收听，请放心表达。",
+    "r.note": "正常说话即可。口音、语法和流利度不计入任何结果——只分析您所描述的内容。",
+    "r.cta": "进入访谈",
+    "s.interviewer": "MIROME 访谈者",
+    "s.avatar": "数字访谈者 · 本原型不含视频画面",
+    "s.tap": "点击回答", "s.listening": "正在聆听…",
+    "s.stage1": "团队体验", "s.stage2": "情境一", "s.stage3": "情境二", "s.stage4": "收尾",
+    "s.greet": "谢谢您抽出时间。这是对团队运作方式的诊断，不是对您个人的评估。您所说的一切都不会具名记录。请说说最近一件不太顺利的工作——发生了什么？卡在哪里？",
+    "s.probe": "本来应该由谁决定？您是怎么知道的？请讲经过，不必指出是谁的错。",
+    "s.ack": "我记下了，谢谢。关于团队如何协作，您还有什么要补充的吗？",
+    "s.scenarioIntro": "接下来是一个简短的职场情境。没有标准答案——请说说您实际会怎么做。",
+    "s.scenario1": "另一个部门的同事延误了您依赖的一项交付，您对客户的承诺现在有风险。这已经是第二次了。您接下来会怎么做？具体会怎么对他说？",
+    "s.scenario2": "交付前三天，需求发生重大变更。已完成的一半工作作废，团队也很疲惫。您的前三个动作是什么？",
+    "s.wrap": "时间快到了。结束之前——您最想改变这个团队的哪一件事？",
+    "s.close": "谢谢您。我会给您看一份简短的记录摘要，您可以更正其中不准确的地方。",
+    "s.a1": "那份交接搁置了九天。没有人知道该由谁签字确认。",
+    "s.a2": "我问了三个人才弄清楚。那一步没有明确的负责人。",
+    "s.a3": "我会先了解发生了什么，问问是什么卡住了——他们那边可能有我看不到的限制。",
+    "s.a4": "我会先退一步，确定必须交付的部分，其余延后，并尽早通知客户。",
+    "s.a5": "明确每一次交接由谁负责。",
+    "f.step": "第 5 步，共 5 步", "f.title": "四个简短回顾",
+    "f.sub": "这些会成为结果中团队自己的声音——匿名引用，绝不署名。",
+    "f.q1": "这个团队的一个优势", "f.q2": "在这里做好工作最大的障碍",
+    "f.q3": "如果只能改变一件事，应该是什么？", "f.q4": "您自己会做的一件事",
+    "f.a1": "在我自己的团队里，大家不用开口就会互相帮忙。",
+    "f.a2": "交接给运营没有统一标准，所以我们送回去的有一半要返工。",
+    "f.a3": "明确每一次交接由谁负责。",
+    "f.a4": "我会把我这部分「完整交接」的标准写下来。",
+    "cf.step": "确认", "cf.title": "这样准确吗？",
+    "cf.sub": "这是本次访谈记录的内容。有不准确的地方请更正——进入分析的是更正后的版本。",
+    "cf.head": "记录摘要", "cf.wrong": "有不准确的地方", "cf.right": "准确，确认",
+    "cf.fixLabel": "应该怎么写？",
+    "cf.noted": "更正已记录，原始版本保留在审计记录中。",
+    "cf.lead": "{dept}的一位{role}认为，{construct}是完成工作的主要制约。",
+    "d.title": "完成 — 谢谢您",
+    "d.sub": "您的访谈已完成，将作为一个匿名数据点并入团队结果。",
+    "d.ref": "您的编号", "d.nextTitle": "接下来会发生什么",
+    "d.n1": "当团队参与人数足够时，结果会被合并。",
+    "d.n2": "引导师会根据数据实际显示的问题来设计方案。",
+    "d.n3": "项目结束 30 天后，会再请您回答四个简短问题。",
+    "d.n4": "管理层确认的行动会向所有参与者公布。",
+    "d.yours": "这份摘要首先属于您。本次访谈不会生成任何个人报告，这里的内容也不会分享给您的主管。",
+    "d.print": "保存我的副本", "d.restart": "再走一遍流程"
+  },
+
+  ar: {
+    "common.continue": "متابعة", "common.back": "رجوع", "common.next": "التالي",
+    "lang.title": "اختر لغتك",
+    "lang.sub": "ستجري الجلسة بالكامل باللغة التي تختارها — الأسئلة، والمُحاوِر، والملخّص الخاص بك.",
+    "lang.note": "مجموعة ميريديان · تشخيص الفريق 2026 · نحو 15 دقيقة",
+    "w.eyebrow": "مجموعة ميريديان · تشخيص الفريق 2026",
+    "w.title": "خمس عشرة دقيقة لتقول كيف يعمل هذا الفريق فعلياً.",
+    "w.lead": "محادثة سرّية مع المُحاوِر الرقمي من MIROME. تُدمج إجاباتك مع إجابات زملائك لتبيّن أين يكون الفريق قوياً وأين يتعثّر.",
+    "chip.private": "لا أحد يستمع إلى هذه المحادثة",
+    "w.s1": "توافق أولاً على ما يُجمع، وترى بوضوح من يستطيع الاطّلاع على ماذا.",
+    "w.s2": "أنت تتحدث. لا توجد إجابة صحيحة، ولا تُقيَّم طريقة كلامك.",
+    "w.s3": "تراجع ما تم تسجيله، وتصحّح أي شيء غير دقيق.",
+    "w.cta": "ابدأ",
+    "w.privacy": "النتائج على مستوى الفريق فقط · لا تُعرض أي مجموعة أقل من خمسة أشخاص · يمكنك التوقف في أي وقت.",
+    "c.step": "الخطوة 1 من 5", "c.title": "قبل أن نبدأ",
+    "c.sub": "هذا تشخيص للفريق. ليس تقييم أداء، ولا يُستخدم في الإجراءات التأديبية أو الرواتب أو الترقية.",
+    "c.i1": "تُحفظ إجاباتك برقم مرجعي، وليس باسمك.",
+    "c.i2": "لا يستمع أحد إلى الجلسة مباشرةً، ولا يُسلَّم أي تسجيل إلى مديرك.",
+    "c.i3": "لا تُعرض أي مجموعة أقل من خمسة أشخاص.",
+    "c.i4": "يطّلع مراجع مدرَّب على أي محتوى يثير قلقاً يتعلق بالسلامة أو الرعاية.",
+    "c.i5": "يمكنك تخطّي أي سؤال أو التوقف دون إبداء سبب.",
+    "c.i6": "يُحذف التسجيل بعد 90 يوماً، وتُحفظ النتائج المجهولة 24 شهراً.",
+    "c.whoTitle": "من يرى ماذا",
+    "c.who1": "أنت", "c.who1v": "ملخّصك الخاص، أولاً، قبل أن يرى أحد أي شيء.",
+    "c.who2": "الميسِّر", "c.who2v": "أنماط على مستوى الفريق واقتباسات مجهولة. لا إجاباتك الفردية.",
+    "c.who3": "الموارد البشرية والإدارة", "c.who3v": "نتائج مجمّعة فقط. ولا ملف فردي إطلاقاً.",
+    "c.check": "قرأت ما سبق وأوافق على المشاركة بهذه الشروط.",
+    "c.cta": "أوافق — متابعة",
+    "x.step": "الخطوة 2 من 5", "x.title": "بعض السياق",
+    "x.sub": "فقط ما يحتاجه التحليل للمقارنة العادلة بين المجموعات. لا شيء هنا يحدّد هويتك بمفرده.",
+    "x.dept": "الإدارة", "x.role": "المستوى الوظيفي", "x.tenure": "مدة العمل في هذا الفريق",
+    "x.manage": "هل تُشرف على موظفين؟", "x.choose": "اختر…", "x.yes": "نعم", "x.no": "لا",
+    "x.note": "إذا أدّى تركيب الإجابات إلى مجموعة أقل من خمسة أشخاص، تُدمج تلك المجموعة قبل إعداد التقارير.",
+    "x.depts": ["العمليات", "المبيعات", "خدمة العملاء", "المالية", "التسويق", "تقنية المعلومات والأنظمة", "الشؤون القانونية والامتثال"],
+    "x.roles": ["الإدارة التنفيذية", "مدير أول", "مدير", "قائد فريق", "موظف"],
+    "x.tenures": ["أقل من سنة", "1–3 سنوات", "3–7 سنوات", "أكثر من 7 سنوات"],
+    "p.step": "الخطوة 3 من 5", "p.title": "إلى أي مدى ينطبق هذا على فريقك؟",
+    "p.sub": "عشر عبارات. أجب بحسب ما تعيشه فعلاً، لا بحسب ما يُفترض أن يكون.",
+    "p.count": "العبارة {n} من {m}",
+    "p.scale": ["لا أوافق بشدة", "لا أوافق", "محايد", "أوافق", "أوافق بشدة"],
+    "p.done": "المتابعة إلى المقابلة",
+    "r.step": "الخطوة 4 من 5", "r.title": "التحقق من الجاهزية", "r.starts": "تبدأ المقابلة بعد",
+    "r.conn": "الاتصال جيّد", "r.mic": "الميكروفون يعمل", "r.lang": "اللغة",
+    "r.promise": "لا أحد يستمع مباشرةً. تحدّث بحرية.",
+    "r.note": "تحدّث بشكل طبيعي. اللهجة والقواعد والطلاقة مستبعدة من كل النتائج — يُحلَّل ما تصفه فقط.",
+    "r.cta": "ادخل إلى المقابلة",
+    "s.interviewer": "مُحاوِر MIROME",
+    "s.avatar": "مُحاوِر رقمي · بث الفيديو غير متضمَّن في هذا النموذج",
+    "s.tap": "اضغط للإجابة", "s.listening": "يستمع…",
+    "s.stage1": "تجربة الفريق", "s.stage2": "الموقف الأول", "s.stage3": "الموقف الثاني", "s.stage4": "الختام",
+    "s.greet": "شكراً لتخصيصك الوقت. هذا تشخيص لطريقة عمل الفريق، وليس تقييماً لك. لا يُسجَّل شيء مما تقوله باسمك. حدّثني عن عمل قريب لم يسِر بسلاسة — ماذا حدث، وأين تعطّل؟",
+    "s.probe": "من كان يُفترض أن يقرّر، وكيف عرفت ذلك؟ ركّز على ما حدث، لا على من المخطئ.",
+    "s.ack": "سجّلت ذلك، شكراً. هل تودّ إضافة شيء عن طريقة تعاون الفريق؟",
+    "s.scenarioIntro": "الآن موقف قصير في العمل. لا توجد إجابة صحيحة — أخبرني بما ستفعله فعلاً.",
+    "s.scenario1": "زميل في إدارة أخرى تأخّر في تسليم شيء تعتمد عليه، والتزامك تجاه العميل صار في خطر. وهذه المرة الثانية. ماذا ستفعل بعد ذلك، وماذا ستقول له تحديداً؟",
+    "s.scenario2": "قبل ثلاثة أيام من التسليم تغيّرت المتطلبات جوهرياً. نصف ما أُنجز لم يعد صالحاً، والفريق مُتعب. ما أول ثلاث خطوات تتخذها؟",
+    "s.wrap": "اقترب الوقت من نهايته. قبل أن ننهي — ما الشيء الذي تودّ تغييره في طريقة عمل هذا الفريق؟",
+    "s.close": "شكراً لك. سأعرض عليك ملخّصاً قصيراً لما سجّلته، لتصحّح أي شيء غير دقيق.",
+    "s.a1": "بقي التسليم معلّقاً تسعة أيام. لم يعرف أحد من المسؤول عن اعتماده.",
+    "s.a2": "عرفت ذلك بعد سؤال ثلاثة أشخاص. لا يوجد مالك متّفق عليه لتلك الخطوة.",
+    "s.a3": "سأتحقق أولاً مما حدث وأسأل عن العائق — قد يكون لديهم قيد لا أراه من موقعي.",
+    "s.a4": "سأتراجع خطوة، وأحدّد ما يجب تسليمه، وأؤجّل الباقي، وأُبلغ العميل مبكراً.",
+    "s.a5": "توضيح المسؤول عن كل عملية تسليم.",
+    "f.step": "الخطوة 5 من 5", "f.title": "أربع وقفات قصيرة",
+    "f.sub": "تصبح هذه صوت الفريق في النتائج — تُقتبس دون ذكر الاسم، ولا تُنسب إليك أبداً.",
+    "f.q1": "نقطة قوة في هذا الفريق", "f.q2": "أكبر عائق أمام إنجاز عمل جيد هنا",
+    "f.q3": "لو تغيّر شيء واحد، فماذا ينبغي أن يكون؟", "f.q4": "شيء واحد ستفعله أنت",
+    "f.a1": "داخل فريقي، يساعد الناس بعضهم دون أن يُطلب منهم.",
+    "f.a2": "التسليم إلى العمليات بلا معيار متّفق عليه، فيعود نصف ما نرسله لإعادة العمل.",
+    "f.a3": "توضيح المسؤول عن كل عملية تسليم.",
+    "f.a4": "سأكتب ما يعنيه التسليم المكتمل في الجزء الخاص بي.",
+    "cf.step": "تأكيد", "cf.title": "هل هذا صحيح؟",
+    "cf.sub": "هذا ما سُجِّل من جلستك. صحّح أي شيء غير دقيق — النسخة المصحَّحة هي التي تدخل التحليل.",
+    "cf.head": "الملخّص المسجَّل", "cf.wrong": "هناك ما هو غير دقيق", "cf.right": "نعم، هذا دقيق",
+    "cf.fixLabel": "وما الذي ينبغي أن يُكتب بدلاً منه؟",
+    "cf.noted": "سُجِّل التصحيح، والنسخة الأصلية محفوظة في سجل التدقيق.",
+    "cf.lead": "بحسب {role} في {dept}، فإن القيد الأساسي على إنجاز العمل هو: {construct}.",
+    "d.title": "تم — شكراً لك",
+    "d.sub": "اكتملت جلستك، وستنضم إلى نتائج الفريق كنقطة بيانات مجهولة.",
+    "d.ref": "رقمك المرجعي", "d.nextTitle": "ما الذي سيحدث بعد ذلك",
+    "d.n1": "تُدمج النتائج عندما يشارك عدد كافٍ من فريقك.",
+    "d.n2": "يصمّم الميسِّر البرنامج بناءً على ما تُظهره البيانات فعلاً.",
+    "d.n3": "ستُسأل أربعة أسئلة قصيرة مرة أخرى بعد 30 يوماً من البرنامج.",
+    "d.n4": "تُعلَن الإجراءات التي تعتمدها الإدارة لجميع المشاركين.",
+    "d.yours": "هذا الملخّص لك أولاً. لا يُنتَج أي تقرير فردي من هذه الجلسة، ولا يُشارَك أي شيء منها مع مديرك.",
+    "d.print": "احفظ نسختي", "d.restart": "إعادة التجربة"
+  },
+
+  ko: {
+    "common.continue": "계속", "common.back": "이전", "common.next": "다음",
+    "lang.title": "언어를 선택하세요",
+    "lang.sub": "선택하신 언어로 전체 세션이 진행됩니다 — 질문, 인터뷰어, 그리고 요약까지.",
+    "lang.note": "메리디안 그룹 · 2026 팀 진단 · 약 15분",
+    "w.eyebrow": "메리디안 그룹 · 2026 팀 진단",
+    "w.title": "이 팀이 실제로 어떻게 일하는지, 15분만 말씀해 주세요.",
+    "w.lead": "MIROME 디지털 인터뷰어와의 비공개 대화입니다. 답변은 동료들의 답변과 합쳐져 팀이 강한 지점과 막혀 있는 지점을 보여줍니다.",
+    "chip.private": "이 대화를 실시간으로 듣는 사람은 없습니다",
+    "w.s1": "무엇이 수집되는지 먼저 동의하고, 누가 무엇을 볼 수 있는지 정확히 확인합니다.",
+    "w.s2": "말씀하시면 됩니다. 정답은 없고, 말하는 방식은 평가하지 않습니다.",
+    "w.s3": "기록된 내용을 확인하고, 사실과 다르면 직접 수정합니다.",
+    "w.cta": "시작하기",
+    "w.privacy": "팀 단위 결과만 제공 · 5명 미만 그룹은 표시하지 않음 · 언제든 중단할 수 있습니다.",
+    "c.step": "1단계 / 5", "c.title": "시작하기 전에",
+    "c.sub": "팀 진단입니다. 인사평가가 아니며 징계·급여·승진에 사용되지 않습니다.",
+    "c.i1": "답변은 이름이 아니라 참조번호로 저장됩니다.",
+    "c.i2": "세션을 실시간으로 듣는 사람은 없으며, 녹음은 상급자에게 전달되지 않습니다.",
+    "c.i3": "5명 미만의 그룹은 어떤 화면에도 표시되지 않습니다.",
+    "c.i4": "안전이나 복지 관련 우려가 있는 내용은 훈련된 검토자가 확인합니다.",
+    "c.i5": "이유를 밝히지 않고 어떤 질문도 건너뛰거나 중단할 수 있습니다.",
+    "c.i6": "녹음은 90일 후 삭제되며, 익명 결과는 24개월간 보관됩니다.",
+    "c.whoTitle": "누가 무엇을 보는가",
+    "c.who1": "본인", "c.who1v": "누구보다 먼저, 본인의 요약을 가장 먼저 받습니다.",
+    "c.who2": "퍼실리테이터", "c.who2v": "팀 단위 패턴과 익명 인용만. 개인 답변은 보지 않습니다.",
+    "c.who3": "인사·경영진", "c.who3v": "집계 결과만. 개인 프로파일은 제공되지 않습니다.",
+    "c.check": "위 내용을 읽었으며 이 조건으로 참여하는 데 동의합니다.",
+    "c.cta": "동의하고 계속",
+    "x.step": "2단계 / 5", "x.title": "간단한 배경 정보",
+    "x.sub": "그룹을 공정하게 비교하는 데 필요한 정보만 받습니다. 이 정보만으로는 개인이 식별되지 않습니다.",
+    "x.dept": "부서", "x.role": "직급", "x.tenure": "현재 팀 근무 기간",
+    "x.manage": "구성원을 관리하십니까?", "x.choose": "선택…", "x.yes": "예", "x.no": "아니오",
+    "x.note": "답변 조합으로 인해 그룹이 5명 미만이 되는 경우, 보고 전에 해당 그룹은 병합됩니다.",
+    "x.depts": ["운영", "영업", "고객 서비스", "재무", "마케팅", "IT·시스템", "법무·컴플라이언스"],
+    "x.roles": ["임원", "수석 매니저", "매니저", "팀 리드", "실무 담당"],
+    "x.tenures": ["1년 미만", "1–3년", "3–7년", "7년 이상"],
+    "p.step": "3단계 / 5", "p.title": "지금 팀에 얼마나 해당되나요?",
+    "p.sub": "열 개의 문장입니다. 그래야 한다고 생각하는 모습이 아니라, 실제로 경험하는 대로 답해 주세요.",
+    "p.count": "문항 {n} / {m}",
+    "p.scale": ["전혀 그렇지 않다", "그렇지 않다", "보통이다", "그렇다", "매우 그렇다"],
+    "p.done": "인터뷰로 이동",
+    "r.step": "4단계 / 5", "r.title": "준비 확인", "r.starts": "인터뷰 시작까지",
+    "r.conn": "연결 상태 양호", "r.mic": "마이크 정상", "r.lang": "언어",
+    "r.promise": "실시간으로 듣는 사람은 없습니다. 편하게 말씀하세요.",
+    "r.note": "평소처럼 말씀하시면 됩니다. 억양·문법·유창함은 모든 결과에서 제외되며, 설명하신 내용만 분석합니다.",
+    "r.cta": "인터뷰 시작",
+    "s.interviewer": "MIROME 인터뷰어",
+    "s.avatar": "디지털 인터뷰어 · 이 프로토타입에는 영상이 포함되지 않습니다",
+    "s.tap": "탭하여 답변", "s.listening": "듣고 있습니다…",
+    "s.stage1": "팀 경험", "s.stage2": "상황 1", "s.stage3": "상황 2", "s.stage4": "마무리",
+    "s.greet": "시간 내주셔서 감사합니다. 이것은 팀이 어떻게 일하는지에 대한 진단이며, 개인에 대한 평가가 아닙니다. 말씀하신 내용은 이름과 함께 기록되지 않습니다. 최근에 매끄럽게 진행되지 않았던 업무 하나를 말씀해 주세요 — 무슨 일이 있었고, 어디에서 막혔습니까?",
+    "s.probe": "원래 누가 결정해야 했고, 그 사실을 어떻게 아셨습니까? 누구의 잘못인지보다 무슨 일이 있었는지 중심으로 말씀해 주세요.",
+    "s.ack": "기록했습니다, 감사합니다. 팀의 협업 방식에 대해 덧붙이실 내용이 있습니까?",
+    "s.scenarioIntro": "이번에는 짧은 업무 상황입니다. 정답은 없습니다 — 실제로 어떻게 하실지 말씀해 주세요.",
+    "s.scenario1": "다른 부서 동료가 귀하가 의존하는 산출물을 지연시켰고, 고객과의 약속이 위태로워졌습니다. 이번이 두 번째입니다. 다음에 무엇을 하시겠습니까? 그리고 그 사람에게 정확히 뭐라고 말씀하시겠습니까?",
+    "s.scenario2": "납기 3일 전에 요구사항이 크게 바뀌었습니다. 이미 끝낸 작업의 절반이 무효가 되었고 팀은 지쳐 있습니다. 가장 먼저 취할 세 가지 조치는 무엇입니까?",
+    "s.wrap": "시간이 거의 다 되었습니다. 마치기 전에 — 이 팀의 일하는 방식에서 한 가지를 바꾼다면 무엇입니까?",
+    "s.close": "감사합니다. 기록된 내용을 짧게 요약해 보여드리겠습니다. 사실과 다른 부분은 수정하실 수 있습니다.",
+    "s.a1": "그 인수인계가 9일 동안 멈춰 있었습니다. 누가 승인해야 하는지 아무도 몰랐습니다.",
+    "s.a2": "세 사람에게 물어보고서야 알았습니다. 그 단계에는 합의된 담당자가 없습니다.",
+    "s.a3": "먼저 무슨 일이 있었는지 확인하고 무엇이 막았는지 묻겠습니다 — 제가 못 보는 제약이 그쪽에 있을 수 있습니다.",
+    "s.a4": "한 발 물러서서 반드시 나가야 할 것을 정하고, 나머지는 미루고, 고객에게 미리 알리겠습니다.",
+    "s.a5": "각 인수인계의 담당자를 명확히 하는 것입니다.",
+    "f.step": "5단계 / 5", "f.title": "네 가지 짧은 성찰",
+    "f.sub": "이 내용은 결과에서 팀의 목소리가 됩니다 — 익명으로 인용되며 개인에게 귀속되지 않습니다.",
+    "f.q1": "이 팀의 강점 하나", "f.q2": "여기서 좋은 성과를 내는 데 가장 큰 장애물",
+    "f.q3": "한 가지를 바꾼다면 무엇이어야 합니까?", "f.q4": "본인이 직접 할 한 가지",
+    "f.a1": "우리 팀 안에서는 부탁하지 않아도 서로 돕습니다.",
+    "f.a2": "운영으로 넘기는 인수인계에 합의된 기준이 없어, 보낸 것의 절반이 재작업으로 돌아옵니다.",
+    "f.a3": "각 인수인계의 담당자를 명확히 하는 것입니다.",
+    "f.a4": "제 담당 구간에서 완결된 인수인계가 무엇인지 문서로 정리하겠습니다.",
+    "cf.step": "확인", "cf.title": "이 내용이 맞습니까?",
+    "cf.sub": "세션에서 기록된 내용입니다. 사실과 다른 부분은 수정해 주세요 — 분석에 반영되는 것은 수정된 내용입니다.",
+    "cf.head": "기록된 요약", "cf.wrong": "사실과 다릅니다", "cf.right": "네, 정확합니다",
+    "cf.fixLabel": "어떻게 수정하면 될까요?",
+    "cf.noted": "수정이 기록되었습니다. 원본은 감사 기록에 보관됩니다.",
+    "cf.lead": "{dept}의 {role}{은는} {construct}{이가} 업무 진행의 가장 큰 제약이라고 설명했습니다.",
+    "d.title": "완료 — 감사합니다",
+    "d.sub": "세션이 끝났습니다. 익명 데이터 한 건으로 팀 결과에 합쳐집니다.",
+    "d.ref": "참조번호", "d.nextTitle": "다음 절차",
+    "d.n1": "팀에서 충분한 인원이 참여하면 결과가 집계됩니다.",
+    "d.n2": "퍼실리테이터가 데이터가 실제로 보여주는 것에 맞춰 프로그램을 설계합니다.",
+    "d.n3": "프로그램 30일 후에 네 개의 짧은 질문을 다시 드립니다.",
+    "d.n4": "경영진이 합의한 조치는 참여자 전원에게 공개됩니다.",
+    "d.yours": "이 요약은 무엇보다 본인의 것입니다. 이 세션에서 개인 보고서는 만들어지지 않으며, 여기의 어떤 내용도 상급자와 공유되지 않습니다.",
+    "d.print": "내 사본 저장", "d.restart": "다시 체험하기"
+  },
+
+  ja: {
+    "common.continue": "続ける", "common.back": "戻る", "common.next": "次へ",
+    "lang.title": "言語を選んでください",
+    "lang.sub": "選んだ言語でセッション全体を進めます — 質問も、インタビュアーも、要約も。",
+    "lang.note": "メリディアン・グループ · 2026年 チーム診断 · 約15分",
+    "w.eyebrow": "メリディアン・グループ · 2026年 チーム診断",
+    "w.title": "このチームが実際にどう動いているか、15分で聞かせてください。",
+    "w.lead": "MIROMEのデジタルインタビュアーとの非公開の対話です。回答は同僚の回答と合わせて集計され、チームの強い部分と詰まっている部分を示します。",
+    "chip.private": "この対話を聞いている人はいません",
+    "w.s1": "何が収集されるかに同意し、誰が何を見られるかを確認します。",
+    "w.s2": "話すだけで結構です。正解はなく、話し方は評価しません。",
+    "w.s3": "記録された内容を確認し、違っていれば修正できます。",
+    "w.cta": "はじめる",
+    "w.privacy": "結果はチーム単位のみ · 5人未満のグループは表示されません · いつでも中断できます。",
+    "c.step": "ステップ 1 / 5", "c.title": "はじめる前に",
+    "c.sub": "これはチームの診断です。人事評価ではなく、懲戒・給与・昇進には使用しません。",
+    "c.i1": "回答は氏名ではなく参照番号で保存されます。",
+    "c.i2": "セッションをリアルタイムで聞く人はおらず、録音が上司に渡ることもありません。",
+    "c.i3": "5人未満のグループは表示されません。",
+    "c.i4": "安全や健康に関わる内容は、訓練を受けたレビュアーが確認します。",
+    "c.i5": "理由を告げずに、どの質問も飛ばせますし、中断もできます。",
+    "c.i6": "録音は90日後に削除され、匿名の結果は24か月保管されます。",
+    "c.whoTitle": "誰が何を見るか",
+    "c.who1": "ご本人", "c.who1v": "誰よりも先に、ご自身の要約を最初に受け取ります。",
+    "c.who2": "ファシリテーター", "c.who2v": "チーム単位の傾向と匿名の引用のみ。個人の回答は見ません。",
+    "c.who3": "人事・経営", "c.who3v": "集計結果のみ。個人プロファイルは提供されません。",
+    "c.check": "上記を読み、この条件で参加することに同意します。",
+    "c.cta": "同意して続ける",
+    "x.step": "ステップ 2 / 5", "x.title": "簡単な背景",
+    "x.sub": "グループを公平に比較するために必要な情報だけです。これだけで個人が特定されることはありません。",
+    "x.dept": "部門", "x.role": "職位", "x.tenure": "現在のチームでの期間",
+    "x.manage": "部下のマネジメントをしていますか？", "x.choose": "選択…", "x.yes": "はい", "x.no": "いいえ",
+    "x.note": "回答の組み合わせでグループが5人未満になる場合、報告前にそのグループは統合されます。",
+    "x.depts": ["オペレーション", "営業", "カスタマーサービス", "財務", "マーケティング", "IT・システム", "法務・コンプライアンス"],
+    "x.roles": ["役員", "シニアマネージャー", "マネージャー", "チームリーダー", "担当者"],
+    "x.tenures": ["1年未満", "1〜3年", "3〜7年", "7年以上"],
+    "p.step": "ステップ 3 / 5", "p.title": "いまのチームにどれくらい当てはまりますか？",
+    "p.sub": "10の文があります。こうあるべきだと思う姿ではなく、実際に感じているとおりにお答えください。",
+    "p.count": "設問 {n} / {m}",
+    "p.scale": ["まったくそう思わない", "そう思わない", "どちらでもない", "そう思う", "強くそう思う"],
+    "p.done": "インタビューへ進む",
+    "r.step": "ステップ 4 / 5", "r.title": "準備の確認", "r.starts": "インタビュー開始まで",
+    "r.conn": "接続は良好です", "r.mic": "マイクは正常です", "r.lang": "言語",
+    "r.promise": "リアルタイムで聞いている人はいません。安心してお話しください。",
+    "r.note": "普段どおりに話してください。アクセント・文法・流暢さはすべての結果から除外され、話された内容だけを分析します。",
+    "r.cta": "インタビューを開始",
+    "s.interviewer": "MIROME インタビュアー",
+    "s.avatar": "デジタルインタビュアー · このプロトタイプに映像は含まれません",
+    "s.tap": "タップして回答", "s.listening": "聞いています…",
+    "s.stage1": "チームの実感", "s.stage2": "状況 1", "s.stage3": "状況 2", "s.stage4": "まとめ",
+    "s.greet": "お時間をいただきありがとうございます。これはチームの働き方の診断であり、あなたへの評価ではありません。お話しの内容が氏名付きで記録されることはありません。最近うまく進まなかった仕事を一つ教えてください — 何が起き、どこで止まりましたか。",
+    "s.probe": "本来は誰が決めるはずでしたか。それをどうやって知りましたか。誰の責任かよりも、何が起きたかを中心にお願いします。",
+    "s.ack": "記録しました、ありがとうございます。チームの協働の仕方について、付け加えたいことはありますか。",
+    "s.scenarioIntro": "次は短い職場の場面です。正解はありません — 実際にどうするかを教えてください。",
+    "s.scenario1": "他部門の同僚が、あなたが依存している成果物を遅らせ、顧客への約束が危うくなっています。これで二度目です。次に何をし、その人に具体的に何と伝えますか。",
+    "s.scenario2": "納品の3日前に要件が大きく変わりました。完了済みの作業の半分が無効になり、チームは疲れています。最初の3つの動きは何ですか。",
+    "s.wrap": "そろそろ時間です。終える前に — このチームの働き方で一つ変えるとしたら何ですか。",
+    "s.close": "ありがとうございました。記録した内容を短い要約でお見せしますので、違うところは修正してください。",
+    "s.a1": "その引き継ぎは9日間止まっていました。誰が承認するのか、誰も分かりませんでした。",
+    "s.a2": "3人に聞いてやっと分かりました。あの工程には決まった担当がいません。",
+    "s.a3": "まず何が起きたかを確認し、何が妨げになったかを聞きます — 私からは見えない制約が相手側にあるかもしれません。",
+    "s.a4": "一度引いて、出すべきものを絞り、残りは後ろ倒しにし、顧客には早めに伝えます。",
+    "s.a5": "引き継ぎごとの担当を明確にすることです。",
+    "f.step": "ステップ 5 / 5", "f.title": "4つの短いふりかえり",
+    "f.sub": "これは結果の中でチーム自身の言葉になります — 匿名で引用され、個人に結び付けられることはありません。",
+    "f.q1": "このチームの強みを一つ", "f.q2": "ここで良い仕事をするうえで最大の障害",
+    "f.q3": "一つだけ変えるとしたら何ですか", "f.q4": "あなた自身がやる一つのこと",
+    "f.a1": "自分のチームの中では、頼まなくても互いに助け合います。",
+    "f.a2": "オペレーションへの引き継ぎに合意された基準がなく、送ったものの半分が手戻りになります。",
+    "f.a3": "引き継ぎごとの担当を明確にすることです。",
+    "f.a4": "自分の担当範囲で「完了した引き継ぎ」とは何かを書き出します。",
+    "cf.step": "確認", "cf.title": "この内容で合っていますか？",
+    "cf.sub": "セッションから記録された内容です。違うところは修正してください — 分析に入るのは修正後の内容です。",
+    "cf.head": "記録された要約", "cf.wrong": "違うところがあります", "cf.right": "はい、合っています",
+    "cf.fixLabel": "どう直しますか？",
+    "cf.noted": "修正を記録しました。元の内容は監査記録に残ります。",
+    "cf.lead": "{dept}の{role}は、{construct}が仕事を進めるうえでの主な制約だと述べました。",
+    "d.title": "完了 — ありがとうございました",
+    "d.sub": "セッションは終了です。匿名のデータ1件としてチームの結果に加わります。",
+    "d.ref": "参照番号", "d.nextTitle": "このあとの流れ",
+    "d.n1": "チームの参加者が一定数に達した時点で結果を集計します。",
+    "d.n2": "ファシリテーターはデータが実際に示すものに合わせてプログラムを設計します。",
+    "d.n3": "プログラムの30日後に、再び4つの短い質問をお送りします。",
+    "d.n4": "経営が合意した施策は、参加者全員に公開されます。",
+    "d.yours": "この要約はまずあなたのものです。このセッションから個人レポートは作成されず、内容が上司に共有されることもありません。",
+    "d.print": "自分の控えを保存", "d.restart": "もう一度体験する"
+  }
+};
+
+/* The ten climate constructs — name + pulse statement, per language. */
+const PULSE = [
+  { id: "psychSafety",
+    en: ["Psychological safety", "In this team I can raise a mistake or disagree with a senior colleague without it being held against me."],
+    ms: ["Keselamatan psikologi", "Dalam pasukan ini saya boleh bangkitkan kesilapan atau tidak bersetuju dengan pegawai atasan tanpa ia digunakan terhadap saya."],
+    zh: ["心理安全感", "在这个团队里，我可以指出错误或不同意资深同事的意见，而不会因此被针对。"],
+    ar: ["الأمان النفسي", "في هذا الفريق أستطيع الإشارة إلى خطأ أو الاختلاف مع زميل أعلى مني دون أن يُستخدم ذلك ضدي."],
+    ko: ["심리적 안전감", "이 팀에서는 실수를 지적하거나 상급자와 다른 의견을 내도 불이익을 받지 않습니다."],
+    ja: ["心理的安全性", "このチームでは、ミスを指摘したり上位者と違う意見を言っても、不利に扱われることはありません。"] },
+  { id: "trust",
+    en: ["Trust", "When colleagues in this team commit to something, I can rely on it being done."],
+    ms: ["Kepercayaan", "Apabila rakan sekerja dalam pasukan ini berjanji, saya boleh bergantung bahawa ia akan disiapkan."],
+    zh: ["信任", "这个团队的同事一旦承诺，我可以放心他们会做到。"],
+    ar: ["الثقة", "عندما يلتزم زملائي في هذا الفريق بشيء، أستطيع الاعتماد على إنجازه."],
+    ko: ["신뢰", "이 팀 동료가 약속한 일은 실제로 이행될 것이라고 믿을 수 있습니다."],
+    ja: ["信頼", "このチームの同僚が約束したことは、実行されると信頼できます。"] },
+  { id: "roleClarity",
+    en: ["Role clarity", "It is clear who owns each decision and each handover in the work I do."],
+    ms: ["Kejelasan peranan", "Jelas siapa pemilik bagi setiap keputusan dan setiap serahan dalam kerja saya."],
+    zh: ["角色清晰", "在我的工作中，每个决策和每次交接由谁负责都很清楚。"],
+    ar: ["وضوح الأدوار", "من الواضح من يملك كل قرار وكل عملية تسليم في العمل الذي أقوم به."],
+    ko: ["역할 명확성", "제 업무에서 각 의사결정과 인수인계의 담당자가 명확합니다."],
+    ja: ["役割の明確さ", "自分の仕事において、各意思決定と引き継ぎの担当が明確です。"] },
+  { id: "goalAlignment",
+    en: ["Goal alignment", "My department's targets pull in the same direction as the departments we depend on."],
+    ms: ["Penjajaran matlamat", "Sasaran jabatan saya sehala dengan jabatan yang kami bergantung kepadanya."],
+    zh: ["目标一致", "我所在部门的目标，与我们依赖的部门方向一致。"],
+    ar: ["اتساق الأهداف", "أهداف إدارتي تسير في الاتجاه نفسه مع الإدارات التي نعتمد عليها."],
+    ko: ["목표 정렬", "우리 부서의 목표는 우리가 의존하는 부서들과 같은 방향을 향합니다."],
+    ja: ["目標の整合", "自部門の目標は、依存している他部門と同じ方向を向いています。"] },
+  { id: "collaboration",
+    en: ["Collaboration", "Working across departments here is straightforward when I need something."],
+    ms: ["Kerjasama", "Bekerja merentas jabatan di sini mudah apabila saya memerlukan sesuatu."],
+    zh: ["协作", "当我需要别的部门配合时，跨部门合作是顺畅的。"],
+    ar: ["التعاون", "العمل بين الإدارات هنا سهل عندما أحتاج شيئاً."],
+    ko: ["협업", "필요한 것이 있을 때 부서 간 협업이 수월합니다."],
+    ja: ["協働", "何かが必要なとき、部門をまたいだ連携はスムーズです。"] },
+  { id: "conflict",
+    en: ["Constructive conflict", "Disagreements in this team get discussed openly and resolved."],
+    ms: ["Konflik membina", "Perselisihan dalam pasukan ini dibincangkan secara terbuka dan diselesaikan."],
+    zh: ["建设性冲突", "这个团队的分歧会被公开讨论并得到解决。"],
+    ar: ["الاختلاف البنّاء", "الخلافات في هذا الفريق تُناقش علناً وتُحل."],
+    ko: ["건설적 갈등", "이 팀에서는 이견이 공개적으로 논의되고 해소됩니다."],
+    ja: ["建設的な対立", "このチームでは意見の相違が率直に話し合われ、解決されます。"] },
+  { id: "leadershipOpenness",
+    en: ["Leadership openness", "My manager invites input before deciding, and explains decisions afterwards."],
+    ms: ["Keterbukaan kepimpinan", "Pengurus saya meminta pandangan sebelum membuat keputusan, dan menjelaskan keputusan selepasnya."],
+    zh: ["管理层开放度", "我的主管在决策前会征求意见，决策后会说明理由。"],
+    ar: ["انفتاح القيادة", "يطلب مديري الرأي قبل اتخاذ القرار، ويشرح القرار بعده."],
+    ko: ["리더십 개방성", "제 상사는 결정 전에 의견을 구하고, 결정 후에는 이유를 설명합니다."],
+    ja: ["上位者の開放性", "上司は決める前に意見を求め、決めた後に理由を説明します。"] },
+  { id: "inclusion",
+    en: ["Inclusion and belonging", "In team discussions, my contribution is heard and taken seriously."],
+    ms: ["Keterangkuman", "Dalam perbincangan pasukan, sumbangan saya didengar dan diambil serius."],
+    zh: ["包容与归属", "在团队讨论中，我的意见会被听见并被认真对待。"],
+    ar: ["الشمول والانتماء", "في نقاشات الفريق، يُسمع ما أقدّمه ويُؤخذ على محمل الجد."],
+    ko: ["포용과 소속감", "팀 논의에서 제 의견이 경청되고 진지하게 다뤄집니다."],
+    ja: ["インクルージョン", "チームの議論で、自分の発言は聞かれ、真剣に受け止められます。"] },
+  { id: "accountability",
+    en: ["Accountability", "In this team, agreed actions are followed through and reviewed."],
+    ms: ["Akauntabiliti", "Dalam pasukan ini, tindakan yang dipersetujui dilaksanakan dan disemak semula."],
+    zh: ["责任落实", "在这个团队，商定的行动会被落实并复盘。"],
+    ar: ["المساءلة", "في هذا الفريق، تُنفَّذ الإجراءات المتفق عليها وتُراجَع."],
+    ko: ["실행 책임", "이 팀에서는 합의된 조치가 끝까지 이행되고 점검됩니다."],
+    ja: ["実行責任", "このチームでは、合意した行動が実行され、見直されます。"] },
+  { id: "resilience",
+    en: ["Collective resilience", "When priorities change suddenly, this team adapts without breaking down."],
+    ms: ["Daya tahan kolektif", "Apabila keutamaan berubah secara mendadak, pasukan ini menyesuaikan diri tanpa berantakan."],
+    zh: ["集体韧性", "当优先级突然变化时，这个团队能够调整而不至于失控。"],
+    ar: ["المرونة الجماعية", "عندما تتغيّر الأولويات فجأة، يتكيّف هذا الفريق دون أن ينهار."],
+    ko: ["집단 회복탄력성", "우선순위가 갑자기 바뀌어도 이 팀은 무너지지 않고 적응합니다."],
+    ja: ["集団のしなやかさ", "優先順位が急に変わっても、このチームは崩れずに適応します。"] }
+];
+
+/* ============================================================
+   State
    ============================================================ */
 const $ = (id) => document.getElementById(id);
-const LEVEL_COLOUR = {
-  "Established Strength": "#1E9E52",
-  Functional: "#7FB13B",
-  Developing: "#E8A400",
-  "Priority Attention": "#C6222F",
-  "Insufficient Evidence": "#A9B0BF",
-};
-const CONF_COLOUR = { high: "#1E9E52", moderate: "#E8A400", low: "#C6222F", insufficient: "#A9B0BF" };
-const OWNERS = [
-  { id: "hrbp", name: "HR Business Partner" },
-  { id: "od", name: "Organisational Development" },
-  { id: "lineMgmt", name: "Line management (department head)" },
-  { id: "exco", name: "Executive committee" },
-  { id: "facilitator", name: "Programme facilitator" },
-  { id: "lnd", name: "Learning & Development" },
-  { id: "pmo", name: "Operations / PMO" },
-];
-const CONSTRUCT_OWNER = {
-  psychSafety: "exco", trust: "lineMgmt", roleClarity: "pmo", goalAlignment: "exco",
-  collaboration: "pmo", conflict: "facilitator", leadershipOpenness: "exco",
-  inclusion: "hrbp", accountability: "lineMgmt", resilience: "od",
-};
-const SHORT = {
-  "Psychological safety": "Psych. safety", Trust: "Trust", "Role clarity": "Role clarity",
-  "Goal alignment": "Goal align.", Collaboration: "Collab.", "Constructive conflict": "Conflict",
-  "Leadership openness": "Leader open.", "Inclusion and belonging": "Inclusion",
-  Accountability: "Account.", "Collective resilience": "Resilience",
-};
-const MIN_N = 5;
+const device = $("device");
+let lang = "en";
+let pulseIdx = 0;
+const answers = {};
+let countdownTimer = null;
+let sessionTimer = null;
+let turn = 0;
 
-function indexColour(index) {
-  const t = Math.max(0, Math.min(1, (index - 40) / 50));
-  const lerp = (a, b, u) => Math.round(a + (b - a) * u);
-  let c1, c2, u;
-  if (t < 0.5) { c1 = [198, 34, 47]; c2 = [232, 164, 0]; u = t / 0.5; }
-  else { c1 = [232, 164, 0]; c2 = [30, 158, 82]; u = (t - 0.5) / 0.5; }
-  return `rgb(${lerp(c1[0], c2[0], u)},${lerp(c1[1], c2[1], u)},${lerp(c1[2], c2[2], u)})`;
-}
-function levelFromIndex(i) {
-  if (i >= 78) return "Established Strength";
-  if (i >= 66) return "Functional";
-  if (i >= 54) return "Developing";
-  return "Priority Attention";
-}
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const t = (key) => {
+  const v = T[lang][key];
+  return v === undefined ? T.en[key] : v;
+};
 
-let toastTimer;
 function toast(msg) {
-  const t = $("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(el._x);
+  el._x = setTimeout(() => el.classList.remove("show"), 3000);
 }
 
 /* ============================================================
-   Participant experience
+   Language
    ============================================================ */
-const VEILED = new Set(["consent", "context", "pulse", "lobby", "reflect", "confirm", "done"]);
-const SCALE = ["Strongly disagree", "Disagree", "Neither", "Agree", "Strongly agree"];
-const answers = {};
-let pulseIdx = 0;
-let lobbyTimer = null;
-let sessionTimer = null;
+$("langGrid").innerHTML = LANGS.map(
+  (l) => `<button class="langcard" data-lang="${l.id}" lang="${l.id}" dir="${l.dir}"><b>${l.native}</b><small>${l.label}</small></button>`
+).join("");
 
-function goScreen(id) {
-  // Entering the interview by hand must cancel the lobby countdown, or it
-  // fires later and restarts the session under the participant.
-  if (id !== "lobby") clearInterval(lobbyTimer);
-  document.querySelectorAll(".pscreen").forEach((s) => s.classList.toggle("on", s.dataset.screen === id));
-  $("phone").dataset.screen = id;
-  $("phone").classList.toggle("veiled", VEILED.has(id));
-  if (id === "pulse") renderPulse();
-  if (id === "lobby") startLobby();
-  if (id === "session") startSession();
-  if (id === "confirm") renderSummary();
+$("langGrid").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-lang]");
+  if (!b) return;
+  setLang(b.dataset.lang);
+  go("welcome");
+});
+
+function setLang(id) {
+  lang = id;
+  const spec = LANGS.find((l) => l.id === id);
+  device.setAttribute("lang", id);
+  device.setAttribute("dir", spec.dir);
+  $("langBtn").textContent = spec.tag + " ▾";
+  $("readyLang").textContent = spec.native;
+  applyCopy();
 }
-document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => goScreen(b.dataset.go)));
+
+function applyCopy() {
+  document.querySelectorAll("[data-t]").forEach((el) => {
+    const v = t(el.dataset.t);
+    if (typeof v === "string") el.textContent = v;
+  });
+
+  $("consentList").innerHTML = ["c.i1", "c.i2", "c.i3", "c.i4", "c.i5", "c.i6"]
+    .map(
+      (k) =>
+        `<div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg><span>${t(k)}</span></div>`
+    )
+    .join("");
+
+  fillSelect($("dept"), t("x.depts"));
+  fillSelect($("role"), t("x.roles"));
+  fillSelect($("tenure"), t("x.tenures"));
+
+  ["q1", "q2", "q3", "q4"].forEach((id, i) => {
+    const el = $(id);
+    if (!el.dataset.touched) el.value = t("f.a" + (i + 1));
+  });
+
+  $("micLbl").textContent = t("s.tap");
+  renderPulse();
+}
+
+function fillSelect(el, items) {
+  const prev = el.selectedIndex;
+  el.innerHTML =
+    `<option value="">${t("x.choose")}</option>` +
+    items.map((x, i) => `<option value="${i}">${x}</option>`).join("");
+  if (prev > 0) el.selectedIndex = prev;
+}
+
+/* ============================================================
+   Navigation
+   ============================================================ */
+const RAIL_TOTAL = 7;
+function go(screen) {
+  clearInterval(countdownTimer);
+  document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.dataset.screen === screen));
+  document.querySelectorAll("[data-rail]").forEach((r) => {
+    const step = +r.dataset.rail;
+    r.innerHTML = Array.from({ length: RAIL_TOTAL }, (_, i) => `<i class="${i < step ? "done" : ""}"></i>`).join("");
+  });
+  const el = document.querySelector('.screen[data-screen="' + screen + '"]');
+  if (el) el.scrollTop = 0;
+  if (screen === "ready") startCountdown();
+  if (screen === "session") startSession();
+  if (screen === "confirm") renderSummary();
+}
+document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
 
 $("consentBtn").addEventListener("click", () => {
-  if (!$("consentBox").checked) { toast("Please confirm you agree before continuing."); return; }
-  goScreen("context");
-});
-
-document.querySelectorAll("#managesRow button, #langRow button").forEach((b) =>
-  b.addEventListener("click", () => {
-    b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    if (b.dataset.lang) {
-      $("lobbyLang").textContent = b.textContent;
-      $("sessLang").textContent = b.dataset.lang;
-    }
-  })
-);
-
-$("contextBtn").addEventListener("click", () => {
-  const manages = document.querySelector("#managesRow button[aria-pressed='true']");
-  if (!$("ctxDept").value || !$("ctxRole").value || !$("ctxTenure").value || !manages) {
-    toast("Please complete the department, role level, tenure and whether you manage people.");
+  if (!$("consentBox").checked) {
+    toast(t("c.check"));
     return;
   }
-  goScreen("pulse");
+  go("context");
 });
 
+$("manageRow").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  $("manageRow").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+});
+
+$("contextBtn").addEventListener("click", () => {
+  const manages = $("manageRow").querySelector('[aria-pressed="true"]');
+  if (!$("dept").value || !$("role").value || !$("tenure").value || !manages) {
+    toast(t("x.sub"));
+    return;
+  }
+  go("pulse");
+});
+
+/* ============================================================
+   Pulse
+   ============================================================ */
 function renderPulse() {
-  const spec = DATA.climateSpecs[pulseIdx];
-  $("pulseFill").style.width = ((pulseIdx + 1) / DATA.climateSpecs.length) * 100 + "%";
-  $("pulseCount").textContent = `Statement ${pulseIdx + 1} of ${DATA.climateSpecs.length}`;
-  $("pulseConstruct").textContent = spec.name;
-  $("pulseStatement").textContent = spec.pulseItem;
-  $("pulseScale").innerHTML = SCALE.map((label, i) =>
-    `<button data-v="${i + 1}" aria-pressed="${answers[spec.id] === i + 1}"><i></i>${label}</button>`
-  ).join("");
+  const item = PULSE[pulseIdx];
+  const pair = item[lang] || item.en;
+  $("pulseCount").textContent = t("p.count").replace("{n}", pulseIdx + 1).replace("{m}", PULSE.length);
+  $("pulseConstruct").textContent = pair[0];
+  $("pulseStatement").textContent = pair[1];
+  $("pulseScale").innerHTML = t("p.scale")
+    .map((label, i) => `<button data-v="${i + 1}" aria-pressed="${answers[item.id] === i + 1}"><i></i>${label}</button>`)
+    .join("");
   $("pulseScale").querySelectorAll("button").forEach((b) =>
     b.addEventListener("click", () => {
-      answers[spec.id] = +b.dataset.v;
-      if (pulseIdx < DATA.climateSpecs.length - 1) { pulseIdx++; renderPulse(); }
-      else renderPulse();
+      answers[item.id] = +b.dataset.v;
+      if (pulseIdx < PULSE.length - 1) pulseIdx++;
+      renderPulse();
     })
   );
   $("pulsePrev").disabled = pulseIdx === 0;
-  const last = pulseIdx === DATA.climateSpecs.length - 1;
-  const answeredAll = DATA.climateSpecs.every((c) => answers[c.id]);
-  $("pulseNext").textContent = last ? "Continue to the interview" : "Next";
-  $("pulseNext").disabled = last ? !answeredAll : !answers[spec.id];
+  const last = pulseIdx === PULSE.length - 1;
+  const all = PULSE.every((p) => answers[p.id]);
+  $("pulseNext").textContent = last ? t("p.done") : t("common.next");
+  $("pulseNext").disabled = last ? !all : !answers[item.id];
 }
-$("pulsePrev").addEventListener("click", () => { if (pulseIdx > 0) { pulseIdx--; renderPulse(); } });
+$("pulsePrev").addEventListener("click", () => {
+  if (pulseIdx > 0) pulseIdx--;
+  renderPulse();
+});
 $("pulseNext").addEventListener("click", () => {
-  if (pulseIdx < DATA.climateSpecs.length - 1) { pulseIdx++; renderPulse(); }
-  else goScreen("lobby");
+  if (pulseIdx < PULSE.length - 1) {
+    pulseIdx++;
+    renderPulse();
+  } else go("ready");
 });
 
-function startLobby() {
+/* ============================================================
+   Ready
+   ============================================================ */
+function startCountdown() {
   let n = 10;
-  $("lobbyCount").textContent = "00:10";
-  clearInterval(lobbyTimer);
-  lobbyTimer = setInterval(() => {
+  $("countdown").textContent = "00:10";
+  clearInterval(countdownTimer);
+  countdownTimer = setInterval(() => {
     n--;
-    $("lobbyCount").textContent = "00:" + String(Math.max(n, 0)).padStart(2, "0");
-    if (n <= 0) { clearInterval(lobbyTimer); goScreen("session"); }
+    $("countdown").textContent = "00:" + String(Math.max(n, 0)).padStart(2, "0");
+    if (n <= 0) {
+      clearInterval(countdownTimer);
+      go("session");
+    }
   }, 1000);
 }
 
-/* the scripted interview — the same ladder the product runs */
-let turn = 0;
-const SCRIPT = [
-  { stage: "Team experience", line: "Thank you for making the time. This is a team diagnosis, not an assessment of you. Nothing you say is reported against your name, and your manager sees team-level results only. Tell me about a recent piece of work that did not go smoothly — what happened, and where did it get stuck?", said: "" },
-  { stage: "Team experience", line: "Who was supposed to decide, and how did you find out? Keep it to what happened, not who is at fault.", said: "“The handover sat for nine days. Nobody knew who signed it off — I found out by asking three people.”" },
-  { stage: "Scenario 1", line: "", said: "“I would check what happened first and ask what got in the way — from their side there may be a constraint I cannot see.”", scenario: 0 },
-  { stage: "Scenario 1", line: "And if it happened again the following week — what changes?", said: "“I would raise it as a process issue rather than a personal one, and agree a next step with a named owner.”" },
-  { stage: "Scenario 2", line: "", said: "“I would step back, prioritise what has to ship and defer the rest, then tell the customer early.”", scenario: 1 },
-  { stage: "Wrap-up", line: "We are close to time. Before we finish — one thing you would change about how this team works?", said: "“Make it clear who owns each handover.”" },
-];
+/* ============================================================
+   Session — the structured ladder the product runs
+   ============================================================ */
+function script() {
+  return [
+    { stage: "s.stage1", line: t("s.greet"), answer: "" },
+    { stage: "s.stage1", line: t("s.probe"), answer: t("s.a1") },
+    { stage: "s.stage1", line: t("s.ack"), answer: t("s.a2") },
+    { stage: "s.stage2", line: t("s.scenarioIntro") + " " + t("s.scenario1"), answer: t("s.a3") },
+    { stage: "s.stage3", line: t("s.scenarioIntro") + " " + t("s.scenario2"), answer: t("s.a4") },
+    { stage: "s.stage4", line: t("s.wrap"), answer: t("s.a5") }
+  ];
+}
 
 function startSession() {
   turn = 0;
-  $("youSaid").textContent = "";
-  speak(SCRIPT[0].line, SCRIPT[0].stage);
+  const s = script();
+  $("you").textContent = "";
+  speak(s[0]);
   let secs = 600;
+  $("sessTimer").textContent = "10:00";
   clearInterval(sessionTimer);
   sessionTimer = setInterval(() => {
     secs--;
-    $("sessTimer").textContent = String(Math.floor(secs / 60)).padStart(2, "0") + ":" + String(secs % 60).padStart(2, "0");
+    $("sessTimer").textContent =
+      String(Math.floor(secs / 60)).padStart(2, "0") + ":" + String(secs % 60).padStart(2, "0");
     if (secs <= 0) clearInterval(sessionTimer);
   }, 1000);
 }
 
-function speak(text, stage) {
-  $("stagePill").textContent = stage;
-  $("caption").textContent = text;
-  $("avatarSlot").classList.add("speaking");
-  setTimeout(() => $("avatarSlot").classList.remove("speaking"), 2200);
+function speak(step) {
+  $("stagePill").textContent = t(step.stage);
+  $("line").textContent = step.line;
+  $("avatar").classList.add("speaking");
+  setTimeout(() => $("avatar").classList.remove("speaking"), 2400);
 }
 
-$("micBtn").addEventListener("click", () => {
-  const step = SCRIPT[turn];
-  $("micBtn").classList.add("listening");
-  $("micLbl").textContent = "Listening…";
+$("mic").addEventListener("click", () => {
+  const s = script();
+  const step = s[turn];
+  $("mic").classList.add("listening");
+  $("micLbl").textContent = t("s.listening");
   setTimeout(() => {
-    $("micBtn").classList.remove("listening");
-    $("micLbl").textContent = "Tap to answer";
-    $("youSaid").textContent = step.said || "";
+    $("mic").classList.remove("listening");
+    $("micLbl").textContent = t("s.tap");
+    $("you").textContent = step.answer ? "“" + step.answer + "”" : "";
     turn++;
-    if (turn >= SCRIPT.length) {
+    if (turn >= s.length) {
       clearInterval(sessionTimer);
-      speak("Thank you. I will show you a short summary of what I recorded so you can correct anything that is wrong.", "Wrap-up");
-      setTimeout(() => goScreen("reflect"), 2200);
+      speak({ stage: "s.stage4", line: t("s.close") });
+      setTimeout(() => go("reflect"), 2400);
       return;
     }
-    const next = SCRIPT[turn];
-    if (next.scenario !== undefined) {
-      const sc = DATA.scenarios[next.scenario];
-      speak(`Now a short workplace situation. There is no right answer — tell me what you would actually do. ${sc.setup} ${sc.ask}`, next.stage);
-    } else {
-      speak(next.line, next.stage);
-    }
+    speak(s[turn]);
   }, 1400);
 });
 
-$("btnCorrect").addEventListener("click", () => {
-  $("correctionWrap").hidden = false;
-  $("correction").focus();
-  toast("Correction recorded with the original kept in the audit trail.");
+/* ============================================================
+   Reflection + confirmation
+   ============================================================ */
+["q1", "q2", "q3", "q4"].forEach((id) =>
+  $(id).addEventListener("input", () => {
+    $(id).dataset.touched = "1";
+  })
+);
+
+$("btnFix").addEventListener("click", () => {
+  $("fixWrap").hidden = false;
+  $("fixedNote").hidden = false;
+  $("fix").focus();
 });
 
-function renderSummary() {
-  const dept = $("ctxDept").value || "your department";
-  const roleLvl = ($("ctxRole").value || "team member").toLowerCase();
-  const weakest = DATA.climateSpecs
-    .map((c) => ({ c, v: answers[c.id] || 3 }))
-    .sort((a, b) => a.v - b.v)[0];
-  $("summaryLead").textContent =
-    `A ${roleLvl} in ${dept} described ${weakest.c.name.toLowerCase()} as the main constraint on getting work done.`;
-  $("summaryPoints").innerHTML = [
-    ["Strength", $("rStrength").value],
-    ["Obstacle", $("rObstacle").value],
-    ["Change asked for", $("rPriority").value],
-    ["Own commitment", $("rAction").value],
-  ].filter((x) => x[1].trim()).map((x) => `<li>${esc(x[0])}: ${esc(x[1])}</li>`).join("");
+/**
+ * Korean particles agree with the final jamo of the word they follow, so they
+ * cannot be baked into a template string with an interpolated noun.
+ */
+function koParticles(str) {
+  const PAIRS = { "은는": ["은", "는"], "이가": ["이", "가"], "을를": ["을", "를"], "과와": ["과", "와"] };
+  return str.replace(/(.)\{(은는|이가|을를|과와)\}/g, (m, ch, kind) => {
+    const code = ch.charCodeAt(0);
+    const hangul = code >= 0xac00 && code <= 0xd7a3;
+    const batchim = hangul && (code - 0xac00) % 28 !== 0;
+    return ch + PAIRS[kind][batchim ? 0 : 1];
+  });
 }
 
-$("restartBtn").addEventListener("click", () => {
+function renderSummary() {
+  const deptIdx = $("dept").value;
+  const roleIdx = $("role").value;
+  const dept = deptIdx === "" ? t("x.depts")[0] : t("x.depts")[+deptIdx];
+  const role = roleIdx === "" ? t("x.roles")[4] : t("x.roles")[+roleIdx];
+  const weakest = PULSE.map((p) => ({ p: p, v: answers[p.id] || 3 })).sort((a, b) => a.v - b.v)[0];
+  const construct = (weakest.p[lang] || weakest.p.en)[0];
+
+  let lead = t("cf.lead")
+    .replace("{role}", role)
+    .replace("{dept}", dept)
+    .replace("{construct}", construct);
+  if (lang === "ko") lead = koParticles(lead);
+  $("sumLead").textContent = lead;
+
+  $("sumPoints").innerHTML = ["f.q1", "f.q2", "f.q3", "f.q4"]
+    .map((k, i) => {
+      const v = $("q" + (i + 1)).value.trim();
+      return v ? "<li><b>" + t(k) + ":</b> " + v + "</li>" : "";
+    })
+    .join("");
+}
+
+/* ============================================================
+   Done
+   ============================================================ */
+$("refCode").textContent = "MTI-2026-" + String(1000 + Math.floor(Math.random() * 8000));
+$("btnPrint").addEventListener("click", () => window.print());
+$("btnRestart").addEventListener("click", () => {
   pulseIdx = 0;
+  turn = 0;
   Object.keys(answers).forEach((k) => delete answers[k]);
   $("consentBox").checked = false;
-  $("correctionWrap").hidden = true;
-  goScreen("landing");
+  $("fixWrap").hidden = true;
+  $("fixedNote").hidden = true;
+  $("manageRow").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", "false"));
+  ["q1", "q2", "q3", "q4"].forEach((id) => delete $(id).dataset.touched);
+  setLang(lang);
+  go("lang");
 });
 
-
 /* boot */
-renderPulse();
-$("phone").dataset.screen = "landing";
+setLang("en");
+go("lang");
 </script>
