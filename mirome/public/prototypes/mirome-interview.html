@@ -311,6 +311,9 @@ button.hudpill { color: #fff; }
 /* Burnt-in subtitles. No box, no blur panel, no border — the shadow does
    the legibility work so nothing opaque ever sits on the picture. */
 .caption { flex: 0 0 auto; padding: 0 20px 12px; }
+/* Nothing to say until a language is chosen — an empty subtitle slot would
+   still reserve space and read as her having been cut off. */
+.device[data-screen="lang"] .caption { display: none; }
 .capname {
   display: flex; align-items: center; gap: 7px;
   font-size: 10px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
@@ -1569,12 +1572,14 @@ const T_DH = {
     "dh.name": "Mira",
     "dh.role": "MIROME digital interviewer",
     "dh.ai": "AI, not a person",
-    "dh.live": "LIVE",
-    "say.lang": "Hello — I'm Mira. I'll be running this session. Choose the language you'd like to speak in.",
     "say.welcome": "Before anything else: no person is listening to this. I ask, you talk, and you read back everything I record.",
     "say.consent": "Here is exactly what is collected and who can read it. Take your time — nothing starts until you agree.",
     "say.context": "Four quick details, so your answers are compared with the right group — not so you can be identified.",
-    "say.pulse": "Ten statements now. Answer for the team as you actually experience it, not as it should be.",
+    "say.pulse": "Ten statements, one at a time. Read the first one and tell me how true it is of your team.",
+    "say.pulseAsk": ["Next one. How true is this of your team?", "And this one?", "Same again — how true is this?", "Here is the next. Take your time."],
+    "say.pulseLast": "Last one.",
+    "say.pulseAck": ["Got it.", "Noted.", "Thank you."],
+    "say.pulseDone": "That is all ten. Now the conversation itself.",
     "say.ready": "We're about to begin. Speak normally — accent, grammar and fluency are excluded from every result.",
     "say.reflect": "Four short reflections, in your own words. These become the team's own voice in the results.",
     "say.confirm": "This is what I recorded. Correct anything that is wrong — the corrected version is what goes into the analysis.",
@@ -1584,12 +1589,14 @@ const T_DH = {
     "dh.name": "Mira",
     "dh.role": "Penemu duga digital MIROME",
     "dh.ai": "AI, bukan manusia",
-    "dh.live": "LANGSUNG",
-    "say.lang": "Helo — saya Mira. Saya yang mengendalikan sesi ini. Sila pilih bahasa yang anda mahu gunakan.",
     "say.welcome": "Sebelum apa-apa: tiada sesiapa mendengar perbualan ini. Saya bertanya, anda bercakap, dan anda semak semula semua yang saya rekodkan.",
     "say.consent": "Inilah dengan tepat apa yang dikumpul dan siapa boleh membacanya. Ambil masa anda — tiada apa bermula sebelum anda bersetuju.",
     "say.context": "Empat butiran ringkas, supaya jawapan anda dibandingkan dengan kumpulan yang betul — bukan untuk mengenal pasti anda.",
-    "say.pulse": "Kini sepuluh kenyataan. Jawab tentang pasukan seperti yang anda alami, bukan seperti yang sepatutnya.",
+    "say.pulse": "Sepuluh kenyataan, satu demi satu. Baca yang pertama dan beritahu saya sejauh mana ia benar tentang pasukan anda.",
+    "say.pulseAsk": ["Seterusnya. Sejauh mana ini benar tentang pasukan anda?", "Dan yang ini?", "Sekali lagi — sejauh mana ini benar?", "Ini yang berikutnya. Ambil masa anda."],
+    "say.pulseLast": "Yang terakhir.",
+    "say.pulseAck": ["Baik.", "Direkodkan.", "Terima kasih."],
+    "say.pulseDone": "Itu kesemua sepuluh. Sekarang perbualan itu sendiri.",
     "say.ready": "Kita hampir bermula. Bercakap seperti biasa — loghat, tatabahasa dan kefasihan dikecualikan daripada setiap keputusan.",
     "say.reflect": "Empat renungan ringkas, dalam perkataan anda sendiri. Ini menjadi suara pasukan dalam keputusan nanti.",
     "say.confirm": "Inilah yang saya rekodkan. Betulkan apa-apa yang salah — versi yang dibetulkan itulah yang masuk ke dalam analisis.",
@@ -1599,12 +1606,14 @@ const T_DH = {
     "dh.name": "米拉",
     "dh.role": "MIROME 数字访谈员",
     "dh.ai": "AI，并非真人",
-    "dh.live": "进行中",
-    "say.lang": "你好，我是米拉，这场对话由我来进行。请选择你想使用的语言。",
     "say.welcome": "首先要说明：没有任何人在旁听。我提问，你回答，最后你会看到我记录的全部内容。",
     "say.consent": "这里写清楚了会收集什么、谁能看到。慢慢看，你同意之后才会开始。",
     "say.context": "四个简短的信息，只是为了把你的回答和合适的群体作比较，不是为了辨认你。",
-    "say.pulse": "接下来是十句陈述。请按你实际的感受来回答，而不是按理应如此。",
+    "say.pulse": "十句陈述，一句一句来。请先读第一句，然后告诉我它有多符合你的团队。",
+    "say.pulseAsk": ["下一句。这有多符合你的团队？", "这一句呢？", "同样地——这有多符合？", "下一句来了，慢慢想。"],
+    "say.pulseLast": "最后一句。",
+    "say.pulseAck": ["好的。", "记下了。", "谢谢。"],
+    "say.pulseDone": "十句都完成了。接下来是对话本身。",
     "say.ready": "我们就要开始了。请自然地说，口音、语法和流利度不计入任何结果。",
     "say.reflect": "四段简短的自述，用你自己的话。它们会成为结果中团队自己的声音。",
     "say.confirm": "这是我记录下来的内容。有不对的请更正，进入分析的是更正后的版本。",
@@ -1614,12 +1623,14 @@ const T_DH = {
     "dh.name": "ميرا",
     "dh.role": "المحاوِرة الرقمية من MIROME",
     "dh.ai": "ذكاء اصطناعي، ليست إنساناً",
-    "dh.live": "مباشر",
-    "say.lang": "مرحباً، أنا ميرا وسأدير هذه الجلسة. اختر اللغة التي تفضّل التحدّث بها.",
     "say.welcome": "قبل كل شيء: لا أحد يستمع إلى هذه المحادثة. أنا أسأل، وأنت تتحدّث، ثم تراجع كل ما سجّلته.",
     "say.consent": "هذا بالضبط ما يُجمع ومَن يمكنه الاطّلاع عليه. خذ وقتك — لا شيء يبدأ قبل موافقتك.",
     "say.context": "أربع معلومات سريعة، لتُقارَن إجاباتك بالمجموعة الصحيحة — لا للتعرّف عليك.",
-    "say.pulse": "الآن عشر عبارات. أجب عن الفريق كما تعيشه فعلاً، لا كما ينبغي أن يكون.",
+    "say.pulse": "عشر عبارات، واحدة تلو الأخرى. اقرأ الأولى وأخبرني إلى أي مدى تنطبق على فريقك.",
+    "say.pulseAsk": ["التالية. إلى أي مدى تنطبق على فريقك؟", "وهذه؟", "مرة أخرى — إلى أي مدى تنطبق؟", "هذه التالية. خذ وقتك."],
+    "say.pulseLast": "الأخيرة.",
+    "say.pulseAck": ["حسناً.", "سُجّلت.", "شكراً."],
+    "say.pulseDone": "اكتملت العشر. الآن المحادثة نفسها.",
     "say.ready": "سنبدأ بعد قليل. تحدّث بشكل طبيعي — اللكنة والقواعد والطلاقة مستبعَدة من كل النتائج.",
     "say.reflect": "أربع ملاحظات قصيرة بكلماتك أنت. هذه ستصبح صوت الفريق في النتائج.",
     "say.confirm": "هذا ما سجّلته. صحّح أي شيء غير دقيق — النسخة المصحَّحة هي التي تدخل التحليل.",
@@ -1629,12 +1640,14 @@ const T_DH = {
     "dh.name": "미라",
     "dh.role": "MIROME 디지털 인터뷰어",
     "dh.ai": "AI이며 사람이 아닙니다",
-    "dh.live": "실시간",
-    "say.lang": "안녕하세요, 미라입니다. 이 세션은 제가 진행합니다. 사용하실 언어를 선택해 주세요.",
     "say.welcome": "먼저 한 가지. 이 대화를 듣고 있는 사람은 없습니다. 제가 묻고, 답해 주시고, 제가 기록한 내용은 모두 확인하실 수 있습니다.",
     "say.consent": "무엇을 수집하고 누가 볼 수 있는지 그대로 적어 두었습니다. 천천히 읽어 보세요. 동의하시기 전에는 아무것도 시작되지 않습니다.",
     "say.context": "간단한 네 가지입니다. 답변을 알맞은 그룹과 비교하기 위한 것이지, 신원을 확인하려는 것이 아닙니다.",
-    "say.pulse": "이제 열 개의 문장입니다. 이상적인 모습이 아니라, 실제로 겪고 계신 팀의 모습으로 답해 주세요.",
+    "say.pulse": "열 개의 문장을 하나씩 보겠습니다. 첫 문장을 읽고, 팀에 얼마나 해당하는지 알려 주세요.",
+    "say.pulseAsk": ["다음 문장입니다. 팀에 얼마나 해당하나요?", "이 문장은 어떤가요?", "다시 한번 — 얼마나 해당하나요?", "다음입니다. 천천히 보셔도 됩니다."],
+    "say.pulseLast": "마지막 문장입니다.",
+    "say.pulseAck": ["알겠습니다.", "기록했습니다.", "감사합니다."],
+    "say.pulseDone": "열 개 모두 끝났습니다. 이제 대화를 시작하겠습니다.",
     "say.ready": "곧 시작합니다. 편하게 말씀하세요. 억양과 문법, 유창함은 어떤 결과에도 반영되지 않습니다.",
     "say.reflect": "직접 쓰신 짧은 소회 네 가지입니다. 결과에서 팀의 목소리가 됩니다.",
     "say.confirm": "제가 기록한 내용입니다. 틀린 부분은 고쳐 주세요. 분석에는 수정된 내용이 들어갑니다.",
@@ -1644,12 +1657,14 @@ const T_DH = {
     "dh.name": "ミラ",
     "dh.role": "MIROME デジタル面談官",
     "dh.ai": "AI・人間ではありません",
-    "dh.live": "ライブ",
-    "say.lang": "こんにちは、ミラです。このセッションは私が進行します。お話しになる言語を選んでください。",
     "say.welcome": "はじめに一つ。この会話を聞いている人はいません。私が尋ね、あなたが話し、記録した内容はすべて確認していただきます。",
     "say.consent": "何を集め、誰が見られるのかをそのまま記しています。ゆっくりご確認ください。同意いただくまで何も始まりません。",
     "say.context": "簡単な四つの項目です。回答を適切なグループと比べるためのもので、個人を特定するためではありません。",
-    "say.pulse": "ここから十の文です。あるべき姿ではなく、実際に感じているとおりに答えてください。",
+    "say.pulse": "十の文を一つずつ見ていきます。まず最初の文を読んで、チームにどれくらい当てはまるか教えてください。",
+    "say.pulseAsk": ["次の文です。チームにどれくらい当てはまりますか。", "この文はどうでしょう。", "もう一度 — どれくらい当てはまりますか。", "次です。ゆっくりどうぞ。"],
+    "say.pulseLast": "最後の文です。",
+    "say.pulseAck": ["承知しました。", "記録しました。", "ありがとうございます。"],
+    "say.pulseDone": "十すべて終わりました。ここからは対話です。",
     "say.ready": "まもなく始めます。ふだんどおりに話してください。なまり・文法・流暢さはどの結果にも反映されません。",
     "say.reflect": "ご自身の言葉で、短い振り返りを四つ。結果の中でチーム自身の声になります。",
     "say.confirm": "私が記録した内容です。違うところは直してください。分析に入るのは修正後の内容です。",
@@ -1671,7 +1686,6 @@ let countdownTimer = null;
 let sessionTimer = null;
 let sayTimer = null;
 let speakOff = null;
-let langCycle = null;
 let turn = 0;
 let screen = "lang";
 
@@ -1746,18 +1760,6 @@ $("langGrid").addEventListener("click", (e) => {
   go("welcome");
 });
 
-/* Before a language is chosen she greets you in each of them in turn — the
-   choice is hers to offer, not a settings screen you fill in. */
-function startLangCycle() {
-  clearInterval(langCycle);
-  let i = 0;
-  say(T[LANGS[0].id]["say.lang"], LANGS[0].id);
-  langCycle = setInterval(() => {
-    i = (i + 1) % LANGS.length;
-    say(T[LANGS[i].id]["say.lang"], LANGS[i].id);
-  }, 3600);
-}
-
 function setLang(id) {
   lang = id;
   const spec = LANGS.find((l) => l.id === id);
@@ -1814,7 +1816,7 @@ const SAY_FOR = {
   welcome: "say.welcome",
   consent: "say.consent",
   context: "say.context",
-  pulse: "say.pulse",
+  pulse: null,
   ready: "say.ready",
   session: null,
   reflect: "say.reflect",
@@ -1826,7 +1828,6 @@ const BACK_TO = { welcome: "lang", consent: "welcome", context: "consent", pulse
 function go(id) {
   screen = id;
   clearInterval(countdownTimer);
-  if (id !== "lang") clearInterval(langCycle);
 
   document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.dataset.screen === id));
   const el = document.querySelector('.screen[data-screen="' + id + '"]');
@@ -1848,7 +1849,14 @@ function go(id) {
      makes her look stuck mid-scenario. */
   if (id !== "session") $("capWho").textContent = t("dh.name");
 
-  if (id === "lang") startLangCycle();
+  /* She says nothing until a language is picked. Reciting the greeting in
+     all six is noise: the participant is going to read one card and choose
+     one, and hearing five languages they did not ask for is not warmth. */
+  if (id === "lang") {
+    clearInterval(sayTimer);
+    capLine.textContent = "";
+    device.dataset.speaking = "0";
+  } else if (id === "pulse") say(pulsePrompt(pulseIdx));
   else if (SAY_FOR[id]) say(t(SAY_FOR[id]));
 
   if (id === "ready") startCountdown();
@@ -1883,8 +1891,32 @@ $("contextBtn").addEventListener("click", () => {
 });
 
 /* ============================================================
-   Pulse
+   Pulse — she runs it.
+
+   Ten silent multiple-choice items would leave the interviewer standing
+   there doing nothing, which is the one thing the hero of the session
+   cannot do. So she introduces the set, prompts each statement, marks the
+   last one, and closes the block.
+
+   The acknowledgements rotate rather than respond to the answer. A warmer
+   reply to agreement than to disagreement would teach the participant which
+   answer pleases her, and that is exactly the bias this instrument exists
+   to avoid.
    ============================================================ */
+let ackIdx = -1;
+
+function pulsePrompt(i) {
+  if (i === 0) return t("say.pulse");
+  if (i === PULSE.length - 1) return t("say.pulseLast");
+  const asks = t("say.pulseAsk");
+  return asks[(i - 1) % asks.length];
+}
+function pulseAck() {
+  const acks = t("say.pulseAck");
+  ackIdx = (ackIdx + 1) % acks.length;
+  return acks[ackIdx];
+}
+
 function renderPulse() {
   const item = PULSE[pulseIdx];
   const pair = item[lang] || item.en;
@@ -1897,8 +1929,14 @@ function renderPulse() {
   $("pulseScale").querySelectorAll("button").forEach((b) =>
     b.addEventListener("click", () => {
       answers[item.id] = +b.dataset.v;
-      if (pulseIdx < PULSE.length - 1) pulseIdx++;
+      if (pulseIdx === PULSE.length - 1) {
+        renderPulse();
+        say(pulseAck() + " " + t("say.pulseDone"));
+        return;
+      }
+      pulseIdx++;
       renderPulse();
+      say(pulseAck() + " " + pulsePrompt(pulseIdx));
     })
   );
   $("pulsePrev").disabled = pulseIdx === 0;
@@ -1910,11 +1948,13 @@ function renderPulse() {
 $("pulsePrev").addEventListener("click", () => {
   if (pulseIdx > 0) pulseIdx--;
   renderPulse();
+  say(pulsePrompt(pulseIdx));
 });
 $("pulseNext").addEventListener("click", () => {
   if (pulseIdx < PULSE.length - 1) {
     pulseIdx++;
     renderPulse();
+    say(pulsePrompt(pulseIdx));
   } else go("ready");
 });
 
@@ -2058,6 +2098,7 @@ $("btnPrint").addEventListener("click", () => window.print());
 $("btnRestart").addEventListener("click", () => {
   pulseIdx = 0;
   turn = 0;
+  ackIdx = -1;
   Object.keys(answers).forEach((k) => delete answers[k]);
   $("consentBox").checked = false;
   $("fixWrap").hidden = true;

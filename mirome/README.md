@@ -151,6 +151,16 @@ so that on every screen, in every language, the subtitle begins **below her
 chin**; there is a Playwright probe for exactly that clearance. The "AI, not a
 person" disclosure rides in a HUD pill on every screen and is never truncated.
 
+**She conducts, she does not narrate.** On the language screen she says nothing
+at all — reciting the greeting in six languages is noise when the participant
+is going to read one card and pick one. Through the ten-item pulse she runs the
+block: she introduces the set, prompts each statement, marks the last one and
+closes it, so the multiple-choice section is a person taking you through
+questions rather than a form with a portrait behind it. The acknowledgements
+between items **rotate rather than respond to the answer** — a warmer reply to
+agreement than to disagreement would teach the participant which answer pleases
+her, which is the bias the instrument exists to avoid.
+
 The drawn figure is a **stand-in**. It is lit rather than rendered: the head
 sits in shadow with only its contour caught by the key light, because a
 featureless bright oval reads as an egg and a hand-drawn face lands in the
