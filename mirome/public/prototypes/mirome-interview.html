@@ -1,17 +1,23 @@
-<title>MIROME — participant assessment session</title>
+<title>MIROME — the digital interviewer</title>
 
 <style>
 /* ============================================================
-   MIROME participant assessment — light edition, six languages.
+   MIROME participant assessment — the digital human is the surface.
 
-   Ground is white because the session is asking for candour: a dark
-   "broadcast studio" reads as production, a bright quiet room reads as a
-   private conversation. Brand colour is spent only on the interviewer layer
-   (violet) and on what is guaranteed (teal); everything else is ink on paper.
+   The interviewer is not a widget inside a form. She is the ground the
+   whole journey stands on: one persistent, full-bleed layer that is never
+   unmounted, never scrolled away, and never smaller than the screen. Every
+   other element — consent, pulse, reflection — is a sheet she hands you and
+   takes back, floating over her.
 
-   Arabic runs the whole journey in RTL, so every directional rule below uses
-   logical properties (inline-start / inline-end) — nothing is hard-coded to
-   left or right.
+   The studio is bright rather than dark. A dark broadcast set reads as
+   production; a bright quiet room reads as a private conversation, and this
+   session is asking for candour. So the light stays, and the hierarchy
+   inverts instead.
+
+   Arabic runs the whole journey in RTL, so every directional rule uses
+   logical properties — nothing is hard-coded to left or right, and the key
+   light mirrors with the figure.
    ============================================================ */
 
 :root {
@@ -20,6 +26,7 @@
   --violet-soft: #f1edff;
   --teal: #0e9f8f;
   --teal-soft: #e8f6f4;
+  --live: #e2445c;
 
   --ink: #191c24;
   --ink-2: #5b6273;
@@ -29,13 +36,19 @@
   --paper: #ffffff;
   --canvas: #f6f7fb;
 
+  /* the studio the interviewer stands in */
+  --studio-1: #f7f5fd;
+  --studio-2: #eae6f7;
+  --studio-3: #d9d4ed;
+
   --shell-bg: #eceef4;
   --shell-panel: #ffffff;
   --shell-ink: #191c24;
   --shell-grey: #5b6273;
   --shell-line: #dde0e9;
 
-  --shadow-device: 0 30px 80px rgba(25, 28, 36, 0.22), 0 0 0 1px rgba(25, 28, 36, 0.06);
+  --shadow-device: 0 30px 80px rgba(25, 28, 36, 0.24), 0 0 0 1px rgba(25, 28, 36, 0.06);
+  --shadow-sheet: 0 -18px 50px rgba(35, 30, 70, 0.16);
 
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --sans-ar: "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", "Segoe UI", Tahoma, var(--sans);
@@ -54,18 +67,12 @@
   }
 }
 :root[data-theme="dark"] {
-  --shell-bg: #15171e;
-  --shell-panel: #1d2029;
-  --shell-ink: #eef0f5;
-  --shell-grey: #99a0b1;
-  --shell-line: #2a2e3a;
+  --shell-bg: #15171e; --shell-panel: #1d2029; --shell-ink: #eef0f5;
+  --shell-grey: #99a0b1; --shell-line: #2a2e3a;
 }
 :root[data-theme="light"] {
-  --shell-bg: #eceef4;
-  --shell-panel: #ffffff;
-  --shell-ink: #191c24;
-  --shell-grey: #5b6273;
-  --shell-line: #dde0e9;
+  --shell-bg: #eceef4; --shell-panel: #ffffff; --shell-ink: #191c24;
+  --shell-grey: #5b6273; --shell-line: #dde0e9;
 }
 
 * { box-sizing: border-box; }
@@ -100,17 +107,17 @@ button { font-family: inherit; cursor: pointer; }
 }
 .bar b {
   color: var(--shell-ink);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
 }
 .bar .short { display: none; }
 @media (max-width: 640px) {
   .bar .long { display: none; }
   .bar .short { display: inline; }
 }
-.stage {
+/* Named .mount, not .stage — the screens below use .stage for "she is the
+   whole surface", and a shared class name silently gave every stage screen
+   flex:1, stretching it past the bottom of the device. */
+.mount {
   flex: 1;
   min-height: 0;
   display: flex;
@@ -125,7 +132,7 @@ button { font-family: inherit; cursor: pointer; }
   width: 100%;
   max-width: 420px;
   height: min(880px, calc(100dvh - 120px));
-  background: var(--paper);
+  background: var(--studio-2);
   color: var(--ink);
   border-radius: 34px;
   overflow: hidden;
@@ -136,7 +143,7 @@ button { font-family: inherit; cursor: pointer; }
 @media (max-width: 640px) {
   /* On a phone the portal IS the page. Stretch rather than height:100% —
      a percentage height against an auto-height flex parent collapses to zero. */
-  .stage { padding: 0; align-items: stretch; }
+  .mount { padding: 0; align-items: stretch; }
   .device { max-width: none; height: auto; border-radius: 0; box-shadow: none; }
 }
 .device[lang="ar"] { font-family: var(--sans-ar); }
@@ -144,80 +151,263 @@ button { font-family: inherit; cursor: pointer; }
 .device[lang="ko"] { font-family: var(--sans-ko); }
 .device[lang="ja"] { font-family: var(--sans-ja); }
 
-.screen {
+/* ============================================================
+   The interviewer layer — full-bleed, persistent, behind everything.
+   ============================================================ */
+.dh { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: var(--studio-2); }
+
+/* A real still drops in here as one line: set --dh-image on .device and the
+   drawn stand-in below is hidden. Nothing else in the page changes. */
+.dh-media {
   position: absolute;
   inset: 0;
-  display: none;
-  flex-direction: column;
-  overflow-y: auto;
-  scrollbar-width: none;
-  background: var(--paper);
+  background-image: var(--dh-image, none);
+  background-size: cover;
+  background-position: 50% 16%;
 }
-.screen::-webkit-scrollbar { display: none; }
-.screen.on { display: flex; animation: rise 0.34s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
-@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.device[dir="rtl"] .dh-media { transform: scaleX(-1); }
+.dh-media svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.device[data-dh="photo"] .dh-media svg { display: none; }
 
-.pad { padding: 22px 22px 26px; display: flex; flex-direction: column; flex: 1; }
-/* Never centre with justify-content inside a scroll container: content taller
-   than the screen overflows upward, above the scroll origin, and becomes
-   unreachable. Auto margins push down but still yield to overflow. */
-.pad.center > :first-child { margin-block-start: auto; }
-.pad.center > :last-child { margin-block-end: auto; }
-
-/* ---------- chrome ---------- */
-.top { display: flex; align-items: center; gap: 10px; padding: 16px 18px 0; }
-.brand { display: flex; align-items: center; gap: 8px; }
-.brand svg { width: 24px; height: 24px; flex: 0 0 auto; }
-.brand b { font-size: 14.5px; font-weight: 800; letter-spacing: 0.06em; line-height: 1; display: block; }
-.brand small {
-  display: block;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  color: var(--ink-3);
-  margin-top: 3px;
+/* Key light. Breathes at rest, flares while she is speaking, so the screen is
+   alive even on the sheet screens where she is only half visible. */
+.dh-key {
+  position: absolute;
+  inset-block-start: -18%;
+  inset-inline-start: -22%;
+  width: 90%;
+  height: 78%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 72%);
+  animation: breathe 7s ease-in-out infinite;
+  pointer-events: none;
 }
-.back {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: var(--paper);
-  color: var(--ink);
+.dh-rim {
+  position: absolute;
+  inset-block-start: 4%;
+  inset-inline-end: -30%;
+  width: 74%;
+  height: 66%;
+  background: radial-gradient(closest-side, rgba(122, 92, 255, 0.34), rgba(122, 92, 255, 0) 70%);
+  pointer-events: none;
+}
+@keyframes breathe { 0%, 100% { opacity: 0.72; } 50% { opacity: 1; } }
+.device[data-speaking="1"] .dh-key { animation: flare 1.5s ease-in-out infinite; }
+@keyframes flare { 0%, 100% { opacity: 0.85; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+
+/* Grain keeps the drawn figure from reading as flat vector art. */
+.dh-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  background-image: radial-gradient(rgba(60, 50, 100, 0.09) 0.6px, transparent 0.7px);
+  background-size: 3px 3px;
+  pointer-events: none;
+}
+/* Reading surface. Text sits on the falloff, never on her face. */
+.dh-scrim {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 46%;
+  background: linear-gradient(to top, #fff 4%, rgba(255, 255, 255, 0.9) 30%, rgba(255, 255, 255, 0.5) 62%, rgba(255, 255, 255, 0) 100%);
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+.device[data-mode="sheet"] .dh-scrim { opacity: 0; }
+
+/* ============================================================
+   HUD — who is talking to you, always on screen.
+   ============================================================ */
+.hud {
+  position: relative;
+  z-index: 30;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  padding: 0;
+  gap: 9px;
+  padding: 15px 15px 0;
+}
+.hud .spacer { flex: 1; }
+.back {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(25, 28, 36, 0.1);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(9px);
+  color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  flex: 0 0 auto; padding: 0;
 }
 .back svg { width: 17px; height: 17px; }
 .device[dir="rtl"] .back svg { transform: scaleX(-1); }
-.top .spacer { flex: 1; }
-.langbtn {
-  border: 1px solid var(--line);
-  background: var(--paper);
-  color: var(--ink-2);
-  font-size: 11.5px;
-  font-weight: 800;
-  padding: 7px 11px;
+.back[hidden] { display: none; }
+
+/* Identity: her portrait ring, her name, and the AI disclosure — one object,
+   so the disclosure can never be separated from the persona. */
+.ident {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(9px);
+  border: 1px solid rgba(25, 28, 36, 0.07);
   border-radius: 99px;
+  padding: 5px 13px 5px 5px;
+  min-width: 0;
+}
+.device[dir="rtl"] .ident { padding: 5px 5px 5px 13px; }
+.ident .ring {
+  position: relative;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: conic-gradient(from 140deg, var(--violet), #9b7bff, var(--teal), var(--violet));
+  display: flex; align-items: center; justify-content: center;
+}
+.ident .ring i {
+  width: 25px; height: 25px;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #efe9ff, #cdbcf0 60%, #a894e0);
+  display: block;
+}
+.device[data-speaking="1"] .ident .ring { animation: spin 3.4s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ident .who { min-width: 0; }
+.ident b { display: block; font-size: 13.5px; font-weight: 800; line-height: 1.1; }
+/* The AI disclosure is part of her name card, so it wraps rather than
+   truncates — an ellipsised "…" is exactly the wrong place to lose it. */
+.ident small {
+  display: block;
+  font-size: 8.5px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--ink-3);
+  line-height: 1.35;
+  margin-top: 2px;
+  max-width: 168px;
+}
+.ident small u { text-decoration: none; color: var(--violet); }
+
+.hudpill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(9px);
+  border: 1px solid rgba(25, 28, 36, 0.07);
+  border-radius: 99px;
+  padding: 7px 11px;
+  font-size: 11.5px; font-weight: 800;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+.hudpill[hidden] { display: none; }
+.hudpill.live { color: var(--live); }
+.hudpill.live i {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--live);
+  animation: blink 1.6s infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+button.hudpill { color: var(--ink); }
+
+/* ============================================================
+   Lower half — her caption, then whatever she is showing you.
+   ============================================================ */
+.lower {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
-.rail { display: flex; gap: 4px; padding: 12px 22px 0; }
+/* The caption is her voice. It stays put across every screen; only the words
+   change, so the participant is never handed a form by nobody. */
+.caption { flex: 0 0 auto; padding: 0 20px 12px; }
+.device[data-mode="sheet"] .caption { padding-bottom: 10px; }
+.capbox {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(25, 28, 36, 0.07);
+  border-radius: 18px;
+  padding: 11px 14px 13px;
+  box-shadow: 0 10px 30px rgba(35, 30, 70, 0.1);
+}
+.capname {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 9.5px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--violet);
+}
+.eq { display: flex; align-items: flex-end; gap: 2px; height: 11px; }
+.eq i { width: 2.5px; height: 3px; border-radius: 2px; background: var(--violet); opacity: 0.35; }
+.device[data-speaking="1"] .eq i { opacity: 1; animation: talk 0.9s ease-in-out infinite; }
+.eq i:nth-child(2) { animation-delay: 0.1s; }
+.eq i:nth-child(3) { animation-delay: 0.2s; }
+.eq i:nth-child(4) { animation-delay: 0.3s; }
+@keyframes talk { 0%, 100% { height: 3px; } 50% { height: 11px; } }
+.capline { margin: 6px 0 0; font-size: 14.5px; line-height: 1.5; font-weight: 500; }
+.device[lang="ar"] .capline { line-height: 1.8; }
+.capline .cursor {
+  display: inline-block;
+  width: 2px; height: 1em;
+  background: var(--violet);
+  vertical-align: -2px;
+  animation: blink 1s steps(1) infinite;
+}
+/* On the session screen she has the floor, so the caption gets room to talk. */
+.device[data-screen="session"] .capbox { padding: 13px 16px 15px; }
+.device[data-screen="session"] .capline { font-size: 16px; }
+
+/* ---------- screens ---------- */
+.screen { display: none; }
+.screen.on { display: flex; flex-direction: column; }
+.screen { overflow-y: auto; scrollbar-width: none; }
+.screen::-webkit-scrollbar { display: none; }
+
+/* stage screens: no card. Content floats on the studio falloff. */
+.screen.stage {
+  max-height: 100%;
+  padding: 0 20px 24px;
+  animation: rise 0.34s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+/* sheet screens: a white sheet she hands you, capped so she stays visible. */
+.screen.sheet {
+  max-height: 76%;
+  background: var(--paper);
+  border-radius: 26px 26px 0 0;
+  box-shadow: var(--shadow-sheet);
+  padding: 0 0 24px;
+  animation: hand 0.36s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes hand { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+.grip {
+  width: 38px; height: 4px;
+  border-radius: 99px;
+  background: var(--line);
+  margin: 9px auto 0;
+  flex: 0 0 auto;
+}
+/* Flex children default to shrinking, which silently compresses a tall sheet
+   instead of letting it scroll. Nothing inside a screen may shrink. */
+.pad { padding: 14px 22px 0; display: flex; flex-direction: column; flex: 0 0 auto; }
+.screen.stage > * { flex: 0 0 auto; }
+.screen.sheet > * { flex: 0 0 auto; }
+
+/* ---------- progress rail, inside the sheet ---------- */
+.rail { display: flex; gap: 4px; padding: 12px 22px 0; flex: 0 0 auto; }
 .rail i { height: 3px; flex: 1; border-radius: 99px; background: var(--line); transition: background 0.3s; }
 .rail i.done { background: var(--violet); }
 
 /* ---------- type ---------- */
 .eyebrow {
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 10.5px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--violet);
 }
-h1.title { margin: 8px 0 0; font-size: 25px; font-weight: 800; line-height: 1.2; letter-spacing: -0.01em; text-wrap: balance; }
+h1.title { margin: 8px 0 0; font-size: 24px; font-weight: 800; line-height: 1.2; letter-spacing: -0.01em; text-wrap: balance; }
 h2.title { margin: 8px 0 0; font-size: 21px; font-weight: 800; line-height: 1.25; text-wrap: balance; }
-.lead { margin: 10px 0 0; font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
+.lead { margin: 10px 0 0; font-size: 14px; line-height: 1.55; color: var(--ink-2); }
 .note { margin: 12px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--ink-3); }
 .device[lang="ar"] h1.title, .device[lang="ar"] h2.title { line-height: 1.45; }
 .device[lang="ar"] .lead { line-height: 1.75; }
@@ -229,46 +419,32 @@ h2.title { margin: 8px 0 0; font-size: 21px; font-weight: 800; line-height: 1.25
   border-radius: 14px;
   background: var(--violet);
   color: #fff;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 16px; font-weight: 700;
   padding: 15px 16px;
   margin-top: 14px;
   transition: transform 0.12s, filter 0.15s;
+  flex: 0 0 auto;
 }
 .btn:active { transform: scale(0.985); }
 .btn:hover { filter: brightness(1.06); }
-.btn.ghost { background: var(--paper); color: var(--ink); border: 1.5px solid var(--line); font-weight: 600; }
+.btn.ghost { background: rgba(255, 255, 255, 0.9); color: var(--ink); border: 1.5px solid var(--line); font-weight: 600; }
 .btn.ghost:hover { background: var(--canvas); filter: none; }
 .btn:disabled { background: var(--line); color: var(--ink-3); cursor: default; transform: none; filter: none; }
 .btnrow { display: flex; gap: 9px; }
 .btnrow .btn { flex: 1; font-size: 14.5px; padding: 14px 10px; }
 
 .field { display: block; font-size: 12.5px; font-weight: 700; margin: 16px 0 6px; }
-select.input {
+select.input, textarea.input {
   width: 100%;
   font-family: inherit;
-  font-size: 15px;
-  padding: 13px 14px;
   border: 1.5px solid var(--line);
   border-radius: 12px;
   background: var(--paper);
   color: var(--ink);
 }
-select.input:focus { border-color: var(--violet); outline: none; }
-textarea.input {
-  width: 100%;
-  font-family: inherit;
-  font-size: 14.5px;
-  line-height: 1.5;
-  padding: 12px 13px;
-  border: 1.5px solid var(--line);
-  border-radius: 12px;
-  background: var(--paper);
-  color: var(--ink);
-  min-height: 66px;
-  resize: vertical;
-}
-textarea.input:focus { border-color: var(--violet); outline: none; }
+select.input { font-size: 15px; padding: 13px 14px; }
+textarea.input { font-size: 14.5px; line-height: 1.5; padding: 12px 13px; min-height: 62px; resize: vertical; }
+select.input:focus, textarea.input:focus { border-color: var(--violet); outline: none; }
 .pillrow { display: flex; gap: 8px; }
 .pillrow button {
   flex: 1;
@@ -276,78 +452,68 @@ textarea.input:focus { border-color: var(--violet); outline: none; }
   background: var(--paper);
   border-radius: 12px;
   padding: 12px 6px;
-  font-size: 14.5px;
-  font-weight: 700;
+  font-size: 14.5px; font-weight: 700;
   color: var(--ink);
 }
 .pillrow button[aria-pressed="true"] { border-color: var(--indigo); background: var(--indigo); color: #fff; }
 
-/* ---------- language picker ---------- */
-.langgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+/* ---------- language picker, on the studio ---------- */
+.langgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
 .langcard {
-  border: 1.5px solid var(--line);
-  background: var(--paper);
+  border: 1px solid rgba(25, 28, 36, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
   border-radius: 14px;
-  padding: 15px 14px;
+  padding: 12px 13px;
   text-align: start;
   color: var(--ink);
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color 0.15s, background 0.15s, transform 0.12s;
 }
-.langcard:hover { border-color: var(--violet); background: var(--violet-soft); }
-.langcard b { display: block; font-size: 16px; font-weight: 700; }
-.langcard small { display: block; font-size: 11px; color: var(--ink-3); margin-top: 3px; letter-spacing: 0.04em; }
+.langcard:hover { border-color: var(--violet); background: #fff; transform: translateY(-1px); }
+.langcard b { display: block; font-size: 15.5px; font-weight: 700; }
+.langcard small { display: block; font-size: 10.5px; color: var(--ink-3); margin-top: 2px; letter-spacing: 0.04em; }
 
 /* ---------- trust chip ---------- */
 .chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
+  display: inline-flex; align-items: center; gap: 7px;
   background: var(--teal-soft);
   color: #0a6055;
   border-radius: 99px;
   padding: 8px 14px;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.35;
+  font-size: 12px; font-weight: 700; line-height: 1.35;
 }
 .chip svg { width: 13px; height: 13px; flex: 0 0 auto; }
 
 /* ---------- consent ---------- */
-.list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
 .item { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.5; color: var(--ink); }
 .item svg { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 2px; color: var(--teal); }
-.who { margin-top: 18px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.who { margin-top: 16px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 .who .h {
   background: var(--canvas);
   padding: 9px 14px;
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--ink-2);
 }
 .who .r { display: flex; gap: 12px; padding: 11px 14px; border-top: 1px solid var(--line-2); font-size: 12.5px; line-height: 1.45; }
 .who .r b { flex: 0 0 34%; font-weight: 700; }
 .who .r span { color: var(--ink-2); }
-.check { display: flex; gap: 11px; align-items: flex-start; margin-top: 18px; font-size: 13px; font-weight: 600; line-height: 1.5; }
+.check { display: flex; gap: 11px; align-items: flex-start; margin-top: 16px; font-size: 13px; font-weight: 600; line-height: 1.5; }
 .check input { width: 19px; height: 19px; accent-color: var(--violet); margin-top: 1px; flex: 0 0 auto; }
 
 /* ---------- pulse ---------- */
-.count { margin-top: 14px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
-.construct { margin-top: 14px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--indigo); }
-.statement { margin: 7px 0 0; font-size: 19px; font-weight: 700; line-height: 1.4; text-wrap: balance; }
+.count { margin-top: 12px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+.construct { margin-top: 12px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--indigo); }
+.statement { margin: 7px 0 0; font-size: 18.5px; font-weight: 700; line-height: 1.4; text-wrap: balance; }
 .device[lang="ar"] .statement { line-height: 1.6; }
-.scale { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+.scale { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
 .scale button {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: flex; align-items: center; gap: 12px;
   border: 1.5px solid var(--line);
   background: var(--paper);
   border-radius: 13px;
-  padding: 13px 15px;
-  font-size: 14.5px;
-  font-weight: 600;
+  padding: 12px 15px;
+  font-size: 14.5px; font-weight: 600;
   color: var(--ink);
   text-align: start;
 }
@@ -356,116 +522,55 @@ textarea.input:focus { border-color: var(--violet); outline: none; }
 .scale button[aria-pressed="true"] { border-color: var(--violet); background: var(--violet-soft); }
 .scale button[aria-pressed="true"] i { background: var(--violet); border-color: var(--violet); box-shadow: inset 0 0 0 3.5px #fff; }
 
-/* ---------- ready ---------- */
-.ready { display: flex; flex-direction: column; gap: 9px; margin-top: 18px; }
+/* ---------- ready (stage) ---------- */
+.ready { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
 .ready .row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid var(--line);
+  display: flex; align-items: center; gap: 12px;
+  border: 1px solid rgba(25, 28, 36, 0.08);
+  background: rgba(255, 255, 255, 0.85);
   border-radius: 13px;
-  padding: 13px 14px;
-  font-size: 13.5px;
-  font-weight: 600;
+  padding: 11px 14px;
+  font-size: 13.5px; font-weight: 600;
 }
 .ready .dot {
-  width: 26px;
-  height: 26px;
+  width: 26px; height: 26px;
   border-radius: 50%;
   background: var(--teal-soft);
   color: var(--teal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   flex: 0 0 auto;
 }
 .ready .dot svg { width: 14px; height: 14px; }
-.countdown { text-align: center; margin-top: 6px; }
-.countdown .n { font-size: 44px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.countdown small { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+.countdown { display: flex; align-items: baseline; gap: 10px; margin-top: 10px; }
+.countdown .n { font-size: 38px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1; }
+.countdown small { font-size: 10.5px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
 
-/* ---------- session ---------- */
-.sess { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.sesshead { display: flex; align-items: center; gap: 8px; padding: 16px 18px 0; }
-.pill {
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 6px 11px;
-  border-radius: 99px;
-  background: var(--violet-soft);
-  color: var(--violet);
-}
-.timer {
-  margin-inline-start: auto;
-  font-size: 13px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-2);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.timer i { width: 7px; height: 7px; border-radius: 50%; background: var(--violet); animation: blink 1.6s infinite; }
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
-
-.avatar {
-  margin: 16px 18px 0;
-  border-radius: 20px;
-  background: linear-gradient(160deg, #f4f1ff 0%, #eef3fb 55%, #f7f8fb 100%);
-  border: 1px solid var(--line);
-  flex: 0 0 auto;
-  height: 176px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  text-align: center;
-  padding: 0 22px;
-}
-.bars { display: flex; align-items: flex-end; gap: 5px; height: 40px; }
-.bars i { width: 6px; height: 10px; border-radius: 3px; background: var(--violet); opacity: 0.5; }
-.avatar.speaking .bars i { animation: talk 1s ease-in-out infinite; opacity: 1; }
-.bars i:nth-child(2) { animation-delay: 0.12s; }
-.bars i:nth-child(3) { animation-delay: 0.24s; }
-.bars i:nth-child(4) { animation-delay: 0.36s; }
-.bars i:nth-child(5) { animation-delay: 0.48s; }
-@keyframes talk { 0%, 100% { height: 9px; } 50% { height: 36px; } }
-.avatar span { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); line-height: 1.7; }
-
-.talkwrap { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 18px 0; scrollbar-width: none; }
-.talkwrap::-webkit-scrollbar { display: none; }
-.said { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--violet); }
-.line { margin: 6px 0 0; font-size: 16px; line-height: 1.55; font-weight: 500; }
-.device[lang="ar"] .line { line-height: 1.85; }
+/* ---------- session (stage) ---------- */
 .you {
-  margin-top: 14px;
-  border-inline-start: 3px solid var(--line);
-  padding-inline-start: 12px;
-  font-size: 13.5px;
-  line-height: 1.5;
+  margin-top: 12px;
+  background: rgba(34, 48, 110, 0.05);
+  border-inline-start: 3px solid var(--indigo);
+  border-radius: 0 12px 12px 0;
+  padding: 10px 13px;
+  font-size: 13.5px; line-height: 1.5;
   color: var(--ink-2);
   font-style: italic;
-  min-height: 20px;
 }
-.micwrap { padding: 14px 18px 22px; display: flex; flex-direction: column; align-items: center; gap: 9px; }
+.device[dir="rtl"] .you { border-radius: 12px 0 0 12px; }
+.you[hidden] { display: none; }
+.micwrap { margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .mic {
   position: relative;
-  width: 68px;
-  height: 68px;
+  width: 72px; height: 72px;
   border-radius: 50%;
   border: 0;
   background: var(--violet);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 26px rgba(107, 78, 230, 0.32);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 12px 30px rgba(107, 78, 230, 0.36);
   transition: background 0.2s, box-shadow 0.2s;
 }
-.mic svg { width: 28px; height: 28px; fill: #fff; }
-.mic.listening { background: var(--teal); box-shadow: 0 10px 26px rgba(14, 159, 143, 0.32); }
+.mic svg { width: 30px; height: 30px; fill: #fff; }
+.mic.listening { background: var(--teal); box-shadow: 0 12px 30px rgba(14, 159, 143, 0.36); }
 .mic.listening::after {
   content: "";
   position: absolute;
@@ -474,51 +579,44 @@ textarea.input:focus { border-color: var(--violet); outline: none; }
   border: 2px solid rgba(14, 159, 143, 0.5);
   animation: ring 1.3s infinite;
 }
-@keyframes ring { 0% { transform: scale(0.92); opacity: 1; } 100% { transform: scale(1.35); opacity: 0; } }
+@keyframes ring { 0% { transform: scale(0.92); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
 .miclbl { font-size: 12.5px; font-weight: 700; color: var(--ink-2); }
 
 /* ---------- summary / done ---------- */
-.summary { margin-top: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--canvas); padding: 15px 16px; }
+.summary { margin-top: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--canvas); padding: 15px 16px; }
 .summary .h { font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--indigo); }
 .summary p { margin: 8px 0 0; font-size: 14px; line-height: 1.6; }
 .summary ul { margin: 10px 0 0; padding-inline-start: 18px; }
 .summary li { font-size: 13px; line-height: 1.55; margin-bottom: 5px; }
 .tick {
-  width: 62px;
-  height: 62px;
+  width: 56px; height: 56px;
   border-radius: 50%;
   background: var(--teal-soft);
   color: var(--teal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   margin: 0 auto 4px;
 }
-.tick svg { width: 28px; height: 28px; }
-.ref { margin-top: 16px; border: 1px dashed var(--line); border-radius: 14px; padding: 13px; text-align: center; }
+.tick svg { width: 26px; height: 26px; }
+.ref { margin-top: 14px; border: 1px dashed var(--line); border-radius: 14px; padding: 12px; text-align: center; }
 .ref small { display: block; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
 .ref b { font-size: 19px; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
-.steps { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.steps { display: flex; flex-direction: column; gap: 9px; margin-top: 12px; }
 .steps .s { display: flex; gap: 11px; font-size: 13px; line-height: 1.5; }
 .steps .s b {
   flex: 0 0 auto;
-  width: 21px;
-  height: 21px;
+  width: 21px; height: 21px;
   border-radius: 50%;
   background: var(--violet-soft);
   color: var(--violet);
   font-size: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
 }
 .yours {
-  margin-top: 16px;
+  margin-top: 14px;
   background: var(--teal-soft);
   border-radius: 14px;
   padding: 13px 15px;
-  font-size: 12.5px;
-  line-height: 1.55;
+  font-size: 12.5px; line-height: 1.55;
   color: #0a6055;
   font-weight: 600;
 }
@@ -532,11 +630,10 @@ textarea.input:focus { border-color: var(--violet); outline: none; }
   max-width: 88vw;
   background: var(--ink);
   color: #fff;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 13px; font-weight: 600;
   padding: 12px 18px;
   border-radius: 12px;
-  transform: translateY(120px);
+  transform: translateY(140px);
   transition: transform 0.3s;
   z-index: 90;
 }
@@ -552,161 +649,227 @@ textarea.input:focus { border-color: var(--violet); outline: none; }
 
 <div class="frame">
   <div class="bar">
-    <b>MIROME participant assessment</b>
-    <span class="long">Prototype of the confidential session, in six languages. Tap through it as an employee would — the digital-human video stream is the one thing a static page cannot carry.</span>
-    <span class="short">Prototype · six languages · tap through as an employee</span>
+    <b>MIROME · the digital interviewer</b>
+    <span class="long">Prototype of the confidential session, in six languages. The interviewer is the surface — every screen is something she hands you. Drop a real still into <code>--dh-image</code> and the drawn stand-in is replaced.</span>
+    <span class="short">Prototype · six languages · the interviewer is the surface</span>
   </div>
 
-  <div class="stage">
-    <main class="device" id="device" lang="en" dir="ltr">
+  <div class="mount">
+    <main class="device" id="device" lang="en" dir="ltr" data-mode="stage" data-screen="lang" data-speaking="0">
 
-      <!-- 1 · language -->
-      <section class="screen on" data-screen="lang">
-        <div class="top">
-          <span class="brand">
-            <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
-              <circle cx="14" cy="14" r="12.5" stroke="#6B4EE6" stroke-width="1.5" opacity=".45"></circle>
-              <g stroke="#6B4EE6" stroke-width="2.6" stroke-linecap="round">
-                <path d="M8 17 v-6"></path><path d="M14 20 v-12"></path><path d="M20 17 v-6"></path>
-              </g>
-            </svg>
-            <span><b>MIROME</b><small>TEAM INTELLIGENCE</small></span>
+      <!-- ---------- the interviewer: one layer, never unmounted ---------- -->
+      <div class="dh" aria-hidden="true">
+        <div class="dh-media">
+          <!-- The interviewer, drawn as a backlit mid-shot rather than a
+               rendered face.
+
+               A hand-drawn face lands in the uncanny valley and cheapens the
+               thing it is meant to carry; a figure lit from behind reads as a
+               person immediately and asks nothing of the drawing. It is also
+               honest — the live avatar is a video stream, and this page is the
+               composition that stream drops into, not a substitute for it. -->
+          <svg viewBox="0 0 420 880" preserveAspectRatio="xMidYMin slice">
+            <defs>
+              <linearGradient id="studio" x1="0" y1="0" x2="0.3" y2="1">
+                <stop offset="0%" stop-color="#faf8ff"></stop>
+                <stop offset="48%" stop-color="#ebe7f8"></stop>
+                <stop offset="100%" stop-color="#d5cfec"></stop>
+              </linearGradient>
+              <radialGradient id="bloom" cx="0.5" cy="0.42" r="0.55">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.98"></stop>
+                <stop offset="62%" stop-color="#ffffff" stop-opacity="0.4"></stop>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"></stop>
+              </radialGradient>
+              <linearGradient id="hair" x1="0.15" y1="0" x2="0.9" y2="1">
+                <stop offset="0%" stop-color="#585070"></stop>
+                <stop offset="55%" stop-color="#3a3350"></stop>
+                <stop offset="100%" stop-color="#282238"></stop>
+              </linearGradient>
+              <linearGradient id="skin" x1="0.2" y1="0.1" x2="0.95" y2="1">
+                <stop offset="0%" stop-color="#eed6c2"></stop>
+                <stop offset="52%" stop-color="#d9b096"></stop>
+                <stop offset="100%" stop-color="#ab7d66"></stop>
+              </linearGradient>
+              <linearGradient id="cloth" x1="0.1" y1="0" x2="0.9" y2="1">
+                <stop offset="0%" stop-color="#39406c"></stop>
+                <stop offset="55%" stop-color="#262b4d"></stop>
+                <stop offset="100%" stop-color="#171a2e"></stop>
+              </linearGradient>
+              <radialGradient id="haze" cx="0.5" cy="0.45" r="0.62">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.34"></stop>
+                <stop offset="70%" stop-color="#f4f1fd" stop-opacity="0.2"></stop>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.5"></stop>
+              </radialGradient>
+              <pattern id="scan" width="4" height="4" patternUnits="userSpaceOnUse">
+                <rect width="4" height="2" fill="#6b62a0" opacity="0.5"></rect>
+              </pattern>
+              <radialGradient id="vig" cx="0.5" cy="0.4" r="0.75">
+                <stop offset="60%" stop-color="#2a2440" stop-opacity="0"></stop>
+                <stop offset="100%" stop-color="#2a2440" stop-opacity="0.2"></stop>
+              </radialGradient>
+              <filter id="defocus" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="4.5"></feGaussianBlur>
+              </filter>
+              <filter id="rim" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="3.5"></feGaussianBlur>
+              </filter>
+            </defs>
+
+            <rect width="420" height="880" fill="url(#studio)"></rect>
+
+            <!-- Back to front: jacket, neck, hair, face, fringe. Every edge is
+                 defocused by the same amount, so nothing floats. -->
+            <g filter="url(#defocus)" transform="translate(0 -30)">
+              <path d="M18 880 C26 648 96 470 212 432 C328 470 398 648 406 880 Z" fill="url(#cloth)"></path>
+              <path d="M170 450 L212 548 L254 450 C238 438 186 438 170 450 Z" fill="#efeafb" opacity="0.9"></path>
+              <path d="M178 300 h68 v78 c-21 18 -47 18 -68 0 Z" fill="url(#skin)"></path>
+              <path d="M178 302 q34 40 68 0 v24 q-34 34 -68 0 Z" fill="#95684f" opacity="0.42"></path>
+              <path d="M120 250 C114 138 160 88 212 88 C264 88 310 138 304 250 C308 336 312 412 322 470 C292 452 278 400 272 344 L152 344 C146 400 132 452 102 470 C112 412 116 336 120 250 Z" fill="url(#hair)"></path>
+              <path d="M140 226 C140 152 172 118 212 118 C252 118 284 152 284 226 C284 296 252 332 212 332 C172 332 140 296 140 226 Z" fill="url(#skin)"></path>
+              <path d="M284 208 C280 268 266 306 236 328 C268 322 284 288 284 226 Z" fill="#8f6349" opacity="0.45"></path>
+              <path d="M142 214 C138 140 172 106 212 106 C252 106 286 140 282 214 C276 182 262 158 244 150 C224 164 200 164 180 150 C162 158 148 182 142 214 Z" fill="url(#hair)"></path>
+            </g>
+
+            <!-- the light she is standing in front of -->
+            <ellipse cx="212" cy="208" rx="215" ry="230" fill="url(#bloom)" opacity="0.4"></ellipse>
+
+            <!-- rim light: the one crisp edge in the frame, which is what makes
+                 a defocused figure read as lit rather than as a smudge -->
+            <g filter="url(#rim)" opacity="0.85" transform="translate(0 -30)">
+              <path d="M280 140 C300 196 300 292 288 344 C286 284 282 200 274 154 Z" fill="#ffffff"></path>
+              <path d="M300 258 C312 330 314 410 324 470 C310 404 302 330 296 272 Z" fill="#ffffff"></path>
+              <path d="M318 626 C356 688 380 782 388 868 C368 786 344 712 310 654 Z" fill="#ffffff"></path>
+              <path d="M132 148 C118 200 116 286 126 344 C126 286 128 202 138 160 Z" fill="#ffffff" opacity="0.55"></path>
+            </g>
+
+            <!-- Front haze. The figure and the studio have to share the same
+                 air, or the drawing reads as a sticker on a background. -->
+            <ellipse cx="206" cy="270" rx="250" ry="330" fill="url(#haze)"></ellipse>
+            <g opacity="0.16">
+              <rect width="420" height="880" fill="url(#scan)"></rect>
+            </g>
+            <rect width="420" height="880" fill="url(#vig)"></rect>
+          </svg>
+        </div>
+        <div class="dh-key"></div>
+        <div class="dh-rim"></div>
+        <div class="dh-grain"></div>
+        <div class="dh-scrim"></div>
+      </div>
+
+      <!-- ---------- HUD ---------- -->
+      <header class="hud">
+        <button class="back" id="hudBack" aria-label="Back" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+        </button>
+        <div class="ident">
+          <span class="ring"><i></i></span>
+          <span class="who">
+            <b id="dhName">Mira</b>
+            <small><span id="dhRole"></span> · <u id="dhAi"></u></small>
           </span>
         </div>
-        <div class="pad center">
-          <h1 class="title" data-t="lang.title"></h1>
-          <p class="lead" data-t="lang.sub"></p>
+        <span class="spacer"></span>
+        <span class="hudpill" id="sessTimerPill" hidden><span id="sessTimer">10:00</span></span>
+        <span class="hudpill live" id="livePill" hidden><i></i><span id="liveLbl"></span></span>
+        <button class="hudpill" id="langBtn">EN</button>
+      </header>
+
+      <!-- ---------- her voice + what she is showing you ---------- -->
+      <div class="lower">
+        <div class="caption" id="caption">
+          <div class="capbox">
+            <div class="capname">
+              <span class="eq"><i></i><i></i><i></i><i></i></span>
+              <span id="capWho">Mira</span>
+            </div>
+            <p class="capline" id="capLine"></p>
+          </div>
+        </div>
+
+        <!-- 1 · language (stage) -->
+        <section class="screen stage on" data-screen="lang">
           <div class="langgrid" id="langGrid"></div>
           <p class="note" data-t="lang.note"></p>
-        </div>
-      </section>
+        </section>
 
-      <!-- 2 · welcome -->
-      <section class="screen" data-screen="welcome">
-        <div class="top">
-          <button class="back" data-go="lang" aria-label="Back">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
-          </button>
-          <span class="brand">
-            <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
-              <circle cx="14" cy="14" r="12.5" stroke="#6B4EE6" stroke-width="1.5" opacity=".45"></circle>
-              <g stroke="#6B4EE6" stroke-width="2.6" stroke-linecap="round">
-                <path d="M8 17 v-6"></path><path d="M14 20 v-12"></path><path d="M20 17 v-6"></path>
-              </g>
-            </svg>
-            <span><b>MIROME</b><small>TEAM INTELLIGENCE</small></span>
-          </span>
-          <span class="spacer"></span>
-          <button class="langbtn" data-go="lang" id="langBtn"></button>
-        </div>
-        <div class="pad">
+        <!-- 2 · welcome (stage) -->
+        <section class="screen stage" data-screen="welcome">
           <div class="eyebrow" data-t="w.eyebrow"></div>
           <h1 class="title" data-t="w.title"></h1>
-          <p class="lead" data-t="w.lead"></p>
-          <div style="margin-top:16px">
+          <div style="margin-top:12px">
             <span class="chip">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
               <span data-t="chip.private"></span>
             </span>
           </div>
-          <div class="steps" style="margin-top:20px">
-            <div class="s"><b>1</b><span data-t="w.s1"></span></div>
-            <div class="s"><b>2</b><span data-t="w.s2"></span></div>
-            <div class="s"><b>3</b><span data-t="w.s3"></span></div>
-          </div>
-          <div style="flex:1"></div>
           <button class="btn" data-go="consent" data-t="w.cta"></button>
           <p class="note" data-t="w.privacy"></p>
-        </div>
-      </section>
+        </section>
 
-      <!-- 3 · consent -->
-      <section class="screen" data-screen="consent">
-        <div class="top">
-          <button class="back" data-go="welcome" aria-label="Back">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
-          </button>
-          <span class="spacer"></span>
-        </div>
-        <div class="rail" data-rail="1"></div>
-        <div class="pad">
-          <div class="eyebrow" data-t="c.step"></div>
-          <h2 class="title" data-t="c.title"></h2>
-          <p class="lead" data-t="c.sub"></p>
-          <div class="list" id="consentList"></div>
-          <div class="who">
-            <div class="h" data-t="c.whoTitle"></div>
-            <div class="r"><b data-t="c.who1"></b><span data-t="c.who1v"></span></div>
-            <div class="r"><b data-t="c.who2"></b><span data-t="c.who2v"></span></div>
-            <div class="r"><b data-t="c.who3"></b><span data-t="c.who3v"></span></div>
+        <!-- 3 · consent (sheet) -->
+        <section class="screen sheet" data-screen="consent">
+          <div class="grip"></div>
+          <div class="rail" data-rail="1"></div>
+          <div class="pad">
+            <div class="eyebrow" data-t="c.step"></div>
+            <h2 class="title" data-t="c.title"></h2>
+            <p class="lead" data-t="c.sub"></p>
+            <div class="list" id="consentList"></div>
+            <div class="who">
+              <div class="h" data-t="c.whoTitle"></div>
+              <div class="r"><b data-t="c.who1"></b><span data-t="c.who1v"></span></div>
+              <div class="r"><b data-t="c.who2"></b><span data-t="c.who2v"></span></div>
+              <div class="r"><b data-t="c.who3"></b><span data-t="c.who3v"></span></div>
+            </div>
+            <label class="check"><input type="checkbox" id="consentBox" /><span data-t="c.check"></span></label>
+            <button class="btn" id="consentBtn" data-t="c.cta"></button>
           </div>
-          <label class="check"><input type="checkbox" id="consentBox" /><span data-t="c.check"></span></label>
-          <button class="btn" id="consentBtn" data-t="c.cta"></button>
-        </div>
-      </section>
+        </section>
 
-      <!-- 4 · context -->
-      <section class="screen" data-screen="context">
-        <div class="top">
-          <button class="back" data-go="consent" aria-label="Back">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
-          </button>
-          <span class="spacer"></span>
-        </div>
-        <div class="rail" data-rail="2"></div>
-        <div class="pad">
-          <div class="eyebrow" data-t="x.step"></div>
-          <h2 class="title" data-t="x.title"></h2>
-          <p class="lead" data-t="x.sub"></p>
-          <label class="field" for="dept" data-t="x.dept"></label>
-          <select class="input" id="dept"></select>
-          <label class="field" for="role" data-t="x.role"></label>
-          <select class="input" id="role"></select>
-          <label class="field" for="tenure" data-t="x.tenure"></label>
-          <select class="input" id="tenure"></select>
-          <label class="field" data-t="x.manage"></label>
-          <div class="pillrow" id="manageRow">
-            <button data-v="yes" aria-pressed="false" data-t="x.yes"></button>
-            <button data-v="no" aria-pressed="false" data-t="x.no"></button>
+        <!-- 4 · context (sheet) -->
+        <section class="screen sheet" data-screen="context">
+          <div class="grip"></div>
+          <div class="rail" data-rail="2"></div>
+          <div class="pad">
+            <div class="eyebrow" data-t="x.step"></div>
+            <h2 class="title" data-t="x.title"></h2>
+            <p class="lead" data-t="x.sub"></p>
+            <label class="field" for="dept" data-t="x.dept"></label>
+            <select class="input" id="dept"></select>
+            <label class="field" for="role" data-t="x.role"></label>
+            <select class="input" id="role"></select>
+            <label class="field" for="tenure" data-t="x.tenure"></label>
+            <select class="input" id="tenure"></select>
+            <label class="field" data-t="x.manage"></label>
+            <div class="pillrow" id="manageRow">
+              <button data-v="yes" aria-pressed="false" data-t="x.yes"></button>
+              <button data-v="no" aria-pressed="false" data-t="x.no"></button>
+            </div>
+            <p class="note" data-t="x.note"></p>
+            <button class="btn" id="contextBtn" data-t="common.continue"></button>
           </div>
-          <p class="note" data-t="x.note"></p>
-          <button class="btn" id="contextBtn" data-t="common.continue"></button>
-        </div>
-      </section>
+        </section>
 
-      <!-- 5 · pulse -->
-      <section class="screen" data-screen="pulse">
-        <div class="top">
-          <button class="back" data-go="context" aria-label="Back">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
-          </button>
-          <span class="spacer"></span>
-        </div>
-        <div class="rail" data-rail="3"></div>
-        <div class="pad">
-          <div class="eyebrow" data-t="p.step"></div>
-          <h2 class="title" data-t="p.title"></h2>
-          <p class="lead" data-t="p.sub"></p>
-          <div class="count" id="pulseCount"></div>
-          <div class="construct" id="pulseConstruct"></div>
-          <p class="statement" id="pulseStatement"></p>
-          <div class="scale" id="pulseScale"></div>
-          <div style="flex:1"></div>
-          <div class="btnrow" style="margin-top:16px">
-            <button class="btn ghost" id="pulsePrev" style="margin-top:0" data-t="common.back"></button>
-            <button class="btn" id="pulseNext" style="margin-top:0"></button>
+        <!-- 5 · pulse (sheet) -->
+        <section class="screen sheet" data-screen="pulse">
+          <div class="grip"></div>
+          <div class="rail" data-rail="3"></div>
+          <div class="pad">
+            <div class="count" id="pulseCount"></div>
+            <div class="construct" id="pulseConstruct"></div>
+            <p class="statement" id="pulseStatement"></p>
+            <div class="scale" id="pulseScale"></div>
+            <div class="btnrow" style="margin-top:14px">
+              <button class="btn ghost" id="pulsePrev" style="margin-top:0" data-t="common.back"></button>
+              <button class="btn" id="pulseNext" style="margin-top:0"></button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- 6 · ready -->
-      <section class="screen" data-screen="ready">
-        <div class="top"><span class="spacer"></span></div>
-        <div class="rail" data-rail="4"></div>
-        <div class="pad">
-          <div class="eyebrow" data-t="r.step"></div>
-          <h2 class="title" data-t="r.title"></h2>
-          <div class="countdown" style="margin-top:18px">
+        <!-- 6 · ready (stage) -->
+        <section class="screen stage" data-screen="ready">
+          <div class="countdown">
             <div class="n" id="countdown">00:10</div>
             <small data-t="r.starts"></small>
           </div>
@@ -724,112 +887,88 @@ textarea.input:focus { border-color: var(--violet); outline: none; }
               <span><span data-t="r.lang"></span>: <b id="readyLang"></b></span>
             </div>
           </div>
-          <div style="margin-top:16px">
-            <span class="chip">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
-              <span data-t="r.promise"></span>
-            </span>
-          </div>
-          <p class="note" data-t="r.note"></p>
-          <div style="flex:1"></div>
           <button class="btn" data-go="session" data-t="r.cta"></button>
-        </div>
-      </section>
+          <p class="note" data-t="s.avatar"></p>
+        </section>
 
-      <!-- 7 · session -->
-      <section class="screen" data-screen="session">
-        <div class="sess">
-          <div class="sesshead">
-            <span class="pill" id="stagePill"></span>
-            <span class="timer"><i></i><span id="sessTimer">10:00</span></span>
-          </div>
-          <div class="avatar" id="avatar">
-            <div class="bars"><i></i><i></i><i></i><i></i><i></i></div>
-            <span data-t="s.avatar"></span>
-          </div>
-          <div class="talkwrap">
-            <div class="said" data-t="s.interviewer"></div>
-            <p class="line" id="line"></p>
-            <div class="you" id="you"></div>
-          </div>
+        <!-- 7 · session (stage) -->
+        <section class="screen stage" data-screen="session">
+          <div class="you" id="you" hidden></div>
           <div class="micwrap">
             <button class="mic" id="mic" aria-label="Answer">
               <svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4Zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2Z"></path></svg>
             </button>
             <span class="miclbl" id="micLbl"></span>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- 8 · reflect -->
-      <section class="screen" data-screen="reflect">
-        <div class="top"><span class="spacer"></span></div>
-        <div class="rail" data-rail="5"></div>
-        <div class="pad">
-          <div class="eyebrow" data-t="f.step"></div>
-          <h2 class="title" data-t="f.title"></h2>
-          <p class="lead" data-t="f.sub"></p>
-          <label class="field" for="q1" data-t="f.q1"></label>
-          <textarea class="input" id="q1"></textarea>
-          <label class="field" for="q2" data-t="f.q2"></label>
-          <textarea class="input" id="q2"></textarea>
-          <label class="field" for="q3" data-t="f.q3"></label>
-          <textarea class="input" id="q3"></textarea>
-          <label class="field" for="q4" data-t="f.q4"></label>
-          <textarea class="input" id="q4"></textarea>
-          <button class="btn" data-go="confirm" data-t="common.continue"></button>
-        </div>
-      </section>
+        <!-- 8 · reflect (sheet) -->
+        <section class="screen sheet" data-screen="reflect">
+          <div class="grip"></div>
+          <div class="rail" data-rail="5"></div>
+          <div class="pad">
+            <div class="eyebrow" data-t="f.step"></div>
+            <h2 class="title" data-t="f.title"></h2>
+            <p class="lead" data-t="f.sub"></p>
+            <label class="field" for="q1" data-t="f.q1"></label>
+            <textarea class="input" id="q1"></textarea>
+            <label class="field" for="q2" data-t="f.q2"></label>
+            <textarea class="input" id="q2"></textarea>
+            <label class="field" for="q3" data-t="f.q3"></label>
+            <textarea class="input" id="q3"></textarea>
+            <label class="field" for="q4" data-t="f.q4"></label>
+            <textarea class="input" id="q4"></textarea>
+            <button class="btn" data-go="confirm" data-t="common.continue"></button>
+          </div>
+        </section>
 
-      <!-- 9 · confirm -->
-      <section class="screen" data-screen="confirm">
-        <div class="top"><span class="spacer"></span></div>
-        <div class="rail" data-rail="6"></div>
-        <div class="pad">
-          <div class="eyebrow" data-t="cf.step"></div>
-          <h2 class="title" data-t="cf.title"></h2>
-          <p class="lead" data-t="cf.sub"></p>
-          <div class="summary">
-            <div class="h" data-t="cf.head"></div>
-            <p id="sumLead"></p>
-            <ul id="sumPoints"></ul>
-          </div>
-          <div id="fixWrap" hidden>
-            <label class="field" for="fix" data-t="cf.fixLabel"></label>
-            <textarea class="input" id="fix"></textarea>
-          </div>
-          <p class="note" id="fixedNote" hidden data-t="cf.noted"></p>
-          <div style="flex:1"></div>
-          <div class="btnrow" style="margin-top:16px">
-            <button class="btn ghost" id="btnFix" style="margin-top:0" data-t="cf.wrong"></button>
-            <button class="btn" data-go="done" style="margin-top:0" data-t="cf.right"></button>
-          </div>
-        </div>
-      </section>
-
-      <!-- 10 · done -->
-      <section class="screen" data-screen="done">
-        <div class="top"><span class="spacer"></span></div>
-        <div class="rail" data-rail="7"></div>
-        <div class="pad" id="printable">
-          <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></div>
-          <h2 class="title" style="text-align:center" data-t="d.title"></h2>
-          <p class="lead" style="text-align:center" data-t="d.sub"></p>
-          <div class="ref"><small data-t="d.ref"></small><b id="refCode">MTI-2026-4821</b></div>
-          <div class="summary">
-            <div class="h" data-t="d.nextTitle"></div>
-            <div class="steps">
-              <div class="s"><b>1</b><span data-t="d.n1"></span></div>
-              <div class="s"><b>2</b><span data-t="d.n2"></span></div>
-              <div class="s"><b>3</b><span data-t="d.n3"></span></div>
-              <div class="s"><b>4</b><span data-t="d.n4"></span></div>
+        <!-- 9 · confirm (sheet) -->
+        <section class="screen sheet" data-screen="confirm">
+          <div class="grip"></div>
+          <div class="rail" data-rail="6"></div>
+          <div class="pad">
+            <div class="eyebrow" data-t="cf.step"></div>
+            <h2 class="title" data-t="cf.title"></h2>
+            <div class="summary">
+              <div class="h" data-t="cf.head"></div>
+              <p id="sumLead"></p>
+              <ul id="sumPoints"></ul>
+            </div>
+            <div id="fixWrap" hidden>
+              <label class="field" for="fix" data-t="cf.fixLabel"></label>
+              <textarea class="input" id="fix"></textarea>
+            </div>
+            <p class="note" id="fixedNote" hidden data-t="cf.noted"></p>
+            <div class="btnrow" style="margin-top:14px">
+              <button class="btn ghost" id="btnFix" style="margin-top:0" data-t="cf.wrong"></button>
+              <button class="btn" data-go="done" style="margin-top:0" data-t="cf.right"></button>
             </div>
           </div>
-          <div class="yours" data-t="d.yours"></div>
-          <button class="btn ghost" id="btnPrint" data-t="d.print"></button>
-          <button class="btn ghost" id="btnRestart" data-t="d.restart"></button>
-        </div>
-      </section>
+        </section>
+
+        <!-- 10 · done (sheet) -->
+        <section class="screen sheet" data-screen="done">
+          <div class="grip"></div>
+          <div class="rail" data-rail="7"></div>
+          <div class="pad" id="printable">
+            <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></div>
+            <h2 class="title" style="text-align:center" data-t="d.title"></h2>
+            <div class="ref"><small data-t="d.ref"></small><b id="refCode">MTI-2026-4821</b></div>
+            <div class="summary">
+              <div class="h" data-t="d.nextTitle"></div>
+              <div class="steps">
+                <div class="s"><b>1</b><span data-t="d.n1"></span></div>
+                <div class="s"><b>2</b><span data-t="d.n2"></span></div>
+                <div class="s"><b>3</b><span data-t="d.n3"></span></div>
+                <div class="s"><b>4</b><span data-t="d.n4"></span></div>
+              </div>
+            </div>
+            <div class="yours" data-t="d.yours"></div>
+            <button class="btn ghost" id="btnPrint" data-t="d.print"></button>
+            <button class="btn ghost" id="btnRestart" data-t="d.restart"></button>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 </div>
@@ -1453,17 +1592,123 @@ const PULSE = [
     ja: ["集団のしなやかさ", "優先順位が急に変わっても、このチームは崩れずに適応します。"] }
 ];
 
+
+/* ============================================================
+   The interviewer's own copy — her name, her disclosure, and the line she
+   says on every screen. Merged in so the six blocks above stay verbatim.
+   ============================================================ */
+const T_DH = {
+  en: {
+    "dh.name": "Mira",
+    "dh.role": "MIROME digital interviewer",
+    "dh.ai": "AI, not a person",
+    "dh.live": "LIVE",
+    "say.lang": "Hello — I'm Mira. I'll be running this session. Choose the language you'd like to speak in.",
+    "say.welcome": "Before anything else: no person is listening to this. I ask, you talk, and you read back everything I record.",
+    "say.consent": "Here is exactly what is collected and who can read it. Take your time — nothing starts until you agree.",
+    "say.context": "Four quick details, so your answers are compared with the right group — not so you can be identified.",
+    "say.pulse": "Ten statements now. Answer for the team as you actually experience it, not as it should be.",
+    "say.ready": "We're about to begin. Speak normally — accent, grammar and fluency are excluded from every result.",
+    "say.reflect": "Four short reflections, in your own words. These become the team's own voice in the results.",
+    "say.confirm": "This is what I recorded. Correct anything that is wrong — the corrected version is what goes into the analysis.",
+    "say.done": "That's everything. Thank you for the time — and for being straight with me."
+  },
+  ms: {
+    "dh.name": "Mira",
+    "dh.role": "Penemu duga digital MIROME",
+    "dh.ai": "AI, bukan manusia",
+    "dh.live": "LANGSUNG",
+    "say.lang": "Helo — saya Mira. Saya yang mengendalikan sesi ini. Sila pilih bahasa yang anda mahu gunakan.",
+    "say.welcome": "Sebelum apa-apa: tiada sesiapa mendengar perbualan ini. Saya bertanya, anda bercakap, dan anda semak semula semua yang saya rekodkan.",
+    "say.consent": "Inilah dengan tepat apa yang dikumpul dan siapa boleh membacanya. Ambil masa anda — tiada apa bermula sebelum anda bersetuju.",
+    "say.context": "Empat butiran ringkas, supaya jawapan anda dibandingkan dengan kumpulan yang betul — bukan untuk mengenal pasti anda.",
+    "say.pulse": "Kini sepuluh kenyataan. Jawab tentang pasukan seperti yang anda alami, bukan seperti yang sepatutnya.",
+    "say.ready": "Kita hampir bermula. Bercakap seperti biasa — loghat, tatabahasa dan kefasihan dikecualikan daripada setiap keputusan.",
+    "say.reflect": "Empat renungan ringkas, dalam perkataan anda sendiri. Ini menjadi suara pasukan dalam keputusan nanti.",
+    "say.confirm": "Inilah yang saya rekodkan. Betulkan apa-apa yang salah — versi yang dibetulkan itulah yang masuk ke dalam analisis.",
+    "say.done": "Itu sahaja. Terima kasih atas masa anda — dan kerana berterus terang."
+  },
+  zh: {
+    "dh.name": "米拉",
+    "dh.role": "MIROME 数字访谈员",
+    "dh.ai": "AI，并非真人",
+    "dh.live": "进行中",
+    "say.lang": "你好，我是米拉，这场对话由我来进行。请选择你想使用的语言。",
+    "say.welcome": "首先要说明：没有任何人在旁听。我提问，你回答，最后你会看到我记录的全部内容。",
+    "say.consent": "这里写清楚了会收集什么、谁能看到。慢慢看，你同意之后才会开始。",
+    "say.context": "四个简短的信息，只是为了把你的回答和合适的群体作比较，不是为了辨认你。",
+    "say.pulse": "接下来是十句陈述。请按你实际的感受来回答，而不是按理应如此。",
+    "say.ready": "我们就要开始了。请自然地说，口音、语法和流利度不计入任何结果。",
+    "say.reflect": "四段简短的自述，用你自己的话。它们会成为结果中团队自己的声音。",
+    "say.confirm": "这是我记录下来的内容。有不对的请更正，进入分析的是更正后的版本。",
+    "say.done": "就到这里。谢谢你的时间，也谢谢你的坦诚。"
+  },
+  ar: {
+    "dh.name": "ميرا",
+    "dh.role": "المحاوِرة الرقمية من MIROME",
+    "dh.ai": "ذكاء اصطناعي، ليست إنساناً",
+    "dh.live": "مباشر",
+    "say.lang": "مرحباً، أنا ميرا وسأدير هذه الجلسة. اختر اللغة التي تفضّل التحدّث بها.",
+    "say.welcome": "قبل كل شيء: لا أحد يستمع إلى هذه المحادثة. أنا أسأل، وأنت تتحدّث، ثم تراجع كل ما سجّلته.",
+    "say.consent": "هذا بالضبط ما يُجمع ومَن يمكنه الاطّلاع عليه. خذ وقتك — لا شيء يبدأ قبل موافقتك.",
+    "say.context": "أربع معلومات سريعة، لتُقارَن إجاباتك بالمجموعة الصحيحة — لا للتعرّف عليك.",
+    "say.pulse": "الآن عشر عبارات. أجب عن الفريق كما تعيشه فعلاً، لا كما ينبغي أن يكون.",
+    "say.ready": "سنبدأ بعد قليل. تحدّث بشكل طبيعي — اللكنة والقواعد والطلاقة مستبعَدة من كل النتائج.",
+    "say.reflect": "أربع ملاحظات قصيرة بكلماتك أنت. هذه ستصبح صوت الفريق في النتائج.",
+    "say.confirm": "هذا ما سجّلته. صحّح أي شيء غير دقيق — النسخة المصحَّحة هي التي تدخل التحليل.",
+    "say.done": "هذا كل شيء. شكراً على وقتك، وعلى صراحتك معي."
+  },
+  ko: {
+    "dh.name": "미라",
+    "dh.role": "MIROME 디지털 인터뷰어",
+    "dh.ai": "AI이며 사람이 아닙니다",
+    "dh.live": "실시간",
+    "say.lang": "안녕하세요, 미라입니다. 이 세션은 제가 진행합니다. 사용하실 언어를 선택해 주세요.",
+    "say.welcome": "먼저 한 가지. 이 대화를 듣고 있는 사람은 없습니다. 제가 묻고, 답해 주시고, 제가 기록한 내용은 모두 확인하실 수 있습니다.",
+    "say.consent": "무엇을 수집하고 누가 볼 수 있는지 그대로 적어 두었습니다. 천천히 읽어 보세요. 동의하시기 전에는 아무것도 시작되지 않습니다.",
+    "say.context": "간단한 네 가지입니다. 답변을 알맞은 그룹과 비교하기 위한 것이지, 신원을 확인하려는 것이 아닙니다.",
+    "say.pulse": "이제 열 개의 문장입니다. 이상적인 모습이 아니라, 실제로 겪고 계신 팀의 모습으로 답해 주세요.",
+    "say.ready": "곧 시작합니다. 편하게 말씀하세요. 억양과 문법, 유창함은 어떤 결과에도 반영되지 않습니다.",
+    "say.reflect": "직접 쓰신 짧은 소회 네 가지입니다. 결과에서 팀의 목소리가 됩니다.",
+    "say.confirm": "제가 기록한 내용입니다. 틀린 부분은 고쳐 주세요. 분석에는 수정된 내용이 들어갑니다.",
+    "say.done": "여기까지입니다. 시간 내 주셔서, 그리고 솔직하게 말씀해 주셔서 감사합니다."
+  },
+  ja: {
+    "dh.name": "ミラ",
+    "dh.role": "MIROME デジタル面談官",
+    "dh.ai": "AI・人間ではありません",
+    "dh.live": "ライブ",
+    "say.lang": "こんにちは、ミラです。このセッションは私が進行します。お話しになる言語を選んでください。",
+    "say.welcome": "はじめに一つ。この会話を聞いている人はいません。私が尋ね、あなたが話し、記録した内容はすべて確認していただきます。",
+    "say.consent": "何を集め、誰が見られるのかをそのまま記しています。ゆっくりご確認ください。同意いただくまで何も始まりません。",
+    "say.context": "簡単な四つの項目です。回答を適切なグループと比べるためのもので、個人を特定するためではありません。",
+    "say.pulse": "ここから十の文です。あるべき姿ではなく、実際に感じているとおりに答えてください。",
+    "say.ready": "まもなく始めます。ふだんどおりに話してください。なまり・文法・流暢さはどの結果にも反映されません。",
+    "say.reflect": "ご自身の言葉で、短い振り返りを四つ。結果の中でチーム自身の声になります。",
+    "say.confirm": "私が記録した内容です。違うところは直してください。分析に入るのは修正後の内容です。",
+    "say.done": "以上です。お時間をいただき、そして率直にお話しくださり、ありがとうございました。"
+  }
+};
+Object.keys(T_DH).forEach((l) => Object.assign(T[l], T_DH[l]));
+
 /* ============================================================
    State
    ============================================================ */
 const $ = (id) => document.getElementById(id);
 const device = $("device");
+const capLine = $("capLine");
 let lang = "en";
 let pulseIdx = 0;
 const answers = {};
 let countdownTimer = null;
 let sessionTimer = null;
+let sayTimer = null;
+let speakOff = null;
+let langCycle = null;
 let turn = 0;
+let screen = "lang";
+
+const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const t = (key) => {
   const v = T[lang][key];
@@ -1476,6 +1721,48 @@ function toast(msg) {
   el.classList.add("show");
   clearTimeout(el._x);
   el._x = setTimeout(() => el.classList.remove("show"), 3000);
+}
+
+/* ============================================================
+   Her voice.
+
+   One caption element, alive on every screen. The reveal is timed rather
+   than instant because the point of the whole page is that somebody is
+   talking to you — text that simply appears reads as a system message, and
+   the interviewer stops being present.
+   ============================================================ */
+function say(text, langId) {
+  clearInterval(sayTimer);
+  clearTimeout(speakOff);
+  const spec = LANGS.find((l) => l.id === (langId || lang));
+  capLine.setAttribute("lang", spec.id);
+  capLine.setAttribute("dir", spec.dir);
+  device.dataset.speaking = "1";
+
+  if (REDUCED) {
+    capLine.textContent = text;
+    speakOff = setTimeout(() => (device.dataset.speaking = "0"), 900);
+    return;
+  }
+
+  /* Long scenario prompts must not take fifteen seconds to appear, so the
+     step size is derived from the length rather than fixed per character. */
+  const chars = Array.from(text);
+  const step = Math.max(10, Math.min(26, Math.round(2200 / chars.length)));
+  let i = 0;
+  capLine.textContent = "";
+  const cursor = document.createElement("span");
+  cursor.className = "cursor";
+  capLine.appendChild(cursor);
+  sayTimer = setInterval(() => {
+    i += Math.max(1, Math.round(chars.length / 90));
+    cursor.insertAdjacentText("beforebegin", chars.slice(i - Math.max(1, Math.round(chars.length / 90)), i).join(""));
+    if (i >= chars.length) {
+      clearInterval(sayTimer);
+      capLine.textContent = text;
+      speakOff = setTimeout(() => (device.dataset.speaking = "0"), 700);
+    }
+  }, step);
 }
 
 /* ============================================================
@@ -1492,12 +1779,24 @@ $("langGrid").addEventListener("click", (e) => {
   go("welcome");
 });
 
+/* Before a language is chosen she greets you in each of them in turn — the
+   choice is hers to offer, not a settings screen you fill in. */
+function startLangCycle() {
+  clearInterval(langCycle);
+  let i = 0;
+  say(T[LANGS[0].id]["say.lang"], LANGS[0].id);
+  langCycle = setInterval(() => {
+    i = (i + 1) % LANGS.length;
+    say(T[LANGS[i].id]["say.lang"], LANGS[i].id);
+  }, 3600);
+}
+
 function setLang(id) {
   lang = id;
   const spec = LANGS.find((l) => l.id === id);
   device.setAttribute("lang", id);
   device.setAttribute("dir", spec.dir);
-  $("langBtn").textContent = spec.tag + " ▾";
+  $("langBtn").textContent = spec.tag;
   $("readyLang").textContent = spec.native;
   applyCopy();
 }
@@ -1507,6 +1806,12 @@ function applyCopy() {
     const v = t(el.dataset.t);
     if (typeof v === "string") el.textContent = v;
   });
+
+  $("dhName").textContent = t("dh.name");
+  $("capWho").textContent = t("dh.name");
+  $("dhRole").textContent = t("dh.role");
+  $("dhAi").textContent = t("dh.ai");
+  $("liveLbl").textContent = t("dh.live");
 
   $("consentList").innerHTML = ["c.i1", "c.i2", "c.i3", "c.i4", "c.i5", "c.i6"]
     .map(
@@ -1537,23 +1842,55 @@ function fillSelect(el, items) {
 }
 
 /* ============================================================
-   Navigation
+   Navigation — she stays, the sheets change.
    ============================================================ */
 const RAIL_TOTAL = 7;
-function go(screen) {
+const SAY_FOR = {
+  lang: null,
+  welcome: "say.welcome",
+  consent: "say.consent",
+  context: "say.context",
+  pulse: "say.pulse",
+  ready: "say.ready",
+  session: null,
+  reflect: "say.reflect",
+  confirm: "say.confirm",
+  done: "say.done"
+};
+const BACK_TO = { welcome: "lang", consent: "welcome", context: "consent", pulse: "context" };
+
+function go(id) {
+  screen = id;
   clearInterval(countdownTimer);
-  document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.dataset.screen === screen));
+  if (id !== "lang") clearInterval(langCycle);
+
+  document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.dataset.screen === id));
+  const el = document.querySelector('.screen[data-screen="' + id + '"]');
+  if (el) el.scrollTop = 0;
+
+  device.dataset.screen = id;
+  device.dataset.mode = el && el.classList.contains("sheet") ? "sheet" : "stage";
+
   document.querySelectorAll("[data-rail]").forEach((r) => {
     const step = +r.dataset.rail;
     r.innerHTML = Array.from({ length: RAIL_TOTAL }, (_, i) => `<i class="${i < step ? "done" : ""}"></i>`).join("");
   });
-  const el = document.querySelector('.screen[data-screen="' + screen + '"]');
-  if (el) el.scrollTop = 0;
-  if (screen === "ready") startCountdown();
-  if (screen === "session") startSession();
-  if (screen === "confirm") renderSummary();
+
+  $("hudBack").hidden = !BACK_TO[id];
+  $("sessTimerPill").hidden = id !== "session";
+  $("livePill").hidden = id !== "session";
+  $("langBtn").hidden = id === "session";
+
+  if (id === "lang") startLangCycle();
+  else if (SAY_FOR[id]) say(t(SAY_FOR[id]));
+
+  if (id === "ready") startCountdown();
+  if (id === "session") startSession();
+  if (id === "confirm") renderSummary();
 }
 document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
+$("hudBack").addEventListener("click", () => go(BACK_TO[screen] || "lang"));
+$("langBtn").addEventListener("click", () => go("lang"));
 
 $("consentBtn").addEventListener("click", () => {
   if (!$("consentBox").checked) {
@@ -1632,7 +1969,9 @@ function startCountdown() {
 }
 
 /* ============================================================
-   Session — the structured ladder the product runs
+   Session — the structured ladder the product runs.
+   The caption is already her voice, so the interview needs no new surface:
+   the screen simply hands the floor over to her.
    ============================================================ */
 function script() {
   return [
@@ -1648,6 +1987,7 @@ function script() {
 function startSession() {
   turn = 0;
   const s = script();
+  $("you").hidden = true;
   $("you").textContent = "";
   speak(s[0]);
   let secs = 600;
@@ -1662,26 +2002,29 @@ function startSession() {
 }
 
 function speak(step) {
-  $("stagePill").textContent = t(step.stage);
-  $("line").textContent = step.line;
-  $("avatar").classList.add("speaking");
-  setTimeout(() => $("avatar").classList.remove("speaking"), 2400);
+  $("capWho").textContent = t("dh.name") + " · " + t(step.stage);
+  say(step.line);
 }
 
 $("mic").addEventListener("click", () => {
   const s = script();
   const step = s[turn];
+  if (!step) return;
   $("mic").classList.add("listening");
   $("micLbl").textContent = t("s.listening");
   setTimeout(() => {
     $("mic").classList.remove("listening");
     $("micLbl").textContent = t("s.tap");
+    $("you").hidden = !step.answer;
     $("you").textContent = step.answer ? "“" + step.answer + "”" : "";
     turn++;
     if (turn >= s.length) {
       clearInterval(sessionTimer);
       speak({ stage: "s.stage4", line: t("s.close") });
-      setTimeout(() => go("reflect"), 2400);
+      setTimeout(() => {
+        $("capWho").textContent = t("dh.name");
+        go("reflect");
+      }, 2600);
       return;
     }
     speak(s[turn]);
@@ -1757,6 +2100,20 @@ $("btnRestart").addEventListener("click", () => {
   setLang(lang);
   go("lang");
 });
+
+/* ============================================================
+   The asset slot.
+
+   The interviewer below is drawn, not photographed — a stand-in that holds
+   the composition. Point DH_IMAGE at a still (or a data: URI, so the page
+   stays self-contained) and the drawing is replaced without another line
+   changing anywhere on this page.
+   ============================================================ */
+const DH_IMAGE = "";
+if (DH_IMAGE) {
+  device.style.setProperty("--dh-image", 'url("' + DH_IMAGE + '")');
+  device.dataset.dh = "photo";
+}
 
 /* boot */
 setLang("en");
