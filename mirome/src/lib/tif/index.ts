@@ -38,3 +38,13 @@ export {
   segmentProfiles,
   toIndex,
 } from "./aggregate";
+export { PERCEPTION_BANDS, BAND_FOR_CONSTRUCT, perceptionRead, unbandedConstructs } from "./perception";
+export type {
+  Direction,
+  PerceptionBand,
+  PerceptionBandSpec,
+  PerceptionRead,
+  PerceptionSegment,
+} from "./perception";
+export { AUDIENCES, firstActions } from "./actions";
+export type { Action, ActionClass, AudienceSpec, CostBand, EffortBand } from "./actions";
