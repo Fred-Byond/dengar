@@ -36,6 +36,9 @@ header{background:linear-gradient(100deg,var(--navy-d),var(--navy) 60%,#24368a);
 .viewTgl{display:flex;background:rgba(255,255,255,.12);border-radius:11px;padding:3px}
 .viewTgl button{border:0;background:transparent;color:#fff;font-size:12px;font-weight:800;padding:8px 14px;border-radius:9px;opacity:.72;letter-spacing:.2px;transition:.15s}
 .viewTgl button.on{background:#fff;color:var(--navy);opacity:1;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.langTgl{display:flex;background:rgba(255,255,255,.12);border-radius:11px;padding:3px}
+.langTgl button{border:0;background:transparent;color:#fff;font-size:11.5px;font-weight:800;padding:7px 12px;border-radius:9px;opacity:.7;letter-spacing:.4px;transition:.15s}
+.langTgl button.on{background:var(--gold);color:#3A2C00;opacity:1}
 .sg-only{display:none!important}
 body.sg .sg-only{display:revert!important}
 body.sg .actBtn.sg-only{display:inline-flex!important}
@@ -272,65 +275,69 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
 <header>
   <div class="hLogo">
     <svg class="dwave" viewBox="0 0 28 28" fill="none"><g stroke="#FFCC00" stroke-width="2.8" stroke-linecap="round"><path d="M4 12 v4"/><path d="M9.5 7 v14"/><path d="M15 3 v22"/><path d="M20.5 8 v12"/><path d="M26 12 v4" stroke-opacity=".55"/></g></svg>
-    <div class="t"><b>DENGAR<span style="font-weight:300">.ai</span></b><small>EVERY VOICE MATTERS</small></div>
+    <div class="t"><b>DENGAR<span style="font-weight:300">.ai</span></b><small data-i18n="brandTag">EVERY VOICE MATTERS</small></div>
   </div>
   <div class="hTitle">
-    <h1>DENGAR Intelligence — Prime Minister's Office</h1>
-    <p>What the rakyat are telling the Prime Minister · whole-of-government · Malaysia MADANI</p>
+    <h1 data-i18n="hTitle">DENGAR Intelligence — Prime Minister's Office</h1>
+    <p data-i18n="hSub">What the rakyat are telling the Prime Minister · whole-of-government · Malaysia MADANI</p>
   </div>
   <div class="hRight">
+    <div class="langTgl" id="langTgl">
+      <button id="tglMs" onclick="setUiLang('ms')">BM</button>
+      <button id="tglEn" class="on" onclick="setUiLang('en')">EN</button>
+    </div>
     <div class="viewTgl" id="viewTgl">
-      <button data-v="min" class="on" onclick="setView('min')">👤 Prime Minister</button>
-      <button data-v="sg" onclick="setView('sg')">🛠️ PMO Delivery Unit</button>
+      <button data-v="min" class="on" onclick="setView('min')" data-i18n="roleMin">👤 Prime Minister</button>
+      <button data-v="sg" onclick="setView('sg')" data-i18n="roleSg">🛠️ PMO Delivery Unit</button>
     </div>
-    <div class="live"><i></i>LIVE</div>
+    <div class="live"><i></i><span data-i18n="live">LIVE</span></div>
     <div class="range" id="range">
-      <button data-d="7" class="on">7d</button>
-      <button data-d="30">30d</button>
-      <button data-d="90">90d</button>
+      <button data-d="7" class="on" data-i18n="r7">7d</button>
+      <button data-d="30" data-i18n="r30">30d</button>
+      <button data-d="90" data-i18n="r90">90d</button>
     </div>
-    <button class="actBtn sg-only" onclick="openDrawer()">📋 Directives<span class="n" id="taskCount">0</span></button>
-    <button class="brief" onclick="document.getElementById('briefModal').classList.add('open')">📄 PM's Briefing</button>
+    <button class="actBtn sg-only" onclick="openDrawer()"><span data-i18n="hDirectives">📋 Directives</span><span class="n" id="taskCount">0</span></button>
+    <button class="brief" onclick="document.getElementById('briefModal').classList.add('open')" data-i18n="hBrief">📄 PM's Briefing</button>
   </div>
 </header>
 
 <div class="filterBar">
-  <span class="scope">Showing: <b id="scopeLbl">All Malaysia</b></span>
+  <span class="scope"><span data-i18n="showing">Showing:</span> <b id="scopeLbl">All Malaysia</b></span>
   <span class="chip" id="stateChip"><span id="stateChipNm"></span><button onclick="selectState(null)">✕</button></span>
   <span class="scope" id="viewNote" style="margin-left:auto"></span>
 </div>
 
 <div class="wrap">
 
-  <div class="flowTag"><span>Insights</span><i></i></div>
+  <div class="flowTag"><span data-i18n="flowInsights">Insights</span><i></i></div>
   <div class="kpis">
-    <div class="kpi"><div class="lbl">Sessions</div><div class="val" id="kSess">—</div><div class="delta up">▲ 14% vs prior period</div></div>
-    <div class="kpi k2"><div class="lbl">Citizens Reached</div><div class="val" id="kCit">—</div><div class="delta up">▲ 11% vs prior period</div></div>
-    <div class="kpi k3"><div class="lbl">National Confidence</div><div class="val" id="kSent">—</div><div class="delta down">▼ 4 pts vs prior period</div></div>
-    <div class="kpi k4"><div class="lbl">Cost-of-Living Sentiment</div><div class="val" id="kCol">—</div><div class="delta down">▼ 6 pts vs prior period</div></div>
+    <div class="kpi"><div class="lbl" data-i18n="kpiSess">Sessions</div><div class="val" id="kSess">—</div><div class="delta up" data-i18n="kpiSessD">▲ 14% vs prior period</div></div>
+    <div class="kpi k2"><div class="lbl" data-i18n="kpiCit">Citizens Reached</div><div class="val" id="kCit">—</div><div class="delta up" data-i18n="kpiCitD">▲ 11% vs prior period</div></div>
+    <div class="kpi k3"><div class="lbl" data-i18n="kpiConf">National Confidence</div><div class="val" id="kSent">—</div><div class="delta down" data-i18n="kpiConfD">▼ 4 pts vs prior period</div></div>
+    <div class="kpi k4"><div class="lbl" data-i18n="kpiCol">Cost-of-Living Sentiment</div><div class="val" id="kCol">—</div><div class="delta down" data-i18n="kpiColD">▼ 6 pts vs prior period</div></div>
   </div>
 
   <!-- NATIONAL AGENDA -->
   <div class="card" id="agendaCard">
-    <div class="cardHead"><h2>🎯 National agenda — how the rakyat feel</h2><small>the government's priorities, scored live by citizen sentiment · lead ministry shown</small></div>
+    <div class="cardHead"><h2 data-i18n="agendaH">🎯 National agenda — how the rakyat feel</h2><small data-i18n="agendaS">the government's priorities, scored live by citizen sentiment · lead ministry shown</small></div>
     <div class="agendaGrid" id="agendaGrid"></div>
   </div>
 
   <!-- PMO DELIVERY COMMAND STRIP -->
-  <div class="flowTag act sg-only"><span>Delivery</span><i></i></div>
+  <div class="flowTag act sg-only"><span data-i18n="flowDelivery">Delivery</span><i></i></div>
   <div class="cmdStrip sg-only">
-    <div><div class="cLbl">Open directives</div><div class="cNum" id="cmdOpen">0</div></div>
+    <div><div class="cLbl" data-i18n="cmdOpenL">Open directives</div><div class="cNum" id="cmdOpen">0</div></div>
     <div class="divider"></div>
-    <div><div class="cLbl">Overdue</div><div class="cNum warn" id="cmdOver">0</div></div>
+    <div><div class="cLbl" data-i18n="cmdOverL">Overdue</div><div class="cNum warn" id="cmdOver">0</div></div>
     <div class="divider"></div>
-    <div><div class="cLbl">Delivered</div><div class="cNum good" id="cmdDone">0</div></div>
+    <div><div class="cLbl" data-i18n="cmdDoneL">Delivered</div><div class="cNum good" id="cmdDone">0</div></div>
     <div class="cmdDept">
-      <div class="dh">Ministry workload</div>
+      <div class="dh" data-i18n="minWorkload">Ministry workload</div>
       <div id="cmdDeptList"></div>
     </div>
     <div class="cmdActs">
-      <button class="cmdBtn gold" onclick="openAssign('','General feedback','normal')">⚡ Issue directive</button>
-      <button class="cmdBtn" onclick="openDrawer()">📋 Tracker</button>
+      <button class="cmdBtn gold" onclick="openAssign('','General feedback','normal')" data-i18n="issueDir">⚡ Issue directive</button>
+      <button class="cmdBtn" onclick="openDrawer()" data-i18n="trackerBtn">📋 Tracker</button>
     </div>
   </div>
 
@@ -339,27 +346,27 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
     <div style="display:flex;flex-direction:column;gap:16px">
       <div class="card" id="mapCard">
         <div class="cardHead">
-          <h2>🗺️ National mood by state</h2>
-          <small>Colour = confidence · Circle = volume · Click a state for district breakdown</small>
+          <h2 data-i18n="mapH">🗺️ National mood by state</h2>
+          <small data-i18n="mapS">Colour = confidence · Circle = volume · Click a state for district breakdown</small>
         </div>
         <div class="mapWrap">
           <div id="mapTip"></div>
           <svg viewBox="0 0 1000 560" id="mapSvg" role="img" aria-label="Malaysia national mood map">
-            <text class="seaLbl" x="60" y="480">STRAITS OF MALACCA</text>
-            <text class="seaLbl" x="360" y="120">SOUTH CHINA SEA</text>
-            <text class="seaLbl" x="820" y="520">CELEBES SEA</text>
+            <text class="seaLbl" x="60" y="480" data-i18n="seaMalacca">STRAITS OF MALACCA</text>
+            <text class="seaLbl" x="360" y="120" data-i18n="seaChina">SOUTH CHINA SEA</text>
+            <text class="seaLbl" x="820" y="520" data-i18n="seaCelebes">CELEBES SEA</text>
           </svg>
         </div>
         <div class="legend">
-          <small>Low confidence</small><div class="bar"></div><small>High confidence</small>
-          <span class="bub"><i></i>Session volume</span>
+          <small data-i18n="legLow">Low confidence</small><div class="bar"></div><small data-i18n="legHigh">High confidence</small>
+          <span class="bub"><i></i><span data-i18n="legVol">Session volume</span></span>
         </div>
       </div>
 
       <div class="card" id="distCard">
         <div class="cardHead">
           <h2 id="distTitle">📍 District breakdown</h2>
-          <small>Colour = district confidence · Click a tile to filter voices</small>
+          <small data-i18n="distS">Colour = district confidence · Click a tile to filter voices</small>
         </div>
         <div class="distSummary" id="distSummary"></div>
         <div class="distGrid" id="distGrid"></div>
@@ -368,23 +375,23 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
 
     <div style="display:flex;flex-direction:column;gap:16px">
       <div class="card chart">
-        <div class="cardHead"><h2>📈 Confidence trend</h2><small>share of sessions · 12 weeks</small></div>
+        <div class="cardHead"><h2 data-i18n="trendH">📈 Confidence trend</h2><small data-i18n="trendS">share of sessions · 12 weeks</small></div>
         <svg viewBox="0 0 520 200" id="trendSvg"></svg>
         <div class="lg">
-          <span><i style="background:var(--green)"></i>Positive</span>
-          <span><i style="background:var(--red)"></i>Negative</span>
-          <span><i style="background:#B9BFCC"></i>Neutral</span>
+          <span><i style="background:var(--green)"></i><span data-i18n="posL">Positive</span></span>
+          <span><i style="background:var(--red)"></i><span data-i18n="negL">Negative</span></span>
+          <span><i style="background:#B9BFCC"></i><span data-i18n="neuL">Neutral</span></span>
         </div>
       </div>
       <div class="card">
-        <div class="cardHead"><h2>🎯 Sentiment split</h2><small id="donutScope">All Malaysia</small></div>
+        <div class="cardHead"><h2 data-i18n="splitH">🎯 Sentiment split</h2><small id="donutScope">All Malaysia</small></div>
         <div class="donutRow">
           <svg viewBox="0 0 42 42" id="donutSvg"></svg>
           <div class="donutStats" id="donutStats"></div>
         </div>
       </div>
       <div class="card">
-        <div class="cardHead"><h2>🌐 Session languages</h2><small>engagement by community</small></div>
+        <div class="cardHead"><h2 data-i18n="langH">🌐 Session languages</h2><small data-i18n="langS">engagement by community</small></div>
         <div id="langList"></div>
       </div>
     </div>
@@ -393,20 +400,20 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
   <!-- TOPICS + KEYWORDS + SUGGESTIONS -->
   <div class="grid-3">
     <div class="card">
-      <div class="cardHead"><h2>🔥 Top national concerns</h2><small id="topicScope">All Malaysia</small></div>
+      <div class="cardHead"><h2 data-i18n="topicH">🔥 Top national concerns</h2><small id="topicScope">All Malaysia</small></div>
       <div id="topicList"></div>
       <div class="hintLine" id="topicHint">👉 Click a concern to open the deep dive</div>
     </div>
     <div class="card">
-      <div class="cardHead"><h2>💬 Trending keywords</h2><small>growth-weighted</small></div>
+      <div class="cardHead"><h2 data-i18n="kwH">💬 Trending keywords</h2><small data-i18n="kwS">growth-weighted</small></div>
       <div class="kwWrap" id="kwWrap"></div>
       <div class="sg-only">
-        <div class="cardHead" style="margin-top:20px"><h2>🏛️ Ministry workload</h2><small>open directives issued via this platform</small></div>
-        <div id="deptStats"><div class="emptyT" style="padding:14px 6px">No directives issued yet.<br>Open a concern deep dive to issue one.</div></div>
+        <div class="cardHead" style="margin-top:20px"><h2 data-i18n="mwH">🏛️ Ministry workload</h2><small data-i18n="mwS">open directives issued via this platform</small></div>
+        <div id="deptStats"><div class="emptyT" style="padding:14px 6px" data-i18n="mwEmpty">No directives issued yet.<br>Open a concern deep dive to issue one.</div></div>
       </div>
     </div>
     <div class="card">
-      <div class="cardHead"><h2>💡 Top citizen proposals</h2><small>ranked by frequency × spread</small></div>
+      <div class="cardHead"><h2 data-i18n="sugH">💡 Top citizen proposals</h2><small data-i18n="sugS">ranked by frequency × spread</small></div>
       <div id="sugList"></div>
     </div>
   </div>
@@ -414,32 +421,32 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
   <!-- FEED + URGENT -->
   <div class="grid-2">
     <div class="card">
-      <div class="cardHead"><h2>🗣️ Latest voices</h2><small id="feedScope">anonymised · AI summaries with verbatim anchors</small></div>
+      <div class="cardHead"><h2 data-i18n="feedH">🗣️ Latest voices</h2><small id="feedScope">anonymised · AI summaries with verbatim anchors</small></div>
       <div id="feedList"></div>
     </div>
     <div class="card">
-      <div class="cardHead"><h2>🚨 National escalations</h2><small>high-impact · same-day PMO review</small></div>
-      <div class="urgent"><b>⚑ FLAGGED · 2h ago</b><p><b>Klang Valley</b> — reports of essential-goods hoarding pushing up prices ahead of the festive season.</p><button class="assignMini sg-only" onclick="openAssign('Essential-goods hoarding pushing prices — Klang Valley','Cost of living','high')">⚡ Issue directive</button></div>
-      <div class="cardHead" style="margin-top:18px"><h2>🔒 Protected disclosures</h2><small>referred to the competent authority · content not retained here</small></div>
+      <div class="cardHead"><h2 data-i18n="escH">🚨 National escalations</h2><small data-i18n="escS">high-impact · same-day PMO review</small></div>
+      <div class="urgent"><b data-i18n="escFlag">⚑ FLAGGED · 2h ago</b><p data-i18n="escBody"><b>Klang Valley</b> — reports of essential-goods hoarding pushing up prices ahead of the festive season.</p><button class="assignMini sg-only" onclick="openAssign('Essential-goods hoarding pushing prices — Klang Valley','Cost of living','high')" data-i18n="issueDir">⚡ Issue directive</button></div>
+      <div class="cardHead" style="margin-top:18px"><h2 data-i18n="pdH">🔒 Protected disclosures</h2><small data-i18n="pdS">referred to the competent authority · content not retained here</small></div>
       <div class="sealed">
-        <div class="sh"><span class="lock">🔒</span>SEALED &amp; REFERRED · <span class="refd">✓ ACKNOWLEDGED</span></div>
-        <div class="meta"><span>Type: <b>Corruption allegation</b></span><span>State: <b>Selangor</b></span><span>Week: <b>2026-W29</b></span><span>Ref: <b>PD-2026-0184</b></span></div>
-        <div class="noContent">Details, names and transcript are <b>not held by this platform</b>. The disclosure was sealed to the receiving authority&rsquo;s key and referred through the statutory channel, then purged. The discloser keeps their legal protection.</div>
+        <div class="sh"><span class="lock">🔒</span><span data-i18n="sealedHead">SEALED &amp; REFERRED</span> · <span class="refd" data-i18n="ackYes">✓ ACKNOWLEDGED</span></div>
+        <div class="meta"><span><span data-i18n="pdType">Type:</span> <b data-i18n="pdKindCorr">Corruption allegation</b></span><span><span data-i18n="pdState">State:</span> <b data-i18n="stSel">Selangor</b></span><span><span data-i18n="pdWeek">Week:</span> <b>2026-W29</b></span><span><span data-i18n="pdRef">Ref:</span> <b>PD-2026-0184</b></span></div>
+        <div class="noContent" data-i18n="pdBody1">Details, names and transcript are <b>not held by this platform</b>. The disclosure was sealed to the receiving authority&rsquo;s key and referred through the statutory channel, then purged. The discloser keeps their legal protection.</div>
       </div>
       <div class="sealed">
-        <div class="sh"><span class="lock">🔒</span>SEALED &amp; REFERRED · <span class="refd pending">⏳ AWAITING ACKNOWLEDGEMENT</span></div>
-        <div class="meta"><span>Type: <b>Corruption allegation</b></span><span>State: <b>Sarawak</b></span><span>Week: <b>2026-W29</b></span><span>Ref: <b>PD-2026-0187</b></span></div>
-        <div class="noContent">Awaiting the authority&rsquo;s acknowledgement reference. Content is quarantined from analytics and cannot be opened from this dashboard by any role.</div>
+        <div class="sh"><span class="lock">🔒</span><span data-i18n="sealedHead">SEALED &amp; REFERRED</span> · <span class="refd pending" data-i18n="ackWait">⏳ AWAITING ACKNOWLEDGEMENT</span></div>
+        <div class="meta"><span><span data-i18n="pdType">Type:</span> <b data-i18n="pdKindCorr">Corruption allegation</b></span><span><span data-i18n="pdState">State:</span> <b data-i18n="stSwk">Sarawak</b></span><span><span data-i18n="pdWeek">Week:</span> <b>2026-W29</b></span><span><span data-i18n="pdRef">Ref:</span> <b>PD-2026-0187</b></span></div>
+        <div class="noContent" data-i18n="pdBody2">Awaiting the authority&rsquo;s acknowledgement reference. Content is quarantined from analytics and cannot be opened from this dashboard by any role.</div>
       </div>
-      <div class="carveNote"><b>Why you see no detail here.</b> Allegations of wrongdoing are deliberately <b>not accumulated</b> in this platform. They are quarantined out of the analytics pool, sealed to the receiving authority, referred through the proper statutory channel so the citizen retains whistleblower protection, and then purged. Only this anonymous count and trend remain — never the allegation, the accused, or the discloser.</div>
-      <div class="flowTag act" style="margin-top:16px"><span>Outcomes</span><i></i></div>
-      <div class="cardHead" style="margin-top:6px"><h2>✅ You said, we did</h2><small>closing the loop with the rakyat</small></div>
-      <div class="sug"><div class="top"><b>Electricity subsidy retained for 85% of households as tariffs were restructured</b><span class="tag act">DELIVERED</span></div><div class="meta"><span>Driven by <b>1,240 sessions</b></span><span>Households notified via WhatsApp: <b>1,240</b></span></div></div>
+      <div class="carveNote" data-i18n="pdCarve"><b>Why you see no detail here.</b> Allegations of wrongdoing are deliberately <b>not accumulated</b> in this platform. They are quarantined out of the analytics pool, sealed to the receiving authority, referred through the proper statutory channel so the citizen retains whistleblower protection, and then purged. Only this anonymous count and trend remain — never the allegation, the accused, or the discloser.</div>
+      <div class="flowTag act" style="margin-top:16px"><span data-i18n="flowOutcomes">Outcomes</span><i></i></div>
+      <div class="cardHead" style="margin-top:6px"><h2 data-i18n="ysH">✅ You said, we did</h2><small data-i18n="ysS">closing the loop with the rakyat</small></div>
+      <div class="sug"><div class="top"><b data-i18n="ysItem">Electricity subsidy retained for 85% of households as tariffs were restructured</b><span class="tag act" data-i18n="tagDelivered">DELIVERED</span></div><div class="meta"><span data-i18n="ysMeta1">Driven by <b>1,240 sessions</b></span><span data-i18n="ysMeta2">Households notified via WhatsApp: <b>1,240</b></span></div></div>
     </div>
   </div>
 </div>
 
-<footer>DENGAR Intelligence · Prime Minister's Office · every voice matters · Demo prototype with synthetic data · BYOND asia × Malaysia MADANI</footer>
+<footer data-i18n="footer">DENGAR Intelligence · Prime Minister's Office · every voice matters · Demo prototype with synthetic data · BYOND asia × Malaysia MADANI</footer>
 
 <!-- ============ TOPIC DEEP-DIVE MODAL ============ -->
 <div class="modal" id="topicModal" onclick="if(event.target===this)this.classList.remove('open')">
@@ -448,17 +455,17 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
     <h3 id="tmTitle">Concern deep dive</h3>
     <div class="sub" id="tmSub"></div>
     <div class="miniStats" id="tmStats"></div>
-    <h4>Trend · 12 weeks</h4>
+    <h4 data-i18n="tmTrend">Trend · 12 weeks</h4>
     <svg class="spark" viewBox="0 0 400 44" id="tmSpark"></svg>
-    <h4>What exactly citizens are raising</h4>
+    <h4 data-i18n="tmWhat">What exactly citizens are raising</h4>
     <div id="tmSubs"></div>
-    <h4>Hotspot districts</h4>
+    <h4 data-i18n="tmHot">Hotspot districts</h4>
     <div class="distHits" id="tmDists"></div>
-    <h4>Representative voices</h4>
+    <h4 data-i18n="tmVoices">Representative voices</h4>
     <div class="qList" id="tmQuotes"></div>
     <div class="mFoot">
-      <button class="btnS" onclick="toast('Demo: full session list would open in Session Explorer.')">View all sessions</button>
-      <button class="btnP sg-only" id="tmAssign">⚡ Issue directive to ministry</button>
+      <button class="btnS" onclick="toast(tt('toastSessions'))" data-i18n="tmViewAll">View all sessions</button>
+      <button class="btnP sg-only" id="tmAssign" data-i18n="tmIssue">⚡ Issue directive to ministry</button>
     </div>
   </div>
 </div>
@@ -467,56 +474,364 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
 <div class="modal" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="mCard" style="max-width:560px">
     <button class="mClose" onclick="document.getElementById('assignModal').classList.remove('open')">✕</button>
-    <h3>Issue directive</h3>
-    <div class="sub">Routes this issue to the responsible ministry with an owner, priority and due date. The directive is logged and tracked by the PMO Delivery Unit to resolution.</div>
-    <label class="f">Issue</label>
+    <h3 data-i18n="asgH">Issue directive</h3>
+    <div class="sub" data-i18n="asgSub">Routes this issue to the responsible ministry with an owner, priority and due date. The directive is logged and tracked by the PMO Delivery Unit to resolution.</div>
+    <label class="f" data-i18n="asgIssue">Issue</label>
     <input class="f" id="aIssue">
-    <label class="f">Assign to ministry</label>
+    <label class="f" data-i18n="asgDept">Assign to ministry</label>
     <select class="f" id="aDept"></select>
     <div class="deptHint" id="aDeptHint"></div>
-    <label class="f">Priority</label>
+    <label class="f" data-i18n="asgPrio">Priority</label>
     <div class="prioRow">
-      <div class="prio" data-p="normal">Normal</div>
-      <div class="prio" data-p="elevated">Elevated</div>
-      <div class="prio hi" data-p="high">High / Urgent</div>
+      <div class="prio" data-p="normal" data-i18n="prioNormal">Normal</div>
+      <div class="prio" data-p="elevated" data-i18n="prioElevated">Elevated</div>
+      <div class="prio hi" data-p="high" data-i18n="prioHigh">High / Urgent</div>
     </div>
-    <label class="f">Due date</label>
+    <label class="f" data-i18n="asgDue">Due date</label>
     <input class="f" id="aDue" type="date">
-    <label class="f">Directive to ministry <i style="font-weight:500;color:var(--grey)">(optional)</i></label>
-    <textarea class="f" id="aNote" placeholder="e.g. Submit a cost-of-living recovery plan and weekly price-watch to the PMO within 14 days."></textarea>
+    <label class="f" data-i18n="asgNote">Directive to ministry <i style="font-weight:500;color:var(--grey)">(optional)</i></label>
+    <textarea class="f" id="aNote"></textarea>
     <div class="mFoot">
-      <button class="btnS" onclick="document.getElementById('assignModal').classList.remove('open')">Cancel</button>
-      <button class="btnP" onclick="createTask()">Issue &amp; track</button>
+      <button class="btnS" onclick="document.getElementById('assignModal').classList.remove('open')" data-i18n="cancel">Cancel</button>
+      <button class="btnP" onclick="createTask()" data-i18n="asgSubmit">Issue &amp; track</button>
     </div>
   </div>
 </div>
 
 <!-- ============ DIRECTIVE TRACKER DRAWER ============ -->
 <div id="drawer">
-  <div class="dh"><h3>📋 Directive Tracker</h3><button onclick="document.getElementById('drawer').classList.remove('open')">✕</button></div>
-  <div class="body" id="taskList"><div class="emptyT">No directives yet.<br><br>Open any concern deep dive, escalation, or proposal and tap <b>Issue directive</b>. Every directive is logged here with the owning ministry, due date and status — the PM's follow-through view.</div></div>
+  <div class="dh"><h3 data-i18n="drawerH">📋 Directive Tracker</h3><button onclick="document.getElementById('drawer').classList.remove('open')">✕</button></div>
+  <div class="body" id="taskList"><div class="emptyT" data-i18n="drawerEmpty">No directives yet.<br><br>Open any concern deep dive, escalation, or proposal and tap <b>Issue directive</b>. Every directive is logged here with the owning ministry, due date and status — the PM's follow-through view.</div></div>
 </div>
 
 <!-- ============ PM BRIEFING MODAL ============ -->
 <div class="modal" id="briefModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="mCard">
     <button class="mClose" onclick="document.getElementById('briefModal').classList.remove('open')">✕</button>
-    <h3>Weekly Prime Minister's Briefing</h3>
-    <div class="sub">Week 29 · 13–19 July 2026 · Auto-generated, human-reviewed · CONFIDENTIAL — DEMO</div>
-    <h4>Headline</h4>
-    <p style="font-size:13px;line-height:1.55">5,120 sessions (+14%). National confidence −7 (down 4 pts), driven overwhelmingly by <b>cost of living</b> — grocery and fuel prices dominate every state. Cost-of-living sentiment sits at −33. <b>4 directives issued to ministries last week; 1 delivered.</b></p>
-    <h4>Top national concerns</h4>
-    <p style="font-size:13px;line-height:1.6">1. Cost of living — food &amp; fuel prices (1,240 sessions, KPDN/MOF) · 2. Jobs &amp; wages — graduate underemployment (880, KESUMA) · 3. Affordable housing — youth priced out (611, KPKT) · 4. Corruption — demand for faster, visible action (540, JPM).</p>
-    <h4>Geographic watch</h4>
-    <p style="font-size:13px;line-height:1.55">Sabah &amp; Kelantan diverge most below the national mean on cost of living and public-service access. Recommend a targeted East Malaysia delivery package and a dedicated session block.</p>
-    <h4>Cross-ministry accountability</h4>
-    <p style="font-size:13px;line-height:1.55">KPDN: 1 directive (due this week). KESUMA: 1 open. JPM: 1 overdue. KPKT: 1 delivered. Average delivery time last 4 weeks: 11.4 days.</p>
+    <h3 data-i18n="bfH">Weekly Prime Minister's Briefing</h3>
+    <div class="sub" data-i18n="bfSub">Week 29 · 13–19 July 2026 · Auto-generated, human-reviewed · CONFIDENTIAL — DEMO</div>
+    <h4 data-i18n="bfHeadline">Headline</h4>
+    <p style="font-size:13px;line-height:1.55" data-i18n="bfHeadlineB">5,120 sessions (+14%). National confidence −7 (down 4 pts), driven overwhelmingly by <b>cost of living</b> — grocery and fuel prices dominate every state. Cost-of-living sentiment sits at −33. <b>4 directives issued to ministries last week; 1 delivered.</b></p>
+    <h4 data-i18n="bfTop">Top national concerns</h4>
+    <p style="font-size:13px;line-height:1.6" data-i18n="bfTopB">1. Cost of living — food &amp; fuel prices (1,240 sessions, KPDN/MOF) · 2. Jobs &amp; wages — graduate underemployment (880, KESUMA) · 3. Affordable housing — youth priced out (611, KPKT) · 4. Corruption — demand for faster, visible action (540, JPM).</p>
+    <h4 data-i18n="bfGeo">Geographic watch</h4>
+    <p style="font-size:13px;line-height:1.55" data-i18n="bfGeoB">Sabah &amp; Kelantan diverge most below the national mean on cost of living and public-service access. Recommend a targeted East Malaysia delivery package and a dedicated session block.</p>
+    <h4 data-i18n="bfAcc">Cross-ministry accountability</h4>
+    <p style="font-size:13px;line-height:1.55" data-i18n="bfAccB">KPDN: 1 directive (due this week). KESUMA: 1 open. JPM: 1 overdue. KPKT: 1 delivered. Average delivery time last 4 weeks: 11.4 days.</p>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+/* ================================================================
+   UI LANGUAGE — Bahasa Melayu / English
+   All data keys stay in English (they are the join keys for
+   TOPIC_DEPT / KW_POOL / TOPIC_DETAIL and the protected-disclosure
+   check). Language affects display only — never logic.
+================================================================ */
+let uiLang='en';
+const I18N={en:{},ms:{}};
+const tt=k=>(I18N[uiLang][k]!==undefined?I18N[uiLang][k]:(I18N.en[k]||k));
+
+I18N.en={
+ brandTag:"EVERY VOICE MATTERS",
+ hTitle:"DENGAR Intelligence — Prime Minister's Office",
+ hSub:"What the rakyat are telling the Prime Minister · whole-of-government · Malaysia MADANI",
+ roleMin:"👤 Prime Minister", roleSg:"🛠️ PMO Delivery Unit",
+ live:"LIVE", r7:"7d", r30:"30d", r90:"90d",
+ hDirectives:"📋 Directives", hBrief:"📄 PM's Briefing", showing:"Showing:",
+ flowInsights:"Insights", flowDelivery:"Delivery", flowOutcomes:"Outcomes",
+ kpiSess:"Sessions", kpiSessD:"▲ 14% vs prior period",
+ kpiCit:"Citizens Reached", kpiCitD:"▲ 11% vs prior period",
+ kpiConf:"National Confidence", kpiConfD:"▼ 4 pts vs prior period",
+ kpiCol:"Cost-of-Living Sentiment", kpiColD:"▼ 6 pts vs prior period",
+ agendaH:"🎯 National agenda — how the rakyat feel",
+ agendaS:"the government's priorities, scored live by citizen sentiment · lead ministry shown",
+ cmdOpenL:"Open directives", cmdOverL:"Overdue", cmdDoneL:"Delivered",
+ minWorkload:"Ministry workload", issueDir:"⚡ Issue directive", trackerBtn:"📋 Tracker",
+ mapH:"🗺️ National mood by state",
+ mapS:"Colour = confidence · Circle = volume · Click a state for district breakdown",
+ seaMalacca:"STRAITS OF MALACCA", seaChina:"SOUTH CHINA SEA", seaCelebes:"CELEBES SEA",
+ legLow:"Low confidence", legHigh:"High confidence", legVol:"Session volume",
+ distS:"Colour = district confidence · Click a tile to filter voices",
+ distTitleBase:"📍 District breakdown",
+ trendH:"📈 Confidence trend", trendS:"share of sessions · 12 weeks",
+ posL:"Positive", negL:"Negative", neuL:"Neutral",
+ splitH:"🎯 Sentiment split",
+ langH:"🌐 Session languages", langS:"engagement by community",
+ topicH:"🔥 Top national concerns",
+ kwH:"💬 Trending keywords", kwS:"growth-weighted",
+ mwH:"🏛️ Ministry workload", mwS:"open directives issued via this platform",
+ mwEmpty:"No directives issued yet.<br>Open a concern deep dive to issue one.",
+ sugH:"💡 Top citizen proposals", sugS:"ranked by frequency × spread",
+ feedH:"🗣️ Latest voices",
+ escH:"🚨 National escalations", escS:"high-impact · same-day PMO review",
+ escFlag:"⚑ FLAGGED · 2h ago",
+ escBody:"<b>Klang Valley</b> — reports of essential-goods hoarding pushing up prices ahead of the festive season.",
+ pdH:"🔒 Protected disclosures", pdS:"referred to the competent authority · content not retained here",
+ sealedHead:"SEALED &amp; REFERRED", ackYes:"✓ ACKNOWLEDGED", ackWait:"⏳ AWAITING ACKNOWLEDGEMENT",
+ pdType:"Type:", pdKindCorr:"Corruption allegation", pdState:"State:", pdWeek:"Week:", pdRef:"Ref:",
+ stSel:"Selangor", stSwk:"Sarawak",
+ pdBody1:"Details, names and transcript are <b>not held by this platform</b>. The disclosure was sealed to the receiving authority&rsquo;s key and referred through the statutory channel, then purged. The discloser keeps their legal protection.",
+ pdBody2:"Awaiting the authority&rsquo;s acknowledgement reference. Content is quarantined from analytics and cannot be opened from this dashboard by any role.",
+ pdCarve:"<b>Why you see no detail here.</b> Allegations of wrongdoing are deliberately <b>not accumulated</b> in this platform. They are quarantined out of the analytics pool, sealed to the receiving authority, referred through the proper statutory channel so the citizen retains whistleblower protection, and then purged. Only this anonymous count and trend remain — never the allegation, the accused, or the discloser.",
+ ysH:"✅ You said, we did", ysS:"closing the loop with the rakyat",
+ ysItem:"Electricity subsidy retained for 85% of households as tariffs were restructured",
+ ysMeta1:"Driven by <b>1,240 sessions</b>", ysMeta2:"Households notified via WhatsApp: <b>1,240</b>",
+ footer:"DENGAR Intelligence · Prime Minister's Office · every voice matters · Demo prototype with synthetic data · BYOND asia × Malaysia MADANI",
+ tmTrend:"Trend · 12 weeks", tmWhat:"What exactly citizens are raising",
+ tmHot:"Hotspot districts", tmVoices:"Representative voices",
+ tmViewAll:"View all sessions", tmIssue:"⚡ Issue directive to ministry",
+ asgH:"Issue directive",
+ asgSub:"Routes this issue to the responsible ministry with an owner, priority and due date. The directive is logged and tracked by the PMO Delivery Unit to resolution.",
+ asgIssue:"Issue", asgDept:"Assign to ministry", asgPrio:"Priority", asgDue:"Due date",
+ asgNote:"Directive to ministry <i style=\"font-weight:500;color:var(--grey)\">(optional)</i>",
+ notePh:"e.g. Submit a cost-of-living recovery plan and weekly price-watch to the PMO within 14 days.",
+ prioNormal:"Normal", prioElevated:"Elevated", prioHigh:"High / Urgent",
+ cancel:"Cancel", asgSubmit:"Issue &amp; track",
+ drawerH:"📋 Directive Tracker",
+ drawerEmpty:"No directives yet.<br><br>Open any concern deep dive, escalation, or proposal and tap <b>Issue directive</b>. Every directive is logged here with the owning ministry, due date and status — the PM's follow-through view.",
+ bfH:"Weekly Prime Minister's Briefing",
+ bfSub:"Week 29 · 13–19 July 2026 · Auto-generated, human-reviewed · CONFIDENTIAL — DEMO",
+ bfHeadline:"Headline",
+ bfHeadlineB:"5,120 sessions (+14%). National confidence −7 (down 4 pts), driven overwhelmingly by <b>cost of living</b> — grocery and fuel prices dominate every state. Cost-of-living sentiment sits at −33. <b>4 directives issued to ministries last week; 1 delivered.</b>",
+ bfTop:"Top national concerns",
+ bfTopB:"1. Cost of living — food &amp; fuel prices (1,240 sessions, KPDN/MOF) · 2. Jobs &amp; wages — graduate underemployment (880, KESUMA) · 3. Affordable housing — youth priced out (611, KPKT) · 4. Corruption — demand for faster, visible action (540, JPM).",
+ bfGeo:"Geographic watch",
+ bfGeoB:"Sabah &amp; Kelantan diverge most below the national mean on cost of living and public-service access. Recommend a targeted East Malaysia delivery package and a dedicated session block.",
+ bfAcc:"Cross-ministry accountability",
+ bfAccB:"KPDN: 1 directive (due this week). KESUMA: 1 open. JPM: 1 overdue. KPKT: 1 delivered. Average delivery time last 4 weeks: 11.4 days.",
+ /* dynamic */
+ allMy:"All Malaysia", clickDistricts:"Click for district breakdown",
+ districtsWord:"districts", lowestConf:"Lowest confidence:", highestConf:"Highest:",
+ topConcern:"Top concern:", topPrefix:"Top:", sessionsWord:"sessions",
+ confidenceWord:"confidence", spreadWord:"Spread:", statesWord:"states",
+ leadWord:"Lead:", worsening:"worsening", improving:"improving", steady:"steady",
+ anonymised:"anonymised", feedScopeBase:"anonymised · AI summaries with verbatim anchors",
+ hintDeep:"👉 Click a concern to open the deep dive",
+ hintDeepSg:"👉 Click a concern to open the deep dive &amp; issue a directive",
+ viewNoteMin:"Prime Minister View — the national pulse at a glance",
+ viewNoteSg:"PMO Delivery Unit — whole-of-government execution: issue, track &amp; deliver",
+ tmSessions:"Sessions", tmWkTrend:"4-wk trend", tmLead:"Lead ministry",
+ lastDays:d=>"last "+d+" days",
+ aiSuggest:"✓ AI-suggested lead ministry based on issue classification: ",
+ stAssigned:"Assigned", stProgress:"In progress", stResolved:"Resolved",
+ ministryWord:"Ministry:", dueWord:"Due:", overdueTag:" ⚠ OVERDUE", priorityWord:"Priority:",
+ noOpenDir:"No open directives.<br>Issue one from a concern deep dive.",
+ cmdNoOpen:"No open directives",
+ tagDelivered:"DELIVERED", tagAck:"ACKNOWLEDGED", tagReview:"UNDER REVIEW", tagIssued:"ISSUED",
+ toastSessions:"Demo: full session list would open in Session Explorer.",
+ toastIssued:n=>"✓ Directive issued to "+n+" — tracked by the PMO Delivery Unit",
+ toastDelivered:"✓ Delivered — citizens who raised this can be notified via WhatsApp (\"You said, we did\").",
+ toastFiltered:d=>"Voices filtered to "+d, toastCleared:"District filter cleared",
+ pdNoVoices:"<b>Representative voices are not shown for this concern.</b><br>Individual disclosures are quarantined out of the analytics pool, sealed to the competent authority and referred through the statutory channel, then purged — so the discloser keeps their legal protection and this office does not hold the allegation. What remains is the aggregate trend above.",
+ pdNoVoicesFoot:"Protected-disclosure handling · content not retained",
+ tmCarveNote:"Referral-only concern. Ministry directives are not issued against individual allegations; systemic reforms (e.g. publishing case timelines) are actioned through the proposals board instead.",
+ generalMentions:"General mentions", quotePlaceholder:"(Representative quotes appear here.)"
+};
+
+I18N.ms={
+ brandTag:"SETIAP SUARA PENTING",
+ hTitle:"DENGAR Intelligence — Jabatan Perdana Menteri",
+ hSub:"Apa yang rakyat sampaikan kepada Perdana Menteri · seluruh kerajaan · Malaysia MADANI",
+ roleMin:"👤 Perdana Menteri", roleSg:"🛠️ Unit Penyampaian JPM",
+ live:"LANGSUNG", r7:"7h", r30:"30h", r90:"90h",
+ hDirectives:"📋 Arahan", hBrief:"📄 Taklimat PM", showing:"Paparan:",
+ flowInsights:"Wawasan", flowDelivery:"Penyampaian", flowOutcomes:"Hasil",
+ kpiSess:"Sesi", kpiSessD:"▲ 14% vs tempoh lalu",
+ kpiCit:"Rakyat Dicapai", kpiCitD:"▲ 11% vs tempoh lalu",
+ kpiConf:"Keyakinan Nasional", kpiConfD:"▼ 4 mata vs tempoh lalu",
+ kpiCol:"Sentimen Kos Sara Hidup", kpiColD:"▼ 6 mata vs tempoh lalu",
+ agendaH:"🎯 Agenda nasional — perasaan rakyat",
+ agendaS:"keutamaan kerajaan, dinilai secara langsung oleh sentimen rakyat · kementerian utama dipaparkan",
+ cmdOpenL:"Arahan terbuka", cmdOverL:"Lewat tempoh", cmdDoneL:"Disampaikan",
+ minWorkload:"Beban kementerian", issueDir:"⚡ Keluarkan arahan", trackerBtn:"📋 Penjejak",
+ mapH:"🗺️ Nadi rakyat mengikut negeri",
+ mapS:"Warna = keyakinan · Bulatan = jumlah sesi · Klik negeri untuk pecahan daerah",
+ seaMalacca:"SELAT MELAKA", seaChina:"LAUT CHINA SELATAN", seaCelebes:"LAUT SULAWESI",
+ legLow:"Keyakinan rendah", legHigh:"Keyakinan tinggi", legVol:"Jumlah sesi",
+ distS:"Warna = keyakinan daerah · Klik untuk tapis suara rakyat",
+ distTitleBase:"📍 Pecahan daerah",
+ trendH:"📈 Aliran keyakinan", trendS:"bahagian sesi · 12 minggu",
+ posL:"Positif", negL:"Negatif", neuL:"Neutral",
+ splitH:"🎯 Pecahan sentimen",
+ langH:"🌐 Bahasa sesi", langS:"penglibatan mengikut komuniti",
+ topicH:"🔥 Isu utama nasional",
+ kwH:"💬 Kata kunci meningkat", kwS:"ditimbang pertumbuhan",
+ mwH:"🏛️ Beban kementerian", mwS:"arahan terbuka yang dikeluarkan melalui platform ini",
+ mwEmpty:"Belum ada arahan dikeluarkan.<br>Buka analisis mendalam isu untuk mengeluarkan arahan.",
+ sugH:"💡 Cadangan utama rakyat", sugS:"disusun mengikut kekerapan × sebaran",
+ feedH:"🗣️ Suara terkini",
+ escH:"🚨 Eskalasi nasional", escS:"impak tinggi · semakan JPM hari yang sama",
+ escFlag:"⚑ DIBENDERAKAN · 2 jam lalu",
+ escBody:"<b>Lembah Klang</b> — laporan penyorokan barang keperluan menaikkan harga menjelang musim perayaan.",
+ pdH:"🔒 Pendedahan terlindung", pdS:"dirujuk kepada pihak berkuasa berwibawa · kandungan tidak disimpan di sini",
+ sealedHead:"DIMETERAI &amp; DIRUJUK", ackYes:"✓ DIAKUI TERIMA", ackWait:"⏳ MENUNGGU PENGAKUAN TERIMA",
+ pdType:"Jenis:", pdKindCorr:"Dakwaan rasuah", pdState:"Negeri:", pdWeek:"Minggu:", pdRef:"Ruj:",
+ stSel:"Selangor", stSwk:"Sarawak",
+ pdBody1:"Butiran, nama dan transkrip <b>tidak disimpan oleh platform ini</b>. Pendedahan dimeterai dengan kunci pihak berkuasa penerima dan dirujuk melalui saluran berkanun, kemudian dihapuskan. Pendedah mengekalkan perlindungan undang-undangnya.",
+ pdBody2:"Menunggu rujukan pengakuan terima daripada pihak berkuasa. Kandungan dikuarantin daripada analitik dan tidak boleh dibuka dari papan pemuka ini oleh mana-mana peranan.",
+ pdCarve:"<b>Mengapa tiada butiran di sini.</b> Dakwaan salah laku sengaja <b>tidak dikumpulkan</b> dalam platform ini. Ia dikuarantin daripada kumpulan analitik, dimeterai kepada pihak berkuasa penerima, dirujuk melalui saluran berkanun yang betul supaya rakyat mengekalkan perlindungan pemberi maklumat, kemudian dihapuskan. Hanya kiraan dan aliran tanpa nama ini kekal — bukan dakwaan, bukan yang dituduh, bukan pendedah.",
+ ysH:"✅ Anda bersuara, kami bertindak", ysS:"melengkapkan kitaran bersama rakyat",
+ ysItem:"Subsidi elektrik dikekalkan untuk 85% isi rumah semasa tarif distruktur semula",
+ ysMeta1:"Didorong oleh <b>1,240 sesi</b>", ysMeta2:"Isi rumah dimaklumkan melalui WhatsApp: <b>1,240</b>",
+ footer:"DENGAR Intelligence · Jabatan Perdana Menteri · setiap suara penting · Prototaip demo dengan data sintetik · BYOND asia × Malaysia MADANI",
+ tmTrend:"Aliran · 12 minggu", tmWhat:"Apa sebenarnya yang dibangkitkan rakyat",
+ tmHot:"Daerah tumpuan", tmVoices:"Suara mewakili",
+ tmViewAll:"Lihat semua sesi", tmIssue:"⚡ Keluarkan arahan kepada kementerian",
+ asgH:"Keluarkan arahan",
+ asgSub:"Menyalurkan isu ini kepada kementerian bertanggungjawab dengan pemilik, keutamaan dan tarikh akhir. Arahan direkodkan dan dijejaki oleh Unit Penyampaian JPM sehingga selesai.",
+ asgIssue:"Isu", asgDept:"Tugaskan kepada kementerian", asgPrio:"Keutamaan", asgDue:"Tarikh akhir",
+ asgNote:"Arahan kepada kementerian <i style=\"font-weight:500;color:var(--grey)\">(pilihan)</i>",
+ notePh:"cth. Kemukakan pelan pemulihan kos sara hidup dan pemantauan harga mingguan kepada JPM dalam 14 hari.",
+ prioNormal:"Biasa", prioElevated:"Tinggi", prioHigh:"Kritikal / Segera",
+ cancel:"Batal", asgSubmit:"Keluarkan &amp; jejak",
+ drawerH:"📋 Penjejak Arahan",
+ drawerEmpty:"Belum ada arahan.<br><br>Buka mana-mana analisis mendalam isu, eskalasi atau cadangan dan tekan <b>Keluarkan arahan</b>. Setiap arahan direkodkan di sini dengan kementerian pemilik, tarikh akhir dan status — paparan susulan PM.",
+ bfH:"Taklimat Mingguan Perdana Menteri",
+ bfSub:"Minggu 29 · 13–19 Julai 2026 · Dijana automatik, disemak manusia · TERHAD — DEMO",
+ bfHeadline:"Utama",
+ bfHeadlineB:"5,120 sesi (+14%). Keyakinan nasional −7 (turun 4 mata), didorong secara ketara oleh <b>kos sara hidup</b> — harga barang dapur dan bahan api mendominasi setiap negeri. Sentimen kos sara hidup berada pada −33. <b>4 arahan dikeluarkan kepada kementerian minggu lalu; 1 disampaikan.</b>",
+ bfTop:"Isu utama nasional",
+ bfTopB:"1. Kos sara hidup — harga makanan &amp; bahan api (1,240 sesi, KPDN/MOF) · 2. Pekerjaan &amp; gaji — graduan bekerja bawah kelayakan (880, KESUMA) · 3. Rumah mampu milik — golongan muda tersisih (611, KPKT) · 4. Rasuah — tuntutan tindakan lebih pantas dan nyata (540, JPM).",
+ bfGeo:"Pemantauan geografi",
+ bfGeoB:"Sabah &amp; Kelantan menyimpang paling jauh di bawah min nasional bagi kos sara hidup dan akses perkhidmatan awam. Disyorkan pakej penyampaian khusus Malaysia Timur dan blok sesi khas.",
+ bfAcc:"Akauntabiliti antara kementerian",
+ bfAccB:"KPDN: 1 arahan (tamat minggu ini). KESUMA: 1 terbuka. JPM: 1 lewat tempoh. KPKT: 1 disampaikan. Purata masa penyampaian 4 minggu lalu: 11.4 hari.",
+ /* dynamic */
+ allMy:"Seluruh Malaysia", clickDistricts:"Klik untuk pecahan daerah",
+ districtsWord:"daerah", lowestConf:"Keyakinan terendah:", highestConf:"Tertinggi:",
+ topConcern:"Isu utama:", topPrefix:"Utama:", sessionsWord:"sesi",
+ confidenceWord:"keyakinan", spreadWord:"Sebaran:", statesWord:"negeri",
+ leadWord:"Utama:", worsening:"semakin teruk", improving:"semakin baik", steady:"stabil",
+ anonymised:"tanpa nama", feedScopeBase:"tanpa nama · ringkasan AI dengan sandaran kata sebenar",
+ hintDeep:"👉 Klik isu untuk analisis mendalam",
+ hintDeepSg:"👉 Klik isu untuk analisis mendalam &amp; keluarkan arahan",
+ viewNoteMin:"Paparan Perdana Menteri — nadi nasional sepintas lalu",
+ viewNoteSg:"Unit Penyampaian JPM — pelaksanaan seluruh kerajaan: keluarkan, jejak &amp; sampaikan",
+ tmSessions:"Sesi", tmWkTrend:"Aliran 4 minggu", tmLead:"Kementerian utama",
+ lastDays:d=>d+" hari lalu",
+ aiSuggest:"✓ Kementerian utama disyorkan AI berdasarkan klasifikasi isu: ",
+ stAssigned:"Ditugaskan", stProgress:"Dalam tindakan", stResolved:"Selesai",
+ ministryWord:"Kementerian:", dueWord:"Tarikh akhir:", overdueTag:" ⚠ LEWAT TEMPOH", priorityWord:"Keutamaan:",
+ noOpenDir:"Tiada arahan terbuka.<br>Keluarkan satu daripada analisis mendalam isu.",
+ cmdNoOpen:"Tiada arahan terbuka",
+ tagDelivered:"DISAMPAIKAN", tagAck:"DIAKUI TERIMA", tagReview:"DALAM SEMAKAN", tagIssued:"DIKELUARKAN",
+ toastSessions:"Demo: senarai penuh sesi akan dibuka dalam Session Explorer.",
+ toastIssued:n=>"✓ Arahan dikeluarkan kepada "+n+" — dijejaki oleh Unit Penyampaian JPM",
+ toastDelivered:"✓ Disampaikan — rakyat yang membangkitkan isu ini boleh dimaklumkan melalui WhatsApp (\"Anda bersuara, kami bertindak\").",
+ toastFiltered:d=>"Suara ditapis kepada "+d, toastCleared:"Tapisan daerah dikosongkan",
+ pdNoVoices:"<b>Suara mewakili tidak dipaparkan untuk isu ini.</b><br>Pendedahan individu dikuarantin daripada kumpulan analitik, dimeterai kepada pihak berkuasa berwibawa dan dirujuk melalui saluran berkanun, kemudian dihapuskan — supaya pendedah mengekalkan perlindungan undang-undang dan jabatan ini tidak menyimpan dakwaan tersebut. Yang kekal ialah aliran agregat di atas.",
+ pdNoVoicesFoot:"Pengendalian pendedahan terlindung · kandungan tidak disimpan",
+ tmCarveNote:"Isu rujukan sahaja. Arahan kementerian tidak dikeluarkan terhadap dakwaan individu; reformasi sistemik (cth. menerbitkan garis masa kes) ditindak melalui papan cadangan.",
+ generalMentions:"Sebutan umum", quotePlaceholder:"(Kutipan mewakili dipaparkan di sini.)"
+};
+
+/* ---- Display translations for data values (keys stay English) ---- */
+const T_TOPIC={
+ "Cost of living":"Kos sara hidup","Jobs & economy":"Pekerjaan & ekonomi","Healthcare":"Kesihatan",
+ "Education":"Pendidikan","Corruption & governance":"Rasuah & tadbir urus",
+ "Public services":"Perkhidmatan awam","Housing":"Perumahan","Safety & crime":"Keselamatan & jenayah",
+ "National unity":"Perpaduan nasional","General feedback":"Maklum balas umum"
+};
+const T_DEPT={
+ mof:"Kementerian Kewangan (MOF)", kpdn:"Perdagangan Dalam Negeri & Kos Sara Hidup (KPDN)",
+ mohr:"Sumber Manusia (KESUMA)", moh:"Kementerian Kesihatan (KKM)",
+ moe:"Kementerian Pendidikan (KPM)", kdn:"Kementerian Dalam Negeri (KDN)",
+ kpkt:"Perumahan & Kerajaan Tempatan (KPKT)", jpm:"Jabatan Perdana Menteri (JPM)",
+ miti:"Pelaburan, Perdagangan & Industri (MITI)", pmo:"Unit Penyampaian JPM"
+};
+const T_STATE={"Penang":"Pulau Pinang","N. Sembilan":"N. Sembilan","Kuala Lumpur":"Kuala Lumpur"};
+const T_LANG={"Bahasa Melayu":"Bahasa Melayu","English":"Bahasa Inggeris","中文 Chinese":"中文 Mandarin","தமிழ் Tamil":"தமிழ் Tamil","العربية Arabic":"العربية Arab"};
+const T_AGENDA={
+ "Bring down the cost of living":"Turunkan kos sara hidup",
+ "Create quality, better-paid jobs":"Cipta pekerjaan berkualiti bergaji lebih baik",
+ "Fight corruption & restore trust":"Perangi rasuah & pulihkan kepercayaan",
+ "Affordable housing for the young":"Rumah mampu milik untuk golongan muda",
+ "Strengthen public healthcare":"Perkukuh kesihatan awam",
+ "Fix everyday public services":"Perbaiki perkhidmatan awam harian"
+};
+const T_SUB={
+ "Food & grocery prices":"Harga makanan & barang dapur",
+ "Fuel / RON95 & subsidy changes":"Bahan api / RON95 & perubahan subsidi",
+ "Electricity & utility bills":"Bil elektrik & utiliti",
+ "Wages not keeping up":"Gaji tidak seiring kenaikan harga",
+ "Graduate underemployment":"Graduan bekerja bawah kelayakan",
+ "Low starting salaries":"Gaji permulaan rendah",
+ "Gig-economy instability":"Ketidakstabilan ekonomi gig",
+ "SME cashflow & loans":"Aliran tunai & pinjaman PKS",
+ "Local vs foreign jobs":"Pekerjaan tempatan vs asing",
+ "Perceived cronyism in contracts":"Persepsi kroniisme dalam kontrak",
+ "Slow, invisible action on cases":"Tindakan lambat dan tidak nyata terhadap kes",
+ "Local council integrity":"Integriti pihak berkuasa tempatan",
+ "Political-funding transparency":"Ketelusan pembiayaan politik",
+ "Affordability vs income":"Kemampuan berbanding pendapatan",
+ "PPR / affordable-home waiting lists":"Senarai menunggu PPR / rumah mampu milik",
+ "Rental deposits & rejections":"Deposit sewa & penolakan",
+ "Youth priced out of first home":"Golongan muda tersisih daripada rumah pertama",
+ "Online scams & losses":"Penipuan online & kerugian",
+ "Snatch theft & break-ins":"Ragut & pecah rumah",
+ "Drug abuse near schools":"Penyalahgunaan dadah dekat sekolah",
+ "Slow response times":"Masa tindakan lambat",
+ "Long waits at public clinics & hospitals":"Menunggu lama di klinik & hospital kerajaan",
+ "Specialist appointment backlog":"Tunggakan temujanji pakar",
+ "Medicine shortages":"Kekurangan ubat",
+ "Rural clinic access":"Akses klinik luar bandar"
+};
+const T_TEXT={
+ /* citizen verbatim — original language is preserved in the record; the
+    dashboard shows the normalised translation with the origin tag intact */
+ "Chicken and eggs cost more every month but my pay is the same. It's suffocating.":"Harga ayam dan telur naik setiap bulan tetapi gaji saya sama. Rasa tercekik.",
+ "When RON95 talk starts, everyone in the kampung is worried about the ripple on food.":"Bila cerita RON95 mula, semua orang kampung risau kesan berantai pada harga makanan.",
+ "A basic grocery run for the family is RM40 more than last year.":"Belanja dapur asas untuk keluarga RM40 lebih mahal daripada tahun lalu.",
+ "I have a degree but I'm doing gig work because the pay for real jobs is too low.":"Saya ada degree tetapi buat kerja gig kerana gaji kerja sebenar terlalu rendah.",
+ "Our SME can't get a fair loan; cashflow is killing us.":"PKS kami tidak dapat pinjaman yang adil; aliran tunai membunuh kami.",
+ "Fresh graduates here start at RM1,800. You can't live on that in the city.":"Graduan baharu di sini mula dengan RM1,800. Tidak mampu hidup di bandar dengan jumlah itu.",
+ "We want to see corruption cases actually finished, not just announced.":"Kami mahu kes rasuah benar-benar selesai, bukan sekadar diumumkan.",
+ "The same connected names keep winning contracts. Why?":"Nama-nama yang sama berkepentingan terus menang kontrak. Mengapa?",
+ "Fix the small graft at the local council — that's what we feel daily.":"Betulkan rasuah kecil di majlis tempatan — itu yang kami rasa setiap hari.",
+ "A first home near work is impossible on our salary; deposits are out of reach.":"Rumah pertama dekat tempat kerja mustahil dengan gaji kami; deposit di luar kemampuan.",
+ "We've been on the PPR list for years with no news.":"Kami dalam senarai PPR bertahun-tahun tanpa berita.",
+ "Young couples here just can't buy. Rent eats everything.":"Pasangan muda di sini tidak mampu beli. Sewa makan semuanya.",
+ "My uncle lost his savings to an investment scam. It's everywhere now.":"Bapa saudara saya hilang simpanan kerana penipuan pelaburan. Sekarang berleluasa.",
+ "Break-ins in our taman are rising; we need more patrols.":"Pecah rumah di taman kami meningkat; kami perlukan lebih banyak rondaan.",
+ "Vape and drugs are creeping near the schools here.":"Vape dan dadah semakin menular dekat sekolah di sini.",
+ "Six hours at the government clinic for a simple appointment.":"Enam jam di klinik kerajaan untuk temujanji biasa.",
+ "Specialist wait is months; we can't afford private.":"Menunggu pakar berbulan-bulan; kami tidak mampu swasta.",
+ "Specialist wait is months; we can't afford to go private.":"Menunggu pakar berbulan-bulan; kami tidak mampu ke swasta.",
+ "The nearest clinic is far and always full.":"Klinik terdekat jauh dan selalu penuh.",
+ "The nearest clinic is far and always full. We need more rural health support.":"Klinik terdekat jauh dan selalu penuh. Kami perlukan lebih sokongan kesihatan luar bandar.",
+ "Renewing my licence online was fast this time. Thank you — please keep improving it.":"Renew lesen secara online cepat kali ini. Terima kasih — teruskan penambahbaikan.",
+ "Renewing documents still means three different counters. Please join them up.":"Renew dokumen masih perlu tiga kaunter berbeza. Tolong satukan.",
+ "Proud to speak to the Prime Minister in my own language from Sarawak.":"Bangga bercakap dengan Perdana Menteri dalam bahasa sendiri dari Sarawak.",
+ /* proposals */
+ "Top up targeted cash aid (SARA) for the B40 as prices climb":"Tambah bantuan tunai bersasar (SARA) untuk B40 ketika harga meningkat",
+ "Publish & enforce ceiling prices for essential goods":"Terbitkan & kuatkuasakan harga siling barang keperluan",
+ "Higher minimum starting pay for graduates + wage subsidy":"Gaji permulaan minimum lebih tinggi untuk graduan + subsidi upah",
+ "Rent-to-own with low deposits for first-home youth":"Sewa-beli dengan deposit rendah untuk rumah pertama golongan muda",
+ "Publish quarterly progress & timelines on corruption cases":"Terbitkan kemajuan suku tahunan & garis masa kes rasuah",
+ /* seeded directives */
+ "Cost of living: accelerate targeted SARA aid & weekly price watch":"Kos sara hidup: pecut bantuan SARA bersasar & pemantauan harga mingguan",
+ "Graduate wages & job quality — national action plan":"Gaji graduan & kualiti pekerjaan — pelan tindakan nasional",
+ "Corruption cases — publish quarterly progress & timelines":"Kes rasuah — terbitkan kemajuan suku tahunan & garis masa",
+ "Rent-to-own pilot for first-home youth":"Perintis sewa-beli untuk rumah pertama golongan muda",
+ "Weekly essential-goods price watch to the PMO; expand aid to affected B40.":"Pemantauan harga barang keperluan mingguan kepada JPM; luaskan bantuan kepada B40 terjejas.",
+ "Table a graduate wage-floor and subsidy proposal within 3 weeks.":"Bentangkan cadangan gaji minimum graduan dan subsidi dalam 3 minggu.",
+ "Coordinate with MACC on a public tracker.":"Selaras dengan SPRM untuk penjejak umum.",
+ "Essential-goods hoarding pushing prices — Klang Valley":"Penyorokan barang keperluan menaikkan harga — Lembah Klang"
+};
+/* Generic display translators. Unknown values fall through unchanged. */
+const dTopic=v=>uiLang==='ms'?(T_TOPIC[v]||v):v;
+const dState=v=>uiLang==='ms'?(T_STATE[v]||v):v;
+const dSub  =v=>uiLang==='ms'?(T_SUB[v]||v):v;
+const dTxt  =v=>uiLang==='ms'?(T_TEXT[v]||v):v;
+const dLangN=v=>uiLang==='ms'?(T_LANG[v]||v):v;
+const dTime =v=>uiLang==='ms'?v.replace('min ago','min lalu').replace('h ago','jam lalu'):v;
+const dPrio =p=>tt(p==='high'?'prioHigh':p==='elevated'?'prioElevated':'prioNormal');
+const dStatus=s=>tt(s==='Resolved'?'stResolved':s==='In progress'?'stProgress':'stAssigned');
+const dTag=lbl=>({DELIVERED:'tagDelivered',ACKNOWLEDGED:'tagAck','UNDER REVIEW':'tagReview',ISSUED:'tagIssued'}[lbl])?tt({DELIVERED:'tagDelivered',ACKNOWLEDGED:'tagAck','UNDER REVIEW':'tagReview',ISSUED:'tagIssued'}[lbl]):lbl;
+
 /* ================================================================
    DATA — national / whole-of-government
 ================================================================ */
@@ -675,9 +990,12 @@ const sentColor=v=>{
   return `rgb(${lerp(c1[0],c2[0],u)},${lerp(c1[1],c2[1],u)},${lerp(c1[2],c2[2],u)})`;
 };
 const scale=n=>Math.round(n*(rangeD===7?1:rangeD===30?4.1:11.6));
-const fmtN=n=>n.toLocaleString('en-MY');
-function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2600);}
-function deptName(id){const d=DEPTS.find(x=>x.id===id);return d?d.n:'PMO Delivery Unit';}
+const fmtN=n=>n.toLocaleString(uiLang==='ms'?'ms-MY':'en-MY');
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._x);el._x=setTimeout(()=>el.classList.remove('show'),2600);}
+function deptName(id){
+  if(uiLang==='ms')return T_DEPT[id]||T_DEPT.pmo;
+  const d=DEPTS.find(x=>x.id===id);return d?d.n:'PMO Delivery Unit';
+}
 
 /* ================================================================
    MAP
@@ -696,7 +1014,7 @@ function drawMap(){
     path.addEventListener('mousemove',e=>{
       const r=mapSvg.parentElement.getBoundingClientRect();
       tip.style.left=(e.clientX-r.left+14)+'px';tip.style.top=(e.clientY-r.top-10)+'px';tip.style.opacity=1;
-      tip.innerHTML=`<b>${st.n}</b><br>${fmtN(scale(st.s))} sessions · confidence ${st.v>0?'+':''}${Math.round(st.v*100)}<br><span style="opacity:.7">Click for district breakdown</span>`;
+      tip.innerHTML=`<b>${dState(st.n)}</b><br>${fmtN(scale(st.s))} ${tt('sessionsWord')} · ${tt('confidenceWord')} ${st.v>0?'+':''}${Math.round(st.v*100)}<br><span style="opacity:.7">${tt('clickDistricts')}</span>`;
     });
     path.addEventListener('mouseleave',()=>tip.style.opacity=0);
     mapSvg.appendChild(path);
@@ -712,7 +1030,7 @@ function drawMap(){
     const t=document.createElementNS('http://www.w3.org/2000/svg','text');
     t.setAttribute('x',sh.lx);t.setAttribute('y',sh.ly);t.setAttribute('class','stLbl');
     if(sh.small)t.setAttribute('font-size','10');
-    t.textContent=st.n;mapSvg.appendChild(t);
+    t.textContent=dState(st.n);mapSvg.appendChild(t);
   });
 }
 
@@ -721,23 +1039,23 @@ function renderDistricts(){
   if(!selState){card.classList.remove('on');selDistrict=null;return}
   const st=STATES.find(s=>s.id===selState);
   card.classList.add('on');
-  $('distTitle').textContent=`📍 ${st.n} — district breakdown`;
+  $('distTitle').textContent=`📍 ${dState(st.n)} — ${tt('distTitleBase').replace('📍 ','').toLowerCase()}`;
   const worst=[...st.districts].sort((a,b)=>a.v-b.v)[0];
   const best=[...st.districts].sort((a,b)=>b.v-a.v)[0];
   $('distSummary').innerHTML=
-    `<span><b>${st.districts.length}</b> districts</span>
-     <span>Lowest confidence: <b style="color:var(--red)">${worst.d}</b> (${Math.round(worst.v*100)})</span>
-     <span>Highest: <b style="color:var(--green)">${best.d}</b> (+${Math.round(best.v*100)})</span>
-     <span>Top concern: <b>${st.topics[0].t}</b></span>`;
+    `<span><b>${st.districts.length}</b> ${tt('districtsWord')}</span>
+     <span>${tt('lowestConf')} <b style="color:var(--red)">${worst.d}</b> (${Math.round(worst.v*100)})</span>
+     <span>${tt('highestConf')} <b style="color:var(--green)">${best.d}</b> (+${Math.round(best.v*100)})</span>
+     <span>${tt('topConcern')} <b>${dTopic(st.topics[0].t)}</b></span>`;
   $('distGrid').innerHTML=st.districts.map(d=>
     `<div class="dTile" style="background:${sentColor(d.v)};${selDistrict===d.d?'outline:3px solid var(--ink)':''}" onclick="selectDistrict('${d.d.replace(/'/g,"\\'")}')">
       <span class="sc">${d.v>0?'+':''}${Math.round(d.v*100)}</span>
       <b>${d.d}</b>
-      <small>${fmtN(scale(d.s))} sessions</small><br>
-      <small style="opacity:.8">Top: ${d.topTopic}</small>
+      <small>${fmtN(scale(d.s))} ${tt('sessionsWord')}</small><br>
+      <small style="opacity:.8">${tt('topPrefix')} ${dTopic(d.topTopic)}</small>
     </div>`).join('');
 }
-function selectDistrict(d){selDistrict=selDistrict===d?null:d;render();toast(selDistrict?`Voices filtered to ${d}`:'District filter cleared');}
+function selectDistrict(d){selDistrict=selDistrict===d?null:d;render();toast(selDistrict?tt('toastFiltered')(d):tt('toastCleared'));}
 
 /* ================================================================
    NATIONAL AGENDA
@@ -747,10 +1065,11 @@ function renderAgenda(){
     const col=sentColor(a.v);
     const arrow=a.dir==='worse'?'▲':a.dir==='better'?'▼':'—';
     const cls=a.dir==='worse'?'worse':a.dir==='better'?'better':'flat';
-    const note=a.dir==='worse'?'worsening':a.dir==='better'?'improving':'steady';
+    const note=tt(a.dir==='worse'?'worsening':a.dir==='better'?'improving':'steady');
+    const label=uiLang==='ms'?(T_AGENDA[a.a]||a.a):a.a;
     return `<div class="agItem" style="--c:${col}"><span style="position:absolute;left:0;top:0;bottom:0;width:4px;background:${col}"></span>
-      <b>${a.a}</b>
-      <span class="mn">Lead: ${deptName(a.m)}</span>
+      <b>${label}</b>
+      <span class="mn">${tt('leadWord')} ${deptName(a.m)}</span>
       <div class="agRow">
         <span class="agPill" style="background:${col}">${a.v>0?'+':''}${Math.round(a.v*100)}</span>
         <span class="agTr ${cls}">${arrow}</span>
@@ -765,7 +1084,7 @@ function renderAgenda(){
 function currentStates(){return selState?STATES.filter(s=>s.id===selState):STATES}
 function render(){
   const set=currentStates();
-  const name=selState?set[0].n:"All Malaysia";
+  const name=selState?dState(set[0].n):tt('allMy');
   $('scopeLbl').textContent=name+(selDistrict?' · '+selDistrict:'');
   $('donutScope').textContent=name;
   $('topicScope').textContent=name;
@@ -782,20 +1101,20 @@ function render(){
   kS.style.color=ns>=5?"var(--green)":ns<=-5?"var(--red)":"var(--amber)";
   const col=ns-26; const kC=$('kCol'); kC.textContent=(col>0?"+":"")+col; kC.style.color="var(--red)";
 
-  const agg={};set.forEach(st=>st.topics.forEach(t=>agg[t.t]=(agg[t.t]||0)+t.c));
+  const agg={};set.forEach(st=>st.topics.forEach(x=>agg[x.t]=(agg[x.t]||0)+x.c));
   const list=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const maxT=list[0][1];
   const trends=["up","up","flat","up","down","flat","up","flat"];
-  $('topicList').innerHTML=list.map(([t,c],i)=>{
-    const neg=NEG_TOPICS.has(t);
-    return `<div class="topicRow" onclick="openTopic('${t.replace(/'/g,"\\'")}',${scale(c)})">
-      <div class="nm">${t}<span class="go">▸</span></div>
+  $('topicList').innerHTML=list.map(([tp,c],i)=>{
+    const neg=NEG_TOPICS.has(tp);
+    return `<div class="topicRow" onclick="openTopic('${tp.replace(/'/g,"\\'")}',${scale(c)})">
+      <div class="nm">${dTopic(tp)}<span class="go">▸</span></div>
       <div class="barBg"><div class="barFill" style="width:${Math.round(c/maxT*100)}%;background:${neg?"var(--red)":"var(--green)"}"></div></div>
       <div class="ct">${fmtN(scale(c))}</div>
       <div class="tr ${trends[i]}">${trends[i]==="up"?"▲":trends[i]==="down"?"▼":"—"}</div>
     </div>`;}).join('');
 
-  const kws=[];list.slice(0,4).forEach(([t],ti)=>(KW_POOL[t]||[]).slice(0,ti===0?4:3).forEach((k,i)=>kws.push({k,g:38-ti*9-i*4})));
+  const kws=[];list.slice(0,4).forEach(([tp],ti)=>(KW_POOL[tp]||[]).slice(0,ti===0?4:3).forEach((k,i)=>kws.push({k,g:38-ti*9-i*4})));
   $('kwWrap').innerHTML=kws.slice(0,12).map(x=>
     `<span class="kw" style="font-size:${12+Math.round(x.g/9)}px">${x.k}<em class="${x.g<14?'g':''}">+${x.g}%</em></span>`).join('');
 
@@ -803,28 +1122,29 @@ function render(){
   const ltot=Object.values(lagg).reduce((a,b)=>a+b,0);
   $('langList').innerHTML=Object.entries(lagg).sort((a,b)=>b[1]-a[1]).map(([l,v])=>{
     const pc=Math.round(v/ltot*100);
-    return `<div class="langRow"><div class="nm">${l}</div><div class="barBg"><div class="barFill" style="width:${pc}%"></div></div><b>${pc}%</b></div>`;}).join('');
+    return `<div class="langRow"><div class="nm">${dLangN(l)}</div><div class="barBg"><div class="barFill" style="width:${pc}%"></div></div><b>${pc}%</b></div>`;}).join('');
 
   const pos=Math.round(44+sent*40), neg=Math.round(31-sent*38), neu=100-pos-neg;
   drawDonut(pos,neu,neg);
 
   $('sugList').innerHTML=SUGS.map((s,i)=>{
-    const assigned=tasks.find(t=>t.src==='sug'+i);
-    return `<div class="sug"><div class="top"><b>${s.b}</b><span class="tag ${assigned?'asg':s.tag}">${assigned?'ISSUED':s.lbl}</span></div>
-     <div class="meta"><span><b>${fmtN(scale(s.c))}</b> sessions</span><span>Spread: <b>${s.sp}</b></span></div>
-     ${assigned?`<div class="assignedNote">→ ${assigned.deptName} · due ${assigned.due}</div>`
-       :`<button class="assignMini sg-only" onclick="openAssign('${s.b.replace(/'/g,"\\'")}','${s.topic}','normal','sug${i}')">⚡ Issue directive</button>`}
+    const assigned=tasks.find(x=>x.src==='sug'+i);
+    const spread=uiLang==='ms'?s.sp.replace('states',tt('statesWord')):s.sp;
+    return `<div class="sug"><div class="top"><b>${dTxt(s.b)}</b><span class="tag ${assigned?'asg':s.tag}">${assigned?tt('tagIssued'):dTag(s.lbl)}</span></div>
+     <div class="meta"><span><b>${fmtN(scale(s.c))}</b> ${tt('sessionsWord')}</span><span>${tt('spreadWord')} <b>${spread}</b></span></div>
+     ${assigned?`<div class="assignedNote">→ ${deptName(assigned.dept)} · ${tt('dueWord')} ${assigned.due}</div>`
+       :`<button class="assignMini sg-only" onclick="openAssign('${s.b.replace(/'/g,"\\'")}','${s.topic}','normal','sug${i}')">${tt('issueDir')}</button>`}
     </div>`;}).join('');
 
   let feed=FEED;
   if(selState)feed=feed.filter(f=>f.st===set[0].n);
   if(selDistrict)feed=feed.filter(f=>f.d===selDistrict);
   if(!feed.length)feed=FEED.slice(0,3);
-  $('feedScope').textContent=(selDistrict?selDistrict+', ':'')+(selState?name+' · ':'')+'anonymised';
+  $('feedScope').textContent=(selDistrict?selDistrict+', ':'')+(selState?name+' · ':'')+tt('anonymised');
   $('feedList').innerHTML=feed.map(f=>
     `<div class="feedRow"><div class="sdot" style="background:${sentColor(f.v)}"></div>
-      <div class="fx"><span class="quote">“${f.q}”</span>
-      <small>${f.d}, ${f.st} · ${f.t} · ${f.l} · ${f.time}</small></div></div>`).join('');
+      <div class="fx"><span class="quote">“${dTxt(f.q)}”</span>
+      <small>${f.d}, ${dState(f.st)} · ${dTopic(f.t)} · ${f.l} · ${dTime(f.time)}</small></div></div>`).join('');
 
   renderDistricts();
   drawMap();
@@ -858,34 +1178,33 @@ function drawDonut(pos,neu,neg){
   const seg=(pc,off,color)=>`<circle cx="21" cy="21" r="15.9" fill="none" stroke="${color}" stroke-width="7" stroke-dasharray="${pc/100*C} ${C}" stroke-dashoffset="${-off/100*C}" transform="rotate(-90 21 21)"/>`;
   svg.innerHTML=seg(pos,0,'#1E9E52')+seg(neu,pos,'#B9BFCC')+seg(neg,pos+neu,'#D22030')+
     `<text x="21" y="20" text-anchor="middle" font-size="8.5" font-weight="800" fill="#17181C">${pos}%</text>
-     <text x="21" y="27.5" text-anchor="middle" font-size="4.2" font-weight="700" fill="#6B7180">POSITIVE</text>`;
+     <text x="21" y="27.5" text-anchor="middle" font-size="4.2" font-weight="700" fill="#6B7180">${tt('posL').toUpperCase()}</text>`;
   $('donutStats').innerHTML=
-   `<div class="dStat"><i style="background:var(--green)"></i>Positive<b>${pos}%</b></div>
-    <div class="dStat"><i style="background:#B9BFCC"></i>Neutral<b>${neu}%</b></div>
-    <div class="dStat"><i style="background:var(--red)"></i>Negative<b>${neg}%</b></div>`;
+   `<div class="dStat"><i style="background:var(--green)"></i>${tt('posL')}<b>${pos}%</b></div>
+    <div class="dStat"><i style="background:#B9BFCC"></i>${tt('neuL')}<b>${neu}%</b></div>
+    <div class="dStat"><i style="background:var(--red)"></i>${tt('negL')}<b>${neg}%</b></div>`;
 }
 
 /* ================================================================
    CONCERN DEEP DIVE
 ================================================================ */
-let currentTopic=null;
+let currentTopic=null, lastTopicCount=0;
 function openTopic(t,count){
-  currentTopic=t;
+  currentTopic=t; lastTopicCount=count;
   { const c=document.getElementById('tmCarve'); if(c) c.remove(); }
   const d=TOPIC_DETAIL[t]||{subs:[["General mentions",100]],quotes:[["(Representative quotes appear here.)","—"]],dists:["—"],trend:[8,8,9,9,10,10,11,11,12,12,13,13]};
-  $('tmTitle').textContent=t;
-  $('tmSub').textContent=(selState?STATES.find(s=>s.id===selState).n:'All Malaysia')+' · last '+rangeD+' days';
+  $('tmTitle').textContent=dTopic(t);
+  $('tmSub').textContent=(selState?dState(STATES.find(s=>s.id===selState).n):tt('allMy'))+' · '+tt('lastDays')(rangeD);
   const tr=d.trend, delta=Math.round((tr[11]-tr[7])/tr[7]*100);
-  const owner=DEPTS.find(x=>x.id===(TOPIC_DEPT[t]||'pmo'));
   $('tmStats').innerHTML=
-   `<div class="miniStat"><small>Sessions</small><b>${fmtN(count)}</b></div>
-    <div class="miniStat"><small>4-wk trend</small><b style="color:${delta>0?'var(--red)':'var(--green)'}">${delta>0?'▲ +':''}${delta}%</b></div>
-    <div class="miniStat"><small>Lead ministry</small><b style="font-size:13px;line-height:1.3">${owner?owner.n:'PMO'}</b></div>`;
+   `<div class="miniStat"><small>${tt('tmSessions')}</small><b>${fmtN(count)}</b></div>
+    <div class="miniStat"><small>${tt('tmWkTrend')}</small><b style="color:${delta>0?'var(--red)':'var(--green)'}">${delta>0?'▲ +':''}${delta}%</b></div>
+    <div class="miniStat"><small>${tt('tmLead')}</small><b style="font-size:13px;line-height:1.3">${deptName(TOPIC_DEPT[t]||'pmo')}</b></div>`;
   const mx=Math.max(...tr), pts=tr.map((v,i)=>`${i/(tr.length-1)*396+2},${42-(v/mx)*38}`).join(' ');
   $('tmSpark').innerHTML=`<polyline points="${pts}" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="398" cy="${42-(tr[11]/mx)*38}" r="3.5" fill="var(--red)"/>`;
   const mS=Math.max(...d.subs.map(s=>s[1]));
   $('tmSubs').innerHTML=d.subs.map(([nm,v])=>
-    `<div class="subIssue"><div class="nm">${nm}</div><div class="barBg"><div class="barFill" style="width:${v/mS*100}%"></div></div><b>${v}%</b></div>`).join('');
+    `<div class="subIssue"><div class="nm">${nm==='General mentions'?tt('generalMentions'):dSub(nm)}</div><div class="barBg"><div class="barFill" style="width:${v/mS*100}%"></div></div><b>${v}%</b></div>`).join('');
   $('tmDists').innerHTML=d.dists.map(x=>`<span class="distHit">${x}</span>`).join('');
   /* Restricted class: governance/corruption is referral-only. No verbatim voices are
      surfaced and no ministry directive can be issued against an individual allegation —
@@ -894,19 +1213,16 @@ function openTopic(t,count){
   if (restricted) {
     $('tmQuotes').innerHTML =
       `<div class="q" style="border-left-color:#5A2CA0;font-style:normal;background:#F4F1FB">
-         🔒 <b>Representative voices are not shown for this concern.</b><br>
-         Individual disclosures are quarantined out of the analytics pool, sealed to the
-         competent authority and referred through the statutory channel, then purged — so the
-         discloser keeps their legal protection and this office does not hold the allegation.
-         What remains is the aggregate trend above.
-         <small>Protected-disclosure handling · content not retained</small>
+         🔒 ${tt('pdNoVoices')}
+         <small>${tt('pdNoVoicesFoot')}</small>
        </div>`;
     $('tmAssign').classList.add('pd-hidden');
     $('tmSubs').insertAdjacentHTML('afterend',
-      `<div class="carveNote" id="tmCarve">Referral-only concern. Ministry directives are not issued against individual allegations; systemic reforms (e.g. publishing case timelines) are actioned through the proposals board instead.</div>`);
+      `<div class="carveNote" id="tmCarve">${tt('tmCarveNote')}</div>`);
   } else {
     const carve=$('tmCarve'); if(carve) carve.remove();
-    $('tmQuotes').innerHTML=d.quotes.map(([q,m])=>`<div class="q">“${q}”<small>${m}</small></div>`).join('');
+    $('tmQuotes').innerHTML=d.quotes.map(([q,m])=>
+      `<div class="q">“${q==='(Representative quotes appear here.)'?tt('quotePlaceholder'):dTxt(q)}”<small>${m}</small></div>`).join('');
     $('tmAssign').classList.remove('pd-hidden');
     $('tmAssign').onclick=()=>{$('topicModal').classList.remove('open');openAssign(t+' — '+(d.subs[0][0]),t,'elevated');};
   }
@@ -916,37 +1232,44 @@ function openTopic(t,count){
 /* ================================================================
    ISSUE DIRECTIVE
 ================================================================ */
-$('aDept').innerHTML=DEPTS.map(d=>`<option value="${d.id}">${d.n}</option>`).join('');
+function buildDeptSelect(){
+  const keep=$('aDept').value;
+  $('aDept').innerHTML=DEPTS.map(d=>`<option value="${d.id}">${deptName(d.id)}</option>`).join('');
+  if(keep)$('aDept').value=keep;
+}
+buildDeptSelect();
 let prio='normal';
 document.querySelectorAll('.prio').forEach(p=>p.onclick=()=>{
   document.querySelectorAll('.prio').forEach(x=>x.classList.remove('sel'));
   p.classList.add('sel');prio=p.dataset.p;
 });
 function openAssign(issue,topic,pri,src){
-  assignCtx={src:src||('adhoc'+Date.now())};
-  $('aIssue').value=issue;
+  assignCtx={src:src||('adhoc'+Date.now()),issueKey:issue};
+  $('aIssue').value=dTxt(issue);
   const rec=TOPIC_DEPT[topic]||'pmo';
   $('aDept').value=rec;
-  $('aDeptHint').textContent='✓ AI-suggested lead ministry based on issue classification: '+deptName(rec);
+  $('aDeptHint').textContent=tt('aiSuggest')+deptName(rec);
   prio=pri||'normal';
   document.querySelectorAll('.prio').forEach(x=>x.classList.toggle('sel',x.dataset.p===prio));
   const d=new Date();d.setDate(d.getDate()+(prio==='high'?3:14));
   $('aDue').value=d.toISOString().slice(0,10);
   $('aNote').value='';
+  $('aNote').placeholder=tt('notePh');
   $('assignModal').classList.add('open');
 }
 function createTask(){
   const dept=DEPTS.find(d=>d.id===$('aDept').value);
   tasks.unshift({
     id:'DIR-'+String(1000+tasks.length+1),
-    issue:$('aIssue').value, dept:dept.id, deptName:dept.n,
+    issue:$('aIssue').value, dept:dept.id,
     prio, due:$('aDue').value, note:$('aNote').value,
-    status:'Assigned', created:new Date().toLocaleDateString('en-MY',{day:'numeric',month:'short'}),
-    src:assignCtx.src
+    status:'Assigned',
+    created:new Date().toLocaleDateString(uiLang==='ms'?'ms-MY':'en-MY',{day:'numeric',month:'short'}),
+    src:assignCtx.src, userText:true
   });
   $('assignModal').classList.remove('open');
   renderTasks();render();
-  toast('✓ Directive issued to '+dept.n+' — tracked by the PMO Delivery Unit');
+  toast(tt('toastIssued')(deptName(dept.id)));
 }
 function renderTasks(){
   const openN=tasks.filter(t=>t.status!=='Resolved').length;
@@ -955,47 +1278,51 @@ function renderTasks(){
   $('taskCount').textContent=openN;
   if($('cmdOpen')){$('cmdOpen').textContent=openN;$('cmdOver').textContent=overN;$('cmdDone').textContent=doneN;}
   renderCmdDept();
-  if(!tasks.length){$('taskList').innerHTML='<div class="emptyT">No directives yet.<br><br>Open any concern deep dive, escalation, or proposal and tap <b>Issue directive</b>.</div>';return}
-  $('taskList').innerHTML=tasks.map((t,i)=>{
-    const over=new Date(t.due)<new Date()&&t.status!=='Resolved';
-    const cls=t.status==='Resolved'?'act':t.status==='In progress'?'prog':'asg';
+  if(!tasks.length){$('taskList').innerHTML=`<div class="emptyT">${tt('drawerEmpty')}</div>`;return}
+  $('taskList').innerHTML=tasks.map((x,i)=>{
+    const over=new Date(x.due)<new Date()&&x.status!=='Resolved';
+    const cls=x.status==='Resolved'?'act':x.status==='In progress'?'prog':'asg';
+    /* User-typed text is shown verbatim; seeded demo text is translated. */
+    const issueTxt=x.userText?x.issue:dTxt(x.issue);
+    const noteTxt =x.userText?x.note :dTxt(x.note||'');
     return `<div class="task">
-      <div class="t1"><b>${t.issue}</b><span class="tag ${cls}">${t.status.toUpperCase()}</span></div>
+      <div class="t1"><b>${issueTxt}</b><span class="tag ${cls}">${dStatus(x.status).toUpperCase()}</span></div>
       <div class="meta">
-        <span>${t.id}</span><span>Ministry: <b>${t.deptName}</b></span>
-        <span class="due ${over?'over':''}">Due: <b>${t.due}</b>${over?' ⚠ OVERDUE':''}</span>
-        <span>Priority: <b style="${t.prio==='high'?'color:var(--red)':''}">${t.prio}</b></span>
+        <span>${x.id}</span><span>${tt('ministryWord')} <b>${deptName(x.dept)}</b></span>
+        <span class="due ${over?'over':''}">${tt('dueWord')} <b>${x.due}</b>${over?tt('overdueTag'):''}</span>
+        <span>${tt('priorityWord')} <b style="${x.prio==='high'?'color:var(--red)':''}">${dPrio(x.prio)}</b></span>
       </div>
-      ${t.note?`<div class="meta"><span>“${t.note}”</span></div>`:''}
+      ${noteTxt?`<div class="meta"><span>“${noteTxt}”</span></div>`:''}
       <div class="row2">
         <select onchange="setStatus(${i},this.value)">
-          <option ${t.status==='Assigned'?'selected':''}>Assigned</option>
-          <option ${t.status==='In progress'?'selected':''}>In progress</option>
-          <option ${t.status==='Resolved'?'selected':''}>Resolved</option>
+          <option value="Assigned" ${x.status==='Assigned'?'selected':''}>${tt('stAssigned')}</option>
+          <option value="In progress" ${x.status==='In progress'?'selected':''}>${tt('stProgress')}</option>
+          <option value="Resolved" ${x.status==='Resolved'?'selected':''}>${tt('stResolved')}</option>
         </select>
       </div>
     </div>`;}).join('');
 }
 function setStatus(i,v){
   tasks[i].status=v;renderTasks();render();
-  if(v==='Resolved')toast('✓ Delivered — citizens who raised this can be notified via WhatsApp ("You said, we did").');
+  if(v==='Resolved')toast(tt('toastDelivered'));
+}
+function deptAgg(){
+  const agg={};tasks.filter(x=>x.status!=='Resolved').forEach(x=>agg[x.dept]=(agg[x.dept]||0)+1);return agg;
 }
 function renderDeptStats(){
-  const open=tasks.filter(t=>t.status!=='Resolved');
-  if(!open.length){$('deptStats').innerHTML='<div class="emptyT" style="padding:14px 6px">No open directives.<br>Issue one from a concern deep dive.</div>';return}
-  const agg={};open.forEach(t=>agg[t.deptName]=(agg[t.deptName]||0)+1);
+  const agg=deptAgg(), keys=Object.keys(agg);
+  if(!keys.length){$('deptStats').innerHTML=`<div class="emptyT" style="padding:14px 6px">${tt('noOpenDir')}</div>`;return}
   const mx=Math.max(...Object.values(agg));
-  $('deptStats').innerHTML=Object.entries(agg).sort((a,b)=>b[1]-a[1]).map(([d,c])=>
-    `<div class="deptStat"><div class="nm">${d}</div><div class="barBg"><div class="barFill" style="width:${c/mx*100}%"></div></div><b>${c}</b></div>`).join('');
+  $('deptStats').innerHTML=Object.entries(agg).sort((a,b)=>b[1]-a[1]).map(([id,c])=>
+    `<div class="deptStat"><div class="nm">${deptName(id)}</div><div class="barBg"><div class="barFill" style="width:${c/mx*100}%"></div></div><b>${c}</b></div>`).join('');
 }
 function renderCmdDept(){
   if(!$('cmdDeptList'))return;
-  const open=tasks.filter(t=>t.status!=='Resolved');
-  if(!open.length){$('cmdDeptList').innerHTML='<div class="cmdDeptRow" style="opacity:.6">No open directives</div>';return}
-  const agg={};open.forEach(t=>agg[t.deptName]=(agg[t.deptName]||0)+1);
+  const agg=deptAgg(), keys=Object.keys(agg);
+  if(!keys.length){$('cmdDeptList').innerHTML=`<div class="cmdDeptRow" style="opacity:.6">${tt('cmdNoOpen')}</div>`;return}
   const mx=Math.max(...Object.values(agg));
-  $('cmdDeptList').innerHTML=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([d,c])=>
-    `<div class="cmdDeptRow"><div class="nm">${d}</div><div class="barBg"><div class="barFill" style="width:${c/mx*100}%"></div></div><b>${c}</b></div>`).join('');
+  $('cmdDeptList').innerHTML=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([id,c])=>
+    `<div class="cmdDeptRow"><div class="nm">${deptName(id)}</div><div class="barBg"><div class="barFill" style="width:${c/mx*100}%"></div></div><b>${c}</b></div>`).join('');
 }
 function openDrawer(){$('drawer').classList.add('open')}
 
@@ -1007,14 +1334,30 @@ function setView(v){
   view=v;
   document.body.classList.toggle('sg',v==='sg');
   document.querySelectorAll('#viewTgl button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
-  $('viewNote').textContent = v==='min'
-    ? 'Prime Minister View — the national pulse at a glance'
-    : 'PMO Delivery Unit — whole-of-government execution: issue, track & deliver';
-  $('topicHint').innerHTML = v==='sg'
-    ? '👉 Click a concern to open the deep dive &amp; issue a directive'
-    : '👉 Click a concern to open the deep dive';
+  $('viewNote').innerHTML = tt(v==='min'?'viewNoteMin':'viewNoteSg');
+  $('topicHint').innerHTML = tt(v==='sg'?'hintDeepSg':'hintDeep');
   render();renderTasks();
 }
+
+/* ================================================================
+   LANGUAGE SWITCH
+================================================================ */
+function applyI18n(){
+  document.documentElement.lang = uiLang==='ms' ? 'ms' : 'en';
+  $('tglMs').classList.toggle('on',uiLang==='ms');
+  $('tglEn').classList.toggle('on',uiLang==='en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=I18N[uiLang][el.dataset.i18n];
+    if(typeof v==='string')el.innerHTML=v;
+  });
+  buildDeptSelect();
+  $('aNote').placeholder=tt('notePh');
+  $('distTitle').textContent=tt('distTitleBase');
+  renderAgenda();
+  setView(view);            /* re-renders everything, incl. tasks + map */
+  if($('topicModal').classList.contains('open')&&currentTopic)openTopic(currentTopic,lastTopicCount);
+}
+function setUiLang(l){ uiLang=l; applyI18n(); }
 
 /* ================================================================
    SEED DIRECTIVES (demo — so the PMO view shows a live operation)
@@ -1023,10 +1366,10 @@ function seedTasks(){
   const today=new Date();
   const d=(n)=>{const x=new Date(today);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);};
   tasks=[
-    {id:'DIR-1004',issue:'Cost of living: accelerate targeted SARA aid & weekly price watch',dept:'kpdn',deptName:"Domestic Trade & Living Costs (KPDN)",prio:'high',due:d(3),note:'Weekly essential-goods price watch to the PMO; expand aid to affected B40.',status:'In progress',created:'14 Jul',src:'seed1'},
-    {id:'DIR-1003',issue:'Graduate wages & job quality — national action plan',dept:'mohr',deptName:'Human Resources (KESUMA)',prio:'elevated',due:d(7),note:'Table a graduate wage-floor and subsidy proposal within 3 weeks.',status:'Assigned',created:'16 Jul',src:'seed2'},
-    {id:'DIR-1002',issue:'Corruption cases — publish quarterly progress & timelines',dept:'jpm',deptName:"Prime Minister's Dept (JPM)",prio:'elevated',due:d(-1),note:'Coordinate with MACC on a public tracker.',status:'Assigned',created:'12 Jul',src:'seed3'},
-    {id:'DIR-1001',issue:'Rent-to-own pilot for first-home youth',dept:'kpkt',deptName:'Housing & Local Govt (KPKT)',prio:'normal',due:d(9),note:'',status:'Resolved',created:'09 Jul',src:'seed4'}
+    {id:'DIR-1004',issue:'Cost of living: accelerate targeted SARA aid & weekly price watch',dept:'kpdn',prio:'high',due:d(3),note:'Weekly essential-goods price watch to the PMO; expand aid to affected B40.',status:'In progress',created:'14 Jul',src:'seed1'},
+    {id:'DIR-1003',issue:'Graduate wages & job quality — national action plan',dept:'mohr',prio:'elevated',due:d(7),note:'Table a graduate wage-floor and subsidy proposal within 3 weeks.',status:'Assigned',created:'16 Jul',src:'seed2'},
+    {id:'DIR-1002',issue:'Corruption cases — publish quarterly progress & timelines',dept:'jpm',prio:'elevated',due:d(-1),note:'Coordinate with MACC on a public tracker.',status:'Assigned',created:'12 Jul',src:'seed3'},
+    {id:'DIR-1001',issue:'Rent-to-own pilot for first-home youth',dept:'kpkt',prio:'normal',due:d(9),note:'',status:'Resolved',created:'09 Jul',src:'seed4'}
   ];
 }
 
@@ -1042,8 +1385,8 @@ $('range').addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));$('drawer').classList.remove('open');}});
 
 seedTasks();
-renderAgenda();
-drawTrend();setView('min');
+drawTrend();
+applyI18n();
 </script>
 </body>
 </html>
