@@ -17,6 +17,16 @@ The product has **two halves**:
 | **Ministry intelligence** | `/dashboard` | DENGAR Intelligence — sentiment map, top issues, citizen suggestions, urgent review queue, action tracker. Two role views: **Minister** (the pulse) and **Secretary General** (assign, track, resolve). The enduring value and the recurring revenue. |
 | **Session Explorer** | `/sessions` | Dashboard view 5, **React-native**. Search/filter every session, open the CVIF Session Insight Record, read the transcript (original + English), work the urgent queue. PII masked by default; reveal is audit-logged. Wired to the real CVIF scorer. |
 
+### Deployments — the stack is leader-agnostic
+
+The same booking engine, digital-human seam and CVIF intelligence layer serve every
+deployment; each one is **configuration + a new avatar + an adapted taxonomy**.
+
+| Deployment | Routes | Scope | Execution routes to | Role views |
+|---|---|---|---|---|
+| **Ministry of Home Affairs** | `/experience` · `/dashboard` · `/sessions` · `/briefing` | Policing, immigration, MyKad, scams, drugs | KDN agencies (PDRM, JIM, JPN, AADK) | Minister ↔ Secretary General |
+| **Prime Minister&rsquo;s Office** | `/pm/experience` · `/pm/dashboard` | Cost of living, jobs, corruption, housing, healthcare | **Ministries** (MOF, KPDN, KESUMA, MOH, KPKT, JPM) | Prime Minister ↔ PMO Delivery Unit |
+
 The **intelligence layer** — the moat — is the [Citizen Voice Intelligence Framework
 (CVIF)](docs/CVIF.md): it scores the *conversation as evidence about an issue*, never the
 citizen as a person.
@@ -31,8 +41,10 @@ dengar/
 │   ├── app/
 │   │   ├── page.tsx            Product hub (this README, as a page)
 │   │   ├── experience/         Citizen experience  → /experience
-│   │   ├── dashboard/          National Pulse       → /dashboard
-│   │   └── sessions/           Session Explorer     → /sessions  (dashboard view 5)
+│   │   ├── dashboard/          DENGAR Intelligence  → /dashboard
+│   │   ├── sessions/           Session Explorer     → /sessions  (dashboard view 5)
+│   │   ├── briefing/           Weekly Ministry Briefing → /briefing
+│   │   └── pm/                 PMO deployment       → /pm/experience · /pm/dashboard
 │   ├── components/
 │   │   └── SessionExplorer.tsx React-native view over the CVIF scorer
 │   └── lib/

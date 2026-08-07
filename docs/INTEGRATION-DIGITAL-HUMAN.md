@@ -20,6 +20,34 @@ team implements one adapter against the vendor SDK; nothing else changes.
 If any element is missing from the vendor SDK, budget 1–2 weeks of joint integration work
 (Dev Plan §4.3).
 
+## As-built browser integration (validated against the working kiosk build)
+
+The production avatar is delivered by a **web SDK**: a UMD script that exposes a global
+chat object and renders the live avatar video into an **`<avatar-container volume="100">`**
+custom element, mounted full-bleed behind the session UI. The typed contract is
+[`web-sdk.ts`](../src/lib/digital-human/web-sdk.ts); the citizen prototypes carry a
+matching `DigitalHuman` adapter whose mock bodies are annotated with the exact real call.
+
+| Surface | As-built shape |
+|---|---|
+| Boot | `await sdk.init({ sdk_key, avatar_id, voice_code, subtitle_code, log_level })` — config via deployment settings / URL params (`character_id`, `language_id`, `speech_speed`) |
+| Status events | `onStatusEvent(cb)` — `VIDEO_CAN_PLAY` ⇒ hide loader/placeholder, show stream |
+| Chat events | `onChatEvent(cb)` — `TEXT` (avatar line ⇒ caption + turn log) · `STT_RESULT` (citizen speech ⇒ turn log + flow advance) · `RESPONSE_IS_ENDED` (unlock mic / next phase) |
+| Speak | `sdk.echo(text)` — drives the controlled-session prompts (welcome/probe/confirm/close) |
+| Mic | `sdk.wakeUpAvatar(); sdk.startStt()` to open · `sdk.endStt()` to close (push-to-talk or VAD auto-mode) |
+| Interrupt | `sdk.stopSpeech()` |
+| Language switch | `sdk.changeAvatar({ avatar_id, voice_code, subtitle_code, voice_tts_speech_speed })` |
+| Locales | `ms_my · en_us · zh_cn · ta_in · ar_sa` (all five session languages supported) |
+
+**Transcript capture (per turn, client → server).** Every `TEXT` and `STT_RESULT` turn is
+POSTed to the transcript-record endpoint as it happens (`TurnRecordPayload`: session ref,
+side, text, offset, deployment tag). At session close the ingestion service folds the
+turns into the CVIF input via `turnsToTranscriptInput()` — that call is the join between
+the live avatar and the intelligence layer.
+
+**Secrets discipline:** `sdk_key` and `avatar_id` are deployment configuration. Never
+commit them to the repo or embed them in shipped prototypes.
+
 ## Sequence
 
 ```

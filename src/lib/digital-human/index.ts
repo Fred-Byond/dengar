@@ -12,3 +12,4 @@ export {
   MockDigitalHumanGateway,
   toTranscriptInput,
 } from "./gateway";
+export * from "./web-sdk";

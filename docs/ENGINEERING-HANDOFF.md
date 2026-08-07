@@ -41,7 +41,8 @@ Read next, in order: this file → `ARCHITECTURE.md` → `INTEGRATION-DIGITAL-HU
 | Session Explorer | `src/components/SessionExplorer.tsx` | ✅ React-native, on the CVIF engine | Full-stack |
 | Weekly Briefing | `src/lib/briefing.ts` + `src/components/WeeklyBriefing.tsx` | ✅ generator built | Full-stack + AI |
 | CVIF engine | `src/lib/cvif` | ✅ typed engine + deterministic scorer — **swap in LLM scorer** | Head of AI |
-| Digital-human seam | `src/lib/digital-human` | 🟥 interface + mock — **implement vendor adapter** | Full-stack |
+| PMO deployment (2nd) | `src/app/pm/*` + `public/prototypes/pm-*.html` | 🟡 approved prototypes — national scope, ministry routing | Full-stack + UIX |
+| Digital-human seam | `src/lib/digital-human` | 🟥 server contract + browser **web-SDK contract** (`web-sdk.ts`) + mock — **implement the adapter** | Full-stack |
 | Domain model | `src/lib/types.ts` | ✅ types — **back with Postgres schema** | Full-stack |
 | Back end | — | 🟥 to build (NestJS) | Full-stack |
 
@@ -53,8 +54,13 @@ Legend: ✅ built · 🟡 works, needs productionising · 🟥 to build.
 - **Back end (NestJS, modular monolith):** Booking API (Redis slot locks, OTP, state
   machine), Notification service (WhatsApp BSP → SMS → email), **Session gateway**,
   Transcript ingestion, Admin API. See `ARCHITECTURE.md`.
-- **Digital-human adapter** — implement `DigitalHumanGateway` against the vendor SDK and the
-  webhook ingress. See `INTEGRATION-DIGITAL-HUMAN.md`. **This is the critical path.**
+- **Digital-human adapter** — implement `DigitalHumanGateway` (server) and the browser
+  **avatar web-SDK** wiring typed in `web-sdk.ts`: mount `<avatar-container>` full-bleed,
+  drive the controlled prompts with `echo()`, open/close the mic with `startStt()`/`endStt()`,
+  and POST each `TEXT` / `STT_RESULT` turn to the transcript-record endpoint. The citizen
+  prototypes already carry a `DigitalHuman` adapter whose mock bodies are annotated with the
+  exact real call — swap them in place. See `INTEGRATION-DIGITAL-HUMAN.md`.
+  **This is the critical path.**
 - **Data tier:** Postgres schema from `src/lib/types.ts`; Redis; encrypted object store for
   transcripts/audio; immutable audit log.
 - **Dashboard API:** replace the in-page synthetic dataset with a live CVIF aggregation

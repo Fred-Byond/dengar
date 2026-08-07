@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DENGAR Intelligence — Prime Minister's Office</title>
+<style>
+:root{
+  --navy:#1B2A6B; --navy-d:#121C4A; --red:#D22030; --gold:#FFCC00;
+  --green:#1E9E52; --amber:#E8A400;
+  --bg:#EEF0F4; --card:#FFFFFF; --ink:#17181C; --grey:#6B7180; --line:#E3E6EC;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+
+/* ================= HEADER ================= */
+header{background:linear-gradient(100deg,var(--navy-d),var(--navy) 60%,#24368a);color:#fff;padding:16px 26px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.hLogo{display:flex;align-items:center;gap:12px}
+.hLogo .t b{display:block;font-size:15px;font-weight:800;letter-spacing:.4px}
+.hLogo .t small{font-size:10px;opacity:.75;letter-spacing:1.4px;font-weight:700}
+.hTitle{margin-left:6px;padding-left:18px;border-left:1px solid rgba(255,255,255,.25)}
+.hTitle h1{font-size:19px;font-weight:800}
+.hTitle p{font-size:11px;opacity:.75;margin-top:1px}
+.hRight{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.live{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;background:rgba(255,255,255,.12);padding:7px 12px;border-radius:99px}
+.live i{width:8px;height:8px;border-radius:50%;background:#3DDC6A;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.range{display:flex;background:rgba(255,255,255,.12);border-radius:11px;padding:3px}
+.range button{border:0;background:transparent;color:#fff;font-size:12px;font-weight:700;padding:7px 13px;border-radius:9px;opacity:.7}
+.range button.on{background:#fff;color:var(--navy);opacity:1}
+.brief{border:0;background:var(--gold);color:#3A2C00;font-weight:800;font-size:12px;padding:9px 15px;border-radius:11px}
+.actBtn{border:0;background:rgba(255,255,255,.15);color:#fff;font-weight:800;font-size:12px;padding:9px 15px;border-radius:11px;position:relative}
+.actBtn .n{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.dwave{width:26px;height:26px;flex:0 0 auto}
+.viewTgl{display:flex;background:rgba(255,255,255,.12);border-radius:11px;padding:3px}
+.viewTgl button{border:0;background:transparent;color:#fff;font-size:12px;font-weight:800;padding:8px 14px;border-radius:9px;opacity:.72;letter-spacing:.2px;transition:.15s}
+.viewTgl button.on{background:#fff;color:var(--navy);opacity:1;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.sg-only{display:none!important}
+body.sg .sg-only{display:revert!important}
+body.sg .actBtn.sg-only{display:inline-flex!important}
+body.sg .grid-3.sg-only,body.sg .cmdStrip.sg-only{display:grid!important}
+.cmdStrip{grid-template-columns:auto auto auto 1fr auto;gap:16px;align-items:center;
+  background:linear-gradient(100deg,#12235E,#1B2A6B 55%,#26317f);color:#fff;border-radius:16px;padding:16px 20px;
+  box-shadow:0 1px 3px rgba(20,25,40,.06),0 8px 24px rgba(20,25,40,.08)}
+.cmdStrip .cLbl{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:.7}
+.cmdStrip .cNum{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.cmdStrip .cNum.warn{color:#FFB4B4}.cmdStrip .cNum.good{color:#8FE9AE}
+.cmdStrip .divider{width:1px;height:38px;background:rgba(255,255,255,.2)}
+.cmdDept{display:flex;flex-direction:column;gap:5px;min-width:0}
+.cmdDept .dh{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;opacity:.7;margin-bottom:1px}
+.cmdDeptRow{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600}
+.cmdDeptRow .nm{width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.92}
+.cmdDeptRow .barBg{flex:1;height:7px;background:rgba(255,255,255,.18);border-radius:5px;overflow:hidden}
+.cmdDeptRow .barFill{height:100%;background:var(--gold);border-radius:5px}
+.cmdDeptRow b{width:18px;text-align:right}
+.cmdActs{display:flex;gap:9px}
+.cmdBtn{border:0;background:#fff;color:var(--navy);font-weight:800;font-size:12.5px;padding:11px 16px;border-radius:11px;white-space:nowrap}
+.cmdBtn.gold{background:var(--gold);color:#3A2C00}
+.flowTag{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--grey);letter-spacing:.5px;text-transform:uppercase;margin:2px 2px -4px}
+.flowTag i{width:22px;height:2px;background:var(--line);border-radius:2px;display:inline-block}
+.flowTag.act{color:var(--navy)}
+
+.filterBar{padding:12px 26px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:7px 8px 7px 14px;border-radius:99px;display:none;align-items:center;gap:8px}
+.chip.on{display:inline-flex}
+.chip button{border:0;background:rgba(255,255,255,.25);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;line-height:1}
+.scope{font-size:12.5px;color:var(--grey);font-weight:600}
+.scope b{color:var(--ink)}
+
+/* ================= LAYOUT ================= */
+.wrap{padding:16px 26px 40px;display:flex;flex-direction:column;gap:16px;max-width:1540px;margin:0 auto}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.grid-main{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:16px}
+.grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+@media(max-width:1120px){.grid-main,.grid-3,.grid-2{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--card);border-radius:16px;padding:18px 20px;box-shadow:0 1px 3px rgba(20,25,40,.06),0 8px 24px rgba(20,25,40,.05)}
+.cardHead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+.cardHead h2{font-size:14.5px;font-weight:800}
+.cardHead small{font-size:11px;color:var(--grey);font-weight:600}
+
+.kpi{background:var(--card);border-radius:16px;padding:15px 18px;box-shadow:0 1px 3px rgba(20,25,40,.06),0 8px 24px rgba(20,25,40,.05);position:relative;overflow:hidden}
+.kpi .lbl{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--grey)}
+.kpi .val{font-size:29px;font-weight:800;letter-spacing:-.5px;margin:3px 0 2px;font-variant-numeric:tabular-nums}
+.kpi .delta{font-size:11.5px;font-weight:700}
+.kpi .delta.up{color:var(--green)}.kpi .delta.down{color:var(--red)}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--navy)}
+.kpi.k2::before{background:var(--gold)}.kpi.k3::before{background:var(--green)}.kpi.k4::before{background:var(--red)}
+
+/* national agenda */
+.agendaGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:11px}
+.agItem{border:1px solid var(--line);border-radius:13px;padding:12px 13px;position:relative;overflow:hidden}
+.agItem::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.agItem b{font-size:13px;line-height:1.25;display:block;padding-left:6px}
+.agItem .mn{font-size:10.5px;font-weight:700;color:var(--grey);margin:6px 0 9px 6px;display:inline-block}
+.agRow{display:flex;align-items:center;gap:8px;padding-left:6px}
+.agPill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;color:#fff}
+.agTr{font-size:12px;font-weight:800}
+.agTr.worse{color:var(--red)}.agTr.better{color:var(--green)}.agTr.flat{color:var(--grey)}
+.agNote{font-size:10.5px;color:var(--grey);font-weight:600;margin-left:auto}
+
+/* ================= MAP ================= */
+.mapWrap{position:relative}
+.mapWrap svg{width:100%;height:auto;display:block}
+.state{stroke:#fff;stroke-width:2.2;cursor:pointer;transition:filter .15s,opacity .2s;stroke-linejoin:round}
+.state:hover{filter:brightness(1.09) saturate(1.12)}
+.state.dim{opacity:.25}
+.state.sel{stroke:var(--ink);stroke-width:2.8}
+.bubble{fill:var(--navy);fill-opacity:.88;pointer-events:none}
+.bubble-pulse{fill:none;stroke:var(--navy);stroke-width:1.6;pointer-events:none;animation:mpulse 2.6s infinite}
+@keyframes mpulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+.stLbl{font-size:11.5px;font-weight:700;fill:#fff;pointer-events:none;paint-order:stroke;stroke:rgba(0,0,0,.32);stroke-width:2.6px;text-anchor:middle}
+.seaLbl{font-size:11px;font-weight:700;fill:#A9B0BF;letter-spacing:2px}
+.legend{display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap}
+.legend .bar{flex:1;min-width:150px;height:10px;border-radius:6px;background:linear-gradient(90deg,#C6222F,#E8A400,#1E9E52)}
+.legend small{font-size:10.5px;color:var(--grey);font-weight:700}
+.legend .bub{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--grey);font-weight:700}
+.legend .bub i{width:11px;height:11px;border-radius:50%;background:var(--navy);display:inline-block}
+#mapTip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:11.5px;padding:8px 11px;border-radius:9px;opacity:0;transition:opacity .12s;white-space:nowrap;z-index:5;line-height:1.5}
+
+#distCard{display:none}
+#distCard.on{display:block}
+.distGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.dTile{border-radius:12px;padding:11px 12px;color:#fff;cursor:pointer;transition:transform .12s;position:relative;overflow:hidden}
+.dTile:hover{transform:translateY(-2px)}
+.dTile b{display:block;font-size:12.5px;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.25)}
+.dTile small{font-size:10.5px;opacity:.92;font-weight:700}
+.dTile .sc{position:absolute;top:9px;right:10px;font-size:10px;font-weight:800;background:rgba(0,0,0,.22);padding:2px 7px;border-radius:99px}
+.distSummary{display:flex;gap:16px;font-size:12px;color:var(--grey);font-weight:600;margin-bottom:11px;flex-wrap:wrap}
+.distSummary b{color:var(--ink)}
+
+/* ================= CHARTS ================= */
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.lg{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+.lg span{font-size:11px;color:var(--grey);font-weight:700;display:flex;align-items:center;gap:6px}
+.lg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.donutRow{display:flex;align-items:center;gap:18px}
+.donutRow svg{width:126px;height:126px;flex:0 0 auto}
+.donutStats{flex:1;display:flex;flex-direction:column;gap:9px}
+.dStat{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600}
+.dStat i{width:11px;height:11px;border-radius:3px}
+.dStat b{margin-left:auto;font-variant-numeric:tabular-nums}
+
+.topicRow{display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:9px;transition:background .12s}
+.topicRow:hover{background:#F5F7FB}
+.topicRow:last-child{border:0}
+.topicRow .nm{width:42%;font-size:12.5px;font-weight:700;line-height:1.25;display:flex;align-items:center;gap:6px}
+.topicRow .nm .go{color:var(--navy);font-size:10px;opacity:.6}
+.topicRow .barBg{flex:1;height:9px;background:#EDEFF4;border-radius:6px;overflow:hidden}
+.topicRow .barFill{height:100%;border-radius:6px}
+.topicRow .ct{width:44px;text-align:right;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.topicRow .tr{width:20px;text-align:center;font-size:12px;font-weight:800}
+.tr.up{color:var(--red)}.tr.down{color:var(--green)}.tr.flat{color:var(--grey)}
+.hintLine{font-size:11px;color:var(--grey);font-weight:600;margin-top:8px}
+
+.kwWrap{display:flex;flex-wrap:wrap;gap:8px}
+.kw{background:#F1F3F8;border:1px solid var(--line);border-radius:99px;padding:7px 13px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:7px}
+.kw em{font-style:normal;font-size:10px;font-weight:800;color:#fff;background:var(--red);border-radius:99px;padding:2px 7px}
+.kw em.g{background:var(--green)}
+.langRow{display:flex;align-items:center;gap:10px;padding:7px 0}
+.langRow .nm{width:108px;font-size:12.5px;font-weight:700}
+.langRow .barBg{flex:1;height:9px;background:#EDEFF4;border-radius:6px;overflow:hidden}
+.langRow .barFill{height:100%;background:var(--navy);border-radius:6px}
+.langRow b{width:40px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums}
+
+.sug{border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin-bottom:10px}
+.sug:last-child{margin-bottom:0}
+.sug .top{display:flex;align-items:flex-start;gap:9px}
+.sug .top b{font-size:13px;line-height:1.35;flex:1}
+.tag{font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 9px;border-radius:7px;white-space:nowrap}
+.tag.rev{background:#FFF3D6;color:#8A6400}
+.tag.ack{background:#E7ECFF;color:var(--navy)}
+.tag.act{background:#E2F6E9;color:#137A3D}
+.tag.asg{background:#F1E6FF;color:#5A2CA0}
+.tag.prog{background:#DFF3FF;color:#0A6C9E}
+.sug .meta{display:flex;gap:14px;font-size:11px;color:var(--grey);font-weight:600;margin-top:7px;flex-wrap:wrap}
+.sug .meta b{color:var(--ink)}
+.assignMini{border:1.5px solid var(--navy);background:#fff;color:var(--navy);font-size:11px;font-weight:800;padding:6px 12px;border-radius:9px;margin-top:9px}
+.assignMini:hover{background:var(--navy);color:#fff}
+.assignedNote{font-size:11px;font-weight:700;color:#5A2CA0;margin-top:8px}
+.feedRow{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:12.5px;align-items:flex-start}
+.feedRow:last-child{border:0}
+.sdot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex:0 0 auto}
+.feedRow .fx{flex:1;line-height:1.45}
+.feedRow .fx small{display:block;color:var(--grey);font-weight:600;font-size:11px;margin-top:2px}
+.feedRow .quote{font-style:italic;color:#3C3F48}
+.urgent{background:#FFF1F1;border:1px solid #F5C9C9;border-radius:13px;padding:12px 14px;margin-bottom:12px}
+.urgent b{color:var(--red);font-size:12px;letter-spacing:.6px}
+.urgent p{font-size:12.5px;margin-top:5px;line-height:1.45}
+.urgent .assignMini{margin-top:8px}
+
+/* ================= MODALS ================= */
+.modal{position:fixed;inset:0;background:rgba(10,14,30,.55);display:none;align-items:flex-start;justify-content:center;padding:34px 20px;z-index:60;overflow-y:auto}
+.modal.open{display:flex}
+.mCard{background:#fff;border-radius:18px;max-width:720px;width:100%;padding:24px 26px;animation:pop .25s ease}
+@keyframes pop{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+.mCard h3{font-size:18px;font-weight:800;margin-bottom:3px;padding-right:40px}
+.mCard .sub{font-size:12px;color:var(--grey);margin-bottom:14px;font-weight:600}
+.mCard h4{font-size:12.5px;font-weight:800;margin:16px 0 8px;color:var(--navy);letter-spacing:.3px;text-transform:uppercase}
+.mClose{float:right;border:0;background:#EEF0F4;width:34px;height:34px;border-radius:50%;font-size:15px}
+.subIssue{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.subIssue:last-child{border:0}
+.subIssue .nm{width:46%;font-weight:700;line-height:1.3}
+.subIssue .barBg{flex:1;height:8px;background:#EDEFF4;border-radius:5px;overflow:hidden}
+.subIssue .barFill{height:100%;background:var(--red);border-radius:5px}
+.subIssue b{width:40px;text-align:right;font-variant-numeric:tabular-nums;font-size:12px}
+.qList .q{background:#F7F8FB;border-left:3px solid var(--navy);border-radius:0 10px 10px 0;padding:10px 13px;font-size:12.5px;font-style:italic;color:#33363F;margin-bottom:8px;line-height:1.5}
+.qList .q small{display:block;font-style:normal;color:var(--grey);font-weight:700;font-size:10.5px;margin-top:4px}
+.miniStats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.miniStat{flex:1;min-width:120px;background:#F4F6FA;border-radius:11px;padding:10px 12px}
+.miniStat small{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--grey);text-transform:uppercase}
+.miniStat b{display:block;font-size:18px;margin-top:2px}
+.spark{width:100%;height:44px}
+.distHits{display:flex;flex-wrap:wrap;gap:7px}
+.distHit{font-size:11px;font-weight:700;background:#FDECEC;color:#A31C28;padding:5px 11px;border-radius:99px}
+.mFoot{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.btnP{flex:1;border:0;background:var(--navy);color:#fff;font-weight:800;font-size:13.5px;padding:13px;border-radius:12px}
+.btnS{flex:1;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-weight:700;font-size:13.5px;padding:13px;border-radius:12px}
+
+label.f{display:block;font-size:11.5px;font-weight:800;margin:12px 0 5px;color:var(--ink)}
+select.f,input.f,textarea.f{width:100%;font-family:inherit;font-size:14px;padding:11px 12px;border:1.5px solid var(--line);border-radius:11px;background:#fff;outline:none;color:var(--ink)}
+select.f:focus,input.f:focus,textarea.f:focus{border-color:var(--navy)}
+textarea.f{resize:vertical;min-height:70px}
+.deptHint{font-size:11px;color:var(--green);font-weight:700;margin-top:5px}
+.prioRow{display:flex;gap:8px}
+.prio{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:10px;font-weight:800;font-size:12.5px;text-align:center;cursor:pointer}
+.prio.sel{border-color:var(--navy);background:var(--navy);color:#fff}
+.prio.hi.sel{border-color:var(--red);background:var(--red)}
+
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,94vw);background:#fff;z-index:70;box-shadow:-14px 0 44px rgba(10,14,30,.25);transform:translateX(105%);transition:transform .3s ease;display:flex;flex-direction:column}
+#drawer.open{transform:none}
+#drawer .dh{background:var(--navy);color:#fff;padding:18px 20px;display:flex;align-items:center;gap:10px}
+#drawer .dh h3{font-size:15.5px;font-weight:800;flex:1}
+#drawer .dh button{border:0;background:rgba(255,255,255,.18);color:#fff;width:32px;height:32px;border-radius:50%}
+#drawer .body{flex:1;overflow-y:auto;padding:16px 18px}
+.task{border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin-bottom:11px}
+.task .t1{display:flex;gap:9px;align-items:flex-start}
+.task .t1 b{flex:1;font-size:13px;line-height:1.35}
+.task .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--grey);font-weight:600;margin-top:7px}
+.task .meta b{color:var(--ink)}
+.task .row2{display:flex;gap:8px;margin-top:9px;align-items:center}
+.task select{flex:1;font-family:inherit;font-size:12px;font-weight:700;padding:7px 9px;border-radius:9px;border:1.5px solid var(--line)}
+.due.over{color:var(--red)}
+.emptyT{text-align:center;color:var(--grey);font-size:12.5px;padding:30px 10px;line-height:1.6}
+.deptStat{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:12px;font-weight:600}
+.deptStat .nm{width:180px}
+.deptStat .barBg{flex:1;height:8px;background:#EDEFF4;border-radius:5px;overflow:hidden}
+.deptStat .barFill{height:100%;background:#5A2CA0;border-radius:5px}
+.deptStat b{width:24px;text-align:right}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:13px 20px;border-radius:12px;z-index:90;transition:transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.toast.show{transform:translateX(-50%)}
+footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey);font-weight:600}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hLogo">
+    <svg class="dwave" viewBox="0 0 28 28" fill="none"><g stroke="#FFCC00" stroke-width="2.8" stroke-linecap="round"><path d="M4 12 v4"/><path d="M9.5 7 v14"/><path d="M15 3 v22"/><path d="M20.5 8 v12"/><path d="M26 12 v4" stroke-opacity=".55"/></g></svg>
+    <div class="t"><b>DENGAR<span style="font-weight:300">.ai</span></b><small>EVERY VOICE MATTERS</small></div>
+  </div>
+  <div class="hTitle">
+    <h1>DENGAR Intelligence — Prime Minister's Office</h1>
+    <p>What the rakyat are telling the Prime Minister · whole-of-government · Malaysia MADANI</p>
+  </div>
+  <div class="hRight">
+    <div class="viewTgl" id="viewTgl">
+      <button data-v="min" class="on" onclick="setView('min')">👤 Prime Minister</button>
+      <button data-v="sg" onclick="setView('sg')">🛠️ PMO Delivery Unit</button>
+    </div>
+    <div class="live"><i></i>LIVE</div>
+    <div class="range" id="range">
+      <button data-d="7" class="on">7d</button>
+      <button data-d="30">30d</button>
+      <button data-d="90">90d</button>
+    </div>
+    <button class="actBtn sg-only" onclick="openDrawer()">📋 Directives<span class="n" id="taskCount">0</span></button>
+    <button class="brief" onclick="document.getElementById('briefModal').classList.add('open')">📄 PM's Briefing</button>
+  </div>
+</header>
+
+<div class="filterBar">
+  <span class="scope">Showing: <b id="scopeLbl">All Malaysia</b></span>
+  <span class="chip" id="stateChip"><span id="stateChipNm"></span><button onclick="selectState(null)">✕</button></span>
+  <span class="scope" id="viewNote" style="margin-left:auto"></span>
+</div>
+
+<div class="wrap">
+
+  <div class="flowTag"><span>Insights</span><i></i></div>
+  <div class="kpis">
+    <div class="kpi"><div class="lbl">Sessions</div><div class="val" id="kSess">—</div><div class="delta up">▲ 14% vs prior period</div></div>
+    <div class="kpi k2"><div class="lbl">Citizens Reached</div><div class="val" id="kCit">—</div><div class="delta up">▲ 11% vs prior period</div></div>
+    <div class="kpi k3"><div class="lbl">National Confidence</div><div class="val" id="kSent">—</div><div class="delta down">▼ 4 pts vs prior period</div></div>
+    <div class="kpi k4"><div class="lbl">Cost-of-Living Sentiment</div><div class="val" id="kCol">—</div><div class="delta down">▼ 6 pts vs prior period</div></div>
+  </div>
+
+  <!-- NATIONAL AGENDA -->
+  <div class="card" id="agendaCard">
+    <div class="cardHead"><h2>🎯 National agenda — how the rakyat feel</h2><small>the government's priorities, scored live by citizen sentiment · lead ministry shown</small></div>
+    <div class="agendaGrid" id="agendaGrid"></div>
+  </div>
+
+  <!-- PMO DELIVERY COMMAND STRIP -->
+  <div class="flowTag act sg-only"><span>Delivery</span><i></i></div>
+  <div class="cmdStrip sg-only">
+    <div><div class="cLbl">Open directives</div><div class="cNum" id="cmdOpen">0</div></div>
+    <div class="divider"></div>
+    <div><div class="cLbl">Overdue</div><div class="cNum warn" id="cmdOver">0</div></div>
+    <div class="divider"></div>
+    <div><div class="cLbl">Delivered</div><div class="cNum good" id="cmdDone">0</div></div>
+    <div class="cmdDept">
+      <div class="dh">Ministry workload</div>
+      <div id="cmdDeptList"></div>
+    </div>
+    <div class="cmdActs">
+      <button class="cmdBtn gold" onclick="openAssign('','General feedback','normal')">⚡ Issue directive</button>
+      <button class="cmdBtn" onclick="openDrawer()">📋 Tracker</button>
+    </div>
+  </div>
+
+  <!-- MAP + SIDE -->
+  <div class="grid-main">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card" id="mapCard">
+        <div class="cardHead">
+          <h2>🗺️ National mood by state</h2>
+          <small>Colour = confidence · Circle = volume · Click a state for district breakdown</small>
+        </div>
+        <div class="mapWrap">
+          <div id="mapTip"></div>
+          <svg viewBox="0 0 1000 560" id="mapSvg" role="img" aria-label="Malaysia national mood map">
+            <text class="seaLbl" x="60" y="480">STRAITS OF MALACCA</text>
+            <text class="seaLbl" x="360" y="120">SOUTH CHINA SEA</text>
+            <text class="seaLbl" x="820" y="520">CELEBES SEA</text>
+          </svg>
+        </div>
+        <div class="legend">
+          <small>Low confidence</small><div class="bar"></div><small>High confidence</small>
+          <span class="bub"><i></i>Session volume</span>
+        </div>
+      </div>
+
+      <div class="card" id="distCard">
+        <div class="cardHead">
+          <h2 id="distTitle">📍 District breakdown</h2>
+          <small>Colour = district confidence · Click a tile to filter voices</small>
+        </div>
+        <div class="distSummary" id="distSummary"></div>
+        <div class="distGrid" id="distGrid"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card chart">
+        <div class="cardHead"><h2>📈 Confidence trend</h2><small>share of sessions · 12 weeks</small></div>
+        <svg viewBox="0 0 520 200" id="trendSvg"></svg>
+        <div class="lg">
+          <span><i style="background:var(--green)"></i>Positive</span>
+          <span><i style="background:var(--red)"></i>Negative</span>
+          <span><i style="background:#B9BFCC"></i>Neutral</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cardHead"><h2>🎯 Sentiment split</h2><small id="donutScope">All Malaysia</small></div>
+        <div class="donutRow">
+          <svg viewBox="0 0 42 42" id="donutSvg"></svg>
+          <div class="donutStats" id="donutStats"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cardHead"><h2>🌐 Session languages</h2><small>engagement by community</small></div>
+        <div id="langList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPICS + KEYWORDS + SUGGESTIONS -->
+  <div class="grid-3">
+    <div class="card">
+      <div class="cardHead"><h2>🔥 Top national concerns</h2><small id="topicScope">All Malaysia</small></div>
+      <div id="topicList"></div>
+      <div class="hintLine" id="topicHint">👉 Click a concern to open the deep dive</div>
+    </div>
+    <div class="card">
+      <div class="cardHead"><h2>💬 Trending keywords</h2><small>growth-weighted</small></div>
+      <div class="kwWrap" id="kwWrap"></div>
+      <div class="sg-only">
+        <div class="cardHead" style="margin-top:20px"><h2>🏛️ Ministry workload</h2><small>open directives issued via this platform</small></div>
+        <div id="deptStats"><div class="emptyT" style="padding:14px 6px">No directives issued yet.<br>Open a concern deep dive to issue one.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="cardHead"><h2>💡 Top citizen proposals</h2><small>ranked by frequency × spread</small></div>
+      <div id="sugList"></div>
+    </div>
+  </div>
+
+  <!-- FEED + URGENT -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="cardHead"><h2>🗣️ Latest voices</h2><small id="feedScope">anonymised · AI summaries with verbatim anchors</small></div>
+      <div id="feedList"></div>
+    </div>
+    <div class="card">
+      <div class="cardHead"><h2>🚨 National escalations</h2><small>high-impact · same-day PMO review</small></div>
+      <div class="urgent"><b>⚑ FLAGGED · 2h ago</b><p><b>Klang Valley</b> — reports of essential-goods hoarding pushing up prices ahead of the festive season.</p><button class="assignMini sg-only" onclick="openAssign('Essential-goods hoarding pushing prices — Klang Valley','Cost of living','high')">⚡ Issue directive</button></div>
+      <div class="urgent"><b>⚑ FLAGGED · 5h ago</b><p><b>National</b> — alleged contract irregularity flagged at a state-linked agency; multiple citizens raising it.</p><button class="assignMini sg-only" onclick="openAssign('Alleged contract irregularity — state-linked agency','Corruption & governance','high')">⚡ Issue directive</button></div>
+      <div class="flowTag act" style="margin-top:16px"><span>Outcomes</span><i></i></div>
+      <div class="cardHead" style="margin-top:6px"><h2>✅ You said, we did</h2><small>closing the loop with the rakyat</small></div>
+      <div class="sug"><div class="top"><b>Electricity subsidy retained for 85% of households as tariffs were restructured</b><span class="tag act">DELIVERED</span></div><div class="meta"><span>Driven by <b>1,240 sessions</b></span><span>Households notified via WhatsApp: <b>1,240</b></span></div></div>
+    </div>
+  </div>
+</div>
+
+<footer>DENGAR Intelligence · Prime Minister's Office · every voice matters · Demo prototype with synthetic data · BYOND asia × Malaysia MADANI</footer>
+
+<!-- ============ TOPIC DEEP-DIVE MODAL ============ -->
+<div class="modal" id="topicModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard">
+    <button class="mClose" onclick="document.getElementById('topicModal').classList.remove('open')">✕</button>
+    <h3 id="tmTitle">Concern deep dive</h3>
+    <div class="sub" id="tmSub"></div>
+    <div class="miniStats" id="tmStats"></div>
+    <h4>Trend · 12 weeks</h4>
+    <svg class="spark" viewBox="0 0 400 44" id="tmSpark"></svg>
+    <h4>What exactly citizens are raising</h4>
+    <div id="tmSubs"></div>
+    <h4>Hotspot districts</h4>
+    <div class="distHits" id="tmDists"></div>
+    <h4>Representative voices</h4>
+    <div class="qList" id="tmQuotes"></div>
+    <div class="mFoot">
+      <button class="btnS" onclick="toast('Demo: full session list would open in Session Explorer.')">View all sessions</button>
+      <button class="btnP sg-only" id="tmAssign">⚡ Issue directive to ministry</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ISSUE DIRECTIVE MODAL ============ -->
+<div class="modal" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard" style="max-width:560px">
+    <button class="mClose" onclick="document.getElementById('assignModal').classList.remove('open')">✕</button>
+    <h3>Issue directive</h3>
+    <div class="sub">Routes this issue to the responsible ministry with an owner, priority and due date. The directive is logged and tracked by the PMO Delivery Unit to resolution.</div>
+    <label class="f">Issue</label>
+    <input class="f" id="aIssue">
+    <label class="f">Assign to ministry</label>
+    <select class="f" id="aDept"></select>
+    <div class="deptHint" id="aDeptHint"></div>
+    <label class="f">Priority</label>
+    <div class="prioRow">
+      <div class="prio" data-p="normal">Normal</div>
+      <div class="prio" data-p="elevated">Elevated</div>
+      <div class="prio hi" data-p="high">High / Urgent</div>
+    </div>
+    <label class="f">Due date</label>
+    <input class="f" id="aDue" type="date">
+    <label class="f">Directive to ministry <i style="font-weight:500;color:var(--grey)">(optional)</i></label>
+    <textarea class="f" id="aNote" placeholder="e.g. Submit a cost-of-living recovery plan and weekly price-watch to the PMO within 14 days."></textarea>
+    <div class="mFoot">
+      <button class="btnS" onclick="document.getElementById('assignModal').classList.remove('open')">Cancel</button>
+      <button class="btnP" onclick="createTask()">Issue &amp; track</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DIRECTIVE TRACKER DRAWER ============ -->
+<div id="drawer">
+  <div class="dh"><h3>📋 Directive Tracker</h3><button onclick="document.getElementById('drawer').classList.remove('open')">✕</button></div>
+  <div class="body" id="taskList"><div class="emptyT">No directives yet.<br><br>Open any concern deep dive, escalation, or proposal and tap <b>Issue directive</b>. Every directive is logged here with the owning ministry, due date and status — the PM's follow-through view.</div></div>
+</div>
+
+<!-- ============ PM BRIEFING MODAL ============ -->
+<div class="modal" id="briefModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard">
+    <button class="mClose" onclick="document.getElementById('briefModal').classList.remove('open')">✕</button>
+    <h3>Weekly Prime Minister's Briefing</h3>
+    <div class="sub">Week 29 · 13–19 July 2026 · Auto-generated, human-reviewed · CONFIDENTIAL — DEMO</div>
+    <h4>Headline</h4>
+    <p style="font-size:13px;line-height:1.55">5,120 sessions (+14%). National confidence −7 (down 4 pts), driven overwhelmingly by <b>cost of living</b> — grocery and fuel prices dominate every state. Cost-of-living sentiment sits at −33. <b>4 directives issued to ministries last week; 1 delivered.</b></p>
+    <h4>Top national concerns</h4>
+    <p style="font-size:13px;line-height:1.6">1. Cost of living — food &amp; fuel prices (1,240 sessions, KPDN/MOF) · 2. Jobs &amp; wages — graduate underemployment (880, KESUMA) · 3. Affordable housing — youth priced out (611, KPKT) · 4. Corruption — demand for faster, visible action (540, JPM).</p>
+    <h4>Geographic watch</h4>
+    <p style="font-size:13px;line-height:1.55">Sabah &amp; Kelantan diverge most below the national mean on cost of living and public-service access. Recommend a targeted East Malaysia delivery package and a dedicated session block.</p>
+    <h4>Cross-ministry accountability</h4>
+    <p style="font-size:13px;line-height:1.55">KPDN: 1 directive (due this week). KESUMA: 1 open. JPM: 1 overdue. KPKT: 1 delivered. Average delivery time last 4 weeks: 11.4 days.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   DATA — national / whole-of-government
+================================================================ */
+const TOPICS=["Cost of living","Jobs & economy","Healthcare","Education","Corruption & governance","Public services","Housing","Safety & crime"];
+const NEG_TOPICS=new Set(["Cost of living","Jobs & economy","Corruption & governance","Housing","Safety & crime"]);
+const KW_POOL={
+ "Cost of living":["harga barang","subsidi","RON95","elektrik","gaji tak cukup"],
+ "Jobs & economy":["kerja","gaji rendah","graduan","pelaburan","SME"],
+ "Healthcare":["klinik","hospital","beratur","ubat","pakar"],
+ "Education":["sekolah","PTPTN","guru","yuran","tuisyen"],
+ "Corruption & governance":["rasuah","SPRM","integriti","telus","kroni"],
+ "Public services":["JPJ","LHDN","online","kaunter","MyGov"],
+ "Housing":["rumah mampu milik","sewa","PPR","deposit","pinjaman"],
+ "Safety & crime":["scam","jenayah","rondaan","dadah","curi"]
+};
+const DEPTS=[
+ {id:"mof",n:"Ministry of Finance (MOF)"},
+ {id:"kpdn",n:"Domestic Trade & Living Costs (KPDN)"},
+ {id:"mohr",n:"Human Resources (KESUMA)"},
+ {id:"moh",n:"Ministry of Health (MOH)"},
+ {id:"moe",n:"Ministry of Education (MOE)"},
+ {id:"kdn",n:"Home Affairs (KDN)"},
+ {id:"kpkt",n:"Housing & Local Govt (KPKT)"},
+ {id:"jpm",n:"Prime Minister's Dept (JPM)"},
+ {id:"miti",n:"Investment, Trade & Industry (MITI)"},
+ {id:"pmo",n:"PMO Delivery Unit"}
+];
+const TOPIC_DEPT={
+ "Cost of living":"kpdn","Jobs & economy":"mohr","Healthcare":"moh","Education":"moe",
+ "Corruption & governance":"jpm","Public services":"jpm","Housing":"kpkt","Safety & crime":"kdn"
+};
+/* National priority agendas → lead ministry, sentiment, direction */
+const AGENDA=[
+ {a:"Bring down the cost of living",m:"kpdn",v:-0.35,dir:"worse"},
+ {a:"Create quality, better-paid jobs",m:"mohr",v:-0.14,dir:"flat"},
+ {a:"Fight corruption & restore trust",m:"jpm",v:-0.04,dir:"better"},
+ {a:"Affordable housing for the young",m:"kpkt",v:-0.19,dir:"worse"},
+ {a:"Strengthen public healthcare",m:"moh",v:0.07,dir:"better"},
+ {a:"Fix everyday public services",m:"jpm",v:0.02,dir:"flat"}
+];
+const GEO={
+ "Perlis":["Kangar","Arau","Padang Besar"],
+ "Kedah":["Kota Setar","Kuala Muda","Kulim","Kubang Pasu","Langkawi","Baling"],
+ "Penang":["Timur Laut","Barat Daya","SP Utara","SP Tengah","SP Selatan"],
+ "Perak":["Kinta","Larut Matang","Manjung","Hilir Perak","Kerian","Kuala Kangsar","Batang Padang"],
+ "Kelantan":["Kota Bharu","Pasir Mas","Tumpat","Bachok","Tanah Merah","Gua Musang"],
+ "Terengganu":["Kuala Terengganu","Kemaman","Dungun","Besut","Marang"],
+ "Pahang":["Kuantan","Temerloh","Bentong","Pekan","Raub","Cameron Highlands"],
+ "Selangor":["Petaling","Klang","Hulu Langat","Gombak","Sepang","Kuala Langat","Kuala Selangor","Hulu Selangor","Sabak Bernam"],
+ "Kuala Lumpur":["Bukit Bintang","Kepong","Wangsa Maju","Cheras","Lembah Pantai","Setiawangsa"],
+ "Putrajaya":["Presint 1–9","Presint 10–20"],
+ "N. Sembilan":["Seremban","Port Dickson","Jempol","Rembau","Tampin"],
+ "Melaka":["Melaka Tengah","Alor Gajah","Jasin"],
+ "Johor":["Johor Bahru","Batu Pahat","Kluang","Muar","Kulai","Segamat","Pontian","Kota Tinggi","Mersing"],
+ "Sarawak":["Kuching","Miri","Sibu","Bintulu","Samarahan","Sri Aman","Kapit"],
+ "Sabah":["Kota Kinabalu","Sandakan","Tawau","Penampang","Lahad Datu","Keningau","Semporna","Kudat"],
+ "Labuan":["Victoria","Rancha-Rancha"]
+};
+const STATES=[
+ {id:"pls",n:"Perlis",s:64,v:0.12},{id:"kdh",n:"Kedah",s:228,v:-0.06},
+ {id:"png",n:"Penang",s:372,v:-0.10},{id:"prk",n:"Perak",s:311,v:0.02},
+ {id:"kel",n:"Kelantan",s:214,v:-0.20},{id:"trg",n:"Terengganu",s:158,v:0.05},
+ {id:"phg",n:"Pahang",s:189,v:0.04},{id:"sel",n:"Selangor",s:820,v:-0.18},
+ {id:"kul",n:"Kuala Lumpur",s:640,v:-0.12},{id:"pjy",n:"Putrajaya",s:66,v:0.18},
+ {id:"nsn",n:"N. Sembilan",s:172,v:-0.01},{id:"mlk",n:"Melaka",s:143,v:0.10},
+ {id:"jhr",n:"Johor",s:540,v:-0.11},{id:"swk",n:"Sarawak",s:300,v:0.06},
+ {id:"sbh",n:"Sabah",s:334,v:-0.24},{id:"lbn",n:"Labuan",s:36,v:0.00}
+];
+function hash(str){let h=0;for(const c of str)h=(h*31+c.charCodeAt(0))>>>0;return h}
+STATES.forEach(st=>{
+  const h=hash(st.n);
+  st.topics=TOPICS.map((t,i)=>({t,c:Math.round(st.s*(0.07+((h>>>i)&7)/34))})).sort((a,b)=>b.c-a.c);
+  st.langs={"Bahasa Melayu":54+(h%14),"English":18+((h>>>2)%8),"中文 Chinese":10+((h>>>4)%9),"தமிழ் Tamil":4+((h>>>6)%5),"العربية Arabic":1+((h>>>8)%2)};
+  const ds=GEO[st.n]||["Central"];
+  let rem=st.s;
+  st.districts=ds.map((d,i)=>{
+    const hh=hash(d+st.n);
+    const share=i===ds.length-1?Math.max(rem,6):Math.max(6,Math.round(st.s*(0.9/ds.length)+((hh%9)-4)));
+    rem-=share;
+    const dv=Math.max(-0.62,Math.min(0.5,st.v+(((hh>>>3)%21)-10)/40));
+    return {d,s:Math.max(share,6),v:dv,topTopic:st.topics[(hh>>>5)%3].t};
+  }).sort((a,b)=>b.s-a.s);
+});
+const TOPIC_DETAIL={
+ "Cost of living":{subs:[["Food & grocery prices",44],["Fuel / RON95 & subsidy changes",24],["Electricity & utility bills",14],["Wages not keeping up",18]],
+  quotes:[["Chicken and eggs cost more every month but my pay is the same. It's suffocating.","Klang, Selangor · BM"],["When RON95 talk starts, everyone in the kampung is worried about the ripple on food.","Kota Bharu, Kelantan · BM"],["A basic grocery run for the family is RM40 more than last year.","Timur Laut, Penang · 中文"]],
+  dists:["Klang","Kota Bharu","Cheras","Timur Laut","Sandakan"],trend:[24,25,27,28,30,31,33,34,36,37,39,41]},
+ "Jobs & economy":{subs:[["Graduate underemployment",33],["Low starting salaries",28],["Gig-economy instability",17],["SME cashflow & loans",14],["Local vs foreign jobs",8]],
+  quotes:[["I have a degree but I'm doing gig work because the pay for real jobs is too low.","Petaling, Selangor · EN"],["Our SME can't get a fair loan; cashflow is killing us.","Johor Bahru, Johor · 中文"],["Fresh graduates here start at RM1,800. You can't live on that in the city.","Bukit Bintang, KL · BM"]],
+  dists:["Petaling","Bukit Bintang","Johor Bahru","Kuching","Kinta"],trend:[20,21,20,22,21,23,22,24,23,25,24,26]},
+ "Corruption & governance":{subs:[["Perceived cronyism in contracts",32],["Slow, invisible action on cases",27],["Local council integrity",21],["Political-funding transparency",12]],
+  quotes:[["We want to see corruption cases actually finished, not just announced.","Kuantan, Pahang · BM"],["The same connected names keep winning contracts. Why?","Kuching, Sarawak · EN"],["Fix the small graft at the local council — that's what we feel daily.","Seremban, N. Sembilan · BM"]],
+  dists:["Kuantan","Kuching","Seremban","Kota Kinabalu","Ipoh"],trend:[19,19,20,18,19,18,19,17,18,17,17,16]},
+ "Housing":{subs:[["Affordability vs income",38],["PPR / affordable-home waiting lists",22],["Rental deposits & rejections",20],["Youth priced out of first home",20]],
+  quotes:[["A first home near work is impossible on our salary; deposits are out of reach.","Petaling, Selangor · EN"],["We've been on the PPR list for years with no news.","Klang, Selangor · BM"],["Young couples here just can't buy. Rent eats everything.","Johor Bahru, Johor · 中文"]],
+  dists:["Petaling","Klang","Johor Bahru","Bukit Bintang","Seremban"],trend:[16,17,18,18,20,20,22,23,24,25,26,27]},
+ "Safety & crime":{subs:[["Online scams & losses",41],["Snatch theft & break-ins",22],["Drug abuse near schools",20],["Slow response times",9]],
+  quotes:[["My uncle lost his savings to an investment scam. It's everywhere now.","Timur Laut, Penang · 中文"],["Break-ins in our taman are rising; we need more patrols.","Kepong, KL · BM"],["Vape and drugs are creeping near the schools here.","Kota Bharu, Kelantan · BM"]],
+  dists:["Timur Laut","Kepong","Kota Bharu","Klang","Sandakan"],trend:[15,16,16,18,19,20,22,23,25,26,28,29]},
+ "Healthcare":{subs:[["Long waits at public clinics & hospitals",42],["Specialist appointment backlog",24],["Medicine shortages",18],["Rural clinic access",16]],
+  quotes:[["Six hours at the government clinic for a simple appointment.","Kuantan, Pahang · BM"],["Specialist wait is months; we can't afford private.","Ipoh, Perak · 中文"],["The nearest clinic is far and always full.","Keningau, Sabah · BM"]],
+  dists:["Kuantan","Ipoh","Keningau","Klang","Kuching"],trend:[13,13,14,13,15,14,15,16,15,16,15,17]}
+};
+const SUGS=[
+ {b:"Top up targeted cash aid (SARA) for the B40 as prices climb",c:1180,sp:"14 states",tag:"act",lbl:"DELIVERED",topic:"Cost of living"},
+ {b:"Publish & enforce ceiling prices for essential goods",c:960,sp:"12 states",tag:"ack",lbl:"ACKNOWLEDGED",topic:"Cost of living"},
+ {b:"Higher minimum starting pay for graduates + wage subsidy",c:742,sp:"9 states",tag:"rev",lbl:"UNDER REVIEW",topic:"Jobs & economy"},
+ {b:"Rent-to-own with low deposits for first-home youth",c:588,sp:"8 states",tag:"ack",lbl:"ACKNOWLEDGED",topic:"Housing"},
+ {b:"Publish quarterly progress & timelines on corruption cases",c:503,sp:"10 states",tag:"rev",lbl:"UNDER REVIEW",topic:"Corruption & governance"}
+];
+const FEED=[
+ {st:"Selangor",d:"Klang",v:-0.7,t:"Cost of living",q:"Chicken and eggs cost more every month but my pay is the same. It's suffocating.",l:"BM",time:"9 min ago"},
+ {st:"Kuala Lumpur",d:"Bukit Bintang",v:-0.5,t:"Jobs & economy",q:"Fresh graduates here start at RM1,800. You can't live on that in the city.",l:"EN",time:"24 min ago"},
+ {st:"Penang",d:"Timur Laut",v:-0.5,t:"Safety & crime",q:"My uncle lost his savings to an investment scam. It's everywhere now.",l:"中文",time:"38 min ago"},
+ {st:"Melaka",d:"Melaka Tengah",v:0.7,t:"Public services",q:"Renewing my licence online was fast this time. Thank you — please keep improving it.",l:"EN",time:"1 h ago"},
+ {st:"Sabah",d:"Keningau",v:-0.6,t:"Healthcare",q:"The nearest clinic is far and always full. We need more rural health support.",l:"BM",time:"1 h ago"},
+ {st:"Johor",d:"Johor Bahru",v:-0.4,t:"Housing",q:"Young couples here just can't buy. Rent eats everything.",l:"中文",time:"2 h ago"},
+ {st:"Pahang",d:"Kuantan",v:-0.3,t:"Corruption & governance",q:"We want to see corruption cases actually finished, not just announced.",l:"BM",time:"2 h ago"},
+ {st:"Sarawak",d:"Kuching",v:0.5,t:"National unity",q:"Proud to speak to the Prime Minister in my own language from Sarawak.",l:"BM",time:"3 h ago"},
+ {st:"Perak",d:"Ipoh",v:-0.4,t:"Healthcare",q:"Specialist wait is months; we can't afford to go private.",l:"中文",time:"3 h ago"}
+];
+const TREND=[[45,32],[46,31],[44,33],[45,33],[44,34],[43,35],[44,34],[42,37],[43,36],[41,38],[42,37],[40,39]];
+
+/* ================================================================
+   MAP GEOMETRY — refined Malaysia
+================================================================ */
+const SHAPES={
+ pls:{d:"M97 62 L118 50 L132 58 L128 76 L108 82 Z",lx:74,ly:56,bx:113,by:66,small:1},
+ kdh:{d:"M108 82 L128 76 L132 58 L156 50 L176 62 L182 92 L172 122 L150 138 L124 132 L110 106 Z",lx:146,ly:98,bx:146,by:98},
+ png:{d:"M92 128 a13 13 0 1 1 -.5 .8 Z M110 106 L124 132 L118 154 L104 146 L102 122 Z",lx:66,ly:120,bx:100,by:135,small:1},
+ prk:{d:"M124 132 L150 138 L172 122 L188 142 L196 178 L188 214 L172 240 L152 232 L138 196 L118 154 Z",lx:158,ly:186,bx:158,by:186},
+ kel:{d:"M156 50 L192 40 L228 48 L238 74 L228 104 L204 122 L182 92 L176 62 Z",lx:206,ly:80,bx:206,by:80},
+ trg:{d:"M228 48 L252 58 L272 92 L282 130 L272 166 L248 176 L232 148 L228 104 L238 74 Z",lx:256,ly:118,bx:256,by:118},
+ phg:{d:"M204 122 L228 104 L232 148 L248 176 L272 166 L276 204 L266 244 L238 268 L206 274 L182 252 L172 240 L188 214 L196 178 L188 142 Z",lx:228,ly:210,bx:228,by:210},
+ sel:{d:"M152 232 L172 240 L182 252 L192 286 L184 316 L162 318 L148 288 L146 258 Z",lx:132,ly:280,bx:167,by:278},
+ kul:{d:"M184 258 a10 10 0 1 1 -.5 .8 Z",lx:232,ly:256,bx:192,by:266,small:1},
+ pjy:{d:"M180 296 a7 7 0 1 1 -.5 .8 Z",lx:228,ly:302,bx:186,by:302,small:1},
+ nsn:{d:"M184 316 L192 286 L206 274 L238 268 L248 296 L236 326 L206 336 Z",lx:216,ly:302,bx:216,by:304},
+ mlk:{d:"M206 336 L236 326 L246 350 L228 370 L206 360 Z",lx:226,ly:392,bx:225,by:348,small:1},
+ jhr:{d:"M236 326 L248 296 L266 244 L238 268 L266 244 L276 244 L296 268 L310 306 L322 344 L312 384 L282 410 L248 400 L232 372 L228 370 L246 350 Z",lx:280,ly:346,bx:280,by:346},
+ swk:{d:"M478 402 L512 362 L548 328 L592 296 L640 270 L688 252 L716 248 L728 268 L712 300 L676 328 L628 356 L576 384 L528 404 L494 414 Z",lx:600,ly:334,bx:600,by:330},
+ sbh:{d:"M716 248 L740 196 L764 152 L800 122 L846 108 L892 118 L926 146 L938 178 L916 196 L930 226 L902 244 L868 230 L842 252 L804 262 L764 258 L738 262 L728 268 Z",lx:830,ly:190,bx:830,by:190},
+ lbn:{d:"M726 226 a8 8 0 1 1 -.5 .8 Z",lx:702,ly:216,bx:733,by:233,small:1}
+};
+
+/* ================================================================
+   STATE + HELPERS
+================================================================ */
+let rangeD=7, selState=null, selDistrict=null, tasks=[], assignCtx=null;
+const $=id=>document.getElementById(id);
+const sentColor=v=>{
+  const t=Math.max(0,Math.min(1,(v+0.5)));
+  const lerp=(a,b,u)=>Math.round(a+(b-a)*u);
+  let c1,c2,u;
+  if(t<0.5){c1=[198,34,47];c2=[232,164,0];u=t/0.5}else{c1=[232,164,0];c2=[30,158,82];u=(t-0.5)/0.5}
+  return `rgb(${lerp(c1[0],c2[0],u)},${lerp(c1[1],c2[1],u)},${lerp(c1[2],c2[2],u)})`;
+};
+const scale=n=>Math.round(n*(rangeD===7?1:rangeD===30?4.1:11.6));
+const fmtN=n=>n.toLocaleString('en-MY');
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2600);}
+function deptName(id){const d=DEPTS.find(x=>x.id===id);return d?d.n:'PMO Delivery Unit';}
+
+/* ================================================================
+   MAP
+================================================================ */
+const mapSvg=$('mapSvg'), tip=$('mapTip');
+function drawMap(){
+  mapSvg.querySelectorAll('.state,.bubble,.bubble-pulse,.stLbl').forEach(e=>e.remove());
+  const maxS=Math.max(...STATES.map(s=>s.s));
+  STATES.forEach(st=>{
+    const sh=SHAPES[st.id]; if(!sh)return;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',sh.d);
+    path.setAttribute('class','state'+(selState===st.id?' sel':'')+(selState&&selState!==st.id?' dim':''));
+    path.setAttribute('fill',sentColor(st.v));
+    path.addEventListener('click',()=>selectState(selState===st.id?null:st.id));
+    path.addEventListener('mousemove',e=>{
+      const r=mapSvg.parentElement.getBoundingClientRect();
+      tip.style.left=(e.clientX-r.left+14)+'px';tip.style.top=(e.clientY-r.top-10)+'px';tip.style.opacity=1;
+      tip.innerHTML=`<b>${st.n}</b><br>${fmtN(scale(st.s))} sessions · confidence ${st.v>0?'+':''}${Math.round(st.v*100)}<br><span style="opacity:.7">Click for district breakdown</span>`;
+    });
+    path.addEventListener('mouseleave',()=>tip.style.opacity=0);
+    mapSvg.appendChild(path);
+    const r=4+12*Math.sqrt(st.s/maxS);
+    const pulse=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    pulse.setAttribute('cx',sh.bx);pulse.setAttribute('cy',sh.by);pulse.setAttribute('r',r);
+    pulse.setAttribute('class','bubble-pulse');
+    pulse.style.transformOrigin=`${sh.bx}px ${sh.by}px`;
+    const bub=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    bub.setAttribute('cx',sh.bx);bub.setAttribute('cy',sh.by);bub.setAttribute('r',r*0.5);
+    bub.setAttribute('class','bubble');
+    mapSvg.appendChild(pulse);mapSvg.appendChild(bub);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',sh.lx);t.setAttribute('y',sh.ly);t.setAttribute('class','stLbl');
+    if(sh.small)t.setAttribute('font-size','10');
+    t.textContent=st.n;mapSvg.appendChild(t);
+  });
+}
+
+function renderDistricts(){
+  const card=$('distCard');
+  if(!selState){card.classList.remove('on');selDistrict=null;return}
+  const st=STATES.find(s=>s.id===selState);
+  card.classList.add('on');
+  $('distTitle').textContent=`📍 ${st.n} — district breakdown`;
+  const worst=[...st.districts].sort((a,b)=>a.v-b.v)[0];
+  const best=[...st.districts].sort((a,b)=>b.v-a.v)[0];
+  $('distSummary').innerHTML=
+    `<span><b>${st.districts.length}</b> districts</span>
+     <span>Lowest confidence: <b style="color:var(--red)">${worst.d}</b> (${Math.round(worst.v*100)})</span>
+     <span>Highest: <b style="color:var(--green)">${best.d}</b> (+${Math.round(best.v*100)})</span>
+     <span>Top concern: <b>${st.topics[0].t}</b></span>`;
+  $('distGrid').innerHTML=st.districts.map(d=>
+    `<div class="dTile" style="background:${sentColor(d.v)};${selDistrict===d.d?'outline:3px solid var(--ink)':''}" onclick="selectDistrict('${d.d.replace(/'/g,"\\'")}')">
+      <span class="sc">${d.v>0?'+':''}${Math.round(d.v*100)}</span>
+      <b>${d.d}</b>
+      <small>${fmtN(scale(d.s))} sessions</small><br>
+      <small style="opacity:.8">Top: ${d.topTopic}</small>
+    </div>`).join('');
+}
+function selectDistrict(d){selDistrict=selDistrict===d?null:d;render();toast(selDistrict?`Voices filtered to ${d}`:'District filter cleared');}
+
+/* ================================================================
+   NATIONAL AGENDA
+================================================================ */
+function renderAgenda(){
+  $('agendaGrid').innerHTML=AGENDA.map(a=>{
+    const col=sentColor(a.v);
+    const arrow=a.dir==='worse'?'▲':a.dir==='better'?'▼':'—';
+    const cls=a.dir==='worse'?'worse':a.dir==='better'?'better':'flat';
+    const note=a.dir==='worse'?'worsening':a.dir==='better'?'improving':'steady';
+    return `<div class="agItem" style="--c:${col}"><span style="position:absolute;left:0;top:0;bottom:0;width:4px;background:${col}"></span>
+      <b>${a.a}</b>
+      <span class="mn">Lead: ${deptName(a.m)}</span>
+      <div class="agRow">
+        <span class="agPill" style="background:${col}">${a.v>0?'+':''}${Math.round(a.v*100)}</span>
+        <span class="agTr ${cls}">${arrow}</span>
+        <span class="agNote">${note}</span>
+      </div>
+    </div>`;}).join('');
+}
+
+/* ================================================================
+   MAIN RENDER
+================================================================ */
+function currentStates(){return selState?STATES.filter(s=>s.id===selState):STATES}
+function render(){
+  const set=currentStates();
+  const name=selState?set[0].n:"All Malaysia";
+  $('scopeLbl').textContent=name+(selDistrict?' · '+selDistrict:'');
+  $('donutScope').textContent=name;
+  $('topicScope').textContent=name;
+  const chip=$('stateChip');
+  chip.classList.toggle('on',!!selState);
+  $('stateChipNm').textContent=name+(selDistrict?' · '+selDistrict:'');
+
+  const sess=set.reduce((a,s)=>a+s.s,0);
+  const sent=set.reduce((a,s)=>a+s.v*s.s,0)/sess;
+  $('kSess').textContent=fmtN(scale(sess));
+  $('kCit').textContent=fmtN(Math.round(scale(sess)*0.93));
+  const ns=Math.round(sent*100);
+  const kS=$('kSent');kS.textContent=(ns>0?"+":"")+ns;
+  kS.style.color=ns>=5?"var(--green)":ns<=-5?"var(--red)":"var(--amber)";
+  const col=ns-26; const kC=$('kCol'); kC.textContent=(col>0?"+":"")+col; kC.style.color="var(--red)";
+
+  const agg={};set.forEach(st=>st.topics.forEach(t=>agg[t.t]=(agg[t.t]||0)+t.c));
+  const list=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxT=list[0][1];
+  const trends=["up","up","flat","up","down","flat","up","flat"];
+  $('topicList').innerHTML=list.map(([t,c],i)=>{
+    const neg=NEG_TOPICS.has(t);
+    return `<div class="topicRow" onclick="openTopic('${t.replace(/'/g,"\\'")}',${scale(c)})">
+      <div class="nm">${t}<span class="go">▸</span></div>
+      <div class="barBg"><div class="barFill" style="width:${Math.round(c/maxT*100)}%;background:${neg?"var(--red)":"var(--green)"}"></div></div>
+      <div class="ct">${fmtN(scale(c))}</div>
+      <div class="tr ${trends[i]}">${trends[i]==="up"?"▲":trends[i]==="down"?"▼":"—"}</div>
+    </div>`;}).join('');
+
+  const kws=[];list.slice(0,4).forEach(([t],ti)=>(KW_POOL[t]||[]).slice(0,ti===0?4:3).forEach((k,i)=>kws.push({k,g:38-ti*9-i*4})));
+  $('kwWrap').innerHTML=kws.slice(0,12).map(x=>
+    `<span class="kw" style="font-size:${12+Math.round(x.g/9)}px">${x.k}<em class="${x.g<14?'g':''}">+${x.g}%</em></span>`).join('');
+
+  const lagg={};set.forEach(st=>Object.entries(st.langs).forEach(([l,p])=>lagg[l]=(lagg[l]||0)+p*st.s));
+  const ltot=Object.values(lagg).reduce((a,b)=>a+b,0);
+  $('langList').innerHTML=Object.entries(lagg).sort((a,b)=>b[1]-a[1]).map(([l,v])=>{
+    const pc=Math.round(v/ltot*100);
+    return `<div class="langRow"><div class="nm">${l}</div><div class="barBg"><div class="barFill" style="width:${pc}%"></div></div><b>${pc}%</b></div>`;}).join('');
+
+  const pos=Math.round(44+sent*40), neg=Math.round(31-sent*38), neu=100-pos-neg;
+  drawDonut(pos,neu,neg);
+
+  $('sugList').innerHTML=SUGS.map((s,i)=>{
+    const assigned=tasks.find(t=>t.src==='sug'+i);
+    return `<div class="sug"><div class="top"><b>${s.b}</b><span class="tag ${assigned?'asg':s.tag}">${assigned?'ISSUED':s.lbl}</span></div>
+     <div class="meta"><span><b>${fmtN(scale(s.c))}</b> sessions</span><span>Spread: <b>${s.sp}</b></span></div>
+     ${assigned?`<div class="assignedNote">→ ${assigned.deptName} · due ${assigned.due}</div>`
+       :`<button class="assignMini sg-only" onclick="openAssign('${s.b.replace(/'/g,"\\'")}','${s.topic}','normal','sug${i}')">⚡ Issue directive</button>`}
+    </div>`;}).join('');
+
+  let feed=FEED;
+  if(selState)feed=feed.filter(f=>f.st===set[0].n);
+  if(selDistrict)feed=feed.filter(f=>f.d===selDistrict);
+  if(!feed.length)feed=FEED.slice(0,3);
+  $('feedScope').textContent=(selDistrict?selDistrict+', ':'')+(selState?name+' · ':'')+'anonymised';
+  $('feedList').innerHTML=feed.map(f=>
+    `<div class="feedRow"><div class="sdot" style="background:${sentColor(f.v)}"></div>
+      <div class="fx"><span class="quote">“${f.q}”</span>
+      <small>${f.d}, ${f.st} · ${f.t} · ${f.l} · ${f.time}</small></div></div>`).join('');
+
+  renderDistricts();
+  drawMap();
+  renderDeptStats();
+}
+
+function drawTrend(){
+  const svg=$('trendSvg');
+  const W=520,H=200,pad={l:34,r:8,t:12,b:24};
+  const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+  const x=i=>pad.l+i/(TREND.length-1)*iw;
+  const y=v=>pad.t+(1-v/60)*ih;
+  let g='';
+  [0,20,40,60].forEach(v=>{g+=`<line x1="${pad.l}" y1="${y(v)}" x2="${W-pad.r}" y2="${y(v)}" stroke="#EDEFF4" stroke-width="1.5"/><text x="${pad.l-8}" y="${y(v)+4}" font-size="10" fill="#9AA0AE" text-anchor="end" font-weight="700">${v}%</text>`;});
+  const posLine=TREND.map((t,i)=>`${x(i)},${y(t[0])}`).join(' ');
+  const negLine=TREND.map((t,i)=>`${x(i)},${y(t[1])}`).join(' ');
+  const neuPts=TREND.map((t,i)=>`${x(i)},${y(100-t[0]-t[1])}`).join(' ');
+  g+=`<polygon points="${pad.l},${y(0)} ${posLine} ${W-pad.r},${y(0)}" fill="rgba(30,158,82,.12)"/>`;
+  g+=`<polyline points="${posLine}" fill="none" stroke="var(--green)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  g+=`<polyline points="${negLine}" fill="none" stroke="var(--red)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  g+=`<polyline points="${neuPts}" fill="none" stroke="#B9BFCC" stroke-width="2" stroke-dasharray="4 5"/>`;
+  const last=TREND[11];
+  g+=`<circle cx="${x(11)}" cy="${y(last[0])}" r="4.5" fill="var(--green)"/><text x="${x(11)-6}" y="${y(last[0])-9}" font-size="11" font-weight="800" fill="var(--green)" text-anchor="end">${last[0]}%</text>`;
+  g+=`<circle cx="${x(11)}" cy="${y(last[1])}" r="4.5" fill="var(--red)"/><text x="${x(11)-6}" y="${y(last[1])+16}" font-size="11" font-weight="800" fill="var(--red)" text-anchor="end">${last[1]}%</text>`;
+  ["W18","W20","W22","W24","W26","W28"].forEach((w,i)=>{g+=`<text x="${x(i*2+1)}" y="${H-4}" font-size="10" fill="#9AA0AE" font-weight="700" text-anchor="middle">${w}</text>`;});
+  svg.innerHTML=g;
+}
+function drawDonut(pos,neu,neg){
+  const svg=$('donutSvg');
+  const C=2*Math.PI*15.9;
+  const seg=(pc,off,color)=>`<circle cx="21" cy="21" r="15.9" fill="none" stroke="${color}" stroke-width="7" stroke-dasharray="${pc/100*C} ${C}" stroke-dashoffset="${-off/100*C}" transform="rotate(-90 21 21)"/>`;
+  svg.innerHTML=seg(pos,0,'#1E9E52')+seg(neu,pos,'#B9BFCC')+seg(neg,pos+neu,'#D22030')+
+    `<text x="21" y="20" text-anchor="middle" font-size="8.5" font-weight="800" fill="#17181C">${pos}%</text>
+     <text x="21" y="27.5" text-anchor="middle" font-size="4.2" font-weight="700" fill="#6B7180">POSITIVE</text>`;
+  $('donutStats').innerHTML=
+   `<div class="dStat"><i style="background:var(--green)"></i>Positive<b>${pos}%</b></div>
+    <div class="dStat"><i style="background:#B9BFCC"></i>Neutral<b>${neu}%</b></div>
+    <div class="dStat"><i style="background:var(--red)"></i>Negative<b>${neg}%</b></div>`;
+}
+
+/* ================================================================
+   CONCERN DEEP DIVE
+================================================================ */
+let currentTopic=null;
+function openTopic(t,count){
+  currentTopic=t;
+  const d=TOPIC_DETAIL[t]||{subs:[["General mentions",100]],quotes:[["(Representative quotes appear here.)","—"]],dists:["—"],trend:[8,8,9,9,10,10,11,11,12,12,13,13]};
+  $('tmTitle').textContent=t;
+  $('tmSub').textContent=(selState?STATES.find(s=>s.id===selState).n:'All Malaysia')+' · last '+rangeD+' days';
+  const tr=d.trend, delta=Math.round((tr[11]-tr[7])/tr[7]*100);
+  const owner=DEPTS.find(x=>x.id===(TOPIC_DEPT[t]||'pmo'));
+  $('tmStats').innerHTML=
+   `<div class="miniStat"><small>Sessions</small><b>${fmtN(count)}</b></div>
+    <div class="miniStat"><small>4-wk trend</small><b style="color:${delta>0?'var(--red)':'var(--green)'}">${delta>0?'▲ +':''}${delta}%</b></div>
+    <div class="miniStat"><small>Lead ministry</small><b style="font-size:13px;line-height:1.3">${owner?owner.n:'PMO'}</b></div>`;
+  const mx=Math.max(...tr), pts=tr.map((v,i)=>`${i/(tr.length-1)*396+2},${42-(v/mx)*38}`).join(' ');
+  $('tmSpark').innerHTML=`<polyline points="${pts}" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="398" cy="${42-(tr[11]/mx)*38}" r="3.5" fill="var(--red)"/>`;
+  const mS=Math.max(...d.subs.map(s=>s[1]));
+  $('tmSubs').innerHTML=d.subs.map(([nm,v])=>
+    `<div class="subIssue"><div class="nm">${nm}</div><div class="barBg"><div class="barFill" style="width:${v/mS*100}%"></div></div><b>${v}%</b></div>`).join('');
+  $('tmDists').innerHTML=d.dists.map(x=>`<span class="distHit">${x}</span>`).join('');
+  $('tmQuotes').innerHTML=d.quotes.map(([q,m])=>`<div class="q">“${q}”<small>${m}</small></div>`).join('');
+  $('tmAssign').onclick=()=>{$('topicModal').classList.remove('open');openAssign(t+' — '+(d.subs[0][0]),t,'elevated');};
+  $('topicModal').classList.add('open');
+}
+
+/* ================================================================
+   ISSUE DIRECTIVE
+================================================================ */
+$('aDept').innerHTML=DEPTS.map(d=>`<option value="${d.id}">${d.n}</option>`).join('');
+let prio='normal';
+document.querySelectorAll('.prio').forEach(p=>p.onclick=()=>{
+  document.querySelectorAll('.prio').forEach(x=>x.classList.remove('sel'));
+  p.classList.add('sel');prio=p.dataset.p;
+});
+function openAssign(issue,topic,pri,src){
+  assignCtx={src:src||('adhoc'+Date.now())};
+  $('aIssue').value=issue;
+  const rec=TOPIC_DEPT[topic]||'pmo';
+  $('aDept').value=rec;
+  $('aDeptHint').textContent='✓ AI-suggested lead ministry based on issue classification: '+deptName(rec);
+  prio=pri||'normal';
+  document.querySelectorAll('.prio').forEach(x=>x.classList.toggle('sel',x.dataset.p===prio));
+  const d=new Date();d.setDate(d.getDate()+(prio==='high'?3:14));
+  $('aDue').value=d.toISOString().slice(0,10);
+  $('aNote').value='';
+  $('assignModal').classList.add('open');
+}
+function createTask(){
+  const dept=DEPTS.find(d=>d.id===$('aDept').value);
+  tasks.unshift({
+    id:'DIR-'+String(1000+tasks.length+1),
+    issue:$('aIssue').value, dept:dept.id, deptName:dept.n,
+    prio, due:$('aDue').value, note:$('aNote').value,
+    status:'Assigned', created:new Date().toLocaleDateString('en-MY',{day:'numeric',month:'short'}),
+    src:assignCtx.src
+  });
+  $('assignModal').classList.remove('open');
+  renderTasks();render();
+  toast('✓ Directive issued to '+dept.n+' — tracked by the PMO Delivery Unit');
+}
+function renderTasks(){
+  const openN=tasks.filter(t=>t.status!=='Resolved').length;
+  const overN=tasks.filter(t=>new Date(t.due)<new Date()&&t.status!=='Resolved').length;
+  const doneN=tasks.filter(t=>t.status==='Resolved').length;
+  $('taskCount').textContent=openN;
+  if($('cmdOpen')){$('cmdOpen').textContent=openN;$('cmdOver').textContent=overN;$('cmdDone').textContent=doneN;}
+  renderCmdDept();
+  if(!tasks.length){$('taskList').innerHTML='<div class="emptyT">No directives yet.<br><br>Open any concern deep dive, escalation, or proposal and tap <b>Issue directive</b>.</div>';return}
+  $('taskList').innerHTML=tasks.map((t,i)=>{
+    const over=new Date(t.due)<new Date()&&t.status!=='Resolved';
+    const cls=t.status==='Resolved'?'act':t.status==='In progress'?'prog':'asg';
+    return `<div class="task">
+      <div class="t1"><b>${t.issue}</b><span class="tag ${cls}">${t.status.toUpperCase()}</span></div>
+      <div class="meta">
+        <span>${t.id}</span><span>Ministry: <b>${t.deptName}</b></span>
+        <span class="due ${over?'over':''}">Due: <b>${t.due}</b>${over?' ⚠ OVERDUE':''}</span>
+        <span>Priority: <b style="${t.prio==='high'?'color:var(--red)':''}">${t.prio}</b></span>
+      </div>
+      ${t.note?`<div class="meta"><span>“${t.note}”</span></div>`:''}
+      <div class="row2">
+        <select onchange="setStatus(${i},this.value)">
+          <option ${t.status==='Assigned'?'selected':''}>Assigned</option>
+          <option ${t.status==='In progress'?'selected':''}>In progress</option>
+          <option ${t.status==='Resolved'?'selected':''}>Resolved</option>
+        </select>
+      </div>
+    </div>`;}).join('');
+}
+function setStatus(i,v){
+  tasks[i].status=v;renderTasks();render();
+  if(v==='Resolved')toast('✓ Delivered — citizens who raised this can be notified via WhatsApp ("You said, we did").');
+}
+function renderDeptStats(){
+  const open=tasks.filter(t=>t.status!=='Resolved');
+  if(!open.length){$('deptStats').innerHTML='<div class="emptyT" style="padding:14px 6px">No open directives.<br>Issue one from a concern deep dive.</div>';return}
+  const agg={};open.forEach(t=>agg[t.deptName]=(agg[t.deptName]||0)+1);
+  const mx=Math.max(...Object.values(agg));
+  $('deptStats').innerHTML=Object.entries(agg).sort((a,b)=>b[1]-a[1]).map(([d,c])=>
+    `<div class="deptStat"><div class="nm">${d}</div><div class="barBg"><div class="barFill" style="width:${c/mx*100}%"></div></div><b>${c}</b></div>`).join('');
+}
+function renderCmdDept(){
+  if(!$('cmdDeptList'))return;
+  const open=tasks.filter(t=>t.status!=='Resolved');
+  if(!open.length){$('cmdDeptList').innerHTML='<div class="cmdDeptRow" style="opacity:.6">No open directives</div>';return}
+  const agg={};open.forEach(t=>agg[t.deptName]=(agg[t.deptName]||0)+1);
+  const mx=Math.max(...Object.values(agg));
+  $('cmdDeptList').innerHTML=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([d,c])=>
+    `<div class="cmdDeptRow"><div class="nm">${d}</div><div class="barBg"><div class="barFill" style="width:${c/mx*100}%"></div></div><b>${c}</b></div>`).join('');
+}
+function openDrawer(){$('drawer').classList.add('open')}
+
+/* ================================================================
+   VIEW MODE  (Prime Minister vs PMO Delivery Unit)
+================================================================ */
+let view='min';
+function setView(v){
+  view=v;
+  document.body.classList.toggle('sg',v==='sg');
+  document.querySelectorAll('#viewTgl button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  $('viewNote').textContent = v==='min'
+    ? 'Prime Minister View — the national pulse at a glance'
+    : 'PMO Delivery Unit — whole-of-government execution: issue, track & deliver';
+  $('topicHint').innerHTML = v==='sg'
+    ? '👉 Click a concern to open the deep dive &amp; issue a directive'
+    : '👉 Click a concern to open the deep dive';
+  render();renderTasks();
+}
+
+/* ================================================================
+   SEED DIRECTIVES (demo — so the PMO view shows a live operation)
+================================================================ */
+function seedTasks(){
+  const today=new Date();
+  const d=(n)=>{const x=new Date(today);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);};
+  tasks=[
+    {id:'DIR-1004',issue:'Cost of living: accelerate targeted SARA aid & weekly price watch',dept:'kpdn',deptName:"Domestic Trade & Living Costs (KPDN)",prio:'high',due:d(3),note:'Weekly essential-goods price watch to the PMO; expand aid to affected B40.',status:'In progress',created:'14 Jul',src:'seed1'},
+    {id:'DIR-1003',issue:'Graduate wages & job quality — national action plan',dept:'mohr',deptName:'Human Resources (KESUMA)',prio:'elevated',due:d(7),note:'Table a graduate wage-floor and subsidy proposal within 3 weeks.',status:'Assigned',created:'16 Jul',src:'seed2'},
+    {id:'DIR-1002',issue:'Corruption cases — publish quarterly progress & timelines',dept:'jpm',deptName:"Prime Minister's Dept (JPM)",prio:'elevated',due:d(-1),note:'Coordinate with MACC on a public tracker.',status:'Assigned',created:'12 Jul',src:'seed3'},
+    {id:'DIR-1001',issue:'Rent-to-own pilot for first-home youth',dept:'kpkt',deptName:'Housing & Local Govt (KPKT)',prio:'normal',due:d(9),note:'',status:'Resolved',created:'09 Jul',src:'seed4'}
+  ];
+}
+
+/* ================================================================
+   INTERACTIONS
+================================================================ */
+function selectState(id){selState=id;selDistrict=null;render();}
+$('range').addEventListener('click',e=>{
+  if(e.target.dataset.d){rangeD=+e.target.dataset.d;
+    document.querySelectorAll('#range button').forEach(b=>b.classList.toggle('on',b===e.target));
+    render();}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));$('drawer').classList.remove('open');}});
+
+seedTasks();
+renderAgenda();
+drawTrend();setView('min');
+</script>
+</body>
+</html>

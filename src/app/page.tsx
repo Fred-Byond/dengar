@@ -32,7 +32,7 @@ export default function Home() {
             <div className="text-sm font-extrabold leading-tight tracking-wide">
               MALAYSIA MADANI
               <span className="block text-[10px] font-bold tracking-[0.14em] text-white/70">
-                MINISTRY OF HOME AFFAIRS · BYOND ASIA
+                CITIZEN LISTENING PLATFORM · BYOND ASIA
               </span>
             </div>
           </div>
@@ -41,16 +41,20 @@ export default function Home() {
             DENGAR<span className="font-light text-gold">.ai</span>
           </div>
           <h1 className="mt-4 max-w-2xl text-balance text-2xl font-extrabold leading-tight sm:text-3xl">
-            Every citizen&rsquo;s voice, heard by the Minister — and turned into national intelligence.
+            Every citizen&rsquo;s voice, heard — and turned into national intelligence.
           </h1>
           <p className="mt-4 max-w-2xl text-white/80">
-            A scheduled 5-minute conversation with the Minister&rsquo;s digital human, in five
+            A scheduled 5-minute conversation with a leader&rsquo;s digital human, in five
             languages. Every controlled session becomes a comparable data point: sentiment by
-            state, pain points by district, and a citizen-generated priority backlog for the
-            Ministry.
+            state, pain points by district, and a citizen-generated priority backlog — deployed
+            today for the <b className="text-white">Home Minister</b> and the{" "}
+            <b className="text-white">Prime Minister&rsquo;s Office</b>.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <p className="mt-8 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white/50">
+            Ministry of Home Affairs deployment
+          </p>
+          <div className="mt-3 flex flex-wrap gap-3">
             <Link
               href="/experience"
               className="rounded-xl bg-red px-5 py-3 text-sm font-extrabold text-white transition hover:brightness-110"
@@ -77,8 +81,49 @@ export default function Home() {
             </Link>
           </div>
           <p className="mt-4 text-xs font-semibold text-white/55">
-            Demo prototype · synthetic data · AI representation of the Minister (disclosed)
+            Demo prototype · synthetic data · AI representation of the leader (disclosed)
           </p>
+        </div>
+      </section>
+
+      {/* Deployments — the platform thesis, in code */}
+      <section className="border-b border-line bg-white">
+        <div className="mx-auto max-w-5xl px-6 py-14">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-red">
+            One platform, many deployments
+          </p>
+          <h2 className="mt-3 text-2xl font-extrabold">The stack is leader-agnostic</h2>
+          <p className="mt-3 max-w-2xl text-grey">
+            Each deployment is <b className="text-ink">configuration + a new avatar + an adapted
+            taxonomy</b> over the same booking engine, digital-human seam and CVIF intelligence
+            layer. The taxonomy library per portfolio becomes accumulating IP.
+          </p>
+          <div className="mt-6 grid gap-5 md:grid-cols-2">
+            <DeploymentCard
+              eyebrow="Deployment 01 · Live prototype"
+              title="Ministry of Home Affairs"
+              scope="Policing · immigration · MyKad · scams · drugs"
+              routing="Routes execution to KDN agencies (PDRM, JIM, JPN, AADK)"
+              roles="Minister ↔ Secretary General"
+              links={[
+                { href: "/experience", label: "Citizen" },
+                { href: "/dashboard", label: "Intelligence" },
+                { href: "/sessions", label: "Sessions" },
+                { href: "/briefing", label: "Briefing" },
+              ]}
+            />
+            <DeploymentCard
+              eyebrow="Deployment 02 · Live prototype"
+              title="Prime Minister's Office"
+              scope="Cost of living · jobs · corruption · housing · healthcare"
+              routing="Routes execution to MINISTRIES (MOF, KPDN, KESUMA, MOH, KPKT, JPM)"
+              roles="Prime Minister ↔ PMO Delivery Unit"
+              links={[
+                { href: "/pm/experience", label: "Citizen" },
+                { href: "/pm/dashboard", label: "Intelligence" },
+              ]}
+            />
+          </div>
         </div>
       </section>
 
@@ -187,6 +232,45 @@ function ProductCard({
         Open →
       </span>
     </Link>
+  );
+}
+
+function DeploymentCard({
+  eyebrow, title, scope, routing, roles, links,
+}: {
+  eyebrow: string; title: string; scope: string; routing: string; roles: string;
+  links: { href: string; label: string }[];
+}) {
+  return (
+    <div className="rounded-2xl border border-line p-6">
+      <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-navy">{eyebrow}</p>
+      <h3 className="mt-1 text-xl font-extrabold">{title}</h3>
+      <dl className="mt-4 space-y-2 text-[13px]">
+        <div>
+          <dt className="text-[10px] font-extrabold uppercase tracking-wide text-grey">Scope</dt>
+          <dd className="text-ink">{scope}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] font-extrabold uppercase tracking-wide text-grey">Execution</dt>
+          <dd className="text-ink">{routing}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] font-extrabold uppercase tracking-wide text-grey">Role views</dt>
+          <dd className="text-ink">{roles}</dd>
+        </div>
+      </dl>
+      <div className="mt-5 flex flex-wrap gap-2">
+        {links.map((l) => (
+          <Link
+            key={l.href}
+            href={l.href}
+            className="rounded-lg border border-line px-3 py-2 text-xs font-extrabold text-navy transition hover:bg-canvas"
+          >
+            {l.label} →
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }
 
