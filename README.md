@@ -61,8 +61,13 @@ dengar/
 ├── public/prototypes/          The two APPROVED prototypes, served verbatim
 │   ├── dengar-citizen.html
 │   └── national-pulse.html
-└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP
+└── docs/                       ENGINEERING-HANDOFF · DATA-GOVERNANCE · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP
 ```
+
+> **Government security / legal review?** Start at
+> [`docs/DATA-GOVERNANCE.md`](docs/DATA-GOVERNANCE.md) — data residency, key
+> custody, the access matrix, and the corruption-report carve-out. Its
+> enforceable half is [`src/lib/governance`](src/lib/governance).
 
 > **Team taking this over?** Start at [`docs/ENGINEERING-HANDOFF.md`](docs/ENGINEERING-HANDOFF.md) —
 > the role split, the two integration seams, and the Phase-1 build order.

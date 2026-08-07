@@ -63,6 +63,13 @@ Legend: ✅ built · 🟡 works, needs productionising · 🟥 to build.
   **This is the critical path.**
 - **Data tier:** Postgres schema from `src/lib/types.ts`; Redis; encrypted object store for
   transcripts/audio; immutable audit log.
+- **Governance enforcement (non-negotiable):** implement `src/lib/governance` server-side —
+  the five data tiers in **separate stores with separate keys**, `canAccess()` as the single
+  authorisation point, hash-chained `AuditEntry` replicated to a Government-held log, and the
+  Tier-4 quarantine→seal→refer→purge lifecycle. Encryption keys live in the **Government's**
+  KMS, not ours. `refuseCrossBorder()` must gate every egress path, including the AI scoring
+  call. Read [`docs/DATA-GOVERNANCE.md`](DATA-GOVERNANCE.md) before writing any persistence
+  code — retrofitting this is not feasible.
 - **Dashboard API:** replace the in-page synthetic dataset with a live CVIF aggregation
   endpoint feeding the same shapes the components already consume.
 - **Role-gated views:** the dashboard's **Minister ↔ Secretary General** toggle is the front
@@ -88,6 +95,10 @@ Legend: ✅ built · 🟡 works, needs productionising · 🟥 to build.
   the Ministry, configured on the digital-human engine.
 - **Manglish / code-switching glossary** + machine-translation normalisation; original
   transcript always preserved.
+- **Sovereignty of the model call.** Raw transcripts are Tier-3 and may not leave Malaysian
+  jurisdiction. Either host the scoring model in-country or put a de-identification gateway in
+  front of any external call — see `docs/DATA-GOVERNANCE.md` §3.3. Also: no citizen data is
+  ever used for training, fine-tuning or evaluation, including by subprocessors.
 - **Reproducibility & calibration:** ≥ 90% classification agreement vs a human-labelled
   sample; publish confidence, not false precision (see `docs/CVIF.md`).
 - Weekly-briefing generation quality + the human-in-the-loop review step.
