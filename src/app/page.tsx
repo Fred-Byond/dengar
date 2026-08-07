@@ -121,6 +121,8 @@ export default function Home() {
               links={[
                 { href: "/pm/experience", label: "Citizen" },
                 { href: "/pm/dashboard", label: "Intelligence" },
+                { href: "/pm/sessions", label: "Sessions" },
+                { href: "/pm/briefing", label: "Briefing" },
               ]}
             />
           </div>

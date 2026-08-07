@@ -20,7 +20,7 @@ import type {
   SentimentScore,
   Confidence,
 } from "./types";
-import { TAXONOMY, TAXONOMY_BY_ID } from "./taxonomy";
+import { TAXONOMY, type TopicDefinition } from "./taxonomy";
 
 export interface Scorer {
   score(input: TranscriptInput): SessionInsightRecord;
@@ -36,8 +36,19 @@ const NEG_WORDS = [
   "break-in", "scared", "rising", "no update", "harass", "afraid", "charge extra",
   "give up", "spreading", "worried", "impossible", "unpaid", "recruit",
   "stuck", "backlog", "overcharge", "still no",
+  // cost-of-living / whole-of-government vocabulary (PMO deployment)
+  "cost more", "expensive", "mahal", "cannot afford", "out of reach",
+  "not moved", "doubled", "wiped out", "strangling", "losing faith",
+  "no explanation", "delayed salaries", "priced out", "always full",
+  "gone before", "stopped bidding", "underemploy",
 ];
-const POS_WORDS = ["thank", "terima kasih", "good", "bagus", "improve", "better", "proud", "bangga", "fast", "cepat", "appreciate", "hargai"];
+const POS_WORDS = [
+  "thank", "terima kasih", "good", "bagus", "improve", "better", "proud", "bangga",
+  "fast", "cepat", "appreciate", "hargai",
+  // acknowledgement / praise vocabulary
+  "helped", "it helped", "real improvement", "acknowledge", "reached us",
+  "saved me", "genuinely fast", "keep the aid", "worked well", "responsive",
+];
 
 const TOPIC_KEYWORDS: Record<string, string[]> = {
   immigration: ["permit", "passport", "visa", "renewal", "imigresen", "foreign worker", "levy", "fomema", "quota"],
@@ -84,7 +95,21 @@ function askSentence(input: TranscriptInput): string | null {
   return null;
 }
 
-function classifyTopic(text: string, hint?: string): string {
+/**
+ * Per-deployment classification inputs. Omitted ⇒ the Home-Affairs taxonomy.
+ * See src/lib/deployments.ts for how a second leader plugs in.
+ */
+export interface ScorerTaxonomyConfig {
+  taxonomy: TopicDefinition[];
+  topicKeywords: Record<string, string[]>;
+}
+
+function classifyTopic(
+  text: string,
+  hint: string | undefined,
+  cfg: ScorerTaxonomyConfig,
+): string {
+  const { taxonomy: TAXONOMY, topicKeywords: TOPIC_KEYWORDS } = cfg;
   const scores = Object.entries(TOPIC_KEYWORDS).map(([id, words]) => [id, countHits(text, words)] as const);
   scores.sort((a, b) => b[1] - a[1]);
   if (scores[0] && scores[0][1] > 0) return scores[0][0];
@@ -141,15 +166,30 @@ function confidenceFrom(evidence: number, clarity: number): Confidence {
   return "insufficient";
 }
 
+/** Default classification config — the Home-Affairs deployment. */
+const DEFAULT_TAXONOMY_CONFIG: ScorerTaxonomyConfig = {
+  taxonomy: TAXONOMY,
+  topicKeywords: TOPIC_KEYWORDS,
+};
+
 /**
- * Deterministic, dependency-free scorer. Faithful to the CVIF SHAPE and the
- * NE/IE + human-review discipline; the heuristics stand in for the LLM pass.
+ * Build a deterministic, dependency-free scorer for a given deployment.
+ * Faithful to the CVIF SHAPE and the NE/IE + human-review discipline; the
+ * heuristics stand in for the LLM pass. Pass a deployment's taxonomy +
+ * keyword cues to score a different leader's sessions — nothing downstream
+ * (dashboard, Session Explorer, briefing) changes.
  */
-export const deterministicScorer: Scorer = {
+export function createDeterministicScorer(
+  cfg: ScorerTaxonomyConfig = DEFAULT_TAXONOMY_CONFIG,
+): Scorer {
+  const byId: Record<string, TopicDefinition> = Object.fromEntries(
+    cfg.taxonomy.map((t) => [t.id, t]),
+  );
+  return {
   score(input: TranscriptInput): SessionInsightRecord {
     const text = citizenText(input);
-    const topicId = classifyTopic(text, input.topicHint);
-    const topic = TAXONOMY_BY_ID[topicId];
+    const topicId = classifyTopic(text, input.topicHint, cfg);
+    const topic = byId[topicId];
 
     const sentiment = sentimentScore(text);
     const impact = impactScore(text);
@@ -192,7 +232,7 @@ export const deterministicScorer: Scorer = {
       locationsMentioned: input.locationsMentioned ?? extractLocations(text),
       topicL1: topic?.label ?? "General governance feedback / praise",
       topicL2: topic?.level2?.[0] ?? null,
-      keywords: extractKeywords(text, topicId),
+      keywords: extractKeywords(text, topicId, cfg),
       sentiment: {
         overall: { value: sentiment, confidence, evidenceQuote: painPoint ?? askQuote },
         targets: [],
@@ -210,15 +250,19 @@ export const deterministicScorer: Scorer = {
       humanReviewReasons,
     };
   },
-};
+  };
+}
+
+/** The Home-Affairs scorer (unchanged public API). */
+export const deterministicScorer: Scorer = createDeterministicScorer();
 
 function extractLocations(text: string): string[] {
   const known = ["Shah Alam", "Kuala Lumpur", "Johor Bahru", "Penang", "Selangor", "Sabah", "Sarawak", "Klang", "Sandakan", "Kota Bharu"];
   return known.filter((k) => text.toLowerCase().includes(k.toLowerCase()));
 }
 
-function extractKeywords(text: string, topicId: string): string[] {
-  const pool = TOPIC_KEYWORDS[topicId] ?? [];
+function extractKeywords(text: string, topicId: string, cfg: ScorerTaxonomyConfig): string[] {
+  const pool = cfg.topicKeywords[topicId] ?? [];
   const lower = text.toLowerCase();
   return pool.filter((k) => lower.includes(k)).slice(0, 5);
 }

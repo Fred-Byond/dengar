@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { generateSessions, type SeededSession } from "@/lib/seed";
 import {
-  DIMENSIONS, TAXONOMY, departmentName,
+  DIMENSIONS, TAXONOMY, DEPARTMENTS, departmentName,
   type SessionInsightRecord, type UrgencyLevel,
 } from "@/lib/cvif";
 
@@ -53,20 +53,52 @@ function dimConfidence(dimId: string, rec: SessionInsightRecord) {
   return map[dimId];
 }
 
-function departmentForTopic(label: string): string {
-  const t = TAXONOMY.find((x) => x.label === label);
-  return departmentName(t?.defaultDepartment ?? "polisi");
+/**
+ * Per-deployment configuration. Omitted ⇒ the Home-Affairs deployment.
+ * The PMO route passes its own profile: PM sessions, national taxonomy, and
+ * ministries instead of KDN agencies.
+ */
+export interface ExplorerConfig {
+  sessions: SeededSession[];
+  taxonomy: { label: string; defaultDepartment: string }[];
+  departments: readonly { id: string; name: string }[];
+  fallbackDepartment: string;
+  /** Where the "back" link goes, and what it is called. */
+  backHref: string;
+  backLabel: string;
+  /** What the executing bodies are called in the record ("Recommended owner"). */
+  ownerLabel: string;
 }
 
 /* ---------- component ---------- */
 
-const TOPICS = ["All topics", ...TAXONOMY.map((t) => t.label)];
+const DEFAULT_EXPLORER_CONFIG: Omit<ExplorerConfig, "sessions"> = {
+  taxonomy: TAXONOMY,
+  departments: DEPARTMENTS,
+  fallbackDepartment: "polisi",
+  backHref: "/dashboard",
+  backLabel: "← DENGAR Intelligence",
+  ownerLabel: "Recommended owner",
+};
 const LANGS = ["All languages", "Bahasa Melayu", "English", "中文", "தமிழ்", "العربية"];
 const SENTS = ["All sentiment", "Positive", "Neutral", "Negative"];
 const URGENCIES: (UrgencyLevel | "All urgency")[] = ["All urgency", "Normal", "Priority", "Urgent", "Critical"];
 
-export default function SessionExplorer() {
-  const sessions = useMemo(() => generateSessions(240), []);
+export default function SessionExplorer({ config }: { config?: Partial<ExplorerConfig> } = {}) {
+  const cfg = { ...DEFAULT_EXPLORER_CONFIG, ...config };
+  const sessions = useMemo(
+    () => config?.sessions ?? generateSessions(240),
+    [config?.sessions],
+  );
+  const TOPICS = useMemo(
+    () => ["All topics", ...cfg.taxonomy.map((t) => t.label)],
+    [cfg.taxonomy],
+  );
+  const departmentForTopic = (label: string): string => {
+    const t = cfg.taxonomy.find((x) => x.label === label);
+    const id = t?.defaultDepartment ?? cfg.fallbackDepartment;
+    return cfg.departments.find((d) => d.id === id)?.name ?? departmentName(id);
+  };
 
   const [q, setQ] = useState("");
   const [topic, setTopic] = useState("All topics");
@@ -119,7 +151,7 @@ export default function SessionExplorer() {
     <div className="min-h-screen bg-canvas text-ink">
       {/* header */}
       <header className="sticky top-0 z-20 flex flex-wrap items-center gap-4 bg-gradient-to-r from-navy-deep via-navy to-navy-light px-5 py-3 text-white sm:px-7">
-        <Link href="/dashboard" className="text-sm font-bold text-white/80 hover:text-white">← DENGAR Intelligence</Link>
+        <Link href={cfg.backHref} className="text-sm font-bold text-white/80 hover:text-white">{cfg.backLabel}</Link>
         <div className="border-l border-white/25 pl-4">
           <h1 className="text-lg font-extrabold">Session Explorer</h1>
           <p className="text-[11px] text-white/70">Every confirmed session becomes one record · CVIF Session Insight Record</p>
@@ -215,6 +247,8 @@ export default function SessionExplorer() {
           elevated={elevated}
           onToggleElevated={toggleElevated}
           onClose={() => { setSelected(null); setElevated(false); }}
+          ownerLabel={cfg.ownerLabel}
+          ownerFor={departmentForTopic}
         />
       )}
 
@@ -252,9 +286,10 @@ export default function SessionExplorer() {
 /* ---------- detail drawer ---------- */
 
 function SessionDetail({
-  session, elevated, onToggleElevated, onClose,
+  session, elevated, onToggleElevated, onClose, ownerLabel, ownerFor,
 }: {
   session: SeededSession; elevated: boolean; onToggleElevated: () => void; onClose: () => void;
+  ownerLabel: string; ownerFor: (topicLabel: string) => string;
 }) {
   const r = session.record;
   const [showOriginal, setShowOriginal] = useState(true);
@@ -298,7 +333,7 @@ function SessionDetail({
           <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
             <Pill>Confirmation: <b>{r.confirmation}</b></Pill>
             <Pill>Satisfaction: <b>{session.satisfaction}/5</b></Pill>
-            <Pill>Recommended owner: <b>{departmentForTopic(r.topicL1)}</b></Pill>
+            <Pill>{ownerLabel}: <b>{ownerFor(r.topicL1)}</b></Pill>
           </div>
 
           {/* CVIF record */}

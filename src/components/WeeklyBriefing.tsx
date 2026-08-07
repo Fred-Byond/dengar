@@ -2,17 +2,45 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { buildBriefing } from "@/lib/briefing";
+import { buildBriefing, type Briefing, type BriefingOwnerConfig } from "@/lib/briefing";
+import type { SeededSession } from "@/lib/seed";
 
-export default function WeeklyBriefing() {
-  const b = useMemo(() => buildBriefing(), []);
+/**
+ * Per-deployment configuration. Omitted ⇒ the Home-Affairs weekly briefing.
+ * The PMO route passes its own sessions, ministry roster and titling so the
+ * same generator produces the Prime Minister's whole-of-government briefing.
+ */
+export interface BriefingConfig {
+  sessions: SeededSession[];
+  ownerConfig: BriefingOwnerConfig;
+  weekLabel: string;
+  /** Masthead + document titling. */
+  institution: string;
+  institutionSub: string;
+  documentTitle: string;
+  backHref: string;
+  backLabel: string;
+  accountabilityLabel: string;
+}
+
+export default function WeeklyBriefing({ config }: { config?: Partial<BriefingConfig> } = {}) {
+  const b: Briefing = useMemo(
+    () => buildBriefing(config?.sessions, config?.weekLabel, config?.ownerConfig),
+    [config?.sessions, config?.weekLabel, config?.ownerConfig],
+  );
+  const institution = config?.institution ?? "MALAYSIA MADANI";
+  const institutionSub = config?.institutionSub ?? "MINISTRY OF HOME AFFAIRS · KEMENTERIAN DALAM NEGERI";
+  const documentTitle = config?.documentTitle ?? "Weekly Ministry Briefing";
+  const backHref = config?.backHref ?? "/dashboard";
+  const backLabel = config?.backLabel ?? "← DENGAR Intelligence";
+  const accountabilityLabel = config?.accountabilityLabel ?? "Accountability";
 
   return (
     <div className="min-h-screen bg-canvas pb-16 text-ink">
       {/* action bar — hidden in print */}
       <div className="no-print sticky top-0 z-20 flex flex-wrap items-center gap-3 bg-gradient-to-r from-navy-deep via-navy to-navy-light px-5 py-3 text-white sm:px-7">
-        <Link href="/dashboard" className="text-sm font-bold text-white/80 hover:text-white">← DENGAR Intelligence</Link>
-        <span className="border-l border-white/25 pl-3 text-sm font-extrabold">Weekly Ministry Briefing</span>
+        <Link href={backHref} className="text-sm font-bold text-white/80 hover:text-white">{backLabel}</Link>
+        <span className="border-l border-white/25 pl-3 text-sm font-extrabold">{documentTitle}</span>
         <div className="ml-auto flex items-center gap-2">
           <button
             onClick={() => window.print()}
@@ -31,16 +59,16 @@ export default function WeeklyBriefing() {
           <div className="flex items-center gap-3">
             <Flag />
             <div className="text-[13px] font-extrabold leading-tight tracking-wide">
-              MALAYSIA MADANI
+              {institution}
               <span className="block text-[10px] font-bold tracking-[0.14em] text-white/70">
-                MINISTRY OF HOME AFFAIRS · KEMENTERIAN DALAM NEGERI
+                {institutionSub}
               </span>
             </div>
             <div className="ml-auto text-right text-[11px] font-bold text-white/70">
               DENGAR.ai · BYOND asia
             </div>
           </div>
-          <h1 className="mt-5 text-2xl font-extrabold">Weekly Ministry Briefing</h1>
+          <h1 className="mt-5 text-2xl font-extrabold">{documentTitle}</h1>
           <p className="mt-1 text-sm text-white/80">{b.weekLabel}</p>
           <p className="mt-3 inline-block rounded-md bg-white/15 px-2.5 py-1 text-[10px] font-extrabold tracking-wide">
             {b.classification}
@@ -155,7 +183,7 @@ export default function WeeklyBriefing() {
           </Section>
 
           {/* accountability */}
-          <Section n="6" title="Accountability">
+          <Section n="6" title={accountabilityLabel}>
             <p className="mb-3 text-[12px] text-grey">
               <b className="text-red">{b.urgentCount}</b> urgent/critical · <b className="text-ink">{b.reviewCount}</b> flagged for human review this week. Open items by responsible agency:
             </p>

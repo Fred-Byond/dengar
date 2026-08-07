@@ -12,4 +12,9 @@
 export * from "./types";
 export * from "./dimensions";
 export * from "./taxonomy";
-export { deterministicScorer, type Scorer } from "./scorer";
+export {
+  deterministicScorer,
+  createDeterministicScorer,
+  type Scorer,
+  type ScorerTaxonomyConfig,
+} from "./scorer";

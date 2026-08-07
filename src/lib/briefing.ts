@@ -10,7 +10,7 @@
  */
 
 import { generateSessions, type SeededSession } from "./seed";
-import { TAXONOMY, departmentName } from "./cvif";
+import { TAXONOMY, DEPARTMENTS, departmentName } from "./cvif";
 
 export interface BriefingPainPoint {
   rank: number;
@@ -59,15 +59,37 @@ function num(v: number | "IE"): number {
   return v === "IE" ? 0 : v;
 }
 
-function ownerFor(topicLabel: string): string {
-  const t = TAXONOMY.find((x) => x.label === topicLabel);
-  return departmentName(t?.defaultDepartment ?? "polisi");
+/**
+ * Which taxonomy/agency roster to resolve owners against. Omitted ⇒ the
+ * Home-Affairs deployment. The PMO deployment passes its own profile so the
+ * same generator produces a whole-of-government briefing routed to ministries.
+ */
+export interface BriefingOwnerConfig {
+  taxonomy: { label: string; defaultDepartment: string }[];
+  departments: readonly { id: string; name: string }[];
+  fallbackDepartment: string;
+}
+
+const DEFAULT_OWNER_CONFIG: BriefingOwnerConfig = {
+  taxonomy: TAXONOMY,
+  departments: DEPARTMENTS,
+  fallbackDepartment: "polisi",
+};
+
+function makeOwnerResolver(cfg: BriefingOwnerConfig) {
+  return (topicLabel: string): string => {
+    const t = cfg.taxonomy.find((x) => x.label === topicLabel);
+    const id = t?.defaultDepartment ?? cfg.fallbackDepartment;
+    return cfg.departments.find((d) => d.id === id)?.name ?? departmentName(id);
+  };
 }
 
 export function buildBriefing(
   sessions: SeededSession[] = generateSessions(240),
   weekLabel = "Week 29 · 13–19 July 2026",
+  ownerConfig: BriefingOwnerConfig = DEFAULT_OWNER_CONFIG,
 ): Briefing {
+  const ownerFor = makeOwnerResolver(ownerConfig);
   const records = sessions.map((s) => s.record);
   const total = records.length;
 
