@@ -180,6 +180,19 @@ input.f:focus,select.f:focus{border-color:var(--navy)}
 .summaryBox{background:#F4F1EA;border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin:14px 0;text-align:left}
 .summaryBox .sHead{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--navy);margin-bottom:7px}
 .summaryBox p{font-size:13.5px;line-height:1.55;color:var(--ink)}
+/* Protected-disclosure notice + sealed-referral close */
+.pdNotice{display:none;background:#F4F1FB;border:1px solid #D9CEF2;border-radius:13px;padding:13px 14px;margin-top:14px;text-align:left}
+.pdNotice.on{display:block}
+.pdNotice .h{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;color:#5A2CA0;letter-spacing:.3px;margin-bottom:6px}
+.pdNotice p{font-size:12.5px;line-height:1.55;color:#3F3358}
+.pdNotice a{color:#5A2CA0;font-weight:700}
+.sealedBox{background:#F4F1FB;border:1px solid #D9CEF2;border-radius:14px;padding:15px;margin:14px 0;text-align:left}
+.sealedBox .h{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#5A2CA0;margin-bottom:8px}
+.sealedBox p{font-size:13px;line-height:1.55;color:#3F3358}
+.sealedBox .pdRef{display:block;background:#fff;border:1.5px dashed #C9B8EC;border-radius:11px;padding:10px;text-align:center;margin:11px 0 9px}
+.sealedBox .pdRef small{display:block;font-size:10px;font-weight:800;letter-spacing:1.2px;color:#7A6AA0}
+.sealedBox .pdRef b{font-size:17px;letter-spacing:1px;color:#3F3358}
+.sealedBox .withdraw{width:100%;border:1.5px solid #C9B8EC;background:#fff;color:#5A2CA0;font-weight:800;font-size:12.5px;padding:11px;border-radius:11px;cursor:pointer;font-family:inherit;margin-top:4px}
 .counterBox{background:linear-gradient(135deg,#0E7A3A,#1E9E52);border-radius:14px;color:#fff;padding:15px;text-align:center;margin:14px 0}
 .counterBox small{font-size:11px;font-weight:700;opacity:.92;display:block;line-height:1.4}
 .counterBox .counterNum{font-size:38px;font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums;margin:3px 0;text-shadow:0 3px 14px rgba(0,0,0,.25)}
@@ -342,6 +355,10 @@ input.f:focus,select.f:focus{border-color:var(--navy)}
         <div class="langGrid" id="langGrid"></div>
         <label class="f"><span data-i18n="fTopic"></span> <i data-i18n="optional"></i></label>
         <select class="f" id="fTopic"></select>
+        <div class="pdNotice" id="pdNotice">
+          <div class="h">🔒 <span data-i18n="pdTitle"></span></div>
+          <p data-i18n="pdBody"></p>
+        </div>
         <label class="check"><input type="checkbox" id="fConsent"><span data-i18n="consent"></span></label>
       </div>
       <button class="btn" id="regNext" onclick="toOTP()" data-i18n="verify"></button>
@@ -480,6 +497,13 @@ input.f:focus,select.f:focus{border-color:var(--navy)}
           <div class="sHead">📝 <span data-i18n="summaryLbl"></span></div>
           <p id="summaryText"></p>
         </div>
+        <div class="sealedBox" id="sealedBox" style="display:none">
+          <div class="h">🔒 <span data-i18n="sealedLbl"></span></div>
+          <p data-i18n="sealedBody"></p>
+          <span class="pdRef"><small data-i18n="sealedRefLbl"></small><b id="pdRefCode">PD-2026-0000</b></span>
+          <p style="font-size:12px" data-i18n="sealedChannel"></p>
+          <button class="withdraw" onclick="withdrawReferral()" data-i18n="sealedWithdraw"></button>
+        </div>
 
         <div class="counterBox">
           <small data-i18n="counterPre"></small>
@@ -550,6 +574,14 @@ const I18N={
   sumTopic:(topic,place)=>`Anda telah berkongsi pandangan tentang <b>${topic}</b> di <b>${place}</b>. Perdana Menteri telah mengambil maklum perkara yang anda bangkitkan.`,
   sumGeneric:place=>`Anda telah berkongsi pandangan anda tentang negara dari <b>${place}</b>. Perdana Menteri telah mengambil maklum perkara yang anda sampaikan.`,
   topicGeneral:"negara",
+  pdTitle:"Pendedahan terlindung",
+  pdBody:"Jika anda ingin melaporkan rasuah atau salah laku, sesi ini <b>bukan laporan rasmi</b>. Perkara yang anda bangkitkan akan <b>dirujuk kepada badan berkuasa yang berwenang</b> melalui saluran statutori, dan anda akan menerima nombor rujukan. Platform ini <b>tidak menyimpan</b> butiran, nama atau transkrip pendedahan tersebut — ini melindungi anda dan memastikan perlindungan undang-undang anda kekal.",
+  sealedLbl:"Pendedahan anda telah dirujuk",
+  sealedBody:"Perkara yang anda bangkitkan telah <b>dimeterai dan dirujuk</b> kepada badan berkuasa yang berwenang. Butiran, nama dan transkrip <b>tidak disimpan</b> oleh platform ini dan tidak boleh dibuka oleh mana-mana pegawai di sini.",
+  sealedRefLbl:"RUJUKAN PENDEDAHAN",
+  sealedChannel:"Untuk membuat laporan rasmi — dan menerima perlindungan undang-undang sepenuhnya — gunakan saluran rasmi badan berkuasa berkenaan.",
+  sealedWithdraw:"Saya tidak mahu ia dirujuk — hapuskan",
+  sealedWithdrawn:"Pendedahan anda telah dihapuskan dan tidak akan dirujuk.",
   shareQuote:"“Saya bercakap dengan Perdana Menteri hari ini.”",share:"Kongsi",
   shareAlert:"Demo: kad kongsi akan dibuka di sini.",restart:"↺ Mula semula demo",
   locale:"ms-MY"
@@ -599,6 +631,14 @@ const I18N={
   sumTopic:(topic,place)=>`You shared your views on <b>${topic}</b> in <b>${place}</b>. The Prime Minister has noted what you raised.`,
   sumGeneric:place=>`You shared your views on the country from <b>${place}</b>. The Prime Minister has noted what you raised.`,
   topicGeneral:"the country",
+  pdTitle:"Protected disclosure",
+  pdBody:"If you want to report corruption or wrongdoing, this session is <b>not a formal report</b>. What you raise will be <b>referred to the competent authority</b> through the statutory channel and you will receive a reference number. This platform <b>does not retain</b> the details, names or transcript of such a disclosure — that protects you and keeps your legal protections intact.",
+  sealedLbl:"Your disclosure has been referred",
+  sealedBody:"What you raised has been <b>sealed and referred</b> to the competent authority. The details, names and transcript are <b>not retained</b> by this platform and cannot be opened by any official here.",
+  sealedRefLbl:"DISCLOSURE REFERENCE",
+  sealedChannel:"To make a formal report — and receive the full legal protections — use the competent authority's official channel.",
+  sealedWithdraw:"I don't want this referred — delete it",
+  sealedWithdrawn:"Your disclosure has been deleted and will not be referred.",
   shareQuote:"“I spoke with the Prime Minister today.”",share:"Share",
   shareAlert:"Demo: share card would open here.",restart:"↺ Restart demo",
   locale:"en-MY"
@@ -706,8 +746,16 @@ function buildGeoPlaceholders(){
   else diSel.innerHTML=`<option value="">${t('chooseStateFirst')}</option>`;
 }
 stSel.onchange=()=>{diSel.innerHTML=`<option value="">${t('chooseDistrict')}</option>`+(GEO[stSel.value]||[]).map(x=>`<option>${x}</option>`).join('');};
+/* Restricted (Tier-4) topics are referral-only: show the protected-disclosure notice
+   at intake so the citizen knows before they speak. See docs/DATA-GOVERNANCE.md §5. */
+const RESTRICTED_TOPICS=["Rasuah & tadbir urus","Corruption & governance"];
+function isRestricted(topic){return RESTRICTED_TOPICS.includes(topic||"");}
+document.getElementById('fTopic').addEventListener('change',function(){
+  document.getElementById('pdNotice').classList.toggle('on',isRestricted(this.value));
+});
 function buildTopics(){
   const cur=document.getElementById('fTopic').selectedIndex;
+  const pd=document.getElementById('pdNotice'); if(pd) pd.classList.remove('on');
   document.getElementById('fTopic').innerHTML=`<option value="">${t('chooseTopic')}</option>`+t('topics').map(x=>`<option>${x}</option>`).join('');
   if(cur>0)document.getElementById('fTopic').selectedIndex=cur;
 }
@@ -1006,12 +1054,26 @@ function showClosing(){
   speechSynthesis.cancel(); animateMouth(false);
   document.getElementById('closeName').textContent=(S.name||'rakan').split(' ')[0];
   document.getElementById('closeRef').textContent=S.ref||'PM-2026-000000';
-  document.getElementById('summaryText').innerHTML=buildSummary();
+  const restricted=isRestricted(S.topic);
+  document.querySelector('.summaryBox').style.display = restricted ? 'none' : 'block';
+  document.getElementById('sealedBox').style.display   = restricted ? 'block' : 'none';
+  if(restricted){
+    /* Only a referral reference is shown. No reflected summary is rendered, because the
+       platform does not retain the narrative of a protected disclosure. */
+    document.getElementById('pdRefCode').textContent =
+      'PD-2026-'+String(100+Math.floor(Math.random()*900));
+  } else {
+    document.getElementById('summaryText').innerHTML=buildSummary();
+  }
   if(!S.voiceNo)S.voiceNo=41000+Math.floor(Math.random()*1400)+ (S.ref?parseInt(S.ref.slice(-2))||0:0);
   go('s-closing');
   setTimeout(()=>animateCounter(S.voiceNo),350);
 }
 
+function withdrawReferral(){
+  const box=document.getElementById('sealedBox');
+  box.innerHTML='<div class="h">✓ <span>'+t('sealedWithdrawn')+'</span></div>';
+}
 document.querySelectorAll('#stars span').forEach((s,i,arr)=>{
   s.onclick=()=>arr.forEach((x,j)=>x.classList.toggle('on',j<=i));
 });

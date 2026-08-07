@@ -40,6 +40,10 @@ header{background:linear-gradient(100deg,var(--navy-d),var(--navy) 60%,#24368a);
 body.sg .sg-only{display:revert!important}
 body.sg .actBtn.sg-only{display:inline-flex!important}
 body.sg .grid-3.sg-only,body.sg .cmdStrip.sg-only{display:grid!important}
+/* Referral-only concerns: hard-hide the directive control. Must out-specify the
+   .sg-only reveal rule above, hence the compound selector. */
+.pd-hidden{display:none!important}
+body.sg .sg-only.pd-hidden,body.sg .btnP.sg-only.pd-hidden{display:none!important}
 .cmdStrip{grid-template-columns:auto auto auto 1fr auto;gap:16px;align-items:center;
   background:linear-gradient(100deg,#12235E,#1B2A6B 55%,#26317f);color:#fff;border-radius:16px;padding:16px 20px;
   box-shadow:0 1px 3px rgba(20,25,40,.06),0 8px 24px rgba(20,25,40,.08)}
@@ -189,6 +193,16 @@ body.sg .grid-3.sg-only,body.sg .cmdStrip.sg-only{display:grid!important}
 .urgent b{color:var(--red);font-size:12px;letter-spacing:.6px}
 .urgent p{font-size:12.5px;margin-top:5px;line-height:1.45}
 .urgent .assignMini{margin-top:8px}
+/* Protected disclosures — sealed, content-free by design */
+.sealed{background:#F4F1FB;border:1px solid #D9CEF2;border-radius:13px;padding:13px 14px;margin-bottom:11px}
+.sealed .sh{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;color:#5A2CA0;letter-spacing:.4px}
+.sealed .sh .lock{font-size:13px}
+.sealed .meta{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--grey);font-weight:600;margin-top:7px}
+.sealed .meta b{color:var(--ink)}
+.sealed .noContent{font-size:12px;color:#4A3A6B;background:#EDE6FA;border-radius:9px;padding:8px 11px;margin-top:9px;line-height:1.45}
+.sealed .refd{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:.5px;background:#E2F6E9;color:#137A3D;padding:4px 9px;border-radius:7px}
+.sealed .pending{background:#FFF3D6;color:#8A6400}
+.carveNote{font-size:11px;color:var(--grey);font-weight:600;line-height:1.5;background:#F7F8FB;border-left:3px solid #5A2CA0;border-radius:0 9px 9px 0;padding:9px 12px;margin-top:10px}
 
 /* ================= MODALS ================= */
 .modal{position:fixed;inset:0;background:rgba(10,14,30,.55);display:none;align-items:flex-start;justify-content:center;padding:34px 20px;z-index:60;overflow-y:auto}
@@ -406,7 +420,18 @@ footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey)
     <div class="card">
       <div class="cardHead"><h2>🚨 National escalations</h2><small>high-impact · same-day PMO review</small></div>
       <div class="urgent"><b>⚑ FLAGGED · 2h ago</b><p><b>Klang Valley</b> — reports of essential-goods hoarding pushing up prices ahead of the festive season.</p><button class="assignMini sg-only" onclick="openAssign('Essential-goods hoarding pushing prices — Klang Valley','Cost of living','high')">⚡ Issue directive</button></div>
-      <div class="urgent"><b>⚑ FLAGGED · 5h ago</b><p><b>National</b> — alleged contract irregularity flagged at a state-linked agency; multiple citizens raising it.</p><button class="assignMini sg-only" onclick="openAssign('Alleged contract irregularity — state-linked agency','Corruption & governance','high')">⚡ Issue directive</button></div>
+      <div class="cardHead" style="margin-top:18px"><h2>🔒 Protected disclosures</h2><small>referred to the competent authority · content not retained here</small></div>
+      <div class="sealed">
+        <div class="sh"><span class="lock">🔒</span>SEALED &amp; REFERRED · <span class="refd">✓ ACKNOWLEDGED</span></div>
+        <div class="meta"><span>Type: <b>Corruption allegation</b></span><span>State: <b>Selangor</b></span><span>Week: <b>2026-W29</b></span><span>Ref: <b>PD-2026-0184</b></span></div>
+        <div class="noContent">Details, names and transcript are <b>not held by this platform</b>. The disclosure was sealed to the receiving authority&rsquo;s key and referred through the statutory channel, then purged. The discloser keeps their legal protection.</div>
+      </div>
+      <div class="sealed">
+        <div class="sh"><span class="lock">🔒</span>SEALED &amp; REFERRED · <span class="refd pending">⏳ AWAITING ACKNOWLEDGEMENT</span></div>
+        <div class="meta"><span>Type: <b>Corruption allegation</b></span><span>State: <b>Sarawak</b></span><span>Week: <b>2026-W29</b></span><span>Ref: <b>PD-2026-0187</b></span></div>
+        <div class="noContent">Awaiting the authority&rsquo;s acknowledgement reference. Content is quarantined from analytics and cannot be opened from this dashboard by any role.</div>
+      </div>
+      <div class="carveNote"><b>Why you see no detail here.</b> Allegations of wrongdoing are deliberately <b>not accumulated</b> in this platform. They are quarantined out of the analytics pool, sealed to the receiving authority, referred through the proper statutory channel so the citizen retains whistleblower protection, and then purged. Only this anonymous count and trend remain — never the allegation, the accused, or the discloser.</div>
       <div class="flowTag act" style="margin-top:16px"><span>Outcomes</span><i></i></div>
       <div class="cardHead" style="margin-top:6px"><h2>✅ You said, we did</h2><small>closing the loop with the rakyat</small></div>
       <div class="sug"><div class="top"><b>Electricity subsidy retained for 85% of households as tariffs were restructured</b><span class="tag act">DELIVERED</span></div><div class="meta"><span>Driven by <b>1,240 sessions</b></span><span>Households notified via WhatsApp: <b>1,240</b></span></div></div>
@@ -609,7 +634,7 @@ const FEED=[
  {st:"Melaka",d:"Melaka Tengah",v:0.7,t:"Public services",q:"Renewing my licence online was fast this time. Thank you — please keep improving it.",l:"EN",time:"1 h ago"},
  {st:"Sabah",d:"Keningau",v:-0.6,t:"Healthcare",q:"The nearest clinic is far and always full. We need more rural health support.",l:"BM",time:"1 h ago"},
  {st:"Johor",d:"Johor Bahru",v:-0.4,t:"Housing",q:"Young couples here just can't buy. Rent eats everything.",l:"中文",time:"2 h ago"},
- {st:"Pahang",d:"Kuantan",v:-0.3,t:"Corruption & governance",q:"We want to see corruption cases actually finished, not just announced.",l:"BM",time:"2 h ago"},
+ {st:"Pahang",d:"Kuantan",v:-0.3,t:"Public services",q:"Renewing documents still means three different counters. Please join them up.",l:"BM",time:"2 h ago"},
  {st:"Sarawak",d:"Kuching",v:0.5,t:"National unity",q:"Proud to speak to the Prime Minister in my own language from Sarawak.",l:"BM",time:"3 h ago"},
  {st:"Perak",d:"Ipoh",v:-0.4,t:"Healthcare",q:"Specialist wait is months; we can't afford to go private.",l:"中文",time:"3 h ago"}
 ];
@@ -846,6 +871,7 @@ function drawDonut(pos,neu,neg){
 let currentTopic=null;
 function openTopic(t,count){
   currentTopic=t;
+  { const c=document.getElementById('tmCarve'); if(c) c.remove(); }
   const d=TOPIC_DETAIL[t]||{subs:[["General mentions",100]],quotes:[["(Representative quotes appear here.)","—"]],dists:["—"],trend:[8,8,9,9,10,10,11,11,12,12,13,13]};
   $('tmTitle').textContent=t;
   $('tmSub').textContent=(selState?STATES.find(s=>s.id===selState).n:'All Malaysia')+' · last '+rangeD+' days';
@@ -861,8 +887,29 @@ function openTopic(t,count){
   $('tmSubs').innerHTML=d.subs.map(([nm,v])=>
     `<div class="subIssue"><div class="nm">${nm}</div><div class="barBg"><div class="barFill" style="width:${v/mS*100}%"></div></div><b>${v}%</b></div>`).join('');
   $('tmDists').innerHTML=d.dists.map(x=>`<span class="distHit">${x}</span>`).join('');
-  $('tmQuotes').innerHTML=d.quotes.map(([q,m])=>`<div class="q">“${q}”<small>${m}</small></div>`).join('');
-  $('tmAssign').onclick=()=>{$('topicModal').classList.remove('open');openAssign(t+' — '+(d.subs[0][0]),t,'elevated');};
+  /* Restricted class: governance/corruption is referral-only. No verbatim voices are
+     surfaced and no ministry directive can be issued against an individual allegation —
+     see docs/DATA-GOVERNANCE.md §5. Aggregate trend remains visible to the leader. */
+  const restricted = (t === 'Corruption & governance');
+  if (restricted) {
+    $('tmQuotes').innerHTML =
+      `<div class="q" style="border-left-color:#5A2CA0;font-style:normal;background:#F4F1FB">
+         🔒 <b>Representative voices are not shown for this concern.</b><br>
+         Individual disclosures are quarantined out of the analytics pool, sealed to the
+         competent authority and referred through the statutory channel, then purged — so the
+         discloser keeps their legal protection and this office does not hold the allegation.
+         What remains is the aggregate trend above.
+         <small>Protected-disclosure handling · content not retained</small>
+       </div>`;
+    $('tmAssign').classList.add('pd-hidden');
+    $('tmSubs').insertAdjacentHTML('afterend',
+      `<div class="carveNote" id="tmCarve">Referral-only concern. Ministry directives are not issued against individual allegations; systemic reforms (e.g. publishing case timelines) are actioned through the proposals board instead.</div>`);
+  } else {
+    const carve=$('tmCarve'); if(carve) carve.remove();
+    $('tmQuotes').innerHTML=d.quotes.map(([q,m])=>`<div class="q">“${q}”<small>${m}</small></div>`).join('');
+    $('tmAssign').classList.remove('pd-hidden');
+    $('tmAssign').onclick=()=>{$('topicModal').classList.remove('open');openAssign(t+' — '+(d.subs[0][0]),t,'elevated');};
+  }
   $('topicModal').classList.add('open');
 }
 
