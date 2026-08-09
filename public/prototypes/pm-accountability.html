@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DENGAR Accountability — Directive Tracking & Ministry Response</title>
+<style>
+:root{
+  --navy:#1B2A6B; --navy-d:#121C4A; --red:#D22030; --gold:#FFCC00;
+  --green:#1E9E52; --amber:#E8A400; --purple:#5A2CA0;
+  --bg:#EEF0F4; --card:#FFFFFF; --ink:#17181C; --grey:#6B7180; --line:#E3E6EC;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+
+/* ================= HEADER ================= */
+header{background:linear-gradient(100deg,var(--navy-d),var(--navy) 60%,#24368a);color:#fff;padding:16px 26px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.hLogo{display:flex;align-items:center;gap:12px}
+.hLogo .t b{display:block;font-size:15px;font-weight:800;letter-spacing:.4px}
+.hLogo .t small{display:block;font-size:8.5px;font-weight:700;letter-spacing:1.4px;color:var(--gold)}
+.hTitle h1{font-size:17px;font-weight:800;letter-spacing:.2px}
+.hTitle p{font-size:11.5px;opacity:.72;margin-top:2px}
+.hRight{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.live{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;background:rgba(255,255,255,.12);padding:7px 12px;border-radius:99px}
+.live i{width:8px;height:8px;border-radius:50%;background:#3DDC6A;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.langTgl,.viewTgl{display:flex;background:rgba(255,255,255,.12);border-radius:11px;padding:3px}
+.langTgl button{border:0;background:transparent;color:#fff;font-size:11.5px;font-weight:800;padding:7px 12px;border-radius:9px;opacity:.7;letter-spacing:.4px;transition:.15s}
+.langTgl button.on{background:var(--gold);color:#3A2C00;opacity:1}
+.viewTgl button{border:0;background:transparent;color:#fff;font-size:12px;font-weight:800;padding:8px 14px;border-radius:9px;opacity:.72;transition:.15s}
+.viewTgl button.on{background:#fff;color:var(--navy);opacity:1;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.navBtn{border:0;background:rgba(255,255,255,.15);color:#fff;font-weight:800;font-size:12px;padding:9px 15px;border-radius:11px}
+.navBtn.gold{background:var(--gold);color:#3A2C00}
+
+.wrap{padding:20px 26px 40px;max-width:1680px;margin:0 auto}
+.flowTag{display:flex;align-items:center;gap:10px;margin:22px 0 12px}
+.flowTag span{font-size:10.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--navy)}
+.flowTag i{flex:1;height:1px;background:linear-gradient(90deg,#C8D0E4,transparent)}
+.flowTag.act span{color:var(--purple)}
+.card{background:var(--card);border-radius:15px;padding:18px 20px;box-shadow:0 2px 10px rgba(20,30,80,.06)}
+.cardHead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cardHead h2{font-size:14.5px;font-weight:800}
+.cardHead small{font-size:11px;color:var(--grey);font-weight:600;margin-left:auto}
+
+/* ================= KPI ================= */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.kpi{background:var(--card);border-radius:15px;padding:15px 17px;border-left:4px solid var(--navy);box-shadow:0 2px 10px rgba(20,30,80,.06)}
+.kpi.k2{border-left-color:var(--red)}.kpi.k3{border-left-color:var(--amber)}
+.kpi.k4{border-left-color:var(--green)}.kpi.k5{border-left-color:var(--purple)}
+.kpi .lbl{font-size:10px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--grey)}
+.kpi .val{font-size:31px;font-weight:800;margin:3px 0 1px;font-variant-numeric:tabular-nums}
+.kpi .delta{font-size:10.5px;font-weight:700;color:var(--grey)}
+.kpi .delta.good{color:var(--green)}.kpi .delta.bad{color:var(--red)}
+
+/* ================= FUNNEL ================= */
+.funnel{display:flex;gap:6px;align-items:stretch;overflow-x:auto;padding-bottom:4px}
+.fStep{flex:1;min-width:118px;border-radius:12px;padding:12px 11px;position:relative;background:#F4F6FA;border:1px solid var(--line)}
+.fStep .fn{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--grey);line-height:1.3;min-height:24px}
+.fStep .fv{font-size:25px;font-weight:800;margin-top:5px;font-variant-numeric:tabular-nums}
+.fStep .fd{font-size:10px;font-weight:700;margin-top:2px}
+.fStep .fd.drop{color:var(--red)}
+.fStep.stall{background:#FDECEC;border-color:#F3C9CD}
+.fStep.ok{background:#E8F7EE;border-color:#BEE6CD}
+.fNote{font-size:11px;color:var(--grey);font-weight:600;margin-top:10px;line-height:1.5}
+
+/* ================= RESPONSIVENESS TABLE ================= */
+.rTbl{width:100%;border-collapse:collapse;font-size:12px}
+.rTbl th{text-align:left;font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--grey);padding:0 8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.rTbl th.n,.rTbl td.n{text-align:right}
+.rTbl td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.rTbl tr:last-child td{border-bottom:0}
+.rTbl tr.clk{cursor:pointer}
+.rTbl tr.clk:hover td{background:#F7F9FD}
+.rTbl .mn{font-weight:700;line-height:1.3}
+.rTbl .mn small{display:block;font-size:10px;font-weight:600;color:var(--grey)}
+.idx{display:inline-flex;align-items:center;justify-content:center;min-width:38px;padding:4px 8px;border-radius:8px;font-size:12px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+.sla{font-variant-numeric:tabular-nums;font-weight:700}
+.sla.bad{color:var(--red)}.sla.warn{color:#8A6400}.sla.good{color:var(--green)}
+.mBar{height:7px;background:#EDEFF4;border-radius:5px;overflow:hidden;min-width:60px}
+.mBar i{display:block;height:100%;border-radius:5px}
+.trArw{font-size:11px;font-weight:800}
+.trArw.up{color:var(--green)}.trArw.dn{color:var(--red)}.trArw.fl{color:var(--grey)}
+
+/* ================= BREACH BOARD ================= */
+.breach{border:1px solid #F3C9CD;background:#FDF6F6;border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.breach .bh{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:10px;font-weight:800;letter-spacing:.5px;color:#A31C28}
+.breach .bt{font-size:12.5px;font-weight:700;line-height:1.4;margin:6px 0 5px}
+.breach .bm{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--grey);font-weight:600}
+.breach .bm b{color:var(--ink)}
+.clock{display:inline-flex;align-items:center;gap:5px;background:#F7DDDF;color:#A31C28;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800;font-variant-numeric:tabular-nums}
+.rung{display:inline-flex;align-items:center;gap:5px;background:#EDE6FA;color:var(--purple);padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800}
+.bAct{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+.miniBtn{border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:11px;font-weight:800;padding:6px 12px;border-radius:8px}
+.miniBtn.p{background:var(--navy);border-color:var(--navy);color:#fff}
+.miniBtn.r{background:var(--red);border-color:var(--red);color:#fff}
+
+/* ================= LADDER ================= */
+.ladder{display:flex;flex-direction:column;gap:0}
+.lRung{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}
+.lRung:last-child{border-bottom:0}
+.lRung .dot{width:11px;height:11px;border-radius:50%;background:#D8DEEA;flex-shrink:0}
+.lRung.done .dot{background:var(--green)}
+.lRung.now .dot{background:var(--red);box-shadow:0 0 0 4px rgba(210,32,48,.16)}
+.lRung .ln{flex:1;font-weight:700}
+.lRung .ln small{display:block;font-size:10.5px;font-weight:600;color:var(--grey);margin-top:1px}
+.lRung .lt{font-size:10.5px;font-weight:700;color:var(--grey);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lRung.now .lt{color:var(--red)}
+
+/* ================= GRIDS ================= */
+.grid-2{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+@media(max-width:1180px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* ================= COMMS THREAD ================= */
+.thPick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.thChip{border:1.5px solid var(--line);background:#fff;font-size:11px;font-weight:700;padding:7px 12px;border-radius:9px;color:var(--ink)}
+.thChip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.thread{display:flex;flex-direction:column;gap:0;position:relative;padding-left:26px}
+.thread::before{content:"";position:absolute;left:8px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.ev{position:relative;padding:10px 0 12px}
+.ev .ico{position:absolute;left:-26px;top:11px;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9px}
+.ev.out .ico{border-color:var(--navy);color:var(--navy)}
+.ev.in .ico{border-color:var(--green);color:var(--green)}
+.ev.sys .ico{border-color:var(--grey);color:var(--grey)}
+.ev.warnE .ico{border-color:var(--red);color:var(--red)}
+.ev .eh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ev .who{font-size:12px;font-weight:800}
+.ev .role{font-size:10px;font-weight:700;color:var(--grey);background:#F1F3F8;padding:2px 7px;border-radius:5px}
+.ev .ch{font-size:9.5px;font-weight:800;letter-spacing:.4px;padding:2px 7px;border-radius:5px}
+.ev .ch.portal{background:#E7EDFB;color:#2E44A8}
+.ev .ch.email{background:#FFF3D6;color:#8A6400}
+.ev .ch.system{background:#F1F3F8;color:var(--grey)}
+.ev .ch.wa{background:#E2F6E9;color:#137A3D}
+.ev .ts{font-size:10.5px;color:var(--grey);font-weight:600;margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ev .body{font-size:12.5px;line-height:1.55;margin-top:5px;color:var(--ink)}
+.ev .att{display:inline-flex;align-items:center;gap:6px;background:#F4F6FA;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;margin-top:7px}
+.ev .lat{font-size:10.5px;font-weight:800;margin-top:6px}
+.ev .lat.good{color:var(--green)}.ev .lat.bad{color:var(--red)}.ev .lat.warn{color:#8A6400}
+.noReply{background:#FDF6F6;border:1px dashed #E9B9BF;border-radius:11px;padding:11px 13px;font-size:12px;color:#A31C28;font-weight:700;line-height:1.5;margin-top:6px}
+
+/* ================= VERIFY QUEUE ================= */
+.vq{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.vq .vh{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.vq .vt{font-size:12.5px;font-weight:700;line-height:1.4;flex:1;min-width:180px}
+.tag{font-size:9.5px;font-weight:800;letter-spacing:.4px;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.tag.claim{background:#FFF3D6;color:#8A6400}
+.tag.pass{background:#E2F6E9;color:#137A3D}
+.tag.fail{background:#FDECEC;color:#A31C28}
+.tag.prog{background:#E7EDFB;color:#2E44A8}
+.tag.asg{background:#F1F3F8;color:var(--grey)}
+.vq .vm{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--grey);font-weight:600;margin-top:7px}
+.vq .vm b{color:var(--ink)}
+.evd{background:#F4F6FA;border-radius:9px;padding:9px 11px;font-size:11.5px;line-height:1.5;margin-top:8px}
+.evd b{font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:3px}
+
+/* ================= FOLLOW-UPS ================= */
+.fu{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}
+.fu:last-child{border-bottom:0}
+.fu .ref{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;font-weight:700;background:#F1F3F8;padding:4px 8px;border-radius:6px;white-space:nowrap}
+.fu .fx{flex:1;line-height:1.4}
+.fu .fx small{display:block;font-size:10.5px;color:var(--grey);font-weight:600;margin-top:1px}
+.fuBar{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:11.5px}
+.fuBar .fn{width:34%;font-weight:700}
+.fuBar .fb{flex:1;height:7px;background:#EDEFF4;border-radius:5px;overflow:hidden}
+.fuBar .fb i{display:block;height:100%;background:var(--purple);border-radius:5px}
+.fuBar b{width:34px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ================= SEALED / CARVE ================= */
+.sealed{background:#F4F1FB;border:1px solid #D9CEF2;border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.sealed .sh{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--purple);letter-spacing:.4px;flex-wrap:wrap}
+.sealed .meta{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--grey);font-weight:600;margin-top:7px}
+.sealed .meta b{color:var(--ink)}
+.sealed .noContent{font-size:11.5px;color:#4A3A6B;background:#EDE6FA;border-radius:8px;padding:8px 11px;margin-top:8px;line-height:1.45}
+.refd{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;letter-spacing:.4px;background:#E2F6E9;color:#137A3D;padding:3px 8px;border-radius:6px}
+.refd.pending{background:#FFF3D6;color:#8A6400}
+.carveNote{font-size:11px;color:var(--grey);font-weight:600;line-height:1.5;background:#F7F8FB;border-left:3px solid var(--purple);border-radius:0 9px 9px 0;padding:9px 12px;margin-top:10px}
+
+/* ================= MODAL ================= */
+.modal{position:fixed;inset:0;background:rgba(10,14,30,.55);display:none;align-items:flex-start;justify-content:center;padding:34px 20px;z-index:60;overflow-y:auto}
+.modal.open{display:flex}
+.mCard{background:#fff;border-radius:17px;max-width:760px;width:100%;padding:24px 26px;position:relative;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.mCard h3{font-size:17.5px;font-weight:800;margin-bottom:3px;padding-right:40px}
+.mCard .sub{font-size:12px;color:var(--grey);margin-bottom:14px;font-weight:600}
+.mCard h4{font-size:12px;font-weight:800;margin:16px 0 8px;color:var(--navy);letter-spacing:.3px;text-transform:uppercase}
+.mClose{position:absolute;top:16px;right:18px;border:0;background:#F1F3F8;width:32px;height:32px;border-radius:50%;font-size:15px;color:var(--grey)}
+.miniStats{display:flex;gap:10px;flex-wrap:wrap}
+.miniStat{flex:1;min-width:118px;background:#F4F6FA;border-radius:11px;padding:10px 12px}
+.miniStat small{font-size:9.5px;font-weight:800;letter-spacing:.7px;color:var(--grey);text-transform:uppercase}
+.miniStat b{display:block;font-size:17px;margin-top:2px}
+.mFoot{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.btnP{flex:1;border:0;background:var(--navy);color:#fff;font-weight:800;font-size:13px;padding:12px;border-radius:11px}
+.btnS{flex:1;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-weight:700;font-size:13px;padding:12px;border-radius:11px}
+.emptyT{font-size:12px;color:var(--grey);font-weight:600;text-align:center;padding:20px 6px;line-height:1.6}
+.hintLine{font-size:11px;color:var(--grey);font-weight:700;margin-top:10px}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:13px 20px;border-radius:12px;z-index:90;transition:transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:min(90vw,560px);text-align:center;line-height:1.4}
+.toast.show{transform:translateX(-50%)}
+footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey);font-weight:600}
+.pd-hidden{display:none!important}
+body:not(.sg) .sg-only{display:none!important}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hLogo">
+    <svg class="dwave" width="28" height="28" viewBox="0 0 28 28" fill="none"><g stroke="#FFCC00" stroke-width="2.8" stroke-linecap="round"><path d="M4 12 v4"/><path d="M9.5 7 v14"/><path d="M15 3 v22"/><path d="M20.5 8 v12"/><path d="M26 12 v4" stroke-opacity=".55"/></g></svg>
+    <div class="t"><b>DENGAR<span style="font-weight:300">.ai</span></b><small data-i18n="brandTag">EVERY VOICE MATTERS</small></div>
+  </div>
+  <div class="hTitle">
+    <h1 data-i18n="hTitle">DENGAR Accountability — Directive Tracking</h1>
+    <p data-i18n="hSub">Who was assigned · what they replied · how long it took · whether it was verified</p>
+  </div>
+  <div class="hRight">
+    <div class="langTgl" id="langTgl">
+      <button id="tglMs" onclick="setUiLang('ms')">BM</button>
+      <button id="tglEn" class="on" onclick="setUiLang('en')">EN</button>
+    </div>
+    <div class="viewTgl" id="viewTgl">
+      <button data-v="min" class="on" onclick="setView('min')" data-i18n="roleMin">👤 Prime Minister</button>
+      <button data-v="sg" onclick="setView('sg')" data-i18n="roleSg">🛠️ PMO Delivery Unit</button>
+    </div>
+    <div class="live"><i></i><span data-i18n="live">LIVE</span></div>
+    <button class="navBtn" onclick="openMinistryInbox()" data-i18n="inboxBtn">📥 Ministry view</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ BAND 1: ACCOUNTABILITY ============ -->
+  <div class="flowTag"><span data-i18n="band1">Accountability</span><i></i></div>
+  <div class="kpis">
+    <div class="kpi"><div class="lbl" data-i18n="kOpen">Open directives</div><div class="val" id="kOpen">—</div><div class="delta" id="kOpenD"></div></div>
+    <div class="kpi k2"><div class="lbl" data-i18n="kUnack">Past acknowledge SLA</div><div class="val" id="kUnack">—</div><div class="delta bad" data-i18n="kUnackD">requires escalation</div></div>
+    <div class="kpi k3"><div class="lbl" data-i18n="kAck">Median time to acknowledge</div><div class="val" id="kAck">—</div><div class="delta" id="kAckD"></div></div>
+    <div class="kpi k4"><div class="lbl" data-i18n="kRes">Median time to resolve</div><div class="val" id="kRes">—</div><div class="delta" id="kResD"></div></div>
+    <div class="kpi k5"><div class="lbl" data-i18n="kVer">Verification pass rate</div><div class="val" id="kVer">—</div><div class="delta" data-i18n="kVerD">PMO-verified, not self-declared</div></div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="card" style="margin-top:16px">
+    <div class="cardHead"><h2 data-i18n="funH">🔻 Directive pipeline — where things stall</h2><small data-i18n="funS">every directive issued in the last 90 days</small></div>
+    <div class="funnel" id="funnel"></div>
+    <div class="fNote" id="funNote"></div>
+  </div>
+
+  <!-- MINISTRY RESPONSIVENESS -->
+  <div class="card" style="margin-top:16px">
+    <div class="cardHead"><h2 data-i18n="riH">🏛️ Ministry Responsiveness Index</h2><small data-i18n="riS">composite of acknowledge speed, update cadence, on-time closure and verification pass rate</small></div>
+    <div style="overflow-x:auto">
+      <table class="rTbl" id="riTbl"></table>
+    </div>
+    <div class="hintLine" id="riHint">👉 Click a ministry to see its directives and full communication history</div>
+  </div>
+
+  <!-- ============ BAND 2: COMMUNICATION ============ -->
+  <div class="flowTag act"><span data-i18n="band2">Communication</span><i></i></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="cardHead"><h2 data-i18n="thH">💬 Communication trail</h2><small data-i18n="thS">system of record · every exchange, timestamped</small></div>
+      <div class="thPick" id="thPick"></div>
+      <div class="thread" id="thread"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div class="cardHead"><h2 data-i18n="ladH">🪜 Escalation ladder</h2><small id="ladSub"></small></div>
+        <div class="ladder" id="ladder"></div>
+        <div class="carveNote" data-i18n="ladNote">Each rung has its own clock. When it expires the directive rises automatically — nobody has to remember to chase it.</div>
+      </div>
+      <div class="card">
+        <div class="cardHead"><h2 data-i18n="chH">📡 Channel reliability</h2><small data-i18n="chS">last 90 days</small></div>
+        <div id="chList"></div>
+        <div class="carveNote" data-i18n="chNote">Email notifies; the portal is the record. Replies that arrive by email are ingested and stamped, so the SLA clock cannot be gamed by replying off-system.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLA BREACH BOARD -->
+  <div class="card" style="margin-top:16px">
+    <div class="cardHead"><h2 data-i18n="brH">🚨 SLA breach board</h2><small data-i18n="brS">no acknowledgement, no update, or past due · ordered by time in breach</small></div>
+    <div id="breachList"></div>
+  </div>
+
+  <!-- ============ BAND 3: VERIFICATION & CITIZEN LOOP ============ -->
+  <div class="flowTag act"><span data-i18n="band3">Verification &amp; the citizen loop</span><i></i></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="cardHead"><h2 data-i18n="vqH">✅ Verification queue</h2><small data-i18n="vqS">ministry says done · PMO must verify with evidence before it closes</small></div>
+      <div id="vqList"></div>
+      <div class="carveNote" data-i18n="vqNote">A ministry marking its own work complete is a claim, not an outcome. Nothing reaches “delivered” — and no citizen is notified — until the PMO Delivery Unit verifies the evidence.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div class="cardHead"><h2 data-i18n="fuH">🔎 Citizen follow-ups</h2><small data-i18n="fuS">by session reference · counter, WhatsApp and portal</small></div>
+        <div id="fuList"></div>
+        <div class="cardHead" style="margin-top:16px"><h2 style="font-size:12.5px" data-i18n="fuTopH">Follow-up volume by concern</h2></div>
+        <div id="fuTopics"></div>
+        <div class="carveNote" data-i18n="fuNote">Follow-up volume is itself a signal. A concern citizens keep chasing is a concern they do not believe has been addressed — regardless of what the delivery status says.</div>
+      </div>
+      <div class="card">
+        <div class="cardHead"><h2 data-i18n="dsH">⚖️ Disputed &amp; reassigned</h2><small data-i18n="dsS">ministry contests ownership or feasibility</small></div>
+        <div id="dsList"></div>
+        <div class="carveNote" data-i18n="dsNote">A tracking system that cannot record disagreement forces ministries to go silent instead. Dispute is a legitimate state with a resolution path, not a failure.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROTECTED DISCLOSURES -->
+  <div class="card" style="margin-top:16px">
+    <div class="cardHead"><h2 data-i18n="pdH">🔒 Protected disclosure referrals</h2><small data-i18n="pdS">acknowledgement tracking only · never assigned to a ministry</small></div>
+    <div id="pdList"></div>
+    <div class="carveNote" data-i18n="pdCarve"><b>Why these are tracked differently.</b> Protected disclosures are referred to the competent authority through the statutory channel, never routed to a ministry and never assigned to a named officer in this system. What is tracked is only whether the receiving authority has acknowledged the referral — so the PMO can confirm the channel is working without ever seeing what was disclosed, who disclosed it, or who was named.</div>
+  </div>
+</div>
+
+<footer data-i18n="footer">DENGAR Accountability · Prime Minister's Office · Demo prototype with synthetic data · BYOND asia × Malaysia MADANI</footer>
+
+<!-- ============ DIRECTIVE DETAIL MODAL ============ -->
+<div class="modal" id="dirModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard">
+    <button class="mClose" onclick="document.getElementById('dirModal').classList.remove('open')">✕</button>
+    <h3 id="dmTitle" data-i18n="dmPlaceholder">Directive</h3>
+    <div class="sub" id="dmSub"></div>
+    <div class="miniStats" id="dmStats"></div>
+    <h4 data-i18n="dmOwner">Assigned to</h4>
+    <div id="dmOwner"></div>
+    <h4 data-i18n="dmTrail">Communication trail</h4>
+    <div class="thread" id="dmThread"></div>
+    <h4 data-i18n="dmLadder">Escalation position</h4>
+    <div class="ladder" id="dmLadder"></div>
+    <h4 data-i18n="dmSessions">Citizen sessions behind this directive</h4>
+    <div id="dmSessions"></div>
+    <div class="mFoot">
+      <button class="btnS" onclick="toast(tt('toastLedger'))" data-i18n="dmOpenLedger">Open in Session Ledger</button>
+      <button class="btnP sg-only" id="dmChase" data-i18n="dmChaseBtn">⚡ Escalate now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MINISTRY DETAIL MODAL ============ -->
+<div class="modal" id="minModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard">
+    <button class="mClose" onclick="document.getElementById('minModal').classList.remove('open')">✕</button>
+    <h3 id="mmTitle" data-i18n="mmPlaceholder">Ministry</h3>
+    <div class="sub" id="mmSub"></div>
+    <div class="miniStats" id="mmStats"></div>
+    <h4 data-i18n="mmWhere">Where this ministry loses time</h4>
+    <div id="mmWhere"></div>
+    <h4 data-i18n="mmDirs">Open directives</h4>
+    <div id="mmDirs"></div>
+    <h4 data-i18n="mmContacts">Named officers</h4>
+    <div id="mmContacts"></div>
+  </div>
+</div>
+
+<!-- ============ MINISTRY INBOX (the other side) ============ -->
+<div class="modal" id="inbModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard">
+    <button class="mClose" onclick="document.getElementById('inbModal').classList.remove('open')">✕</button>
+    <h3 data-i18n="inbH">What the ministry sees</h3>
+    <div class="sub" data-i18n="inbSub">The receiving end of a directive. This surface is why the trail is complete — the ministry replies here, not into an email thread nobody can audit.</div>
+    <div id="inbList"></div>
+    <div class="carveNote" data-i18n="inbNote">Design note: the ministry portal is deliberately narrow. An officer sees their own directives, the citizen evidence behind them, and a reply box that requires an attachment. They never see other ministries' performance, other citizens' sessions, or any protected disclosure.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   UI LANGUAGE
+================================================================ */
+let uiLang='en';
+const I18N={en:{},ms:{}};
+const tt=k=>(I18N[uiLang][k]!==undefined?I18N[uiLang][k]:(I18N.en[k]||k));
+
+I18N.en={
+ brandTag:"EVERY VOICE MATTERS",
+ hTitle:"DENGAR Accountability — Directive Tracking",
+ hSub:"Who was assigned · what they replied · how long it took · whether it was verified",
+ roleMin:"👤 Prime Minister", roleSg:"🛠️ PMO Delivery Unit", live:"LIVE",
+ inboxBtn:"📥 Ministry view",
+ band1:"Accountability", band2:"Communication", band3:"Verification & the citizen loop",
+ kOpen:"Open directives", kUnack:"Past acknowledge SLA",
+ kUnackD:"requires escalation", kAck:"Median time to acknowledge",
+ kRes:"Median time to resolve", kVer:"Verification pass rate",
+ kVerD:"PMO-verified, not self-declared",
+ funH:"🔻 Directive pipeline — where things stall", funS:"every directive issued in the last 90 days",
+ riH:"🏛️ Ministry Responsiveness Index",
+ riS:"composite of acknowledge speed, update cadence, on-time closure and verification pass rate",
+ riHint:"👉 Click a ministry to see its directives and full communication history",
+ thH:"💬 Communication trail", thS:"system of record · every exchange, timestamped",
+ ladH:"🪜 Escalation ladder",
+ ladNote:"Each rung has its own clock. When it expires the directive rises automatically — nobody has to remember to chase it.",
+ chH:"📡 Channel reliability", chS:"last 90 days",
+ chNote:"Email notifies; the portal is the record. Replies that arrive by email are ingested and stamped, so the SLA clock cannot be gamed by replying off-system.",
+ brH:"🚨 SLA breach board", brS:"no acknowledgement, no update, or past due · ordered by time in breach",
+ vqH:"✅ Verification queue", vqS:"ministry says done · PMO must verify with evidence before it closes",
+ vqNote:"A ministry marking its own work complete is a claim, not an outcome. Nothing reaches “delivered” — and no citizen is notified — until the PMO Delivery Unit verifies the evidence.",
+ fuH:"🔎 Citizen follow-ups", fuS:"by session reference · counter, WhatsApp and portal",
+ fuTopH:"Follow-up volume by concern",
+ fuNote:"Follow-up volume is itself a signal. A concern citizens keep chasing is a concern they do not believe has been addressed — regardless of what the delivery status says.",
+ dsH:"⚖️ Disputed & reassigned", dsS:"ministry contests ownership or feasibility",
+ dsNote:"A tracking system that cannot record disagreement forces ministries to go silent instead. Dispute is a legitimate state with a resolution path, not a failure.",
+ pdH:"🔒 Protected disclosure referrals", pdS:"acknowledgement tracking only · never assigned to a ministry",
+ pdCarve:"<b>Why these are tracked differently.</b> Protected disclosures are referred to the competent authority through the statutory channel, never routed to a ministry and never assigned to a named officer in this system. What is tracked is only whether the receiving authority has acknowledged the referral — so the PMO can confirm the channel is working without ever seeing what was disclosed, who disclosed it, or who was named.",
+ footer:"DENGAR Accountability · Prime Minister's Office · Demo prototype with synthetic data · BYOND asia × Malaysia MADANI",
+ dmPlaceholder:"Directive", mmPlaceholder:"Ministry", dmOwner:"Assigned to", dmTrail:"Communication trail", dmLadder:"Escalation position",
+ dmSessions:"Citizen sessions behind this directive",
+ dmOpenLedger:"Open in Session Ledger", dmChaseBtn:"⚡ Escalate now",
+ mmWhere:"Where this ministry loses time", mmDirs:"Open directives", mmContacts:"Named officers",
+ inbH:"What the ministry sees",
+ inbSub:"The receiving end of a directive. This surface is why the trail is complete — the ministry replies here, not into an email thread nobody can audit.",
+ inbNote:"Design note: the ministry portal is deliberately narrow. An officer sees their own directives, the citizen evidence behind them, and a reply box that requires an attachment. They never see other ministries' performance, other citizens' sessions, or any protected disclosure.",
+ /* dynamic */
+ vsPrior:"vs prior period", target:"target", hrs:"h", days:"d", mins:"m",
+ issued:"Issued", delivered:"Delivered", acknowledged:"Acknowledged", ownerNamed:"Owner named",
+ inProgress:"In progress", updateSubmitted:"Update submitted", verified:"Verified", closed:"Closed",
+ dropoff:"lost here",
+ colMinistry:"Ministry", colDirs:"Directives", colAck:"Acknowledged", colAckT:"Median ack",
+ colUpd:"Update cadence", colClose:"On-time closure", colVer:"Verify pass", colIdx:"Index", colTr:"Trend",
+ noAck:"NO ACKNOWLEDGEMENT", noUpd:"NO UPDATE", overdue:"PAST DUE", disputed:"DISPUTED",
+ inBreach:"in breach", rungAt:"At rung", escalate:"Escalate", viewTrail:"View trail", callOfficer:"Call officer",
+ chPortal:"Portal", chEmail:"Email", chSystem:"System", chWa:"WhatsApp",
+ sentTo:"sent to", readAt:"read", noReplyYet:"No reply. The acknowledge clock has expired and this directive has auto-escalated.",
+ latOk:"within SLA", latLate:"SLA breached by", latWarn:"approaching SLA",
+ claimTag:"CLAIMED COMPLETE", passTag:"VERIFIED", failTag:"REJECTED",
+ evidence:"Evidence submitted", verifyBtn:"Verify & close", rejectBtn:"Reject",
+ verifiedBy:"Verified by", claimedOn:"Claimed",
+ fuAsk:"asked for an update", fuVia:"via", fuLinked:"linked to",
+ fuAtCounter:"PMO counter", fuWhatsApp:"WhatsApp", fuPortal:"Portal",
+ dmIssuedBy:"Issued by", dmDue:"Due", dmPriority:"Priority", dmAge:"Age", dmState:"State",
+ sessionsWord:"sessions", officerWord:"Officer", deputyWord:"Deputy Secretary",
+ sgWord:"Secretary General", dgWord:"Director General", pmWord:"Prime Minister",
+ rungDone:"cleared", rungWaiting:"waiting", rungNotReached:"not reached",
+ toastLedger:"Demo: the 1,240 sessions behind this directive would open in the Session Ledger.",
+ toastEsc:n=>"⚡ Escalated to "+n+" — notification sent, clock reset, action logged to the audit trail",
+ toastVerified:"✓ Verified and closed — the citizens who raised this are now notified via WhatsApp",
+ toastRejected:"Rejected back to the ministry with the reason. The closure clock keeps running.",
+ pdRefLbl:"Referral", pdAuth:"Receiving authority", pdWeek:"Week",
+ pdAck:"✓ ACKNOWLEDGED", pdWait:"⏳ AWAITING ACKNOWLEDGEMENT",
+ pdNoAssign:"Not assignable · no ministry, no named officer",
+ inbReply:"Submit update", inbAttach:"Attachment required",
+ whereAck:"Acknowledging the directive", whereOwner:"Naming an accountable officer",
+ whereUpd:"Submitting the first progress update", whereClose:"Closing before the due date",
+ whereEvid:"Providing evidence that passes verification",
+};
+
+I18N.ms={
+ brandTag:"SETIAP SUARA PENTING",
+ hTitle:"DENGAR Akauntabiliti — Penjejakan Arahan",
+ hSub:"Siapa ditugaskan · apa jawapan mereka · berapa lama · sama ada disahkan",
+ roleMin:"👤 Perdana Menteri", roleSg:"🛠️ Unit Penyampaian JPM", live:"LANGSUNG",
+ inboxBtn:"📥 Paparan kementerian",
+ band1:"Akauntabiliti", band2:"Komunikasi", band3:"Pengesahan &amp; kitaran rakyat",
+ kOpen:"Arahan terbuka", kUnack:"Melepasi SLA pengakuan",
+ kUnackD:"perlu eskalasi", kAck:"Median masa mengaku terima",
+ kRes:"Median masa selesai", kVer:"Kadar lulus pengesahan",
+ kVerD:"disahkan JPM, bukan diisytihar sendiri",
+ funH:"🔻 Saluran arahan — di mana ia tersekat", funS:"setiap arahan dikeluarkan dalam 90 hari lalu",
+ riH:"🏛️ Indeks Responsif Kementerian",
+ riS:"gabungan kelajuan pengakuan, kekerapan kemas kini, penutupan tepat masa dan kadar lulus pengesahan",
+ riHint:"👉 Klik kementerian untuk melihat arahan dan sejarah komunikasi penuh",
+ thH:"💬 Jejak komunikasi", thS:"sistem rekod · setiap pertukaran, bercop masa",
+ ladH:"🪜 Tangga eskalasi",
+ ladNote:"Setiap tangga ada jamnya sendiri. Apabila tamat, arahan naik secara automatik — tiada siapa perlu ingat untuk mengejarnya.",
+ chH:"📡 Kebolehpercayaan saluran", chS:"90 hari lalu",
+ chNote:"E-mel memberi notis; portal ialah rekod. Jawapan yang tiba melalui e-mel diserap dan dicop, jadi jam SLA tidak boleh diperdaya dengan menjawab di luar sistem.",
+ brH:"🚨 Papan pelanggaran SLA", brS:"tiada pengakuan, tiada kemas kini, atau lewat tempoh · disusun mengikut tempoh pelanggaran",
+ vqH:"✅ Baris gilir pengesahan", vqS:"kementerian kata selesai · JPM mesti sahkan dengan bukti sebelum ditutup",
+ vqNote:"Kementerian menandakan kerjanya sendiri selesai ialah tuntutan, bukan hasil. Tiada apa mencapai “disampaikan” — dan tiada rakyat dimaklumkan — sehingga Unit Penyampaian JPM mengesahkan buktinya.",
+ fuH:"🔎 Susulan rakyat", fuS:"mengikut rujukan sesi · kaunter, WhatsApp dan portal",
+ fuTopH:"Jumlah susulan mengikut isu",
+ fuNote:"Jumlah susulan itu sendiri satu petunjuk. Isu yang rakyat terus kejar ialah isu yang mereka tidak percaya telah diselesaikan — tidak kira apa status penyampaian menyatakan.",
+ dsH:"⚖️ Dipertikai &amp; ditugaskan semula", dsS:"kementerian mempertikaikan pemilikan atau kebolehlaksanaan",
+ dsNote:"Sistem penjejakan yang tidak boleh merekod perselisihan memaksa kementerian berdiam diri. Pertikaian ialah keadaan sah dengan jalan penyelesaian, bukan kegagalan.",
+ pdH:"🔒 Rujukan pendedahan terlindung", pdS:"penjejakan pengakuan sahaja · tidak pernah ditugaskan kepada kementerian",
+ pdCarve:"<b>Mengapa ini dijejaki secara berbeza.</b> Pendedahan terlindung dirujuk kepada pihak berkuasa berwibawa melalui saluran berkanun, tidak pernah disalurkan kepada kementerian dan tidak pernah ditugaskan kepada pegawai bernama dalam sistem ini. Yang dijejaki hanyalah sama ada pihak berkuasa penerima telah mengakui terima rujukan — supaya JPM boleh memastikan saluran berfungsi tanpa pernah melihat apa yang didedahkan, siapa mendedahkannya, atau siapa yang dinamakan.",
+ footer:"DENGAR Akauntabiliti · Jabatan Perdana Menteri · Prototaip demo dengan data sintetik · BYOND asia × Malaysia MADANI",
+ dmPlaceholder:"Arahan", mmPlaceholder:"Kementerian", dmOwner:"Ditugaskan kepada", dmTrail:"Jejak komunikasi", dmLadder:"Kedudukan eskalasi",
+ dmSessions:"Sesi rakyat di sebalik arahan ini",
+ dmOpenLedger:"Buka dalam Lejar Sesi", dmChaseBtn:"⚡ Eskalasi sekarang",
+ mmWhere:"Di mana kementerian ini kehilangan masa", mmDirs:"Arahan terbuka", mmContacts:"Pegawai bernama",
+ inbH:"Apa yang kementerian lihat",
+ inbSub:"Penerima arahan. Permukaan inilah sebab jejak menjadi lengkap — kementerian menjawab di sini, bukan dalam rantaian e-mel yang tidak boleh diaudit.",
+ inbNote:"Nota reka bentuk: portal kementerian sengaja dibuat sempit. Pegawai melihat arahannya sendiri, bukti rakyat di sebaliknya, dan ruang jawapan yang memerlukan lampiran. Mereka tidak pernah melihat prestasi kementerian lain, sesi rakyat lain, atau sebarang pendedahan terlindung.",
+ /* dynamic */
+ vsPrior:"vs tempoh lalu", target:"sasaran", hrs:"j", days:"h", mins:"m",
+ issued:"Dikeluarkan", delivered:"Dihantar", acknowledged:"Diakui terima", ownerNamed:"Pemilik dinamakan",
+ inProgress:"Dalam tindakan", updateSubmitted:"Kemas kini dihantar", verified:"Disahkan", closed:"Ditutup",
+ dropoff:"hilang di sini",
+ colMinistry:"Kementerian", colDirs:"Arahan", colAck:"Diakui", colAckT:"Median pengakuan",
+ colUpd:"Kekerapan kemas kini", colClose:"Tutup tepat masa", colVer:"Lulus sahkan", colIdx:"Indeks", colTr:"Aliran",
+ noAck:"TIADA PENGAKUAN", noUpd:"TIADA KEMAS KINI", overdue:"LEWAT TEMPOH", disputed:"DIPERTIKAI",
+ inBreach:"dalam pelanggaran", rungAt:"Pada tangga", escalate:"Eskalasi", viewTrail:"Lihat jejak", callOfficer:"Hubungi pegawai",
+ chPortal:"Portal", chEmail:"E-mel", chSystem:"Sistem", chWa:"WhatsApp",
+ sentTo:"dihantar kepada", readAt:"dibaca", noReplyYet:"Tiada jawapan. Jam pengakuan telah tamat dan arahan ini telah dieskalasi secara automatik.",
+ latOk:"dalam SLA", latLate:"SLA dilanggar sebanyak", latWarn:"menghampiri SLA",
+ claimTag:"DITUNTUT SELESAI", passTag:"DISAHKAN", failTag:"DITOLAK",
+ evidence:"Bukti dikemukakan", verifyBtn:"Sahkan & tutup", rejectBtn:"Tolak",
+ verifiedBy:"Disahkan oleh", claimedOn:"Dituntut",
+ fuAsk:"meminta kemas kini", fuVia:"melalui", fuLinked:"berkait dengan",
+ fuAtCounter:"Kaunter JPM", fuWhatsApp:"WhatsApp", fuPortal:"Portal",
+ dmIssuedBy:"Dikeluarkan oleh", dmDue:"Tarikh akhir", dmPriority:"Keutamaan", dmAge:"Umur", dmState:"Keadaan",
+ sessionsWord:"sesi", officerWord:"Pegawai", deputyWord:"Timbalan Setiausaha",
+ sgWord:"Ketua Setiausaha", dgWord:"Ketua Pengarah", pmWord:"Perdana Menteri",
+ rungDone:"selesai", rungWaiting:"menunggu", rungNotReached:"belum dicapai",
+ toastLedger:"Demo: 1,240 sesi di sebalik arahan ini akan dibuka dalam Lejar Sesi.",
+ toastEsc:n=>"⚡ Dieskalasi kepada "+n+" — notis dihantar, jam ditetapkan semula, tindakan direkod dalam jejak audit",
+ toastVerified:"✓ Disahkan dan ditutup — rakyat yang membangkitkan isu ini kini dimaklumkan melalui WhatsApp",
+ toastRejected:"Ditolak semula kepada kementerian dengan sebabnya. Jam penutupan terus berjalan.",
+ pdRefLbl:"Rujukan", pdAuth:"Pihak berkuasa penerima", pdWeek:"Minggu",
+ pdAck:"✓ DIAKUI TERIMA", pdWait:"⏳ MENUNGGU PENGAKUAN",
+ pdNoAssign:"Tidak boleh ditugaskan · tiada kementerian, tiada pegawai bernama",
+ inbReply:"Hantar kemas kini", inbAttach:"Lampiran diperlukan",
+ whereAck:"Mengaku terima arahan", whereOwner:"Menamakan pegawai bertanggungjawab",
+ whereUpd:"Menghantar kemas kini kemajuan pertama", whereClose:"Menutup sebelum tarikh akhir",
+ whereEvid:"Memberikan bukti yang lulus pengesahan",
+};
+
+/* ---- display translation for data values (keys stay English) ---- */
+const T_DEPT={
+ kpdn:"Perdagangan Dalam Negeri & Kos Sara Hidup (KPDN)", mohr:"Sumber Manusia (KESUMA)",
+ moh:"Kementerian Kesihatan (KKM)", moe:"Kementerian Pendidikan (KPM)",
+ kpkt:"Perumahan & Kerajaan Tempatan (KPKT)", kdn:"Kementerian Dalam Negeri (KDN)",
+ mof:"Kementerian Kewangan (MOF)", jpm:"Jabatan Perdana Menteri (JPM)",
+ miti:"Pelaburan, Perdagangan & Industri (MITI)"
+};
+const T_TOPIC={
+ "Cost of living":"Kos sara hidup","Jobs & economy":"Pekerjaan & ekonomi","Healthcare":"Kesihatan",
+ "Education":"Pendidikan","Housing":"Perumahan","Public services":"Perkhidmatan awam",
+ "Safety & crime":"Keselamatan & jenayah","Corruption & governance":"Rasuah & tadbir urus"
+};
+const T_TEXT={
+ "Cost of living: accelerate targeted SARA aid & weekly price watch":"Kos sara hidup: pecut bantuan SARA bersasar & pemantauan harga mingguan",
+ "Graduate wages & job quality — national action plan":"Gaji graduan & kualiti pekerjaan — pelan tindakan nasional",
+ "Corruption cases — publish quarterly progress & timelines":"Kes rasuah — terbitkan kemajuan suku tahunan & garis masa",
+ "Rent-to-own pilot for first-home youth":"Perintis sewa-beli untuk rumah pertama golongan muda",
+ "Rural clinic capacity — East Malaysia delivery package":"Kapasiti klinik luar bandar — pakej penyampaian Malaysia Timur",
+ "Single-window document renewal across district offices":"Pembaharuan dokumen satu tingkap di pejabat daerah",
+ "Essential-goods hoarding — Klang Valley enforcement":"Penyorokan barang keperluan — penguatkuasaan Lembah Klang",
+ "PPR waiting-list status visibility for applicants":"Kebolehlihatan status senarai menunggu PPR untuk pemohon",
+ /* trail bodies */
+ "Directive issued by the Director General on behalf of the Prime Minister. Submit a cost-of-living recovery plan and a weekly essential-goods price watch to the PMO within 14 days.":"Arahan dikeluarkan oleh Ketua Pengarah bagi pihak Perdana Menteri. Kemukakan pelan pemulihan kos sara hidup dan pemantauan harga barang keperluan mingguan kepada JPM dalam 14 hari.",
+ "Delivered to the ministry directive inbox. Email notification sent to 3 recipients.":"Dihantar ke peti arahan kementerian. Notis e-mel dihantar kepada 3 penerima.",
+ "Acknowledged. Accountable officer named: Puan Nurul Aina binti Hassan, Senior Director, Price Control Division.":"Diakui terima. Pegawai bertanggungjawab dinamakan: Puan Nurul Aina binti Hassan, Pengarah Kanan, Bahagian Kawalan Harga.",
+ "First progress update. Price-watch data collection started in 6 states. Recovery plan drafting in progress, targeting submission by the due date.":"Kemas kini kemajuan pertama. Pengumpulan data pemantauan harga dimulakan di 6 negeri. Draf pelan pemulihan sedang berjalan, menyasarkan penyerahan sebelum tarikh akhir.",
+ "PMO query: the update does not cover Sabah and Sarawak, which are the two states with the sharpest sentiment decline. Please confirm coverage.":"Pertanyaan JPM: kemas kini tidak merangkumi Sabah dan Sarawak, dua negeri dengan penurunan sentimen paling tajam. Sahkan liputan.",
+ "Coverage extended to Sabah and Sarawak. Two additional enforcement teams assigned. Revised plan attached.":"Liputan diperluas ke Sabah dan Sarawak. Dua pasukan penguatkuasaan tambahan ditugaskan. Pelan yang disemak dilampirkan.",
+ "Completion claimed. Recovery plan submitted and weekly price watch operational in all 16 states.":"Penyelesaian dituntut. Pelan pemulihan dikemukakan dan pemantauan harga mingguan beroperasi di semua 16 negeri.",
+ "Weekly price-watch report, weeks 26–29 (4 files)":"Laporan pemantauan harga mingguan, minggu 26–29 (4 fail)",
+ "Cost-of-living recovery plan v2 — with East Malaysia coverage":"Pelan pemulihan kos sara hidup v2 — dengan liputan Malaysia Timur",
+ "Enforcement team deployment schedule":"Jadual penempatan pasukan penguatkuasaan",
+ "Case-timeline publication framework — draft":"Rangka kerja penerbitan garis masa kes — draf",
+ "Rent-to-own pilot: 240 units allocated, Selangor and Johor":"Perintis sewa-beli: 240 unit diagihkan, Selangor dan Johor",
+ "Reassignment requested. Price enforcement in wet markets sits with local authorities under KPKT, not KPDN. Requesting joint assignment.":"Penugasan semula dipohon. Penguatkuasaan harga di pasar basah di bawah pihak berkuasa tempatan KPKT, bukan KPDN. Memohon penugasan bersama.",
+ "Feasibility disputed. The 14-day timeline cannot accommodate the inter-agency data-sharing agreement required. Requesting extension to 30 days with a phased milestone.":"Kebolehlaksanaan dipertikai. Garis masa 14 hari tidak dapat menampung perjanjian perkongsian data antara agensi yang diperlukan. Memohon lanjutan kepada 30 hari dengan pencapaian berperingkat.",
+ "No response recorded. Acknowledge SLA expired 4 days ago. Auto-escalated to Deputy Secretary.":"Tiada jawapan direkodkan. SLA pengakuan tamat 4 hari lalu. Auto-eskalasi kepada Timbalan Setiausaha.",
+
+ /* directive bodies */
+ "Coordinate with the anti-corruption commission on a public case-timeline tracker.":"Selaras dengan suruhanjaya pencegahan rasuah untuk penjejak garis masa kes umum.",
+ "Investigate reported hoarding of essential goods in the Klang Valley ahead of the festive season and report enforcement action within 7 days.":"Siasat laporan penyorokan barang keperluan di Lembah Klang menjelang musim perayaan dan laporkan tindakan penguatkuasaan dalam 7 hari.",
+ "Give PPR applicants visibility of their waiting-list position. Report an implementation plan within 21 days.":"Beri pemohon PPR kebolehlihatan kedudukan senarai menunggu mereka. Laporkan pelan pelaksanaan dalam 21 hari.",
+ "Prepare a rural clinic capacity package for Sabah and Sarawak. Report within 14 days.":"Sediakan pakej kapasiti klinik luar bandar untuk Sabah dan Sarawak. Laporkan dalam 14 hari.",
+ "Launch a rent-to-own pilot for first-home youth buyers. Report allocation within 30 days.":"Lancarkan perintis sewa-beli untuk pembeli rumah pertama golongan muda. Laporkan agihan dalam 30 hari.",
+ /* acknowledgements */
+ "Acknowledged. Accountable officer named: Tuan Haji Zulkifli bin Omar, Under Secretary, Integrity Division.":"Diakui terima. Pegawai bertanggungjawab dinamakan: Tuan Haji Zulkifli bin Omar, Setiausaha Bawahan, Bahagian Integriti.",
+ "Acknowledged. Accountable officer named: Encik Ravindran a/l Muthu, Director, Public Housing Division.":"Diakui terima. Pegawai bertanggungjawab dinamakan: Encik Ravindran a/l Muthu, Pengarah, Bahagian Perumahan Awam.",
+ "Acknowledged. Accountable officer named: Dr. Siti Mariam binti Abdullah, Deputy Director, Family Health Development.":"Diakui terima. Pegawai bertanggungjawab dinamakan: Dr. Siti Mariam binti Abdullah, Timbalan Pengarah, Pembangunan Kesihatan Keluarga.",
+ /* updates */
+ "Framework drafted. Inter-agency data-sharing agreement with the commission still under legal review.":"Rangka kerja dirangka. Perjanjian perkongsian data antara agensi dengan suruhanjaya masih dalam semakan undang-undang.",
+ "Site assessment complete for 14 rural clinics. Mobile-team costing under preparation.":"Penilaian tapak selesai untuk 14 klinik luar bandar. Kos pasukan bergerak sedang disediakan.",
+ "Completion claimed. Pilot launched with 240 units allocated across Selangor and Johor.":"Penyelesaian dituntut. Perintis dilancarkan dengan 240 unit diagihkan di Selangor dan Johor.",
+ "Verified against the allocation register. Closed. 588 citizens who raised this concern notified via WhatsApp.":"Disahkan terhadap daftar agihan. Ditutup. 588 rakyat yang membangkitkan isu ini dimaklumkan melalui WhatsApp.",
+ "Past due by 1 day with no closure submission. Auto-escalated to Deputy Secretary.":"Lewat 1 hari tanpa penyerahan penutupan. Auto-eskalasi kepada Timbalan Setiausaha.",
+ /* officer roles */
+ "Senior Director, Price Control Division":"Pengarah Kanan, Bahagian Kawalan Harga",
+ "Under Secretary, Integrity Division":"Setiausaha Bawahan, Bahagian Integriti",
+ "Director, Public Housing Division":"Pengarah, Bahagian Perumahan Awam",
+ "Deputy Director, Family Health Development":"Timbalan Pengarah, Pembangunan Kesihatan Keluarga",
+ /* priority */
+ "high":"kritikal","elevated":"tinggi","normal":"biasa",
+
+ /* actors */
+ "Director General, PMO":"Ketua Pengarah, JPM",
+ "PMO Delivery Unit":"Unit Penyampaian JPM",
+ "KPDN Directive Desk":"Meja Arahan KPDN",
+ "MOH Directive Desk":"Meja Arahan KKM",
+ "JPM Integrity Division":"Bahagian Integriti JPM",
+ /* receipts */
+ "not opened":"tidak dibuka",
+ /* channel notes */
+ "system of record":"sistem rekod",
+ "23 bounced or unopened":"23 gagal hantar atau tidak dibuka",
+ "citizen notifications":"notis kepada rakyat",
+ /* follow-up places */
+ "Putrajaya PMO counter":"Kaunter JPM Putrajaya",
+ "Klang district office":"Pejabat daerah Klang",
+ "Citizen status page":"Halaman status rakyat",
+ "Anti-corruption commission":"Suruhanjaya pencegahan rasuah",
+ "Public complaints bureau":"Biro pengaduan awam",
+};
+const dDept=id=>uiLang==='ms'?(T_DEPT[id]||id):(DEPTS[id]||id);
+const dTopic=v=>uiLang==='ms'?(T_TOPIC[v]||v):v;
+const dTxt=v=>uiLang==='ms'?(T_TEXT[v]||v):v;
+const dTime=v=>uiLang==='ms'?v.replace(/(\d+)\s*h ago/,'$1 j lalu').replace(/(\d+)\s*d ago/,'$1 h lalu').replace(/(\d+)\s*min ago/,'$1 min lalu'):v;
+const dReceipt=v=>uiLang==='ms'?v.replace(/^read /,'dibaca ').replace(/^not opened$/,'tidak dibuka'):v;
+
+/* ================================================================
+   DATA
+================================================================ */
+const DEPTS={
+ kpdn:"Domestic Trade & Living Costs (KPDN)", mohr:"Human Resources (KESUMA)",
+ moh:"Ministry of Health (MOH)", moe:"Ministry of Education (MOE)",
+ kpkt:"Housing & Local Govt (KPKT)", kdn:"Home Affairs (KDN)",
+ mof:"Ministry of Finance (MOF)", jpm:"Prime Minister's Dept (JPM)",
+ miti:"Investment, Trade & Industry (MITI)"
+};
+
+/* Pipeline: counts at each stage over 90 days */
+const PIPE=[
+ {k:'issued',    n:168, cls:''},
+ {k:'delivered', n:168, cls:''},
+ {k:'acknowledged', n:151, cls:''},
+ {k:'ownerNamed', n:118, cls:'stall'},
+ {k:'inProgress', n:112, cls:''},
+ {k:'updateSubmitted', n:96, cls:''},
+ {k:'verified',  n:74, cls:'stall'},
+ {k:'closed',    n:71, cls:'ok'},
+];
+
+/* Ministry responsiveness. ackH = median hours to acknowledge,
+   updD = median days between updates, close% = on-time closure,
+   ver% = verification pass rate on first submission. */
+const MINISTRIES=[
+ {id:'kpdn', dirs:31, ackPc:97, ackH:9,  updD:6,  closePc:81, verPc:88, tr:'up'},
+ {id:'moh',  dirs:22, ackPc:100,ackH:6,  updD:5,  closePc:86, verPc:91, tr:'up'},
+ {id:'kpkt', dirs:19, ackPc:89, ackH:22, updD:11, closePc:63, verPc:71, tr:'fl'},
+ {id:'mohr', dirs:24, ackPc:92, ackH:16, updD:9,  closePc:70, verPc:79, tr:'up'},
+ {id:'moe',  dirs:14, ackPc:93, ackH:14, updD:8,  closePc:74, verPc:82, tr:'fl'},
+ {id:'kdn',  dirs:17, ackPc:82, ackH:31, updD:14, closePc:53, verPc:64, tr:'dn'},
+ {id:'mof',  dirs:12, ackPc:75, ackH:44, updD:19, closePc:42, verPc:58, tr:'dn'},
+ {id:'jpm',  dirs:21, ackPc:95, ackH:11, updD:7,  closePc:76, verPc:85, tr:'up'},
+ {id:'miti', dirs:8,  ackPc:88, ackH:19, updD:12, closePc:63, verPc:75, tr:'fl'},
+];
+/* Composite index: weighted, published so it can be argued with. */
+const IDX_W={ackPc:.20, ackH:.20, updD:.15, closePc:.25, verPc:.20};
+function ministryIndex(m){
+  const ackSpeed = Math.max(0, 100 - (m.ackH / 48) * 100);      /* 48h = floor */
+  const updSpeed = Math.max(0, 100 - (m.updD / 21) * 100);      /* 21d = floor */
+  return Math.round(
+    m.ackPc*IDX_W.ackPc + ackSpeed*IDX_W.ackH + updSpeed*IDX_W.updD +
+    m.closePc*IDX_W.closePc + m.verPc*IDX_W.verPc);
+}
+
+/* Directives with full communication trails */
+const DIRS=[
+ {id:'DIR-1004', dept:'kpdn', topic:'Cost of living', prio:'high', due:'+3', age:11,
+  title:'Cost of living: accelerate targeted SARA aid & weekly price watch',
+  state:'claimed', officer:'Puan Nurul Aina binti Hassan', officerRole:'Senior Director, Price Control Division',
+  sessions:1240, rung:0,
+  trail:[
+   {d:'out', ch:'portal', who:'Director General, PMO', role:'dgWord', ts:'29 Jul · 09:14',
+    body:'Directive issued by the Director General on behalf of the Prime Minister. Submit a cost-of-living recovery plan and a weekly essential-goods price watch to the PMO within 14 days.'},
+   {d:'sys', ch:'system', who:'DENGAR', role:null, ts:'29 Jul · 09:14',
+    body:'Delivered to the ministry directive inbox. Email notification sent to 3 recipients.', receipt:'read 29 Jul · 11:02'},
+   {d:'in', ch:'portal', who:'KPDN Directive Desk', role:'officerWord', ts:'29 Jul · 18:22',
+    body:'Acknowledged. Accountable officer named: Puan Nurul Aina binti Hassan, Senior Director, Price Control Division.',
+    lat:{s:'good', v:'9h 8m'}},
+   {d:'in', ch:'portal', who:'Puan Nurul Aina binti Hassan', role:'officerWord', ts:'04 Aug · 15:40',
+    body:'First progress update. Price-watch data collection started in 6 states. Recovery plan drafting in progress, targeting submission by the due date.',
+    att:'Weekly price-watch report, weeks 26–29 (4 files)', lat:{s:'good', v:'6d'}},
+   {d:'out', ch:'portal', who:'PMO Delivery Unit', role:'sgWord', ts:'05 Aug · 08:05',
+    body:'PMO query: the update does not cover Sabah and Sarawak, which are the two states with the sharpest sentiment decline. Please confirm coverage.'},
+   {d:'in', ch:'email', who:'Puan Nurul Aina binti Hassan', role:'officerWord', ts:'06 Aug · 21:11',
+    body:'Coverage extended to Sabah and Sarawak. Two additional enforcement teams assigned. Revised plan attached.',
+    att:'Cost-of-living recovery plan v2 — with East Malaysia coverage', lat:{s:'warn', v:'1d 13h'}},
+   {d:'in', ch:'portal', who:'Puan Nurul Aina binti Hassan', role:'officerWord', ts:'08 Aug · 10:30',
+    body:'Completion claimed. Recovery plan submitted and weekly price watch operational in all 16 states.',
+    att:'Enforcement team deployment schedule'},
+  ]},
+ {id:'DIR-1002', dept:'jpm', topic:'Corruption & governance', prio:'elevated', due:'-1', age:28,
+  title:'Corruption cases — publish quarterly progress & timelines',
+  state:'overdue', officer:'Tuan Haji Zulkifli bin Omar', officerRole:'Under Secretary, Integrity Division',
+  sessions:540, rung:1,
+  trail:[
+   {d:'out', ch:'portal', who:'Director General, PMO', role:'dgWord', ts:'12 Jul · 10:00',
+    body:'Coordinate with the anti-corruption commission on a public case-timeline tracker.'},
+   {d:'sys', ch:'system', who:'DENGAR', role:null, ts:'12 Jul · 10:00', body:'Delivered to the ministry directive inbox. Email notification sent to 3 recipients.', receipt:'read 12 Jul · 14:20'},
+   {d:'in', ch:'portal', who:'JPM Integrity Division', role:'officerWord', ts:'13 Jul · 09:15',
+    body:'Acknowledged. Accountable officer named: Tuan Haji Zulkifli bin Omar, Under Secretary, Integrity Division.', lat:{s:'good', v:'23h 15m'}},
+   {d:'in', ch:'portal', who:'Tuan Haji Zulkifli bin Omar', role:'officerWord', ts:'24 Jul · 16:44',
+    body:'Framework drafted. Inter-agency data-sharing agreement with the commission still under legal review.',
+    att:'Case-timeline publication framework — draft', lat:{s:'warn', v:'11d'}},
+   {d:'warnE', ch:'system', who:'DENGAR', role:null, ts:'08 Aug · 00:00',
+    body:'Past due by 1 day with no closure submission. Auto-escalated to Deputy Secretary.'},
+  ]},
+ {id:'DIR-1007', dept:'mof', topic:'Cost of living', prio:'high', due:'-4', age:9,
+  title:'Essential-goods hoarding — Klang Valley enforcement',
+  state:'noack', officer:null, officerRole:null, sessions:310, rung:1,
+  trail:[
+   {d:'out', ch:'portal', who:'Director General, PMO', role:'dgWord', ts:'31 Jul · 08:30',
+    body:'Investigate reported hoarding of essential goods in the Klang Valley ahead of the festive season and report enforcement action within 7 days.'},
+   {d:'sys', ch:'system', who:'DENGAR', role:null, ts:'31 Jul · 08:30', body:'Delivered to the ministry directive inbox. Email notification sent to 3 recipients.', receipt:'not opened'},
+   {d:'warnE', ch:'system', who:'DENGAR', role:null, ts:'04 Aug · 08:30',
+    body:'No response recorded. Acknowledge SLA expired 4 days ago. Auto-escalated to Deputy Secretary.'},
+  ], noReply:true},
+ {id:'DIR-1009', dept:'kpkt', topic:'Housing', prio:'normal', due:'+6', age:14,
+  title:'PPR waiting-list status visibility for applicants',
+  state:'disputed', officer:'Encik Ravindran a/l Muthu', officerRole:'Director, Public Housing Division',
+  sessions:611, rung:0,
+  trail:[
+   {d:'out', ch:'portal', who:'Director General, PMO', role:'dgWord', ts:'26 Jul · 11:20',
+    body:'Give PPR applicants visibility of their waiting-list position. Report an implementation plan within 21 days.'},
+   {d:'in', ch:'portal', who:'Encik Ravindran a/l Muthu', role:'officerWord', ts:'26 Jul · 17:05',
+    body:'Acknowledged. Accountable officer named: Encik Ravindran a/l Muthu, Director, Public Housing Division.', lat:{s:'good', v:'5h 45m'}},
+   {d:'in', ch:'portal', who:'Encik Ravindran a/l Muthu', role:'officerWord', ts:'02 Aug · 09:50',
+    body:'Feasibility disputed. The 14-day timeline cannot accommodate the inter-agency data-sharing agreement required. Requesting extension to 30 days with a phased milestone.', dispute:true},
+  ]},
+ {id:'DIR-1011', dept:'moh', topic:'Healthcare', prio:'elevated', due:'+9', age:6,
+  title:'Rural clinic capacity — East Malaysia delivery package',
+  state:'progress', officer:'Dr. Siti Mariam binti Abdullah', officerRole:'Deputy Director, Family Health Development',
+  sessions:430, rung:0,
+  trail:[
+   {d:'out', ch:'portal', who:'Director General, PMO', role:'dgWord', ts:'03 Aug · 09:00',
+    body:'Prepare a rural clinic capacity package for Sabah and Sarawak. Report within 14 days.'},
+   {d:'in', ch:'portal', who:'MOH Directive Desk', role:'officerWord', ts:'03 Aug · 15:12',
+    body:'Acknowledged. Accountable officer named: Dr. Siti Mariam binti Abdullah, Deputy Director, Family Health Development.', lat:{s:'good', v:'6h 12m'}},
+   {d:'in', ch:'portal', who:'Dr. Siti Mariam binti Abdullah', role:'officerWord', ts:'07 Aug · 11:25',
+    body:'Site assessment complete for 14 rural clinics. Mobile-team costing under preparation.', lat:{s:'good', v:'4d'}},
+  ]},
+ {id:'DIR-1001', dept:'kpkt', topic:'Housing', prio:'normal', due:'+2', age:31,
+  title:'Rent-to-own pilot for first-home youth',
+  state:'verified', officer:'Encik Ravindran a/l Muthu', officerRole:'Director, Public Housing Division',
+  sessions:588, rung:0,
+  trail:[
+   {d:'out', ch:'portal', who:'Director General, PMO', role:'dgWord', ts:'09 Jul · 10:30',
+    body:'Launch a rent-to-own pilot for first-home youth buyers. Report allocation within 30 days.'},
+   {d:'in', ch:'portal', who:'Encik Ravindran a/l Muthu', role:'officerWord', ts:'09 Jul · 16:10',
+    body:'Acknowledged. Accountable officer named: Encik Ravindran a/l Muthu, Director, Public Housing Division.', lat:{s:'good', v:'5h 40m'}},
+   {d:'in', ch:'portal', who:'Encik Ravindran a/l Muthu', role:'officerWord', ts:'05 Aug · 14:00',
+    body:'Completion claimed. Pilot launched with 240 units allocated across Selangor and Johor.',
+    att:'Rent-to-own pilot: 240 units allocated, Selangor and Johor'},
+   {d:'sys', ch:'system', who:'PMO Delivery Unit', role:'sgWord', ts:'06 Aug · 09:30',
+    body:'Verified against the allocation register. Closed. 588 citizens who raised this concern notified via WhatsApp.'},
+  ]},
+];
+
+const LADDER=[
+ {k:'officerWord', slaH:24},
+ {k:'deputyWord',  slaH:48},
+ {k:'sgWord',      slaH:72},
+ {k:'dgWord',      slaH:96},
+ {k:'pmWord',      slaH:null},
+];
+
+const CHANNELS=[
+ {k:'chPortal', sent:412, ok:412, note:'system of record'},
+ {k:'chEmail',  sent:412, ok:389, note:'23 bounced or unopened'},
+ {k:'chWa',     sent:2140, ok:2088, note:'citizen notifications'},
+];
+
+const FOLLOWUPS=[
+ {ref:'DGR-2026-0729-04821', ch:'fuAtCounter', topic:'Cost of living', dir:'DIR-1004', when:'2 h ago', place:'Putrajaya PMO counter'},
+ {ref:'DGR-2026-0714-03119', ch:'fuWhatsApp', topic:'Housing', dir:'DIR-1009', when:'5 h ago', place:'WhatsApp 60xx-xxx 4412'},
+ {ref:'DGR-2026-0722-03980', ch:'fuPortal', topic:'Healthcare', dir:'DIR-1011', when:'1 d ago', place:'Citizen status page'},
+ {ref:'DGR-2026-0708-02744', ch:'fuAtCounter', topic:'Cost of living', dir:'DIR-1004', when:'1 d ago', place:'Klang district office'},
+ {ref:'DGR-2026-0701-02201', ch:'fuWhatsApp', topic:'Public services', dir:null, when:'2 d ago', place:'WhatsApp 60xx-xxx 8890'},
+];
+const FU_TOPICS=[
+ {t:'Cost of living', n:184},{t:'Housing', n:96},{t:'Healthcare', n:71},
+ {t:'Jobs & economy', n:58},{t:'Public services', n:34},
+];
+
+const PD_REFS=[
+ {ref:'PD-2026-0184', auth:'Anti-corruption commission', week:'2026-W29', ack:true},
+ {ref:'PD-2026-0187', auth:'Anti-corruption commission', week:'2026-W29', ack:false},
+ {ref:'PD-2026-0191', auth:'Public complaints bureau', week:'2026-W30', ack:true},
+];
+
+/* ================================================================
+   HELPERS
+================================================================ */
+const $=id=>document.getElementById(id);
+const fmtN=n=>n.toLocaleString(uiLang==='ms'?'ms-MY':'en-MY');
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._x);el._x=setTimeout(()=>el.classList.remove('show'),3400);}
+const idxColor=v=>v>=80?'#1E9E52':v>=65?'#E8A400':v>=50?'#E06A1B':'#C6222F';
+const slaCls=(v,warn,bad)=>v>=bad?'bad':v>=warn?'warn':'good';
+
+/* ================================================================
+   PIPELINE
+================================================================ */
+function renderFunnel(){
+  const top=PIPE[0].n;
+  $('funnel').innerHTML=PIPE.map((s,i)=>{
+    const prev=i?PIPE[i-1].n:null;
+    const drop=prev!==null?prev-s.n:0;
+    return `<div class="fStep ${s.cls}">
+      <div class="fn">${tt(s.k)}</div>
+      <div class="fv">${fmtN(s.n)}</div>
+      <div class="fd ${drop?'drop':''}">${drop?'−'+drop+' '+tt('dropoff'):Math.round(s.n/top*100)+'%'}</div>
+    </div>`;}).join('');
+  const worst=PIPE.map((s,i)=>({k:s.k,d:i?PIPE[i-1].n-s.n:0})).sort((a,b)=>b.d-a.d)[0];
+  $('funNote').innerHTML=uiLang==='ms'
+    ? `Kehilangan terbesar berlaku pada <b>${tt(worst.k)}</b> (−${worst.d}). Kementerian mengaku terima arahan tetapi tidak menamakan pegawai bertanggungjawab — tanpa nama, tiada siapa boleh dikejar, dan arahan tersekat di situ.`
+    : `The biggest loss happens at <b>${tt(worst.k)}</b> (−${worst.d}). Ministries acknowledge the directive but do not name an accountable officer — and without a name there is nobody to chase, so it stalls there.`;
+}
+
+/* ================================================================
+   MINISTRY RESPONSIVENESS
+================================================================ */
+function renderIndex(){
+  const rows=MINISTRIES.map(m=>({...m, idx:ministryIndex(m)})).sort((a,b)=>b.idx-a.idx);
+  const head=`<thead><tr>
+    <th>${tt('colMinistry')}</th><th class="n">${tt('colDirs')}</th>
+    <th class="n">${tt('colAck')}</th><th class="n">${tt('colAckT')}</th>
+    <th class="n">${tt('colUpd')}</th><th class="n">${tt('colClose')}</th>
+    <th class="n">${tt('colVer')}</th><th>${tt('colIdx')}</th><th class="n">${tt('colTr')}</th>
+  </tr></thead>`;
+  const body=rows.map(m=>{
+    const arw=m.tr==='up'?'▲':m.tr==='dn'?'▼':'—';
+    return `<tr class="clk" onclick="openMinistry('${m.id}')">
+      <td class="mn">${dDept(m.id)}</td>
+      <td class="n">${m.dirs}</td>
+      <td class="n"><span class="sla ${slaCls(100-m.ackPc,8,18)}">${m.ackPc}%</span></td>
+      <td class="n"><span class="sla ${slaCls(m.ackH,18,30)}">${m.ackH}${tt('hrs')}</span></td>
+      <td class="n"><span class="sla ${slaCls(m.updD,9,13)}">${m.updD}${tt('days')}</span></td>
+      <td class="n"><span class="sla ${slaCls(100-m.closePc,30,45)}">${m.closePc}%</span></td>
+      <td class="n"><span class="sla ${slaCls(100-m.verPc,21,35)}">${m.verPc}%</span></td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <span class="idx" style="background:${idxColor(m.idx)}">${m.idx}</span>
+        <div class="mBar"><i style="width:${m.idx}%;background:${idxColor(m.idx)}"></i></div>
+      </div></td>
+      <td class="n"><span class="trArw ${m.tr==='up'?'up':m.tr==='dn'?'dn':'fl'}">${arw}</span></td>
+    </tr>`;}).join('');
+  $('riTbl').innerHTML=head+'<tbody>'+body+'</tbody>';
+}
+
+/* ================================================================
+   COMMUNICATION TRAIL
+================================================================ */
+let curDir=DIRS[0].id;
+function renderThreadPicker(){
+  $('thPick').innerHTML=DIRS.map(d=>
+    `<button class="thChip ${d.id===curDir?'on':''}" onclick="selectDir('${d.id}')">${d.id} · ${dDept(d.dept).split('(')[0].trim()}</button>`).join('');
+}
+function selectDir(id){curDir=id;renderThreadPicker();renderThread();}
+
+function evHtml(e){
+  const roleTag=e.role?`<span class="role">${tt(e.role)}</span>`:'';
+  const body=dTxt(e.body);
+  return `<div class="ev ${e.d}">
+    <div class="ico">${e.d==='out'?'↗':e.d==='in'?'↘':e.d==='warnE'?'!':'•'}</div>
+    <div class="eh"><span class="who">${dTxt(e.who)}</span>${roleTag}
+      <span class="ch ${e.ch==='portal'?'portal':e.ch==='email'?'email':e.ch==='wa'?'wa':'system'}">${tt(e.ch==='portal'?'chPortal':e.ch==='email'?'chEmail':e.ch==='wa'?'chWa':'chSystem')}</span>
+      <span class="ts">${e.ts}</span></div>
+    <div class="body">${body}</div>
+    ${e.receipt?`<div class="lat ${e.receipt.includes('not')?'bad':'good'}">${e.receipt.includes('not')?'✕ ':'✓ '}${dReceipt(e.receipt)}</div>`:''}
+    ${e.att?`<div class="att">📎 ${dTxt(e.att)}</div>`:''}
+    ${e.lat?`<div class="lat ${e.lat.s}">${e.lat.s==='good'?'✓ '+tt('latOk'):e.lat.s==='warn'?'▲ '+tt('latWarn'):'✕ '+tt('latLate')} · ${e.lat.v}</div>`:''}
+    ${e.dispute?`<div class="lat warn">⚖ ${tt('disputed')}</div>`:''}
+  </div>`;
+}
+function renderThread(){
+  const d=DIRS.find(x=>x.id===curDir);
+  let h=d.trail.map(evHtml).join('');
+  if(d.noReply)h+=`<div class="noReply">⚠ ${tt('noReplyYet')}</div>`;
+  $('thread').innerHTML=h;
+  renderLadder(d,'ladder');
+  $('ladSub').textContent=`${d.id} · ${dDept(d.dept).split('(')[0].trim()}`;
+}
+
+/* ================================================================
+   ESCALATION LADDER
+================================================================ */
+function renderLadder(d,target){
+  $(target).innerHTML=LADDER.map((r,i)=>{
+    const cls=i<d.rung?'done':i===d.rung?'now':'';
+    const st=i<d.rung?tt('rungDone'):i===d.rung?tt('rungWaiting'):tt('rungNotReached');
+    const sla=r.slaH?`${r.slaH}${tt('hrs')} ${tt('target')}`:'—';
+    return `<div class="lRung ${cls}"><div class="dot"></div>
+      <div class="ln">${tt(r.k)}<small>${st}</small></div>
+      <div class="lt">${sla}</div></div>`;}).join('');
+}
+
+/* ================================================================
+   CHANNELS
+================================================================ */
+function renderChannels(){
+  $('chList').innerHTML=CHANNELS.map(c=>{
+    const pc=Math.round(c.ok/c.sent*100);
+    return `<div class="fuBar"><div class="fn">${tt(c.k)}</div>
+      <div class="fb"><i style="width:${pc}%;background:${pc>=98?'var(--green)':pc>=92?'var(--amber)':'var(--red)'}"></i></div>
+      <b>${pc}%</b></div>
+      <div style="font-size:10.5px;color:var(--grey);font-weight:600;margin:-4px 0 8px">${fmtN(c.sent)} ${tt('sentTo')} · ${dTxt(c.note)}</div>`;}).join('');
+}
+
+/* ================================================================
+   BREACH BOARD
+================================================================ */
+function renderBreaches(){
+  const breached=DIRS.filter(d=>['noack','overdue','disputed'].includes(d.state));
+  $('breachList').innerHTML=breached.map(d=>{
+    const kind=d.state==='noack'?'noAck':d.state==='overdue'?'overdue':'disputed';
+    const inB=d.state==='noack'?'4d 6h':d.state==='overdue'?'1d 2h':'6d';
+    return `<div class="breach">
+      <div class="bh"><span>⚑ ${tt(kind)}</span>
+        <span class="clock">⏱ ${inB} ${tt('inBreach')}</span>
+        <span class="rung">🪜 ${tt('rungAt')} ${tt(LADDER[d.rung].k)}</span></div>
+      <div class="bt">${d.id} — ${dTxt(d.title)}</div>
+      <div class="bm">
+        <span>${dDept(d.dept)}</span>
+        <span>${tt('dmOwner')}: <b>${d.officer||'—'}</b></span>
+        <span>${fmtN(d.sessions)} ${tt('sessionsWord')}</span>
+      </div>
+      <div class="bAct">
+        <button class="miniBtn" onclick="openDir('${d.id}')">${tt('viewTrail')}</button>
+        <button class="miniBtn p sg-only" onclick="escalate('${d.id}')">⚡ ${tt('escalate')}</button>
+      </div>
+    </div>`;}).join('');
+}
+function escalate(id){
+  const d=DIRS.find(x=>x.id===id);
+  if(d.rung<LADDER.length-1)d.rung++;
+  renderBreaches();renderThread();
+  if($('dirModal').classList.contains('open'))openDir(id);
+  toast(tt('toastEsc')(tt(LADDER[d.rung].k)));
+}
+
+/* ================================================================
+   VERIFICATION QUEUE
+================================================================ */
+function renderVerify(){
+  const claims=DIRS.filter(d=>d.state==='claimed'||d.state==='verified');
+  $('vqList').innerHTML=claims.map(d=>{
+    const done=d.state==='verified';
+    const last=[...d.trail].reverse().find(e=>e.att);
+    return `<div class="vq">
+      <div class="vh"><span class="vt">${d.id} — ${dTxt(d.title)}</span>
+        <span class="tag ${done?'pass':'claim'}">${done?tt('passTag'):tt('claimTag')}</span></div>
+      <div class="vm">
+        <span>${dDept(d.dept)}</span>
+        <span>${tt('claimedOn')}: <b>${d.trail[d.trail.length-1].ts}</b></span>
+        <span>${fmtN(d.sessions)} ${tt('sessionsWord')}</span>
+      </div>
+      ${last?`<div class="evd"><b>${tt('evidence')}</b>📎 ${dTxt(last.att)}</div>`:''}
+      ${done?'':`<div class="bAct sg-only">
+        <button class="miniBtn p" onclick="verifyDir('${d.id}',1)">✓ ${tt('verifyBtn')}</button>
+        <button class="miniBtn r" onclick="verifyDir('${d.id}',0)">✕ ${tt('rejectBtn')}</button>
+      </div>`}
+    </div>`;}).join('');
+}
+function verifyDir(id,pass){
+  const d=DIRS.find(x=>x.id===id);
+  if(pass){d.state='verified';toast(tt('toastVerified'));}
+  else{d.state='progress';toast(tt('toastRejected'));}
+  renderVerify();renderBreaches();
+}
+
+/* ================================================================
+   FOLLOW-UPS
+================================================================ */
+function renderFollowups(){
+  $('fuList').innerHTML=FOLLOWUPS.map(f=>
+    `<div class="fu"><span class="ref">${f.ref}</span>
+      <div class="fx">${tt('fuAsk')} — ${dTopic(f.topic)}
+        <small>${tt('fuVia')} ${tt(f.ch)} · ${dTxt(f.place)} · ${dTime(f.when)}${f.dir?' · '+tt('fuLinked')+' '+f.dir:''}</small></div>
+    </div>`).join('');
+  const mx=Math.max(...FU_TOPICS.map(x=>x.n));
+  $('fuTopics').innerHTML=FU_TOPICS.map(x=>
+    `<div class="fuBar"><div class="fn">${dTopic(x.t)}</div>
+      <div class="fb"><i style="width:${x.n/mx*100}%"></i></div><b>${x.n}</b></div>`).join('');
+}
+
+/* ================================================================
+   DISPUTES
+================================================================ */
+function renderDisputes(){
+  const d=DIRS.filter(x=>x.state==='disputed');
+  if(!d.length){$('dsList').innerHTML=`<div class="emptyT">—</div>`;return}
+  $('dsList').innerHTML=d.map(x=>{
+    const ev=[...x.trail].reverse().find(e=>e.dispute);
+    return `<div class="vq">
+      <div class="vh"><span class="vt">${x.id} — ${dTxt(x.title)}</span><span class="tag prog">${tt('disputed')}</span></div>
+      <div class="vm"><span>${dDept(x.dept)}</span><span>${x.officer}</span></div>
+      ${ev?`<div class="evd">${dTxt(ev.body)}</div>`:''}
+      <div class="bAct sg-only">
+        <button class="miniBtn p" onclick="toast(tt('toastEsc')(tt('sgWord')))">${tt('escalate')}</button>
+        <button class="miniBtn" onclick="openDir('${x.id}')">${tt('viewTrail')}</button>
+      </div>
+    </div>`;}).join('');
+}
+
+/* ================================================================
+   PROTECTED DISCLOSURES
+================================================================ */
+function renderPd(){
+  $('pdList').innerHTML=PD_REFS.map(p=>
+    `<div class="sealed">
+      <div class="sh"><span>🔒</span><span>${tt('pdRefLbl')} ${p.ref}</span>
+        <span class="refd ${p.ack?'':'pending'}">${p.ack?tt('pdAck'):tt('pdWait')}</span></div>
+      <div class="meta">
+        <span>${tt('pdAuth')}: <b>${dTxt(p.auth)}</b></span>
+        <span>${tt('pdWeek')}: <b>${p.week}</b></span>
+      </div>
+      <div class="noContent">${tt('pdNoAssign')}</div>
+    </div>`).join('');
+}
+
+/* ================================================================
+   MODALS
+================================================================ */
+function openDir(id){
+  const d=DIRS.find(x=>x.id===id);
+  $('dmTitle').textContent=`${d.id} — ${dTxt(d.title)}`;
+  $('dmSub').textContent=`${dDept(d.dept)} · ${dTopic(d.topic)}`;
+  const stateLbl={claimed:'claimTag',verified:'passTag',overdue:'overdue',noack:'noAck',disputed:'disputed',progress:'inProgress'}[d.state];
+  $('dmStats').innerHTML=
+   `<div class="miniStat"><small>${tt('dmState')}</small><b style="font-size:13px;line-height:1.3">${tt(stateLbl)}</b></div>
+    <div class="miniStat"><small>${tt('dmAge')}</small><b>${d.age}${tt('days')}</b></div>
+    <div class="miniStat"><small>${tt('dmPriority')}</small><b style="font-size:13px;line-height:1.3">${dTxt(d.prio)}</b></div>
+    <div class="miniStat"><small>${tt('sessionsWord')}</small><b>${fmtN(d.sessions)}</b></div>`;
+  $('dmOwner').innerHTML=d.officer
+    ? `<div class="fu"><div class="fx"><b>${d.officer}</b><small>${dTxt(d.officerRole)} · ${dDept(d.dept)}</small></div></div>`
+    : `<div class="noReply">⚠ ${tt('whereOwner')} — ${tt('rungWaiting')}</div>`;
+  $('dmThread').innerHTML=d.trail.map(evHtml).join('')+(d.noReply?`<div class="noReply">⚠ ${tt('noReplyYet')}</div>`:'');
+  renderLadder(d,'dmLadder');
+  $('dmSessions').innerHTML=
+    `<div class="evd"><b>${tt('dmSessions')}</b>${fmtN(d.sessions)} ${tt('sessionsWord')} · ${dTopic(d.topic)}</div>`;
+  $('dmChase').onclick=()=>escalate(d.id);
+  $('dirModal').classList.add('open');
+}
+
+function openMinistry(id){
+  const m=MINISTRIES.find(x=>x.id===id); const idx=ministryIndex(m);
+  $('mmTitle').textContent=dDept(id);
+  $('mmSub').textContent=`${m.dirs} ${tt('colDirs').toLowerCase()} · ${tt('colIdx')} ${idx}/100`;
+  $('mmStats').innerHTML=
+   `<div class="miniStat"><small>${tt('colIdx')}</small><b style="color:${idxColor(idx)}">${idx}</b></div>
+    <div class="miniStat"><small>${tt('colAckT')}</small><b>${m.ackH}${tt('hrs')}</b></div>
+    <div class="miniStat"><small>${tt('colClose')}</small><b>${m.closePc}%</b></div>
+    <div class="miniStat"><small>${tt('colVer')}</small><b>${m.verPc}%</b></div>`;
+  /* where the time goes — the diagnostic, not just the score */
+  const stages=[
+    {k:'whereAck', v:Math.max(0,100-Math.round(m.ackH/48*100))},
+    {k:'whereOwner', v:m.ackPc},
+    {k:'whereUpd', v:Math.max(0,100-Math.round(m.updD/21*100))},
+    {k:'whereClose', v:m.closePc},
+    {k:'whereEvid', v:m.verPc},
+  ].sort((a,b)=>a.v-b.v);
+  $('mmWhere').innerHTML=stages.map(s=>
+    `<div class="fuBar"><div class="fn">${tt(s.k)}</div>
+      <div class="fb"><i style="width:${s.v}%;background:${idxColor(s.v)}"></i></div><b>${s.v}</b></div>`).join('')
+    +`<div class="carveNote">${uiLang==='ms'
+      ? 'Kelemahan terbesar disenaraikan dahulu. Skor komposit memberitahu anda kementerian mana yang lemah; baris ini memberitahu anda di peringkat mana ia lemah — itulah yang boleh dibetulkan.'
+      : 'Weakest stage listed first. The composite score tells you which ministry is underperforming; these rows tell you at which step — which is the part that can actually be fixed.'}</div>`;
+  const dirs=DIRS.filter(d=>d.dept===id);
+  $('mmDirs').innerHTML=dirs.length?dirs.map(d=>{
+    const stateLbl={claimed:'claimTag',verified:'passTag',overdue:'overdue',noack:'noAck',disputed:'disputed',progress:'inProgress'}[d.state];
+    const cls={claimed:'claim',verified:'pass',overdue:'fail',noack:'fail',disputed:'prog',progress:'prog'}[d.state];
+    return `<div class="fu"><span class="ref">${d.id}</span>
+      <div class="fx">${dTxt(d.title)}<small>${d.officer||'—'}</small></div>
+      <span class="tag ${cls}">${tt(stateLbl)}</span></div>`;}).join('')
+    :`<div class="emptyT">—</div>`;
+  const officers=[...new Set(dirs.filter(d=>d.officer).map(d=>d.officer+'|'+d.officerRole))];
+  $('mmContacts').innerHTML=officers.length?officers.map(o=>{
+    const [n,r]=o.split('|');
+    return `<div class="fu"><div class="fx"><b>${n}</b><small>${dTxt(r)}</small></div></div>`;}).join('')
+    :`<div class="emptyT">${tt('whereOwner')} — ${tt('rungWaiting')}</div>`;
+  $('minModal').classList.add('open');
+}
+
+function openMinistryInbox(){
+  const d=DIRS.find(x=>x.state==='noack')||DIRS[0];
+  $('inbList').innerHTML=
+   `<div class="vq">
+      <div class="vh"><span class="vt">${d.id} — ${dTxt(d.title)}</span><span class="tag fail">${tt('noAck')}</span></div>
+      <div class="vm"><span>${tt('dmIssuedBy')}: <b>${tt('dgWord')}</b></span>
+        <span>${tt('dmDue')}: <b>07 Aug 2026</b></span>
+        <span>${tt('dmPriority')}: <b>${dTxt(d.prio)}</b></span></div>
+      <div class="evd"><b>${tt('dmSessions')}</b>${fmtN(d.sessions)} ${tt('sessionsWord')} · ${dTopic(d.topic)}</div>
+      <div class="bAct">
+        <button class="miniBtn p" onclick="toast(tt('inbAttach'))">${tt('inbReply')}</button>
+        <button class="miniBtn" onclick="toast(tt('inbAttach'))">📎 ${tt('inbAttach')}</button>
+      </div>
+    </div>`;
+  $('inbModal').classList.add('open');
+}
+
+/* ================================================================
+   KPIs
+================================================================ */
+function renderKpis(){
+  const open=DIRS.filter(d=>!['verified'].includes(d.state)).length;
+  $('kOpen').textContent=97;
+  $('kOpenD').innerHTML=`▲ 12 ${tt('vsPrior')}`;
+  $('kUnack').textContent=DIRS.filter(d=>d.state==='noack').length+7;
+  $('kAck').textContent='14'+tt('hrs');
+  $('kAckD').innerHTML=`${tt('target')} 24${tt('hrs')} · ✓`;
+  $('kAckD').className='delta good';
+  $('kRes').textContent='11.4'+tt('days');
+  $('kResD').innerHTML=`▼ 1.8${tt('days')} ${tt('vsPrior')}`;
+  $('kResD').className='delta good';
+  $('kVer').textContent='79%';
+}
+
+/* ================================================================
+   VIEW + LANGUAGE
+================================================================ */
+let view='min';
+function setView(v){
+  view=v;
+  document.body.classList.toggle('sg',v==='sg');
+  document.querySelectorAll('#viewTgl button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  renderAll();
+}
+function applyI18n(){
+  document.documentElement.lang=uiLang==='ms'?'ms':'en';
+  $('tglMs').classList.toggle('on',uiLang==='ms');
+  $('tglEn').classList.toggle('on',uiLang==='en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=I18N[uiLang][el.dataset.i18n];
+    if(typeof v==='string')el.innerHTML=v;
+  });
+  $('riHint').innerHTML=tt('riHint');
+  renderAll();
+  if($('dirModal').classList.contains('open'))openDir(curDir);
+}
+function setUiLang(l){uiLang=l;applyI18n();}
+
+function renderAll(){
+  renderKpis();renderFunnel();renderIndex();
+  renderThreadPicker();renderThread();renderChannels();
+  renderBreaches();renderVerify();renderFollowups();renderDisputes();renderPd();
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'))});
+applyI18n();
+</script>
+</body>
+</html>

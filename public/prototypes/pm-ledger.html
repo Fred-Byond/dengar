@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DENGAR Session Ledger — every session, searchable by reference</title>
+<style>
+:root{
+  --navy:#1B2A6B; --navy-d:#121C4A; --red:#D22030; --gold:#FFCC00;
+  --green:#1E9E52; --amber:#E8A400; --purple:#5A2CA0;
+  --bg:#EEF0F4; --card:#FFFFFF; --ink:#17181C; --grey:#6B7180; --line:#E3E6EC;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+header{background:linear-gradient(100deg,var(--navy-d),var(--navy) 60%,#24368a);color:#fff;padding:16px 26px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.hLogo{display:flex;align-items:center;gap:12px}
+.hLogo .t b{display:block;font-size:15px;font-weight:800;letter-spacing:.4px}
+.hLogo .t small{display:block;font-size:8.5px;font-weight:700;letter-spacing:1.4px;color:var(--gold)}
+.hTitle h1{font-size:17px;font-weight:800}
+.hTitle p{font-size:11.5px;opacity:.72;margin-top:2px}
+.hRight{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.langTgl,.viewTgl{display:flex;background:rgba(255,255,255,.12);border-radius:11px;padding:3px}
+.langTgl button{border:0;background:transparent;color:#fff;font-size:11.5px;font-weight:800;padding:7px 12px;border-radius:9px;opacity:.7;letter-spacing:.4px}
+.langTgl button.on{background:var(--gold);color:#3A2C00;opacity:1}
+.viewTgl button{border:0;background:transparent;color:#fff;font-size:11.5px;font-weight:800;padding:8px 13px;border-radius:9px;opacity:.72}
+.viewTgl button.on{background:#fff;color:var(--navy);opacity:1}
+.live{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;background:rgba(255,255,255,.12);padding:7px 12px;border-radius:99px}
+.live i{width:8px;height:8px;border-radius:50%;background:#3DDC6A;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+.wrap{padding:20px 26px 40px;max-width:1680px;margin:0 auto}
+.card{background:var(--card);border-radius:15px;padding:18px 20px;box-shadow:0 2px 10px rgba(20,30,80,.06)}
+.cardHead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cardHead h2{font-size:14.5px;font-weight:800}
+.cardHead small{font-size:11px;color:var(--grey);font-weight:600;margin-left:auto}
+.flowTag{display:flex;align-items:center;gap:10px;margin:22px 0 12px}
+.flowTag span{font-size:10.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--navy)}
+.flowTag i{flex:1;height:1px;background:linear-gradient(90deg,#C8D0E4,transparent)}
+.flowTag.act span{color:var(--purple)}
+
+/* ===== SEARCH ===== */
+.searchCard{background:linear-gradient(135deg,var(--navy-d),var(--navy));border-radius:15px;padding:20px 22px;color:#fff}
+.searchCard h2{font-size:15px;font-weight:800;margin-bottom:3px}
+.searchCard p{font-size:11.5px;opacity:.75;margin-bottom:13px}
+.srow{display:flex;gap:9px;flex-wrap:wrap}
+.srow input{flex:1;min-width:250px;border:0;border-radius:11px;padding:13px 15px;font-size:14px;font-weight:700;letter-spacing:.5px}
+.srow button{border:0;background:var(--gold);color:#3A2C00;font-weight:800;font-size:13px;padding:13px 22px;border-radius:11px}
+.srow button.ghost{background:rgba(255,255,255,.16);color:#fff}
+.sHint{font-size:10.5px;opacity:.6;margin-top:9px;font-weight:600}
+
+/* ===== FILTERS ===== */
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.fGrp label{display:block;font-size:9.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--grey);margin-bottom:4px}
+.fGrp select,.fGrp input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:8px 9px;font-size:12px;font-weight:600;color:var(--ink);background:#fff}
+.chipRow{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.fchip{border:1.5px solid var(--line);background:#fff;font-size:11px;font-weight:700;padding:6px 11px;border-radius:8px;color:var(--ink)}
+.fchip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.clearBtn{border:0;background:transparent;color:var(--red);font-size:11px;font-weight:800;margin-left:auto}
+
+/* ===== KPI ===== */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.kpi{background:var(--card);border-radius:15px;padding:14px 16px;border-left:4px solid var(--navy);box-shadow:0 2px 10px rgba(20,30,80,.06)}
+.kpi.k2{border-left-color:var(--green)}.kpi.k3{border-left-color:var(--amber)}
+.kpi.k4{border-left-color:var(--purple)}.kpi.k5{border-left-color:var(--red)}
+.kpi .lbl{font-size:9.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--grey)}
+.kpi .val{font-size:27px;font-weight:800;margin:3px 0 1px;font-variant-numeric:tabular-nums}
+.kpi .delta{font-size:10.5px;font-weight:700;color:var(--grey)}
+
+/* ===== TABLE ===== */
+.tblWrap{overflow-x:auto}
+.sTbl{width:100%;border-collapse:collapse;font-size:12px}
+.sTbl th{text-align:left;font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--grey);padding:0 9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.sTbl td{padding:9px;border-bottom:1px solid var(--line);white-space:nowrap}
+.sTbl tr{cursor:pointer}
+.sTbl tr:hover td{background:#F7F9FD}
+.sTbl .ref{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;font-weight:700}
+.sdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.pill{font-size:9.5px;font-weight:800;letter-spacing:.3px;padding:3px 7px;border-radius:6px;white-space:nowrap}
+.pill.ok{background:#E2F6E9;color:#137A3D}
+.pill.warn{background:#FFF3D6;color:#8A6400}
+.pill.bad{background:#FDECEC;color:#A31C28}
+.pill.info{background:#E7EDFB;color:#2E44A8}
+.pill.mute{background:#F1F3F8;color:var(--grey)}
+.pill.pd{background:#EDE6FA;color:var(--purple)}
+.pager{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.pager button{border:1.5px solid var(--line);background:#fff;font-size:12px;font-weight:800;padding:7px 13px;border-radius:9px;color:var(--ink)}
+.pager button:disabled{opacity:.4;cursor:default}
+.pager .pinfo{font-size:11.5px;color:var(--grey);font-weight:700}
+
+/* ===== COHORT ===== */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:1120px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.bar{display:flex;align-items:center;gap:9px;padding:6px 0;font-size:12px}
+.bar .bn{width:38%;font-weight:700;line-height:1.3}
+.bar .bb{flex:1;height:8px;background:#EDEFF4;border-radius:5px;overflow:hidden}
+.bar .bb i{display:block;height:100%;border-radius:5px;background:var(--navy)}
+.bar b{width:52px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ===== CVIF SCORECARD ===== */
+.cvif{display:flex;flex-direction:column;gap:0}
+.cvRow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.cvRow:last-child{border-bottom:0}
+.cvRow .cn{width:37%;font-size:12px;font-weight:700;line-height:1.3}
+.cvRow .cn small{display:block;font-size:10px;font-weight:600;color:var(--grey);margin-top:1px}
+.cvRow .cs{display:flex;gap:3px}
+.cvRow .cs i{width:15px;height:15px;border-radius:4px;background:#EDEFF4;display:inline-block}
+.cvRow .cs i.on{background:var(--navy)}
+.cvRow .cv{width:66px;text-align:right;font-size:11.5px;font-weight:800}
+.cvRow .conf{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:5px;white-space:nowrap}
+.conf.high{background:#E2F6E9;color:#137A3D}
+.conf.med{background:#FFF3D6;color:#8A6400}
+.conf.low{background:#FDECEC;color:#A31C28}
+.conf.ne{background:#F1F3F8;color:var(--grey)}
+
+/* ===== TIER GATE ===== */
+.gate{background:#F4F1FB;border:1px dashed #C9B8EC;border-radius:12px;padding:14px 16px}
+.gate .gh{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;color:var(--purple);letter-spacing:.3px}
+.gate p{font-size:11.5px;color:#4A3A6B;line-height:1.55;margin-top:7px}
+.gate .gb{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+.gate button{border:1.5px solid #C9B8EC;background:#fff;color:var(--purple);font-size:11.5px;font-weight:800;padding:8px 13px;border-radius:9px}
+.gate button.p{background:var(--purple);border-color:var(--purple);color:#fff}
+.granted{background:#F7F8FB;border:1px solid var(--line);border-radius:11px;padding:13px 15px;font-size:12.5px;line-height:1.6}
+.granted .turn{margin-bottom:10px}
+.granted .turn:last-child{margin-bottom:0}
+.granted .who{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--grey);text-transform:uppercase;display:block;margin-bottom:2px}
+.auditNote{font-size:10.5px;color:var(--grey);font-weight:700;margin-top:9px;background:#FFF3D6;border-radius:7px;padding:7px 10px;line-height:1.45}
+
+/* ===== MODAL ===== */
+.modal{position:fixed;inset:0;background:rgba(10,14,30,.55);display:none;align-items:flex-start;justify-content:center;padding:34px 20px;z-index:60;overflow-y:auto}
+.modal.open{display:flex}
+.mCard{background:#fff;border-radius:17px;max-width:780px;width:100%;padding:24px 26px;position:relative;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.mCard h3{font-size:17px;font-weight:800;margin-bottom:3px;padding-right:40px}
+.mCard .sub{font-size:12px;color:var(--grey);margin-bottom:14px;font-weight:600}
+.mCard h4{font-size:12px;font-weight:800;margin:16px 0 8px;color:var(--navy);letter-spacing:.3px;text-transform:uppercase}
+.mClose{position:absolute;top:16px;right:18px;border:0;background:#F1F3F8;width:32px;height:32px;border-radius:50%;font-size:15px;color:var(--grey)}
+.miniStats{display:flex;gap:9px;flex-wrap:wrap}
+.miniStat{flex:1;min-width:110px;background:#F4F6FA;border-radius:11px;padding:10px 12px}
+.miniStat small{font-size:9.5px;font-weight:800;letter-spacing:.6px;color:var(--grey);text-transform:uppercase}
+.miniStat b{display:block;font-size:15px;margin-top:2px;line-height:1.25}
+.summ{background:#FFFBEF;border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:12px 14px;font-size:12.5px;line-height:1.6;color:#3A2C00}
+.askList li{font-size:12.5px;line-height:1.55;margin:0 0 6px 17px}
+.lnk{display:flex;align-items:center;gap:10px;background:#F4F6FA;border-radius:11px;padding:11px 13px;font-size:12px}
+.lnk .lx{flex:1;line-height:1.4;font-weight:600}
+.lnk .lx small{display:block;font-size:10.5px;color:var(--grey);font-weight:600;margin-top:2px}
+.fuRow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px}
+.fuRow:last-child{border-bottom:0}
+.mFoot{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.btnP{flex:1;border:0;background:var(--navy);color:#fff;font-weight:800;font-size:13px;padding:12px;border-radius:11px}
+.btnS{flex:1;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-weight:700;font-size:13px;padding:12px;border-radius:11px}
+.emptyT{font-size:12px;color:var(--grey);font-weight:600;text-align:center;padding:26px 6px;line-height:1.6}
+.note{font-size:11px;color:var(--grey);font-weight:600;line-height:1.5;background:#F7F8FB;border-left:3px solid var(--purple);border-radius:0 9px 9px 0;padding:9px 12px;margin-top:11px}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:13px 20px;border-radius:12px;z-index:90;transition:transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:min(90vw,580px);text-align:center;line-height:1.45}
+.toast.show{transform:translateX(-50%)}
+footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey);font-weight:600}
+.pd-hidden{display:none!important}
+body:not(.research) .research-only{display:none!important}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hLogo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><g stroke="#FFCC00" stroke-width="2.8" stroke-linecap="round"><path d="M4 12 v4"/><path d="M9.5 7 v14"/><path d="M15 3 v22"/><path d="M20.5 8 v12"/><path d="M26 12 v4" stroke-opacity=".55"/></g></svg>
+    <div class="t"><b>DENGAR<span style="font-weight:300">.ai</span></b><small data-i18n="brandTag">EVERY VOICE MATTERS</small></div>
+  </div>
+  <div class="hTitle">
+    <h1 data-i18n="hTitle">DENGAR Session Ledger</h1>
+    <p data-i18n="hSub">Every session, by reference number · what was discussed · what it became</p>
+  </div>
+  <div class="hRight">
+    <div class="langTgl">
+      <button id="tglMs" onclick="setUiLang('ms')">BM</button>
+      <button id="tglEn" class="on" onclick="setUiLang('en')">EN</button>
+    </div>
+    <div class="viewTgl" id="viewTgl">
+      <button data-v="analyst" class="on" onclick="setRole('analyst')" data-i18n="roleAnalyst">🔬 Analyst</button>
+      <button data-v="desk" onclick="setRole('desk')" data-i18n="roleDesk">🏛️ Counter officer</button>
+    </div>
+    <div class="live"><i></i><span data-i18n="live">LIVE</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- SEARCH -->
+  <div class="searchCard">
+    <h2 data-i18n="srcH">🔎 Look up a session</h2>
+    <p data-i18n="srcS">A citizen quoting their reference at any PMO counter, on WhatsApp or on the status page resolves to exactly one session.</p>
+    <div class="srow">
+      <input class="mono" id="q" placeholder="DGR-2026-0729-04821" autocomplete="off">
+      <button onclick="doSearch()" data-i18n="srcBtn">Look up</button>
+      <button class="ghost" onclick="randomRef()" data-i18n="srcRand">Try a real one</button>
+    </div>
+    <div class="sHint" id="srcHint"></div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis" style="margin-top:16px">
+    <div class="kpi"><div class="lbl" data-i18n="kTot">Sessions in ledger</div><div class="val" id="kTot">—</div><div class="delta" id="kTotD"></div></div>
+    <div class="kpi k2"><div class="lbl" data-i18n="kComp">Completed</div><div class="val" id="kComp">—</div><div class="delta" data-i18n="kCompD">spoke for the full 5 minutes</div></div>
+    <div class="kpi k3"><div class="lbl" data-i18n="kRev">Flagged for human review</div><div class="val" id="kRev">—</div><div class="delta" data-i18n="kRevD">low confidence or control code</div></div>
+    <div class="kpi k4"><div class="lbl" data-i18n="kCons">Consented to research use</div><div class="val" id="kCons">—</div><div class="delta" data-i18n="kConsD">opt-in at booking · de-identified</div></div>
+    <div class="kpi k5"><div class="lbl" data-i18n="kDir">Produced a directive</div><div class="val" id="kDir">—</div><div class="delta" data-i18n="kDirD">traceable session → action</div></div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="card" style="margin-top:16px">
+    <div class="cardHead"><h2 data-i18n="fltH">🎚️ Filter the ledger</h2><small id="fltCount"></small></div>
+    <div class="filters">
+      <div class="fGrp"><label data-i18n="fState">State</label><select id="fState" onchange="applyFilters()"></select></div>
+      <div class="fGrp"><label data-i18n="fTopic">Concern</label><select id="fTopic" onchange="applyFilters()"></select></div>
+      <div class="fGrp"><label data-i18n="fLang">Language</label><select id="fLang" onchange="applyFilters()"></select></div>
+      <div class="fGrp"><label data-i18n="fSent">Sentiment</label><select id="fSent" onchange="applyFilters()"></select></div>
+      <div class="fGrp"><label data-i18n="fConf">Confidence</label><select id="fConf" onchange="applyFilters()"></select></div>
+      <div class="fGrp"><label data-i18n="fWeek">Week</label><select id="fWeek" onchange="applyFilters()"></select></div>
+    </div>
+    <div class="chipRow">
+      <button class="fchip" id="cDir" onclick="toggleChip('dir')" data-i18n="cDir">Produced a directive</button>
+      <button class="fchip" id="cRes" onclick="toggleChip('res')" data-i18n="cRes">Resolved</button>
+      <button class="fchip" id="cRev" onclick="toggleChip('rev')" data-i18n="cRev">Needs review</button>
+      <button class="fchip" id="cFu" onclick="toggleChip('fu')" data-i18n="cFu">Has follow-up</button>
+      <button class="fchip" id="cCons" onclick="toggleChip('cons')" data-i18n="cCons">Research-consented</button>
+      <button class="clearBtn" onclick="clearFilters()" data-i18n="clearF">Clear all</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="card" style="margin-top:16px">
+    <div class="cardHead"><h2 data-i18n="resH">📋 Sessions</h2><small data-i18n="resS">click any row to open the session record</small></div>
+    <div class="tblWrap"><table class="sTbl" id="sTbl"></table></div>
+    <div class="pager">
+      <button id="pPrev" onclick="page(-1)">←</button>
+      <span class="pinfo" id="pInfo"></span>
+      <button id="pNext" onclick="page(1)">→</button>
+    </div>
+  </div>
+
+  <!-- COHORT -->
+  <div class="flowTag act"><span data-i18n="bandCohort">Cohort analysis of the filtered set</span><i></i></div>
+  <div class="grid-3">
+    <div class="card"><div class="cardHead"><h2 data-i18n="chTopic">Concerns</h2></div><div id="chTopic"></div></div>
+    <div class="card"><div class="cardHead"><h2 data-i18n="chState">States</h2></div><div id="chState"></div></div>
+    <div class="card"><div class="cardHead"><h2 data-i18n="chLang">Languages</h2></div><div id="chLang"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="cardHead"><h2 data-i18n="chAskH">🗣️ What this cohort actually asked for</h2><small data-i18n="chAskS">request-actionability signals, ranked</small></div>
+    <div id="chAsks"></div>
+    <div class="note" data-i18n="chAskNote">This is the bridge from thousands of sessions to a single directive. A cohort is not a report — select it, read what it asked for, and issue one directive against the whole cohort so every session in it inherits the outcome.</div>
+  </div>
+
+  <!-- LEARNING -->
+  <div class="flowTag act"><span data-i18n="bandLearn">Learning loop</span><i></i></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="cardHead"><h2 data-i18n="clH">🧪 Calibration queue</h2><small data-i18n="clS">human labelling improves the rubric, not the model</small></div>
+      <div id="clList"></div>
+      <div class="note" data-i18n="clNote"><b>What “learning” means here.</b> Human labels on this queue are compared against the scorer to measure agreement and refine the CVIF rubric, the Manglish glossary and the confidence thresholds. Citizen content is never used to train or fine-tune a model — not ours, not a subprocessor's. That is a contractual commitment, so the learning loop is deliberately built to improve the <i>rubric</i> rather than the weights.</div>
+    </div>
+    <div class="card">
+      <div class="cardHead"><h2 data-i18n="crH">📚 Research corpus</h2><small data-i18n="crS">consent-gated · de-identified</small></div>
+      <div id="crStats"></div>
+      <div class="note" data-i18n="crNote">Only sessions where the citizen opted in at booking enter the corpus, and they enter de-identified. A citizen can withdraw consent at any time using their reference number, which removes the session from the corpus without affecting the aggregate trends already published.</div>
+    </div>
+  </div>
+</div>
+
+<footer data-i18n="footer">DENGAR Session Ledger · Prime Minister's Office · Demo prototype with synthetic data · BYOND asia × Malaysia MADANI</footer>
+
+<!-- ============ SESSION DETAIL ============ -->
+<div class="modal" id="sModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard">
+    <button class="mClose" onclick="document.getElementById('sModal').classList.remove('open')">✕</button>
+    <h3 id="smRef" class="mono">—</h3>
+    <div class="sub" id="smSub"></div>
+    <div class="miniStats" id="smStats"></div>
+
+    <h4 data-i18n="smSummary">Reflected session summary</h4>
+    <div class="summ" id="smSummary"></div>
+
+    <h4 data-i18n="smAsks">What this citizen asked for</h4>
+    <ul class="askList" id="smAsks"></ul>
+
+    <h4 data-i18n="smCvif">CVIF scorecard</h4>
+    <div class="cvif" id="smCvif"></div>
+
+    <h4 data-i18n="smTranscript">Transcript</h4>
+    <div id="smTranscript"></div>
+
+    <h4 data-i18n="smOutcome">What happened next</h4>
+    <div id="smOutcome"></div>
+
+    <h4 data-i18n="smFu">Follow-up history</h4>
+    <div id="smFu"></div>
+
+    <h4 data-i18n="smConsent">Consent &amp; retention</h4>
+    <div id="smConsent"></div>
+
+    <div class="mFoot">
+      <button class="btnS" onclick="toast(tt('toastCohort'))" data-i18n="smCohort">See the cohort this belongs to</button>
+      <button class="btnP" onclick="toast(tt('toastNotify'))" data-i18n="smNotify">📲 Send status update to citizen</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   LANGUAGE
+================================================================ */
+let uiLang='en';
+const I18N={en:{},ms:{}};
+const tt=k=>(I18N[uiLang][k]!==undefined?I18N[uiLang][k]:(I18N.en[k]||k));
+
+I18N.en={
+ brandTag:"EVERY VOICE MATTERS",
+ hTitle:"DENGAR Session Ledger",
+ hSub:"Every session, by reference number · what was discussed · what it became",
+ roleAnalyst:"🔬 Analyst", roleDesk:"🏛️ Counter officer", live:"LIVE",
+ srcH:"🔎 Look up a session",
+ srcS:"A citizen quoting their reference at any PMO counter, on WhatsApp or on the status page resolves to exactly one session.",
+ srcBtn:"Look up", srcRand:"Try a real one",
+ srcHintIdle:"Reference format: DGR-YYYY-MMDD-NNNNN. Partial references also match.",
+ srcNotFound:"No session matches that reference. Check the format: DGR-YYYY-MMDD-NNNNN.",
+ srcFound:n=>n===1?"1 session matched.":n+" sessions matched.",
+ kTot:"Sessions in ledger", kComp:"Completed", kCompD:"spoke for the full 5 minutes",
+ kRev:"Flagged for human review", kRevD:"low confidence or control code",
+ kCons:"Consented to research use", kConsD:"opt-in at booking · de-identified",
+ kDir:"Produced a directive", kDirD:"traceable session → action",
+ fltH:"🎚️ Filter the ledger",
+ fState:"State", fTopic:"Concern", fLang:"Language", fSent:"Sentiment",
+ fConf:"Confidence", fWeek:"Week",
+ cDir:"Produced a directive", cRes:"Resolved", cRev:"Needs review",
+ cFu:"Has follow-up", cCons:"Research-consented", clearF:"Clear all",
+ resH:"📋 Sessions", resS:"click any row to open the session record",
+ all:"All",
+ colRef:"Reference", colDate:"Date", colWhere:"District, State", colTopic:"Concern",
+ colLang:"Lang", colDur:"Duration", colSent:"Sentiment", colConf:"Confidence",
+ colState:"Status", colFlags:"",
+ bandCohort:"Cohort analysis of the filtered set", bandLearn:"Learning loop",
+ chTopic:"Concerns", chState:"States", chLang:"Languages",
+ chAskH:"🗣️ What this cohort actually asked for", chAskS:"request-actionability signals, ranked",
+ chAskNote:"This is the bridge from thousands of sessions to a single directive. A cohort is not a report — select it, read what it asked for, and issue one directive against the whole cohort so every session in it inherits the outcome.",
+ clH:"🧪 Calibration queue", clS:"human labelling improves the rubric, not the model",
+ clNote:"<b>What “learning” means here.</b> Human labels on this queue are compared against the scorer to measure agreement and refine the CVIF rubric, the Manglish glossary and the confidence thresholds. Citizen content is never used to train or fine-tune a model — not ours, not a subprocessor's. That is a contractual commitment, so the learning loop is deliberately built to improve the <i>rubric</i> rather than the weights.",
+ crH:"📚 Research corpus", crS:"consent-gated · de-identified",
+ crNote:"Only sessions where the citizen opted in at booking enter the corpus, and they enter de-identified. A citizen can withdraw consent at any time using their reference number, which removes the session from the corpus without affecting the aggregate trends already published.",
+ footer:"DENGAR Session Ledger · Prime Minister's Office · Demo prototype with synthetic data · BYOND asia × Malaysia MADANI",
+ /* session detail */
+ smSummary:"Reflected session summary", smAsks:"What this citizen asked for",
+ smCvif:"CVIF scorecard", smTranscript:"Transcript", smOutcome:"What happened next",
+ smFu:"Follow-up history", smConsent:"Consent & retention",
+ smCohort:"See the cohort this belongs to", smNotify:"📲 Send status update to citizen",
+ mDur:"Duration", mLang:"Language", mSent:"Sentiment", mConf:"Confidence", mStatus:"Status",
+ /* CVIF dimensions */
+ d1:"Sentiment", d1s:"direction and strength of feeling",
+ d2:"Issue clarity", d2s:"how precisely the problem is stated",
+ d3:"Evidence strength", d3s:"specifics, dates, amounts, locations",
+ d4:"Impact severity", d4s:"how badly it affects the citizen",
+ d5:"Request actionability", d5s:"whether the ask can be acted on",
+ d6:"Confirmation status", d6s:"confirmed back to the citizen in session",
+ d7:"Urgency & escalation", d7s:"whether it needs same-day review",
+ confHigh:"HIGH", confMed:"MEDIUM", confLow:"LOW", confNE:"NOT EVIDENT",
+ /* transcript gate */
+ gateH:"🔒 TIER 3 — RAW TRANSCRIPT",
+ gateBody:"The transcript is classified Tier 3 and is not shown by default. Your role can request time-boxed access, which requires a stated reason, a second approver, and is written to the append-only audit log replicated to the Government-held store. The Prime Minister role has no route to this content at all.",
+ gateReq:"Request access (logged)", gateWhy:"Why is this gated?",
+ gateGranted:"Access granted · 30 minutes · logged",
+ auditNote:"This view has been written to the audit log: role, reason, session reference, timestamp. The citizen can see that their transcript was accessed, and by which role.",
+ gateWhyToast:"A leader who can read any citizen's raw words is a leader who can be asked to. Structural non-access protects the citizen and the office at the same time.",
+ /* outcome */
+ outNone:"This session contributed to the national trend but did not generate its own directive. It is one of the sessions counted behind its concern.",
+ outDir:"Contributed to directive", outResolved:"Delivered and citizen notified",
+ outInProgress:"In progress with the ministry",
+ /* consent */
+ consYes:"Opted in to de-identified research use", consNo:"Not opted in — analytics only",
+ retTranscript:"Transcript retention", retAudio:"Audio retention", ret12:"12 months", ret90:"90 days",
+ withdraw:"Citizen can withdraw consent using this reference at any time",
+ /* follow-up */
+ fuNone:"No follow-up requests for this session.", fuAsk:"asked for an update",
+ fuAtCounter:"PMO counter", fuWhatsApp:"WhatsApp", fuPortal:"Status page",
+ /* calibration */
+ clReason:"Reason", clLowConf:"Low confidence on issue clarity",
+ clControl:"Control code — insufficient evidence", clDisagree:"Scorer / human label disagreement",
+ clCodeSwitch:"Heavy code-switching", clLabel:"Label this", clAgree:"Agreement",
+ crInCorpus:"In corpus", crOptedOut:"Not consented", crWithdrawn:"Consent withdrawn",
+ /* counter officer */
+ deskBanner:"Counter officer view — you see only what is safe to read aloud to the citizen standing in front of you. No transcript, no other citizens, no internal notes.",
+ pdBlocked:"🔒 This reference is a protected disclosure. It cannot be looked up at a counter, by design — see the note below.",
+ pdBlockedWhy:"Looking up a corruption referral at a public counter would expose the discloser to whoever is nearby, and to the officer serving them. Protected-disclosure references resolve only through the sealed channel to the receiving authority. If a citizen asks about one, the correct answer is to give them the authority's own contact, not a status.",
+ statusReceived:"Received", statusAnalysed:"Analysed", statusInTrend:"Counted in the national trend",
+ statusRouted:"Routed to a ministry", statusProgress:"Ministry working on it", statusDelivered:"Delivered",
+ toastCohort:"Demo: the filters would jump to this session's cohort — same concern, same state, same week.",
+ toastNotify:"📲 Status update queued to the citizen's WhatsApp, in the language they used in session.",
+ toastLabel:"Demo: the labelling interface for the AI team would open here.",
+ sessionsWord:"sessions", ofWord:"of", pageWord:"Page",
+};
+
+I18N.ms={
+ brandTag:"SETIAP SUARA PENTING",
+ hTitle:"Lejar Sesi DENGAR",
+ hSub:"Setiap sesi, mengikut nombor rujukan · apa yang dibincangkan · apa hasilnya",
+ roleAnalyst:"🔬 Penganalisis", roleDesk:"🏛️ Pegawai kaunter", live:"LANGSUNG",
+ srcH:"🔎 Cari sesi",
+ srcS:"Rakyat yang menyebut rujukan mereka di mana-mana kaunter JPM, WhatsApp atau halaman status akan menemui tepat satu sesi.",
+ srcBtn:"Cari", srcRand:"Cuba satu yang sah",
+ srcHintIdle:"Format rujukan: DGR-YYYY-MMDD-NNNNN. Rujukan sebahagian juga boleh dicari.",
+ srcNotFound:"Tiada sesi sepadan dengan rujukan itu. Periksa formatnya: DGR-YYYY-MMDD-NNNNN.",
+ srcFound:n=>n===1?"1 sesi ditemui.":n+" sesi ditemui.",
+ kTot:"Sesi dalam lejar", kComp:"Selesai", kCompD:"bercakap sepenuh 5 minit",
+ kRev:"Ditanda untuk semakan manusia", kRevD:"keyakinan rendah atau kod kawalan",
+ kCons:"Bersetuju kegunaan penyelidikan", kConsD:"pilih masuk semasa tempahan · tanpa pengenalan",
+ kDir:"Menghasilkan arahan", kDirD:"sesi → tindakan boleh dijejaki",
+ fltH:"🎚️ Tapis lejar",
+ fState:"Negeri", fTopic:"Isu", fLang:"Bahasa", fSent:"Sentimen",
+ fConf:"Keyakinan", fWeek:"Minggu",
+ cDir:"Menghasilkan arahan", cRes:"Selesai", cRev:"Perlu semakan",
+ cFu:"Ada susulan", cCons:"Bersetuju penyelidikan", clearF:"Kosongkan semua",
+ resH:"📋 Sesi", resS:"klik mana-mana baris untuk membuka rekod sesi",
+ all:"Semua",
+ colRef:"Rujukan", colDate:"Tarikh", colWhere:"Daerah, Negeri", colTopic:"Isu",
+ colLang:"Bhs", colDur:"Tempoh", colSent:"Sentimen", colConf:"Keyakinan",
+ colState:"Status", colFlags:"",
+ bandCohort:"Analisis kohort bagi set yang ditapis", bandLearn:"Kitaran pembelajaran",
+ chTopic:"Isu", chState:"Negeri", chLang:"Bahasa",
+ chAskH:"🗣️ Apa yang kohort ini sebenarnya minta", chAskS:"petunjuk kebolehtindakan permintaan, disusun",
+ chAskNote:"Ini jambatan daripada beribu sesi kepada satu arahan. Kohort bukan laporan — pilihnya, baca apa yang diminta, dan keluarkan satu arahan terhadap keseluruhan kohort supaya setiap sesi di dalamnya mewarisi hasilnya.",
+ clH:"🧪 Baris gilir penentukuran", clS:"pelabelan manusia menambah baik rubrik, bukan model",
+ clNote:"<b>Apa maksud “pembelajaran” di sini.</b> Label manusia pada baris gilir ini dibandingkan dengan penilai untuk mengukur persetujuan dan memperhalus rubrik CVIF, glosari Manglish dan ambang keyakinan. Kandungan rakyat tidak pernah digunakan untuk melatih atau menala model — bukan model kami, bukan subpemproses. Itu komitmen kontrak, jadi kitaran pembelajaran sengaja dibina untuk menambah baik <i>rubrik</i> dan bukan pemberat model.",
+ crH:"📚 Korpus penyelidikan", crS:"berpagar keizinan · tanpa pengenalan",
+ crNote:"Hanya sesi yang rakyatnya memilih masuk semasa tempahan memasuki korpus, dan ia masuk tanpa pengenalan. Rakyat boleh menarik balik keizinan pada bila-bila masa menggunakan nombor rujukan mereka, yang mengeluarkan sesi itu daripada korpus tanpa menjejaskan aliran agregat yang telah diterbitkan.",
+ footer:"Lejar Sesi DENGAR · Jabatan Perdana Menteri · Prototaip demo dengan data sintetik · BYOND asia × Malaysia MADANI",
+ smSummary:"Ringkasan sesi yang dipantulkan", smAsks:"Apa yang rakyat ini minta",
+ smCvif:"Kad skor CVIF", smTranscript:"Transkrip", smOutcome:"Apa yang berlaku seterusnya",
+ smFu:"Sejarah susulan", smConsent:"Keizinan &amp; penyimpanan",
+ smCohort:"Lihat kohort sesi ini", smNotify:"📲 Hantar kemas kini status kepada rakyat",
+ mDur:"Tempoh", mLang:"Bahasa", mSent:"Sentimen", mConf:"Keyakinan", mStatus:"Status",
+ d1:"Sentimen", d1s:"arah dan kekuatan perasaan",
+ d2:"Kejelasan isu", d2s:"setepat mana masalah dinyatakan",
+ d3:"Kekuatan bukti", d3s:"perincian, tarikh, jumlah, lokasi",
+ d4:"Keterukan impak", d4s:"seburuk mana ia menjejaskan rakyat",
+ d5:"Kebolehtindakan permintaan", d5s:"sama ada permintaan boleh ditindak",
+ d6:"Status pengesahan", d6s:"disahkan semula kepada rakyat dalam sesi",
+ d7:"Kesegeraan & eskalasi", d7s:"sama ada perlu semakan hari sama",
+ confHigh:"TINGGI", confMed:"SEDERHANA", confLow:"RENDAH", confNE:"TIDAK NYATA",
+ gateH:"🔒 TAHAP 3 — TRANSKRIP MENTAH",
+ gateBody:"Transkrip dikelaskan Tahap 3 dan tidak dipaparkan secara lalai. Peranan anda boleh memohon akses berjangka masa, yang memerlukan sebab dinyatakan, pelulus kedua, dan direkod ke log audit tambah-sahaja yang direplikasi ke simpanan milik Kerajaan. Peranan Perdana Menteri tiada laluan sama sekali kepada kandungan ini.",
+ gateReq:"Mohon akses (direkod)", gateWhy:"Mengapa ini berpagar?",
+ gateGranted:"Akses diberi · 30 minit · direkod",
+ auditNote:"Paparan ini telah direkod ke log audit: peranan, sebab, rujukan sesi, cop masa. Rakyat boleh melihat bahawa transkrip mereka telah diakses, dan oleh peranan yang mana.",
+ gateWhyToast:"Pemimpin yang boleh membaca kata-kata mentah mana-mana rakyat ialah pemimpin yang boleh diminta melakukannya. Ketidakbolehaksesan struktur melindungi rakyat dan jabatan pada masa yang sama.",
+ outNone:"Sesi ini menyumbang kepada aliran nasional tetapi tidak menghasilkan arahannya sendiri. Ia salah satu sesi yang dikira di sebalik isunya.",
+ outDir:"Menyumbang kepada arahan", outResolved:"Disampaikan dan rakyat dimaklumkan",
+ outInProgress:"Dalam tindakan bersama kementerian",
+ consYes:"Memilih masuk kegunaan penyelidikan tanpa pengenalan", consNo:"Tidak memilih masuk — analitik sahaja",
+ retTranscript:"Penyimpanan transkrip", retAudio:"Penyimpanan audio", ret12:"12 bulan", ret90:"90 hari",
+ withdraw:"Rakyat boleh menarik balik keizinan menggunakan rujukan ini pada bila-bila masa",
+ fuNone:"Tiada permintaan susulan untuk sesi ini.", fuAsk:"meminta kemas kini",
+ fuAtCounter:"Kaunter JPM", fuWhatsApp:"WhatsApp", fuPortal:"Halaman status",
+ clReason:"Sebab", clLowConf:"Keyakinan rendah pada kejelasan isu",
+ clControl:"Kod kawalan — bukti tidak mencukupi", clDisagree:"Percanggahan label penilai / manusia",
+ clCodeSwitch:"Pertukaran bahasa yang banyak", clLabel:"Label ini", clAgree:"Persetujuan",
+ crInCorpus:"Dalam korpus", crOptedOut:"Tidak bersetuju", crWithdrawn:"Keizinan ditarik balik",
+ deskBanner:"Paparan pegawai kaunter — anda hanya melihat apa yang selamat dibaca kepada rakyat di hadapan anda. Tiada transkrip, tiada rakyat lain, tiada nota dalaman.",
+ pdBlocked:"🔒 Rujukan ini ialah pendedahan terlindung. Ia tidak boleh dicari di kaunter, secara reka bentuk — lihat nota di bawah.",
+ pdBlockedWhy:"Mencari rujukan rasuah di kaunter awam akan mendedahkan pendedah kepada sesiapa yang berdekatan, dan kepada pegawai yang melayaninya. Rujukan pendedahan terlindung hanya diselesaikan melalui saluran termeterai kepada pihak berkuasa penerima. Jika rakyat bertanya tentangnya, jawapan yang betul ialah memberi mereka maklumat hubungan pihak berkuasa itu, bukan status.",
+ statusReceived:"Diterima", statusAnalysed:"Dianalisis", statusInTrend:"Dikira dalam aliran nasional",
+ statusRouted:"Disalurkan kepada kementerian", statusProgress:"Kementerian sedang menanganinya", statusDelivered:"Disampaikan",
+ toastCohort:"Demo: penapis akan melompat ke kohort sesi ini — isu sama, negeri sama, minggu sama.",
+ toastNotify:"📲 Kemas kini status dibaris gilirkan ke WhatsApp rakyat, dalam bahasa yang mereka gunakan dalam sesi.",
+ toastLabel:"Demo: antara muka pelabelan untuk pasukan AI akan dibuka di sini.",
+ sessionsWord:"sesi", ofWord:"daripada", pageWord:"Halaman",
+};
+
+/* ================================================================
+   REFERENCE DATA
+================================================================ */
+const STATES=["Selangor","Kuala Lumpur","Johor","Penang","Sabah","Sarawak","Perak","Kedah",
+  "Kelantan","Pahang","Terengganu","N. Sembilan","Melaka","Perlis","Putrajaya","Labuan"];
+const T_STATE={"Penang":"Pulau Pinang"};
+const DISTRICTS={
+ "Selangor":["Petaling","Klang","Hulu Langat","Gombak","Sepang"],
+ "Kuala Lumpur":["Bukit Bintang","Kepong","Cheras","Wangsa Maju"],
+ "Johor":["Johor Bahru","Batu Pahat","Kluang","Muar"],
+ "Penang":["Timur Laut","Barat Daya","SP Tengah"],
+ "Sabah":["Kota Kinabalu","Sandakan","Tawau","Keningau"],
+ "Sarawak":["Kuching","Miri","Sibu","Bintulu"],
+ "Perak":["Kinta","Larut Matang","Manjung"],
+ "Kedah":["Kota Setar","Kuala Muda","Kulim"],
+ "Kelantan":["Kota Bharu","Pasir Mas","Tumpat"],
+ "Pahang":["Kuantan","Temerloh","Bentong"],
+ "Terengganu":["Kuala Terengganu","Kemaman","Dungun"],
+ "N. Sembilan":["Seremban","Port Dickson","Jempol"],
+ "Melaka":["Melaka Tengah","Alor Gajah","Jasin"],
+ "Perlis":["Kangar","Arau"],
+ "Putrajaya":["Presint 1–9","Presint 10–20"],
+ "Labuan":["Victoria"],
+};
+const TOPICS=["Cost of living","Jobs & economy","Housing","Healthcare","Public services",
+  "Safety & crime","Education","Corruption & governance","National unity"];
+const T_TOPIC={
+ "Cost of living":"Kos sara hidup","Jobs & economy":"Pekerjaan & ekonomi","Housing":"Perumahan",
+ "Healthcare":"Kesihatan","Public services":"Perkhidmatan awam","Safety & crime":"Keselamatan & jenayah",
+ "Education":"Pendidikan","Corruption & governance":"Rasuah & tadbir urus","National unity":"Perpaduan nasional"
+};
+const LANGS=["BM","EN","中文","தமிழ்","العربية"];
+const TOPIC_WEIGHT=[24,17,12,11,10,9,8,6,3];
+
+/* Asks per topic — the request-actionability text */
+const ASKS={
+ "Cost of living":["Cap the price of chicken, eggs and cooking oil and enforce it",
+   "Expand SARA cash aid to more B40 households","Publish a weekly essential-goods price list per district",
+   "Keep the electricity subsidy for low-income households"],
+ "Jobs & economy":["Set a minimum starting salary for graduates",
+   "Give EPF and injury cover to gig workers","Wage subsidy for SMEs that hire fresh graduates",
+   "Publish which sectors actually have vacancies"],
+ "Housing":["Rent-to-own with a low deposit for first homes",
+   "Show PPR applicants their position on the waiting list","Cap rental deposits at one month",
+   "Build affordable units near workplaces, not on the outskirts"],
+ "Healthcare":["More specialists at district hospitals",
+   "Mobile clinics for rural districts","Fix medicine stock-outs at government clinics",
+   "Let patients book clinic appointments by phone"],
+ "Public services":["One counter for one transaction, not three",
+   "Put all document renewals online","Extend counter hours past 5pm",
+   "Same service standard at every district office"],
+ "Safety & crime":["Faster response to online investment scams",
+   "More patrols in residential taman at night","Keep vape and drugs away from schools",
+   "A single hotline for scam reporting"],
+ "Education":["Reduce class sizes in urban schools",
+   "Restructure PTPTN repayment for low earners","More teachers for rural schools",
+   "Free tuition support for B40 students"],
+ "Corruption & governance":[],
+ "National unity":["More support for community and cultural programmes",
+   "Recognise all languages in government services"],
+};
+
+/* Summary templates */
+const SUMM={
+ "Cost of living":"raised the rising cost of food and household essentials, describing a widening gap between prices and income",
+ "Jobs & economy":"raised wages and job quality, describing work that is available but does not pay enough to live on",
+ "Housing":"raised the difficulty of buying or renting a first home, pointing at deposits rather than monthly instalments",
+ "Healthcare":"raised access to public healthcare, describing distance and waiting time rather than quality of care",
+ "Public services":"raised the effort required to complete a government transaction across multiple counters",
+ "Safety & crime":"raised safety in their neighbourhood, with online scams and night-time break-ins named most often",
+ "Education":"raised school and tertiary education, with class sizes and study loan repayment named most often",
+ "Corruption & governance":"raised governance and integrity",
+ "National unity":"spoke positively about being heard in their own language",
+};
+const T_SUMM={
+ "raised the rising cost of food and household essentials, describing a widening gap between prices and income":"membangkitkan kenaikan harga makanan dan barang keperluan rumah, menggambarkan jurang yang melebar antara harga dan pendapatan",
+ "raised wages and job quality, describing work that is available but does not pay enough to live on":"membangkitkan gaji dan kualiti pekerjaan, menggambarkan kerja yang ada tetapi tidak cukup untuk hidup",
+ "raised the difficulty of buying or renting a first home, pointing at deposits rather than monthly instalments":"membangkitkan kesukaran membeli atau menyewa rumah pertama, menunjuk kepada deposit dan bukan ansuran bulanan",
+ "raised access to public healthcare, describing distance and waiting time rather than quality of care":"membangkitkan akses kesihatan awam, menggambarkan jarak dan masa menunggu dan bukan kualiti rawatan",
+ "raised the effort required to complete a government transaction across multiple counters":"membangkitkan usaha yang diperlukan untuk melengkapkan transaksi kerajaan merentas beberapa kaunter",
+ "raised safety in their neighbourhood, with online scams and night-time break-ins named most often":"membangkitkan keselamatan di kejiranan mereka, dengan penipuan online dan pecah rumah pada malam paling kerap disebut",
+ "raised school and tertiary education, with class sizes and study loan repayment named most often":"membangkitkan pendidikan sekolah dan tinggi, dengan saiz kelas dan bayaran balik pinjaman pengajian paling kerap disebut",
+ "raised governance and integrity":"membangkitkan tadbir urus dan integriti",
+ "spoke positively about being heard in their own language":"bercakap secara positif tentang didengari dalam bahasa mereka sendiri",
+};
+const T_ASK={};
+[["Cap the price of chicken, eggs and cooking oil and enforce it","Hadkan harga ayam, telur dan minyak masak serta kuatkuasakannya"],
+ ["Expand SARA cash aid to more B40 households","Luaskan bantuan tunai SARA kepada lebih banyak isi rumah B40"],
+ ["Publish a weekly essential-goods price list per district","Terbitkan senarai harga barang keperluan mingguan bagi setiap daerah"],
+ ["Keep the electricity subsidy for low-income households","Kekalkan subsidi elektrik untuk isi rumah berpendapatan rendah"],
+ ["Set a minimum starting salary for graduates","Tetapkan gaji permulaan minimum untuk graduan"],
+ ["Give EPF and injury cover to gig workers","Beri KWSP dan perlindungan kecederaan kepada pekerja gig"],
+ ["Wage subsidy for SMEs that hire fresh graduates","Subsidi upah untuk PKS yang mengambil graduan baharu"],
+ ["Publish which sectors actually have vacancies","Terbitkan sektor mana yang benar-benar ada kekosongan"],
+ ["Rent-to-own with a low deposit for first homes","Sewa-beli dengan deposit rendah untuk rumah pertama"],
+ ["Show PPR applicants their position on the waiting list","Tunjukkan pemohon PPR kedudukan mereka dalam senarai menunggu"],
+ ["Cap rental deposits at one month","Hadkan deposit sewa kepada satu bulan"],
+ ["Build affordable units near workplaces, not on the outskirts","Bina unit mampu milik dekat tempat kerja, bukan di pinggir"],
+ ["More specialists at district hospitals","Lebih banyak pakar di hospital daerah"],
+ ["Mobile clinics for rural districts","Klinik bergerak untuk daerah luar bandar"],
+ ["Fix medicine stock-outs at government clinics","Atasi kehabisan stok ubat di klinik kerajaan"],
+ ["Let patients book clinic appointments by phone","Benarkan pesakit menempah temujanji klinik melalui telefon"],
+ ["One counter for one transaction, not three","Satu kaunter untuk satu transaksi, bukan tiga"],
+ ["Put all document renewals online","Jadikan semua pembaharuan dokumen secara online"],
+ ["Extend counter hours past 5pm","Lanjutkan waktu kaunter melebihi 5 petang"],
+ ["Same service standard at every district office","Standard perkhidmatan sama di setiap pejabat daerah"],
+ ["Faster response to online investment scams","Tindakan lebih pantas terhadap penipuan pelaburan online"],
+ ["More patrols in residential taman at night","Lebih banyak rondaan di taman perumahan pada malam"],
+ ["Keep vape and drugs away from schools","Jauhkan vape dan dadah daripada sekolah"],
+ ["A single hotline for scam reporting","Satu talian hotline untuk melaporkan penipuan"],
+ ["Reduce class sizes in urban schools","Kurangkan saiz kelas di sekolah bandar"],
+ ["Restructure PTPTN repayment for low earners","Struktur semula bayaran balik PTPTN untuk berpendapatan rendah"],
+ ["More teachers for rural schools","Lebih banyak guru untuk sekolah luar bandar"],
+ ["Free tuition support for B40 students","Sokongan tuisyen percuma untuk pelajar B40"],
+ ["More support for community and cultural programmes","Lebih sokongan untuk program komuniti dan kebudayaan"],
+ ["Recognise all languages in government services","Iktiraf semua bahasa dalam perkhidmatan kerajaan"],
+].forEach(([a,b])=>T_ASK[a]=b);
+
+const DIR_FOR_TOPIC={"Cost of living":"DIR-1004","Jobs & economy":"DIR-1003",
+ "Housing":"DIR-1001","Healthcare":"DIR-1011","Public services":"DIR-1014"};
+
+const dState=v=>uiLang==='ms'?(T_STATE[v]||v):v;
+const dTopic=v=>uiLang==='ms'?(T_TOPIC[v]||v):v;
+const dSumm=v=>uiLang==='ms'?(T_SUMM[v]||v):v;
+const dAsk=v=>uiLang==='ms'?(T_ASK[v]||v):v;
+
+/* ================================================================
+   DETERMINISTIC SESSION GENERATION
+   Seeded so a reference the user reads is the same reference on reload.
+================================================================ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function weightedPick(rnd,items,weights){
+  const tot=weights.reduce((a,b)=>a+b,0);let r=rnd()*tot;
+  for(let i=0;i<items.length;i++){r-=weights[i];if(r<=0)return items[i];}
+  return items[items.length-1];
+}
+const SESSIONS=[];
+(function build(){
+  const rnd=mulberry32(20260809);
+  const SEEN=new Set();
+  const N=4812;
+  for(let i=0;i<N;i++){
+    const st=weightedPick(rnd,STATES,[820,640,540,372,334,300,311,228,214,189,158,172,143,64,66,36]);
+    const ds=DISTRICTS[st]; const d=ds[Math.floor(rnd()*ds.length)];
+    const topic=weightedPick(rnd,TOPICS,TOPIC_WEIGHT);
+    const lang=weightedPick(rnd,LANGS,[58,20,13,6,3]);
+    /* date across 12 weeks ending 8 Aug 2026 */
+    const dayOffset=Math.floor(rnd()*84);
+    const dt=new Date(Date.UTC(2026,7,8)); dt.setUTCDate(dt.getUTCDate()-dayOffset);
+    const mm=String(dt.getUTCMonth()+1).padStart(2,'0'), dd=String(dt.getUTCDate()).padStart(2,'0');
+    /* The reference is the citizen's only key into the system, so it must be
+       unique. Re-draw on collision rather than trusting the PRNG. */
+    let ref, guard=0;
+    do{
+      const seq=String(1+Math.floor(rnd()*99998)).padStart(5,'0');
+      ref=`DGR-2026-${mm}${dd}-${seq}`;
+    }while(SEEN.has(ref)&&++guard<50);
+    SEEN.add(ref);
+    const isoWeek=weekOf(dt);
+    /* sentiment: negative topics skew negative */
+    const negT=["Cost of living","Jobs & economy","Housing","Safety & crime","Corruption & governance"];
+    const base=negT.includes(topic)?-0.45:topic==="National unity"?0.45:-0.05;
+    const sent=Math.max(-1,Math.min(1,base+(rnd()-0.5)*0.9));
+    const dur=Math.round((rnd()*2.6+2.4)*10)/10;           /* 2.4–5.0 min */
+    const completed=dur>=4.2||rnd()>0.22;
+    /* CVIF dimensions 1–5, with control codes */
+    const clarity=1+Math.floor(rnd()*5);
+    const evidence=rnd()<0.09?'IE':1+Math.floor(rnd()*5);
+    const impact=1+Math.floor(rnd()*5);
+    const action=rnd()<0.07?'NE':1+Math.floor(rnd()*5);
+    const confirmed=completed&&rnd()>0.18;
+    const urgency=(impact>=4&&typeof evidence==='number'&&evidence>=4)?(rnd()<0.2?3:2):1;
+    const confN=(clarity+(typeof evidence==='number'?evidence:1)+impact)/3;
+    const conf=evidence==='IE'||action==='NE'?'low':confN>=3.9?'high':confN>=2.6?'med':'low';
+    const needsReview=conf==='low'||evidence==='IE'||action==='NE'||urgency>=3;
+    const consented=rnd()<0.63;
+    const restricted=topic==="Corruption & governance";
+    const hasDir=!restricted&&!!DIR_FOR_TOPIC[topic]&&rnd()<0.34;
+    const resolved=hasDir&&rnd()<0.24;
+    const fuCount=restricted?0:(rnd()<0.11?1+Math.floor(rnd()*2):0);
+    SESSIONS.push({ref,st,d,topic,lang,dt,isoWeek,sent,dur,completed,
+      clarity,evidence,impact,action,confirmed,urgency,conf,needsReview,consented,
+      restricted,hasDir,resolved,fuCount,
+      askIdx:Math.floor(rnd()*4)});
+  }
+})();
+function weekOf(dt){
+  const d=new Date(Date.UTC(dt.getUTCFullYear(),dt.getUTCMonth(),dt.getUTCDate()));
+  const dayNum=d.getUTCDay()||7; d.setUTCDate(d.getUTCDate()+4-dayNum);
+  const y0=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return '2026-W'+String(Math.ceil(((d-y0)/86400000+1)/7)).padStart(2,'0');
+}
+const WEEKS=[...new Set(SESSIONS.map(s=>s.isoWeek))].sort();
+
+/* ================================================================
+   HELPERS
+================================================================ */
+const $=id=>document.getElementById(id);
+const fmtN=n=>n.toLocaleString(uiLang==='ms'?'ms-MY':'en-MY');
+const MON_EN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MON_MS=["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogo","Sep","Okt","Nov","Dis"];
+const fmtD=dt=>`${dt.getUTCDate()} ${(uiLang==='ms'?MON_MS:MON_EN)[dt.getUTCMonth()]}`;
+const sentColor=v=>{
+  const t=Math.max(0,Math.min(1,(v+1)/2));
+  const lerp=(a,b,u)=>Math.round(a+(b-a)*u);
+  let c1,c2,u;
+  if(t<0.5){c1=[198,34,47];c2=[232,164,0];u=t/0.5}else{c1=[232,164,0];c2=[30,158,82];u=(t-0.5)/0.5}
+  return `rgb(${lerp(c1[0],c2[0],u)},${lerp(c1[1],c2[1],u)},${lerp(c1[2],c2[2],u)})`;
+};
+const sentBand=v=>v<=-0.33?'neg':v>=0.33?'pos':'neu';
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._x);el._x=setTimeout(()=>el.classList.remove('show'),3600);}
+
+/* ================================================================
+   FILTER STATE
+================================================================ */
+const F={state:'',topic:'',lang:'',sent:'',conf:'',week:'',dir:false,res:false,rev:false,fu:false,cons:false,q:''};
+let pageNo=0; const PER=25;
+
+function buildSelects(){
+  const opt=(v,l)=>`<option value="${v}">${l}</option>`;
+  $('fState').innerHTML=opt('',tt('all'))+STATES.map(s=>opt(s,dState(s))).join('');
+  $('fTopic').innerHTML=opt('',tt('all'))+TOPICS.map(t=>opt(t,dTopic(t))).join('');
+  $('fLang').innerHTML=opt('',tt('all'))+LANGS.map(l=>opt(l,l)).join('');
+  $('fSent').innerHTML=opt('',tt('all'))+[['neg','▼ '+tt('confLow')],['neu','—'],['pos','▲ '+tt('confHigh')]].map(([v,l])=>opt(v,l)).join('');
+  $('fSent').innerHTML=opt('',tt('all'))+opt('neg',uiLang==='ms'?'Negatif':'Negative')+opt('neu',uiLang==='ms'?'Neutral':'Neutral')+opt('pos',uiLang==='ms'?'Positif':'Positive');
+  $('fConf').innerHTML=opt('',tt('all'))+opt('high',tt('confHigh'))+opt('med',tt('confMed'))+opt('low',tt('confLow'));
+  $('fWeek').innerHTML=opt('',tt('all'))+WEEKS.map(w=>opt(w,w)).join('');
+  $('fState').value=F.state;$('fTopic').value=F.topic;$('fLang').value=F.lang;
+  $('fSent').value=F.sent;$('fConf').value=F.conf;$('fWeek').value=F.week;
+}
+function applyFilters(){
+  F.state=$('fState').value;F.topic=$('fTopic').value;F.lang=$('fLang').value;
+  F.sent=$('fSent').value;F.conf=$('fConf').value;F.week=$('fWeek').value;
+  pageNo=0;render();
+}
+function toggleChip(k){F[k]=!F[k];pageNo=0;render();}
+function clearFilters(){
+  Object.assign(F,{state:'',topic:'',lang:'',sent:'',conf:'',week:'',dir:false,res:false,rev:false,fu:false,cons:false,q:''});
+  $('q').value='';pageNo=0;buildSelects();render();
+}
+function filtered(){
+  return SESSIONS.filter(s=>{
+    if(F.q&&!s.ref.toUpperCase().includes(F.q))return false;
+    if(F.state&&s.st!==F.state)return false;
+    if(F.topic&&s.topic!==F.topic)return false;
+    if(F.lang&&s.lang!==F.lang)return false;
+    if(F.sent&&sentBand(s.sent)!==F.sent)return false;
+    if(F.conf&&s.conf!==F.conf)return false;
+    if(F.week&&s.isoWeek!==F.week)return false;
+    if(F.dir&&!s.hasDir)return false;
+    if(F.res&&!s.resolved)return false;
+    if(F.rev&&!s.needsReview)return false;
+    if(F.fu&&!s.fuCount)return false;
+    if(F.cons&&!s.consented)return false;
+    return true;
+  });
+}
+
+/* ================================================================
+   SEARCH
+================================================================ */
+function doSearch(){
+  F.q=$('q').value.trim().toUpperCase();pageNo=0;
+  const n=filtered().length;
+  $('srcHint').textContent=F.q?(n?tt('srcFound')(n):tt('srcNotFound')):tt('srcHintIdle');
+  render();
+  if(F.q&&n===1)openSession(filtered()[0].ref);
+}
+function randomRef(){
+  const pool=SESSIONS.filter(s=>!s.restricted&&s.fuCount>0);
+  const s=pool[Math.floor(pool.length/2)];
+  $('q').value=s.ref;doSearch();
+}
+$('q').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
+
+/* ================================================================
+   RENDER
+================================================================ */
+function render(){
+  const set=filtered();
+  /* KPIs are always whole-ledger; the filter count is separate */
+  $('kTot').textContent=fmtN(SESSIONS.length);
+  $('kTotD').textContent=`12 ${uiLang==='ms'?'minggu':'weeks'}`;
+  $('kComp').textContent=Math.round(SESSIONS.filter(s=>s.completed).length/SESSIONS.length*100)+'%';
+  $('kRev').textContent=fmtN(SESSIONS.filter(s=>s.needsReview).length);
+  $('kCons').textContent=Math.round(SESSIONS.filter(s=>s.consented).length/SESSIONS.length*100)+'%';
+  $('kDir').textContent=fmtN(SESSIONS.filter(s=>s.hasDir).length);
+
+  $('fltCount').textContent=`${fmtN(set.length)} ${tt('ofWord')} ${fmtN(SESSIONS.length)} ${tt('sessionsWord')}`;
+  ['dir','res','rev','fu','cons'].forEach(k=>{
+    const el=$({dir:'cDir',res:'cRes',rev:'cRev',fu:'cFu',cons:'cCons'}[k]);
+    el.classList.toggle('on',F[k]);
+  });
+
+  /* table */
+  const head=`<thead><tr>
+    <th>${tt('colRef')}</th><th>${tt('colDate')}</th><th>${tt('colWhere')}</th>
+    <th>${tt('colTopic')}</th><th>${tt('colLang')}</th><th>${tt('colDur')}</th>
+    <th>${tt('colSent')}</th><th>${tt('colConf')}</th><th>${tt('colState')}</th><th></th>
+  </tr></thead>`;
+  const pages=Math.max(1,Math.ceil(set.length/PER));
+  if(pageNo>=pages)pageNo=pages-1;
+  const slice=set.slice(pageNo*PER,pageNo*PER+PER);
+  const body=slice.map(s=>{
+    const confCls=s.conf==='high'?'ok':s.conf==='med'?'warn':'bad';
+    const st=s.resolved?['ok',tt('statusDelivered')]:s.hasDir?['info',tt('statusRouted')]:['mute',tt('statusInTrend')];
+    return `<tr onclick="openSession('${s.ref}')">
+      <td class="ref">${s.ref}</td>
+      <td>${fmtD(s.dt)}</td>
+      <td>${s.d}, ${dState(s.st)}</td>
+      <td>${dTopic(s.topic)}</td>
+      <td>${s.lang}</td>
+      <td>${s.dur}m</td>
+      <td><span class="sdot" style="background:${sentColor(s.sent)}"></span>${s.sent>0?'+':''}${Math.round(s.sent*100)}</td>
+      <td><span class="pill ${confCls}">${tt(s.conf==='high'?'confHigh':s.conf==='med'?'confMed':'confLow')}</span></td>
+      <td><span class="pill ${st[0]}">${st[1]}</span></td>
+      <td>${s.restricted?`<span class="pill pd">🔒</span>`:''}${s.needsReview?`<span class="pill warn">⚑</span>`:''}${s.fuCount?`<span class="pill info">🔎${s.fuCount}</span>`:''}</td>
+    </tr>`;}).join('');
+  $('sTbl').innerHTML=head+'<tbody>'+(slice.length?body:`<tr><td colspan="10"><div class="emptyT">—</div></td></tr>`)+'</tbody>';
+  $('pInfo').textContent=`${tt('pageWord')} ${pageNo+1} / ${pages}`;
+  $('pPrev').disabled=pageNo===0;$('pNext').disabled=pageNo>=pages-1;
+
+  renderCohort(set);
+  renderLearning();
+}
+function page(d){pageNo+=d;render();window.scrollTo({top:$('sTbl').getBoundingClientRect().top+window.scrollY-90,behavior:'smooth'});}
+
+function barList(el,rows,total,fmt){
+  const mx=Math.max(1,...rows.map(r=>r[1]));
+  $(el).innerHTML=rows.length?rows.map(([k,v])=>
+    `<div class="bar"><div class="bn">${fmt?fmt(k):k}</div>
+      <div class="bb"><i style="width:${v/mx*100}%"></i></div>
+      <b>${fmtN(v)}</b></div>`).join(''):`<div class="emptyT">—</div>`;
+}
+function renderCohort(set){
+  const agg=(f)=>{const m={};set.forEach(s=>m[f(s)]=(m[f(s)]||0)+1);
+    return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,8);};
+  barList('chTopic',agg(s=>s.topic),set.length,dTopic);
+  barList('chState',agg(s=>s.st),set.length,dState);
+  barList('chLang',agg(s=>s.lang),set.length);
+  /* asks: only from non-restricted sessions */
+  const am={};
+  set.filter(s=>!s.restricted).forEach(s=>{
+    const list=ASKS[s.topic]||[];if(!list.length)return;
+    const a=list[s.askIdx%list.length];am[a]=(am[a]||0)+1;
+  });
+  const rows=Object.entries(am).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  barList('chAsks',rows,set.length,dAsk);
+}
+
+function renderLearning(){
+  const q=SESSIONS.filter(s=>s.needsReview).slice(0,5);
+  $('clList').innerHTML=q.map(s=>{
+    const reason=s.evidence==='IE'?'clControl':s.action==='NE'?'clControl':s.conf==='low'?'clLowConf':'clDisagree';
+    return `<div class="fuRow"><span class="pill mute mono" style="font-size:10px">${s.ref}</span>
+      <div style="flex:1;line-height:1.4">${dTopic(s.topic)}
+        <small style="display:block;font-size:10.5px;color:var(--grey);font-weight:600">${tt('clReason')}: ${tt(reason)}</small></div>
+      <button class="fchip" onclick="event.stopPropagation();toast(tt('toastLabel'))">${tt('clLabel')}</button></div>`;}).join('');
+  const inC=SESSIONS.filter(s=>s.consented).length;
+  const out=SESSIONS.length-inC;
+  barList('crStats',[[tt('crInCorpus'),inC],[tt('crOptedOut'),out],[tt('crWithdrawn'),37]],SESSIONS.length);
+}
+
+/* ================================================================
+   SESSION DETAIL
+================================================================ */
+let curSession=null, transcriptOpen=false;
+function openSession(ref){
+  const s=SESSIONS.find(x=>x.ref===ref); if(!s)return;
+  curSession=ref; transcriptOpen=false;
+  $('smRef').textContent=s.ref;
+  $('smSub').textContent=`${s.d}, ${dState(s.st)} · ${fmtD(s.dt)} · ${s.isoWeek} · ${dTopic(s.topic)}`;
+
+  /* Counter-officer role: protected disclosures cannot be resolved at a counter. */
+  if(role==='desk'&&s.restricted){
+    $('smStats').innerHTML=`<div class="gate" style="flex:1"><div class="gh">${tt('pdBlocked')}</div>
+      <p>${tt('pdBlockedWhy')}</p></div>`;
+    ['smSummary','smAsks','smCvif','smTranscript','smOutcome','smFu','smConsent'].forEach(id=>$(id).innerHTML='');
+    $('sModal').classList.add('open');
+    return;
+  }
+
+  $('smStats').innerHTML=
+   `<div class="miniStat"><small>${tt('mDur')}</small><b>${s.dur} min</b></div>
+    <div class="miniStat"><small>${tt('mLang')}</small><b>${s.lang}</b></div>
+    <div class="miniStat"><small>${tt('mSent')}</small><b style="color:${sentColor(s.sent)}">${s.sent>0?'+':''}${Math.round(s.sent*100)}</b></div>
+    <div class="miniStat"><small>${tt('mConf')}</small><b style="font-size:13px">${tt(s.conf==='high'?'confHigh':s.conf==='med'?'confMed':'confLow')}</b></div>`;
+
+  /* summary — suppressed for protected disclosures */
+  if(s.restricted){
+    $('smSummary').innerHTML=`<div class="gate"><div class="gh">🔒 ${tt('gateH').replace('🔒 ','')}</div>
+      <p>${tt('pdBlockedWhy')}</p></div>`;
+    $('smAsks').innerHTML='';
+    $('smCvif').innerHTML='';
+    $('smTranscript').innerHTML='';
+    $('smOutcome').innerHTML=`<div class="note">${tt('pdBlockedWhy')}</div>`;
+    $('smFu').innerHTML=`<div class="emptyT">${tt('fuNone')}</div>`;
+    $('smConsent').innerHTML=`<div class="note">${tt('crWithdrawn')} — ${tt('consNo')}</div>`;
+    $('sModal').classList.add('open');
+    return;
+  }
+
+  const who=uiLang==='ms'?`Rakyat dari <b>${s.d}, ${dState(s.st)}</b> `:`A citizen from <b>${s.d}, ${dState(s.st)}</b> `;
+  $('smSummary').innerHTML=who+dSumm(SUMM[s.topic])+'.';
+
+  const list=ASKS[s.topic]||[];
+  const asks=list.length?[list[s.askIdx%list.length],list[(s.askIdx+1)%list.length]]:[];
+  $('smAsks').innerHTML=asks.map(a=>`<li>${dAsk(a)}</li>`).join('')||`<li>—</li>`;
+
+  const dims=[
+   ['d1',Math.round((s.sent+1)/2*4)+1,s.conf],
+   ['d2',s.clarity,s.conf],
+   ['d3',s.evidence,s.evidence==='IE'?'ne':s.conf],
+   ['d4',s.impact,s.conf],
+   ['d5',s.action,s.action==='NE'?'ne':s.conf],
+   ['d6',s.confirmed?5:1,'high'],
+   ['d7',s.urgency,s.conf],
+  ];
+  $('smCvif').innerHTML=dims.map(([k,v,c])=>{
+    const isCode=typeof v!=='number';
+    const blocks=[1,2,3,4,5].map(i=>`<i class="${!isCode&&i<=v?'on':''}"></i>`).join('');
+    const val=isCode?(v==='IE'?'IE':'NE'):v+'/5';
+    return `<div class="cvRow"><div class="cn">${tt(k)}<small>${tt(k+'s')}</small></div>
+      <div class="cs">${blocks}</div><div class="cv">${val}</div>
+      <span class="conf ${c}">${tt(c==='high'?'confHigh':c==='med'?'confMed':c==='ne'?'confNE':'confLow')}</span></div>`;}).join('');
+
+  renderTranscript(s);
+
+  /* outcome */
+  if(s.resolved)
+    $('smOutcome').innerHTML=`<div class="lnk"><span class="pill ok">${tt('statusDelivered')}</span>
+      <div class="lx">${tt('outResolved')}<small>${tt('outDir')} ${DIR_FOR_TOPIC[s.topic]}</small></div></div>`;
+  else if(s.hasDir)
+    $('smOutcome').innerHTML=`<div class="lnk"><span class="pill info">${tt('statusProgress')}</span>
+      <div class="lx">${tt('outInProgress')}<small>${tt('outDir')} ${DIR_FOR_TOPIC[s.topic]}</small></div></div>`;
+  else
+    $('smOutcome').innerHTML=`<div class="lnk"><span class="pill mute">${tt('statusInTrend')}</span>
+      <div class="lx">${tt('outNone')}</div></div>`;
+
+  /* follow-ups */
+  if(!s.fuCount)$('smFu').innerHTML=`<div class="emptyT">${tt('fuNone')}</div>`;
+  else{
+    const chans=['fuAtCounter','fuWhatsApp','fuPortal'];
+    $('smFu').innerHTML=Array.from({length:s.fuCount},(_,i)=>
+      `<div class="fuRow"><span class="pill info">${tt(chans[(s.askIdx+i)%3])}</span>
+        <div style="flex:1">${tt('fuAsk')}<small style="display:block;font-size:10.5px;color:var(--grey);font-weight:600">${fmtD(s.dt)} + ${9+i*6} ${uiLang==='ms'?'hari':'days'}</small></div></div>`).join('');
+  }
+
+  /* consent + retention */
+  $('smConsent').innerHTML=
+   `<div class="fuRow"><span class="pill ${s.consented?'ok':'mute'}">${s.consented?'✓':'—'}</span>
+      <div style="flex:1">${s.consented?tt('consYes'):tt('consNo')}
+      <small style="display:block;font-size:10.5px;color:var(--grey);font-weight:600">${tt('withdraw')}</small></div></div>
+    <div class="fuRow"><div style="flex:1">${tt('retTranscript')}: <b>${tt('ret12')}</b> · ${tt('retAudio')}: <b>${tt('ret90')}</b></div></div>`;
+
+  $('sModal').classList.add('open');
+}
+
+function renderTranscript(s){
+  if(role==='desk'){
+    $('smTranscript').innerHTML=`<div class="gate"><div class="gh">${tt('gateH')}</div>
+      <p>${tt('deskBanner')}</p></div>`;
+    return;
+  }
+  if(!transcriptOpen){
+    $('smTranscript').innerHTML=`<div class="gate"><div class="gh">${tt('gateH')}</div>
+      <p>${tt('gateBody')}</p>
+      <div class="gb">
+        <button class="p" onclick="grantTranscript()">${tt('gateReq')}</button>
+        <button onclick="toast(tt('gateWhyToast'))">${tt('gateWhy')}</button>
+      </div></div>`;
+    return;
+  }
+  const q=TRANSCRIPTS[s.topic]||TRANSCRIPTS._default;
+  $('smTranscript').innerHTML=`<div class="granted">
+      ${q.map(([w,t])=>`<div class="turn"><span class="who">${w==='pm'?(uiLang==='ms'?'Perdana Menteri':'Prime Minister'):(uiLang==='ms'?'Rakyat':'Citizen')}</span>${dTxtT(t)}</div>`).join('')}
+    </div>
+    <div class="auditNote">🧾 ${tt('auditNote')}</div>`;
+}
+function grantTranscript(){transcriptOpen=true;renderTranscript(SESSIONS.find(s=>s.ref===curSession));toast(tt('gateGranted'));}
+
+const TRANSCRIPTS={
+ "Cost of living":[
+  ['pm','Terima kasih kerana meluangkan masa. Apa yang paling membebankan keluarga anda sekarang?'],
+  ['cit','Harga ayam dan telur naik setiap bulan tetapi gaji saya sama. Untuk keluarga empat orang, belanja dapur naik RM40 sebulan.'],
+  ['pm','Boleh anda beritahu saya bahagian mana yang paling ketara?'],
+  ['cit','Barang basah. Sayur pun naik. Bantuan SARA membantu tetapi tidak cukup untuk menampung kenaikan.'],
+  ['pm','Jika satu perkara boleh diubah, apa yang anda mahu?'],
+  ['cit','Hadkan harga ayam, telur dan minyak masak, dan kuatkuasakan betul-betul di pasar.'],
+ ],
+ "Housing":[
+  ['pm','Thank you for speaking with me. What is the hardest part of housing for you?'],
+  ['cit','The deposit. We can afford the monthly instalment but not the ten percent upfront. The bank rejected us twice.'],
+  ['pm','Where are you looking to buy?'],
+  ['cit','Near Petaling, because that is where we both work. Anything we can afford is an hour and a half away.'],
+  ['pm','What would help most?'],
+  ['cit','Rent-to-own with a low deposit. And tell PPR applicants where they actually stand in the queue.'],
+ ],
+ _default:[
+  ['pm','Thank you for speaking with me. Please tell me what is on your mind.'],
+  ['cit','(Session transcript continues. In production this is the verbatim record, preserved in the original language with a normalised translation alongside it.)'],
+ ],
+};
+const T_TXT_T={
+ 'Thank you for speaking with me. What is the hardest part of housing for you?':'Terima kasih kerana bercakap dengan saya. Apa bahagian paling sukar tentang perumahan bagi anda?',
+ 'The deposit. We can afford the monthly instalment but not the ten percent upfront. The bank rejected us twice.':'Deposit. Kami mampu ansuran bulanan tetapi tidak sepuluh peratus pendahuluan. Bank menolak kami dua kali.',
+ 'Where are you looking to buy?':'Di mana anda mencari untuk membeli?',
+ 'Near Petaling, because that is where we both work. Anything we can afford is an hour and a half away.':'Dekat Petaling, kerana di situ kami berdua bekerja. Apa yang kami mampu adalah sejam setengah jauhnya.',
+ 'What would help most?':'Apa yang paling membantu?',
+ 'Rent-to-own with a low deposit. And tell PPR applicants where they actually stand in the queue.':'Sewa-beli dengan deposit rendah. Dan beritahu pemohon PPR di mana kedudukan sebenar mereka dalam barisan.',
+ 'Thank you for speaking with me. Please tell me what is on your mind.':'Terima kasih kerana bercakap dengan saya. Sila beritahu saya apa yang ada di fikiran anda.',
+ '(Session transcript continues. In production this is the verbatim record, preserved in the original language with a normalised translation alongside it.)':'(Transkrip sesi berterusan. Dalam pengeluaran ini ialah rekod kata sebenar, dikekalkan dalam bahasa asal dengan terjemahan ternormal di sebelahnya.)',
+};
+const dTxtT=v=>uiLang==='ms'?(T_TXT_T[v]||v):v;
+
+/* ================================================================
+   ROLE + LANGUAGE
+================================================================ */
+let role='analyst';
+function setRole(r){
+  role=r;
+  document.querySelectorAll('#viewTgl button').forEach(b=>b.classList.toggle('on',b.dataset.v===r));
+  if($('sModal').classList.contains('open')&&curSession){transcriptOpen=false;openSession(curSession);}
+  render();
+}
+function applyI18n(){
+  document.documentElement.lang=uiLang==='ms'?'ms':'en';
+  $('tglMs').classList.toggle('on',uiLang==='ms');
+  $('tglEn').classList.toggle('on',uiLang==='en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=I18N[uiLang][el.dataset.i18n];
+    if(typeof v==='string')el.innerHTML=v;
+  });
+  $('srcHint').textContent=F.q?'':tt('srcHintIdle');
+  buildSelects();render();
+  if($('sModal').classList.contains('open')&&curSession)openSession(curSession);
+}
+function setUiLang(l){uiLang=l;applyI18n();}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'))});
+applyI18n();
+</script>
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DENGAR.ai — Semak status suara anda</title>
+<style>
+:root{
+  --navy:#1B2A6B; --navy-d:#0E1838; --red:#D22030; --gold:#FFCC00;
+  --green:#1E9E52; --amber:#E8A400; --purple:#5A2CA0;
+  --card:#FFFFFF; --ink:#17181C; --grey:#6B7180; --line:#E3E6EC;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:#0B1226;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:22px 14px;color:var(--ink)}
+button,input{font-family:inherit}
+button{cursor:pointer}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+#phone{width:100%;max-width:408px;background:linear-gradient(180deg,var(--navy-d),#16224E 55%,#1B2A6B);
+  border-radius:34px;overflow:hidden;position:relative;box-shadow:0 26px 70px rgba(0,0,0,.55);min-height:760px;
+  display:flex;flex-direction:column}
+.demoTag{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:9;
+  background:rgba(255,255,255,.14);color:#fff;font-size:8.5px;font-weight:800;letter-spacing:1.4px;
+  padding:4px 12px;border-radius:99px;backdrop-filter:blur(6px)}
+#uiLangTgl{position:absolute;top:38px;left:0;right:0;display:flex;justify-content:center;z-index:8;pointer-events:none}
+#uiLangTgl .box{pointer-events:auto;display:flex;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);
+  border-radius:99px;padding:3px;backdrop-filter:blur(8px)}
+#uiLangTgl button{border:0;background:transparent;color:#fff;font-size:11px;font-weight:800;padding:6px 14px;border-radius:99px;letter-spacing:.4px}
+#uiLangTgl button.on{background:#fff;color:var(--ink)}
+
+.hero{padding:76px 22px 20px;text-align:center;color:#fff}
+.hero .wave{display:flex;justify-content:center;margin-bottom:10px}
+.hero h1{font-size:20px;font-weight:800;line-height:1.25}
+.hero p{font-size:12.5px;opacity:.78;margin-top:6px;line-height:1.5}
+
+.sheet{background:#F4F6FA;border-radius:26px 26px 0 0;flex:1;padding:22px 20px 26px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border-radius:18px;padding:18px;box-shadow:0 6px 22px rgba(10,20,60,.10)}
+label.f{display:block;font-size:12px;font-weight:800;color:var(--ink);margin-bottom:6px}
+input.f{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:14px;font-size:15px;font-weight:700;letter-spacing:.6px}
+input.f::placeholder{font-weight:600;color:#B9BFCC;letter-spacing:.4px}
+.hintS{font-size:11px;color:var(--grey);font-weight:600;line-height:1.5;margin-top:8px}
+.btn{width:100%;border:0;background:var(--red);color:#fff;font-size:16px;font-weight:800;padding:15px;border-radius:14px;margin-top:14px;transition:transform .12s}
+.btn:active{transform:scale(.975)}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);font-weight:700;font-size:14px;padding:13px}
+.btn.navy{background:var(--navy)}
+.err{background:#FDECEC;border:1px solid #F3C9CD;color:#A31C28;border-radius:12px;padding:12px 14px;font-size:12.5px;font-weight:700;line-height:1.5;margin-top:12px}
+
+/* ===== STATUS TIMELINE ===== */
+.refBadge{display:flex;align-items:center;gap:9px;background:#EEF1F8;border-radius:12px;padding:11px 13px;margin-bottom:14px}
+.refBadge .rl{font-size:9.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--grey);display:block}
+.refBadge .rv{font-size:13.5px;font-weight:800;letter-spacing:.5px}
+.meta2{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--grey);font-weight:600;margin-bottom:4px}
+.meta2 b{color:var(--ink)}
+.tl{position:relative;padding-left:28px;margin-top:6px}
+.tl::before{content:"";position:absolute;left:9px;top:10px;bottom:12px;width:2px;background:var(--line)}
+.st{position:relative;padding:0 0 17px}
+.st:last-child{padding-bottom:2px}
+.st .dot{position:absolute;left:-28px;top:1px;width:20px;height:20px;border-radius:50%;
+  background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--grey)}
+.st.done .dot{background:var(--green);border-color:var(--green);color:#fff}
+.st.now .dot{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:0 0 0 4px rgba(27,42,107,.14)}
+.st .sn{font-size:13.5px;font-weight:800;line-height:1.3}
+.st.todo .sn{color:#A6ADBB}
+.st .sd{font-size:11.5px;color:var(--grey);font-weight:600;line-height:1.5;margin-top:3px}
+.st .sw{font-size:10.5px;color:var(--grey);font-weight:700;margin-top:3px}
+
+.said{background:#FFFBEF;border-left:3px solid var(--gold);border-radius:0 12px 12px 0;padding:13px 15px;font-size:12.5px;line-height:1.6;color:#3A2C00}
+.said b{color:var(--ink)}
+.counterBox{background:linear-gradient(135deg,#0E7A3A,var(--green));border-radius:15px;color:#fff;padding:16px;text-align:center}
+.counterBox small{font-size:11px;font-weight:700;opacity:.92;display:block;line-height:1.45}
+.counterBox .n{font-size:34px;font-weight:800;letter-spacing:.5px;font-variant-numeric:tabular-nums;margin:4px 0}
+.pillRow{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.pill{font-size:10px;font-weight:800;letter-spacing:.3px;padding:4px 9px;border-radius:7px}
+.pill.ok{background:#E2F6E9;color:#137A3D}
+.pill.info{background:#E7EDFB;color:#2E44A8}
+.pill.mute{background:#F1F3F8;color:var(--grey)}
+.sealedBox{background:#F4F1FB;border:1px solid #D9CEF2;border-radius:15px;padding:16px}
+.sealedBox .sh{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--purple);letter-spacing:.5px}
+.sealedBox p{font-size:12.5px;color:#4A3A6B;line-height:1.6;margin-top:9px}
+.sealedBox .ch{background:#EDE6FA;border-radius:10px;padding:11px 13px;margin-top:11px;font-size:12px;color:#3E2E60;line-height:1.5;font-weight:600}
+h2.t2{font-size:13px;font-weight:800;margin-bottom:9px}
+.siteUrl{text-align:center;font-size:10.5px;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:1px;padding:12px 0 4px}
+.scr{display:none}.scr.on{display:block;animation:fade .4s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;
+  font-size:12.5px;font-weight:700;padding:12px 18px;border-radius:12px;z-index:90;transition:transform .3s;
+  max-width:min(88vw,380px);text-align:center;line-height:1.45}
+.toast.show{transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div class="demoTag" data-i18n="demoTag">DEMO PROTOTAIP</div>
+  <div id="uiLangTgl"><div class="box">
+    <button id="tglMs" class="on" onclick="setUiLang('ms')">BM</button>
+    <button id="tglEn" onclick="setUiLang('en')">EN</button>
+  </div></div>
+
+  <div class="hero">
+    <div class="wave">
+      <svg width="34" height="34" viewBox="0 0 28 28" fill="none"><g stroke="#FFCC00" stroke-width="2.8" stroke-linecap="round"><path d="M4 12 v4"/><path d="M9.5 7 v14"/><path d="M15 3 v22"/><path d="M20.5 8 v12"/><path d="M26 12 v4" stroke-opacity=".55"/></g></svg>
+    </div>
+    <h1 data-i18n="heroH">Semak status suara anda</h1>
+    <p data-i18n="heroP">Masukkan nombor rujukan yang anda terima selepas sesi anda.</p>
+  </div>
+
+  <div class="sheet">
+
+    <!-- ===== SCREEN 1: LOOKUP ===== -->
+    <div class="scr on" id="s1">
+      <div class="card">
+        <label class="f" data-i18n="refLbl">Nombor rujukan</label>
+        <input class="f mono" id="ref" placeholder="DGR-2026-0729-04821" autocomplete="off">
+        <label class="f" style="margin-top:14px" data-i18n="phoneLbl">4 angka terakhir nombor telefon anda</label>
+        <input class="f mono" id="last4" placeholder="4412" maxlength="4" inputmode="numeric" autocomplete="off">
+        <p class="hintS" data-i18n="whyPhone">Kami minta 4 angka terakhir supaya hanya anda boleh melihat status suara anda. Kami tidak memaparkan nama atau nombor penuh anda di skrin ini.</p>
+        <button class="btn" onclick="lookup()" data-i18n="checkBtn">Semak status</button>
+        <div id="err"></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2 class="t2" data-i18n="otherH">Cara lain untuk menyemak</h2>
+        <p class="hintS" style="margin-top:0" data-i18n="otherP">WhatsApp nombor rujukan anda ke 60-1-DENGAR, atau bawa ke mana-mana kaunter JPM atau pejabat daerah. Pegawai di kaunter melihat status yang sama seperti di sini — tiada lebih.</p>
+      </div>
+      <div class="siteUrl">DENGAR.AI/STATUS</div>
+    </div>
+
+    <!-- ===== SCREEN 2: STATUS ===== -->
+    <div class="scr" id="s2">
+      <div class="card">
+        <div class="refBadge">
+          <span style="font-size:17px">🎙️</span>
+          <div><span class="rl" data-i18n="yourRef">Rujukan anda</span><span class="rv mono" id="oRef"></span></div>
+        </div>
+        <div class="meta2" id="oMeta"></div>
+        <div class="said" id="oSaid"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="t2" data-i18n="progH">Perjalanan suara anda</h2>
+        <div class="tl" id="oTl"></div>
+      </div>
+
+      <div class="card" id="oOutcomeCard">
+        <h2 class="t2" data-i18n="outH">Apa yang berlaku</h2>
+        <div id="oOutcome"></div>
+      </div>
+
+      <div class="counterBox">
+        <small data-i18n="cntPre">Anda adalah rakyat Malaysia yang ke-</small>
+        <div class="n" id="oCount">—</div>
+        <small data-i18n="cntPost">yang bersuara mengenai isu ini. Suara anda dikira bersama mereka.</small>
+      </div>
+
+      <button class="btn navy" onclick="askFollowUp()" data-i18n="fuBtn">📲 Minta kemas kini</button>
+      <button class="btn ghost" onclick="back()" data-i18n="backBtn">Semak rujukan lain</button>
+      <div class="siteUrl">DENGAR.AI/STATUS</div>
+    </div>
+
+    <!-- ===== SCREEN 3: PROTECTED DISCLOSURE ===== -->
+    <div class="scr" id="s3">
+      <div class="sealedBox">
+        <div class="sh"><span>🔒</span><span data-i18n="pdTitle">RUJUKAN TERLINDUNG</span></div>
+        <p data-i18n="pdBody">Rujukan ini adalah pendedahan terlindung. Statusnya tidak dipaparkan di sini, dan tidak boleh disemak di kaunter awam — ini untuk melindungi anda.</p>
+        <div class="ch" data-i18n="pdChannel">Perkara yang anda kongsi telah dimeterai dan dirujuk kepada pihak berkuasa berwibawa melalui saluran berkanun. Hanya mereka boleh memberi anda status. Hubungi mereka secara terus dan berikan nombor rujukan ini.</div>
+        <p data-i18n="pdProtect" style="font-size:11.5px">Platform ini tidak menyimpan apa yang anda katakan, siapa yang anda namakan, atau siapa anda. Perlindungan undang-undang anda sebagai pemberi maklumat kekal.</p>
+      </div>
+      <button class="btn ghost" onclick="back()" data-i18n="backBtn">Semak rujukan lain</button>
+      <div class="siteUrl">DENGAR.AI/STATUS</div>
+    </div>
+
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   LANGUAGE
+================================================================ */
+let uiLang='ms';
+const I18N={ms:{},en:{}};
+const tt=k=>(I18N[uiLang][k]!==undefined?I18N[uiLang][k]:(I18N.ms[k]||k));
+
+I18N.ms={
+ demoTag:"DEMO PROTOTAIP",
+ heroH:"Semak status suara anda",
+ heroP:"Masukkan nombor rujukan yang anda terima selepas sesi anda.",
+ refLbl:"Nombor rujukan", phoneLbl:"4 angka terakhir nombor telefon anda",
+ whyPhone:"Kami minta 4 angka terakhir supaya hanya anda boleh melihat status suara anda. Kami tidak memaparkan nama atau nombor penuh anda di skrin ini.",
+ checkBtn:"Semak status",
+ otherH:"Cara lain untuk menyemak",
+ otherP:"WhatsApp nombor rujukan anda ke 60-1-DENGAR, atau bawa ke mana-mana kaunter JPM atau pejabat daerah. Pegawai di kaunter melihat status yang sama seperti di sini — tiada lebih.",
+ errNotFound:"Nombor rujukan itu tidak ditemui. Sila periksa formatnya: DGR-2026-0729-04821.",
+ errPhone:"4 angka itu tidak sepadan dengan rujukan ini. Sila cuba lagi.",
+ errBlank:"Sila masukkan nombor rujukan dan 4 angka terakhir telefon anda.",
+ yourRef:"Rujukan anda", progH:"Perjalanan suara anda", outH:"Apa yang berlaku",
+ cntPre:"Anda adalah rakyat Malaysia yang ke-",
+ cntPost:"yang bersuara mengenai isu ini. Suara anda dikira bersama mereka.",
+ fuBtn:"📲 Minta kemas kini", backBtn:"Semak rujukan lain",
+ saidPre:"Anda bersuara pada", saidMid:"mengenai", saidTail:"Ringkasan ini dibina daripada perkara yang anda katakan sendiri.",
+ mWhen:"Tarikh", mWhere:"Lokasi", mLang:"Bahasa", mDur:"Tempoh",
+ /* timeline */
+ t1:"Diterima", t1d:"Sesi anda direkodkan dan disimpan dengan selamat.",
+ t2:"Dianalisis", t2d:"Isu, permintaan dan keterukan yang anda nyatakan telah dikeluarkan dan diberi skor.",
+ t3:"Dikira dalam aliran nasional", t3d:"Suara anda kini menjadi bahagian gambaran kebangsaan yang dilihat Perdana Menteri setiap minggu.",
+ t4:"Disalurkan kepada kementerian", t4d:"Satu arahan dikeluarkan kepada kementerian yang bertanggungjawab, dengan pegawai bernama dan tarikh akhir.",
+ t5:"Kementerian sedang bertindak", t5d:"Kemas kini kemajuan sedang dijejaki oleh Unit Penyampaian Jabatan Perdana Menteri.",
+ t6:"Disampaikan", t6d:"Hasil telah disahkan oleh Unit Penyampaian JPM, bukan hanya dilaporkan oleh kementerian.",
+ tWaiting:"menunggu", tNotYet:"belum",
+ /* outcomes */
+ outTrend:"Suara anda dikira dalam aliran nasional bagi isu ini. Ia belum menghasilkan arahannya sendiri — tetapi apabila isu ini mencapai ambang, semua sesi yang membangkitkannya termasuk sesi anda akan disalurkan bersama.",
+ outRouted:"Arahan telah dikeluarkan kepada kementerian bertanggungjawab. Anda akan dimaklumkan melalui WhatsApp apabila ia selesai.",
+ outDelivered:"Perkara yang anda minta telah disampaikan dan disahkan. Berikut hasilnya:",
+ outDirLbl:"Rujukan arahan",
+ statusTrend:"DIKIRA DALAM ALIRAN", statusRouted:"DISALURKAN", statusDelivered:"DISAMPAIKAN",
+ /* protected */
+ pdTitle:"RUJUKAN TERLINDUNG",
+ pdBody:"Rujukan ini adalah pendedahan terlindung. Statusnya tidak dipaparkan di sini, dan tidak boleh disemak di kaunter awam — ini untuk melindungi anda.",
+ pdChannel:"Perkara yang anda kongsi telah dimeterai dan dirujuk kepada pihak berkuasa berwibawa melalui saluran berkanun. Hanya mereka boleh memberi anda status. Hubungi mereka secara terus dan berikan nombor rujukan ini.",
+ pdProtect:"Platform ini tidak menyimpan apa yang anda katakan, siapa yang anda namakan, atau siapa anda. Perlindungan undang-undang anda sebagai pemberi maklumat kekal.",
+ toastFu:"✓ Permintaan kemas kini direkodkan. Kami akan WhatsApp anda apabila status berubah — dan permintaan ini dikira sebagai petunjuk bahawa isu ini masih belum selesai bagi rakyat.",
+};
+I18N.en={
+ demoTag:"DEMO PROTOTYPE",
+ heroH:"Check the status of your voice",
+ heroP:"Enter the reference number you received after your session.",
+ refLbl:"Reference number", phoneLbl:"Last 4 digits of your phone number",
+ whyPhone:"We ask for the last 4 digits so that only you can see the status of your voice. We never show your name or full number on this screen.",
+ checkBtn:"Check status",
+ otherH:"Other ways to check",
+ otherP:"WhatsApp your reference to 60-1-DENGAR, or bring it to any PMO counter or district office. The officer at the counter sees exactly the same status you see here — nothing more.",
+ errNotFound:"That reference was not found. Please check the format: DGR-2026-0729-04821.",
+ errPhone:"Those 4 digits do not match this reference. Please try again.",
+ errBlank:"Please enter your reference number and the last 4 digits of your phone.",
+ yourRef:"Your reference", progH:"The journey of your voice", outH:"What happened",
+ cntPre:"You are the",
+ cntPost:"Malaysian to speak about this concern. Your voice is counted with theirs.",
+ fuBtn:"📲 Ask for an update", backBtn:"Check another reference",
+ saidPre:"You spoke on", saidMid:"about", saidTail:"This summary is built from what you said yourself.",
+ mWhen:"Date", mWhere:"Location", mLang:"Language", mDur:"Duration",
+ t1:"Received", t1d:"Your session was recorded and stored securely.",
+ t2:"Analysed", t2d:"The issue, the request and the severity you described were extracted and scored.",
+ t3:"Counted in the national trend", t3d:"Your voice is now part of the national picture the Prime Minister sees every week.",
+ t4:"Routed to a ministry", t4d:"A directive was issued to the responsible ministry, with a named officer and a due date.",
+ t5:"Ministry working on it", t5d:"Progress updates are being tracked by the Prime Minister's Department Delivery Unit.",
+ t6:"Delivered", t6d:"The outcome was verified by the PMO Delivery Unit, not just reported by the ministry.",
+ tWaiting:"waiting", tNotYet:"not yet",
+ outTrend:"Your voice is counted in the national trend for this concern. It has not produced its own directive yet — but when this concern crosses the threshold, every session that raised it, including yours, is routed together.",
+ outRouted:"A directive has been issued to the responsible ministry. You will be notified on WhatsApp when it is completed.",
+ outDelivered:"What you asked for has been delivered and verified. Here is the outcome:",
+ outDirLbl:"Directive reference",
+ statusTrend:"COUNTED IN TREND", statusRouted:"ROUTED", statusDelivered:"DELIVERED",
+ pdTitle:"PROTECTED REFERENCE",
+ pdBody:"This reference is a protected disclosure. Its status is not shown here, and it cannot be checked at a public counter — that is to protect you.",
+ pdChannel:"What you shared was sealed and referred to the competent authority through the statutory channel. Only they can give you a status. Contact them directly and quote this reference number.",
+ pdProtect:"This platform does not hold what you said, who you named, or who you are. Your legal protection as a discloser stands.",
+ toastFu:"✓ Your update request is logged. We will WhatsApp you when the status changes — and this request is itself counted as a signal that the concern is not yet settled for citizens.",
+};
+
+/* ================================================================
+   DEMO RECORDS — the three states a citizen can be in, plus a
+   protected disclosure. Reference + last4 must both match.
+================================================================ */
+const RECORDS={
+ 'DGR-2026-0729-04821':{
+   last4:'4412', when:{ms:'29 Julai 2026',en:'29 July 2026'}, where:'Klang, Selangor',
+   lang:'BM', dur:'4.8', stage:5, count:1240,
+   topic:{ms:'kos sara hidup',en:'the cost of living'},
+   said:{ms:'kenaikan harga makanan dan barang keperluan rumah, dan jurang yang melebar antara harga dan pendapatan anda',
+         en:'the rising cost of food and household essentials, and the widening gap between prices and your income'},
+   dir:'DIR-1004',
+   outcome:{ms:'Subsidi elektrik dikekalkan untuk 85% isi rumah, dan pemantauan harga barang keperluan mingguan kini beroperasi di semua 16 negeri.',
+            en:'The electricity subsidy was retained for 85% of households, and a weekly essential-goods price watch is now operating in all 16 states.'}},
+ 'DGR-2026-0714-03119':{
+   last4:'8890', when:{ms:'14 Julai 2026',en:'14 July 2026'}, where:'Petaling, Selangor',
+   lang:'EN', dur:'5.0', stage:4, count:611,
+   topic:{ms:'perumahan mampu milik',en:'affordable housing'},
+   said:{ms:'kesukaran membeli rumah pertama, dan bahawa deposit — bukan ansuran bulanan — yang menghalang anda',
+         en:'the difficulty of buying a first home, and that the deposit rather than the monthly instalment is what blocks you'},
+   dir:'DIR-1009'},
+ 'DGR-2026-0722-03980':{
+   last4:'2077', when:{ms:'22 Julai 2026',en:'22 July 2026'}, where:'Keningau, Sabah',
+   lang:'BM', dur:'4.1', stage:2, count:430,
+   topic:{ms:'akses kesihatan awam',en:'access to public healthcare'},
+   said:{ms:'jarak ke klinik terdekat dan betapa penuhnya ia, dan keperluan sokongan kesihatan luar bandar',
+         en:'the distance to the nearest clinic and how full it always is, and the need for rural health support'}},
+ 'DGR-2026-0705-01188':{
+   last4:'6301', restricted:true},
+};
+
+const STAGES=[
+ {k:'t1'},{k:'t2'},{k:'t3'},{k:'t4'},{k:'t5'},{k:'t6'},
+];
+
+/* ================================================================
+   UI
+================================================================ */
+const $=id=>document.getElementById(id);
+let cur=null;
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),4200);}
+function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');}
+function back(){cur=null;$('err').innerHTML='';show('s1');}
+
+function lookup(){
+  const ref=$('ref').value.trim().toUpperCase();
+  const l4=$('last4').value.trim();
+  $('err').innerHTML='';
+  if(!ref||!l4){$('err').innerHTML=`<div class="err">${tt('errBlank')}</div>`;return}
+  const rec=RECORDS[ref];
+  if(!rec){$('err').innerHTML=`<div class="err">${tt('errNotFound')}</div>`;return}
+  if(rec.last4!==l4){$('err').innerHTML=`<div class="err">${tt('errPhone')}</div>`;return}
+  cur=ref;
+  if(rec.restricted){show('s3');return}
+  renderStatus(ref,rec);
+  show('s2');
+}
+
+function renderStatus(ref,rec){
+  $('oRef').textContent=ref;
+  $('oMeta').innerHTML=
+   `<span>${tt('mWhen')}: <b>${rec.when[uiLang]}</b></span>
+    <span>${tt('mWhere')}: <b>${rec.where}</b></span>
+    <span>${tt('mLang')}: <b>${rec.lang}</b></span>
+    <span>${tt('mDur')}: <b>${rec.dur} min</b></span>`;
+  $('oSaid').innerHTML=
+   `${tt('saidPre')} <b>${rec.when[uiLang]}</b> ${tt('saidMid')} <b>${rec.topic[uiLang]}</b> — ${rec.said[uiLang]}.
+    <div style="font-size:11px;color:var(--grey);font-weight:600;margin-top:8px">${tt('saidTail')}</div>`;
+
+  $('oTl').innerHTML=STAGES.map((s,i)=>{
+    const cls=i<rec.stage?'done':i===rec.stage?'now':'todo';
+    const mark=i<rec.stage?'✓':i===rec.stage?'●':'';
+    const when=i<rec.stage?'':i===rec.stage?tt('tWaiting'):tt('tNotYet');
+    return `<div class="st ${cls}"><div class="dot">${mark}</div>
+      <div class="sn">${tt(s.k)}</div>
+      <div class="sd">${tt(s.k+'d')}</div>
+      ${when?`<div class="sw">${when}</div>`:''}</div>`;}).join('');
+
+  let body='';
+  if(rec.stage>=6||rec.outcome){
+    body=`<span class="pill ok">${tt('statusDelivered')}</span>
+      <p style="font-size:12.5px;line-height:1.6;margin-top:9px">${tt('outDelivered')}</p>
+      <div class="said" style="margin-top:10px">${rec.outcome[uiLang]}</div>`;
+  } else if(rec.stage>=4){
+    body=`<span class="pill info">${tt('statusRouted')}</span>
+      <p style="font-size:12.5px;line-height:1.6;margin-top:9px">${tt('outRouted')}</p>`;
+  } else {
+    body=`<span class="pill mute">${tt('statusTrend')}</span>
+      <p style="font-size:12.5px;line-height:1.6;margin-top:9px">${tt('outTrend')}</p>`;
+  }
+  if(rec.dir)body+=`<div class="pillRow"><span class="pill mute mono">${tt('outDirLbl')}: ${rec.dir}</span></div>`;
+  $('oOutcome').innerHTML=body;
+
+  const n=rec.count.toLocaleString(uiLang==='ms'?'ms-MY':'en-MY');
+  $('oCount').textContent=uiLang==='en'?n+ordinal(rec.count):n;
+}
+
+/* English ordinal: 1st/2nd/3rd/4th, with the 11–13 exception. */
+function ordinal(n){
+  const r100=n%100; if(r100>=11&&r100<=13)return'th';
+  return {1:'st',2:'nd',3:'rd'}[n%10]||'th';
+}
+function askFollowUp(){toast(tt('toastFu'));}
+
+function applyI18n(){
+  document.documentElement.lang=uiLang;
+  $('tglMs').classList.toggle('on',uiLang==='ms');
+  $('tglEn').classList.toggle('on',uiLang==='en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=I18N[uiLang][el.dataset.i18n];
+    if(typeof v==='string')el.innerHTML=v;
+  });
+  if(cur&&RECORDS[cur]&&!RECORDS[cur].restricted)renderStatus(cur,RECORDS[cur]);
+}
+function setUiLang(l){uiLang=l;applyI18n();}
+$('ref').addEventListener('keydown',e=>{if(e.key==='Enter')$('last4').focus()});
+$('last4').addEventListener('keydown',e=>{if(e.key==='Enter')lookup()});
+applyI18n();
+</script>
+</body>
+</html>
