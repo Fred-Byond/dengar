@@ -79,31 +79,14 @@ type ProductRow = {
   name: string;
   tagline: string;
   launch_label: string | null;
+  brand_id: string | null;
+  division_id: string | null;
 };
 
-export function listProducts(): Product[] {
-  const rows = getDb()
-    .prepare(
-      "SELECT id, brand, category, name, tagline, launch_label FROM products ORDER BY launch_label IS NULL, name"
-    )
-    .all() as ProductRow[];
-  return rows.map((r) => ({
-    id: r.id,
-    brand: r.brand,
-    category: r.category,
-    name: r.name,
-    tagline: r.tagline,
-    launchLabel: r.launch_label,
-  }));
-}
+const PRODUCT_COLS =
+  "id, brand, category, name, tagline, launch_label, brand_id, division_id";
 
-export function getProduct(id: string): Product | null {
-  const r = getDb()
-    .prepare(
-      "SELECT id, brand, category, name, tagline, launch_label FROM products WHERE id = ?"
-    )
-    .get(id) as ProductRow | undefined;
-  if (!r) return null;
+function toProduct(r: ProductRow): Product {
   return {
     id: r.id,
     brand: r.brand,
@@ -111,7 +94,38 @@ export function getProduct(id: string): Product | null {
     name: r.name,
     tagline: r.tagline,
     launchLabel: r.launch_label,
+    brandId: r.brand_id,
+    divisionId: r.division_id,
   };
+}
+
+export function listProducts(): Product[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT ${PRODUCT_COLS} FROM products ORDER BY launch_label IS NULL, brand, name`
+    )
+    .all() as ProductRow[];
+  return rows.map(toProduct);
+}
+
+export function getProduct(id: string): Product | null {
+  const r = getDb()
+    .prepare(`SELECT ${PRODUCT_COLS} FROM products WHERE id = ?`)
+    .get(id) as ProductRow | undefined;
+  return r ? toProduct(r) : null;
+}
+
+/** Languages that have a runnable (source/approved) pack for a product. */
+export function listPackLanguages(
+  productId: string
+): Array<{ language: string; status: string; version: number }> {
+  return getDb()
+    .prepare(
+      `SELECT language, translation_status AS status, MAX(version) AS version
+         FROM launch_packs WHERE product_id = ?
+        GROUP BY language, translation_status ORDER BY language`
+    )
+    .all(productId) as Array<{ language: string; status: string; version: number }>;
 }
 
 export interface NexusProductSummary extends Product {
@@ -163,20 +177,24 @@ export function saveProductWithPack(input: {
   product: Product;
   pack: Omit<LaunchPack, "id" | "version" | "productId">;
   image?: { mime: string; data: Buffer } | null;
+  translationStatus?: string;
 }): { version: number } {
   const db = getDb();
   const now = new Date().toISOString();
   let version = 1;
   const tx = db.transaction(() => {
     db.prepare(
-      `INSERT INTO products (id, brand, category, name, tagline, launch_label)
-       VALUES (@id, @brand, @category, @name, @tagline, @launchLabel)
+      `INSERT INTO products (id, brand, category, name, tagline, launch_label, brand_id, division_id)
+       VALUES (@id, @brand, @category, @name, @tagline, @launchLabel, @brandId, @divisionId)
        ON CONFLICT(id) DO UPDATE SET brand=@brand, category=@category,
-         name=@name, tagline=@tagline, launch_label=@launchLabel`
+         name=@name, tagline=@tagline, launch_label=@launchLabel,
+         brand_id=@brandId, division_id=@divisionId`
     ).run({
       id: input.product.id, brand: input.product.brand,
       category: input.product.category, name: input.product.name,
       tagline: input.product.tagline, launchLabel: input.product.launchLabel,
+      brandId: input.product.brandId ?? null,
+      divisionId: input.product.divisionId ?? null,
     });
     if (input.image) {
       db.prepare(
@@ -196,9 +214,12 @@ export function saveProductWithPack(input: {
       version,
     };
     db.prepare(
-      `INSERT INTO launch_packs (id, product_id, version, language, content, created_at)
-       VALUES (?, ?, ?, ?, ?, ?)`
-    ).run(pack.id, pack.productId, version, pack.language, JSON.stringify(pack), now);
+      `INSERT INTO launch_packs (id, product_id, version, language, content, created_at, translation_status)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      pack.id, pack.productId, version, pack.language, JSON.stringify(pack), now,
+      input.translationStatus ?? (pack.language === "EN" ? "source" : "approved")
+    );
   });
   tx();
   return { version };
@@ -210,13 +231,29 @@ export function getLatestPack(
 ): LaunchPack | null {
   const row = getDb()
     .prepare(
-      `SELECT content FROM launch_packs
+      `SELECT content, translation_status AS status FROM launch_packs
         WHERE product_id = ? AND language = ?
         ORDER BY version DESC LIMIT 1`
     )
-    .get(productId, language) as { content: string } | undefined;
+    .get(productId, language) as { content: string; status: string } | undefined;
   if (!row) return null;
-  return JSON.parse(row.content) as LaunchPack;
+  const pack = JSON.parse(row.content) as LaunchPack;
+  pack.translationStatus = row.status;
+  return pack;
+}
+
+/**
+ * The pack a session should actually run on: the requested language when it
+ * is source/approved, otherwise null — a draft translation must never be
+ * spoken to an advisor as brand truth.
+ */
+export function getRunnablePack(
+  productId: string,
+  language: string
+): LaunchPack | null {
+  const pack = getLatestPack(productId, language);
+  if (pack && pack.translationStatus !== "draft") return pack;
+  return null;
 }
 
 // ---------- slots ----------

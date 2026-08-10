@@ -354,6 +354,15 @@
   background: #221d16;
 }
 
+.prodBrand {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2px;
+}
+
 .prodName {
   font-size: 14px;
   font-weight: 700;

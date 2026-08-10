@@ -13,11 +13,16 @@ import { useCallback, useEffect, useState } from "react";
 import { PACK_SECTION_FRAME } from "@/lib/coach/packbuild";
 import type { LaunchPack, Product } from "@/lib/coach/types";
 
+type PackLang = { language: string; status: string; version: number };
 type Summary = Product & {
   packVersion: number | null;
   packUpdatedAt: string | null;
   hasImage: boolean;
+  languages: PackLang[];
 };
+type Brand = { id: string; name: string; divisionId: string };
+type Division = { id: string; name: string; shortName: string; advisorType: string };
+type Lang = { code: string; englishName: string; nativeName: string; rtl: boolean };
 
 type View = "signin" | "library" | "edit";
 
@@ -35,10 +40,12 @@ async function api<T>(path: string, body?: unknown): Promise<T> {
 interface FormState {
   id: string;
   name: string;
-  brand: string;
+  brandId: string;
   category: string;
   tagline: string;
   launchLabel: string;
+  language: string;
+  translationStatus: string;
   sections: Record<string, string>;
   claims: string;
   doNotSay: string;
@@ -49,11 +56,17 @@ interface FormState {
 }
 
 const EMPTY_FORM: FormState = {
-  id: "", name: "", brand: "L'Oréal Paris", category: "skincare",
-  tagline: "", launchLabel: "",
+  id: "", name: "", brandId: "loreal-paris", category: "skincare",
+  tagline: "", launchLabel: "", language: "EN", translationStatus: "source",
   sections: {}, claims: "", doNotSay: "",
   objections: [{ objection: "", approvedResponse: "" }],
   imageBase64: null, imageMime: null, imagePreview: null,
+};
+
+const STATUS_STYLE: Record<string, string> = {
+  source: "bg-stone-800 text-white",
+  approved: "bg-emerald-100 text-emerald-800 border border-emerald-300",
+  draft: "bg-amber-100 text-amber-800 border border-amber-300",
 };
 
 const box = "w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-[15px] text-stone-900 outline-none focus:border-amber-600";
@@ -68,12 +81,21 @@ export function NexusApp() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [products, setProducts] = useState<Summary[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [langs, setLangs] = useState<Lang[]>([]);
+  const [divFilter, setDivFilter] = useState<string>("all");
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [isNew, setIsNew] = useState(true);
 
   const loadLibrary = useCallback(async () => {
-    const { products: list } = await api<{ products: Summary[] }>("/api/nexus/products");
-    setProducts(list);
+    const d = await api<{
+      products: Summary[]; brands: Brand[]; divisions: Division[]; languages: Lang[];
+    }>("/api/nexus/products");
+    setProducts(d.products);
+    setBrands(d.brands);
+    setDivisions(d.divisions);
+    setLangs(d.languages);
   }, []);
 
   const signIn = useCallback(async () => {
@@ -94,18 +116,22 @@ export function NexusApp() {
     setView("edit");
   }, []);
 
-  const openProduct = useCallback(async (id: string) => {
+  const openProduct = useCallback(async (id: string, language = "EN") => {
     setBusy(true); setError(null); setNotice(null);
     try {
-      const { product, pack } = await api<{ product: Product; pack: LaunchPack | null }>(
-        `/api/nexus/products/${id}`
-      );
+      const { product, pack } = await api<{
+        product: Product; pack: LaunchPack | null;
+      }>(`/api/nexus/products/${id}?language=${language}`);
       const sections: Record<string, string> = {};
       pack?.sections.forEach((s) => { sections[s.id] = s.content; });
       setForm({
-        id: product.id, name: product.name, brand: product.brand,
+        id: product.id, name: product.name,
+        brandId: product.brandId ?? "loreal-paris",
         category: product.category, tagline: product.tagline,
         launchLabel: product.launchLabel ?? "",
+        language,
+        translationStatus:
+          pack?.translationStatus ?? (language === "EN" ? "source" : "approved"),
         sections,
         claims: (pack?.approvedClaims ?? []).join("\n"),
         doNotSay: (pack?.doNotSay ?? []).join("\n"),
@@ -138,12 +164,12 @@ export function NexusApp() {
     try {
       const r = await api<{ productId: string; version: number }>("/api/nexus/products", {
         product: {
-          id: form.id || undefined, name: form.name, brand: form.brand,
+          id: form.id || undefined, name: form.name, brandId: form.brandId,
           category: form.category, tagline: form.tagline,
           launchLabel: form.launchLabel || null,
         },
         pack: {
-          language: "EN",
+          language: form.language,
           sections: form.sections,
           approvedClaims: form.claims.split("\n").map((s) => s.trim()).filter(Boolean),
           doNotSay: form.doNotSay.split("\n").map((s) => s.trim()).filter(Boolean),
@@ -151,9 +177,14 @@ export function NexusApp() {
         },
         imageBase64: form.imageBase64,
         imageMime: form.imageMime,
+        translationStatus: form.translationStatus,
       });
       await loadLibrary();
-      setNotice(`Published — pack v${r.version} is live. The Beauty Coach now trains on it.`);
+      setNotice(
+        form.translationStatus === "draft"
+          ? `Saved as draft — ${form.language} pack v${r.version}. Advisors cannot train on a draft; mark it market-approved to go live.`
+          : `Published — ${form.language} pack v${r.version} is live. The Beauty Coach now trains on it.`
+      );
       setForm((f) => ({ ...f, id: r.productId }));
       setIsNew(false);
     } catch (e) {
@@ -210,11 +241,12 @@ export function NexusApp() {
 
         {view === "library" && (
           <>
-            <div className="mb-6 flex items-end justify-between gap-4">
+            <div className="mb-4 flex items-end justify-between gap-4">
               <div>
                 <h1 className="font-serif text-3xl">Product library</h1>
                 <p className="mt-1 text-sm text-stone-500">
-                  {products.length} products · every pack version is immutable and auditable.
+                  {products.length} products across {divisions.length} divisions ·
+                  every pack version is immutable and auditable.
                 </p>
               </div>
               <button onClick={openNew}
@@ -222,9 +254,23 @@ export function NexusApp() {
                 + Upload new product
               </button>
             </div>
+            <div className="mb-6 flex flex-wrap gap-2">
+              {[{ id: "all", shortName: "All divisions" }, ...divisions].map((d) => (
+                <button key={d.id} onClick={() => setDivFilter(d.id)}
+                  className={`rounded-full border px-4 py-1.5 text-sm font-semibold ${
+                    divFilter === d.id
+                      ? "border-amber-600 bg-amber-600 text-white"
+                      : "border-stone-300 bg-white text-stone-600 hover:border-amber-500"
+                  }`}>
+                  {d.shortName}
+                </button>
+              ))}
+            </div>
             {error && <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((p) => (
+              {products
+                .filter((p) => divFilter === "all" || p.divisionId === divFilter)
+                .map((p) => (
                 <button key={p.id} onClick={() => openProduct(p.id)}
                   className="group overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition hover:border-amber-500 hover:shadow-md">
                   <div className="flex h-36 items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
@@ -242,8 +288,19 @@ export function NexusApp() {
                         {p.launchLabel}
                       </span>
                     )}
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">
+                      {p.brand}
+                    </div>
                     <div className="font-semibold leading-snug">{p.name}</div>
                     <div className="mt-0.5 text-xs text-stone-500">{p.tagline}</div>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {(p.languages ?? []).map((l) => (
+                        <span key={l.language}
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${STATUS_STYLE[l.status] ?? "bg-stone-200"}`}>
+                          {l.language}
+                        </span>
+                      ))}
+                    </div>
                     <div className="mt-2 text-[11px] text-stone-400">
                       {p.packVersion
                         ? <>Pack v{p.packVersion} · {p.packUpdatedAt ? new Date(p.packUpdatedAt).toLocaleDateString() : ""}</>
@@ -280,9 +337,17 @@ export function NexusApp() {
                     onChange={(e) => setForm({ ...form, tagline: e.target.value })} />
                 </div>
                 <div>
-                  <label className={label}>Brand</label>
-                  <input className={box} value={form.brand}
-                    onChange={(e) => setForm({ ...form, brand: e.target.value })} />
+                  <label className={label}>Brand · division</label>
+                  <select className={box} value={form.brandId}
+                    onChange={(e) => setForm({ ...form, brandId: e.target.value })}>
+                    {divisions.map((d) => (
+                      <optgroup key={d.id} label={`${d.name} — ${d.advisorType}`}>
+                        {brands.filter((b) => b.divisionId === d.id).map((b) => (
+                          <option key={b.id} value={b.id}>{b.name}</option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className={label}>Category</label>
@@ -317,6 +382,35 @@ export function NexusApp() {
               <p className="mt-1 text-xs text-stone-500">
                 Fixed six-section frame so every product is taught the same way, in every market.
               </p>
+
+              <label className={label}>Language pack</label>
+              <div className="flex flex-wrap gap-2">
+                {langs.map((l) => (
+                  <button key={l.code}
+                    onClick={() => { if (!isNew) openProduct(form.id, l.code);
+                      else setForm({ ...form, language: l.code,
+                        translationStatus: l.code === "EN" ? "source" : "approved" }); }}
+                    className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold ${
+                      form.language === l.code
+                        ? "border-amber-600 bg-amber-600 text-white"
+                        : "border-stone-300 bg-white text-stone-600 hover:border-amber-500"
+                    }`}>
+                    {l.nativeName}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-stone-500">
+                Each language is authored and approved separately — approved claim wording is a
+                regulatory artifact per market, never a machine translation of English.
+              </p>
+
+              <label className={label}>Governance status</label>
+              <select className={box} value={form.translationStatus}
+                onChange={(e) => setForm({ ...form, translationStatus: e.target.value })}>
+                <option value="source">Source of truth (master language)</option>
+                <option value="approved">Market-approved — advisors may train on it</option>
+                <option value="draft">Draft — not for coaching</option>
+              </select>
               {PACK_SECTION_FRAME.map((f) => (
                 <div key={f.id}>
                   <label className={label}>{f.title}</label>

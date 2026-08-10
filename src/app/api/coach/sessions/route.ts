@@ -6,9 +6,10 @@ import {
   addTurn,
   createSession,
   getAppointment,
-  getLatestPack,
   getProduct,
+  getRunnablePack,
 } from "@/lib/db/repos";
+import { getLanguage } from "@/lib/coach/languages";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,13 +30,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Appointment not found." }, { status: 404 });
   }
   const product = getProduct(appointment.productId);
-  const pack = product
-    ? getLatestPack(product.id, appointment.language) ??
-      getLatestPack(product.id, "EN")
-    : null;
+  // Language governance: a draft translation is never spoken as brand truth.
+  const pack = product ? getRunnablePack(product.id, appointment.language) : null;
   if (!product || !pack) {
     return NextResponse.json(
-      { error: "No launch pack available for this product." },
+      {
+        error:
+          "No market-approved launch pack in that language yet. Ask the product team to approve the translation in the Nexus.",
+      },
       { status: 409 }
     );
   }
@@ -50,10 +52,12 @@ export async function POST(req: NextRequest) {
   });
 
   const firstName = ctx.advisorName.split(" ")[0];
+  const lang = appointment.language;
   const greeting = BEAUTY_COACH_PERSONA.lines.greet(
     firstName,
     product,
-    appointment.focus
+    appointment.focus,
+    lang
   );
   addTurn(session.id, {
     speaker: "coach",
@@ -64,8 +68,11 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     session,
     greeting,
-    wrapLine: BEAUTY_COACH_PERSONA.lines.wrap(),
-    closeLine: BEAUTY_COACH_PERSONA.lines.close(firstName),
+    wrapLine: BEAUTY_COACH_PERSONA.lines.wrap(lang),
+    closeLine: BEAUTY_COACH_PERSONA.lines.close(firstName, lang),
     product,
+    language: getLanguage(lang),
+    packVersion: pack.version,
+    translationStatus: pack.translationStatus,
   });
 }

@@ -8,6 +8,46 @@
 
 import type Database from "better-sqlite3";
 import { SEED_PACKS, SEED_PRODUCTS } from "@/lib/coach/packs";
+import { CATALOGUE, CATALOGUE_PACKS } from "@/lib/coach/packs-multi";
+
+/**
+ * Cross-division catalogue with market-approved language packs. Idempotent
+ * and run on every boot after migration, so a database created before the
+ * multi-brand work picks the catalogue up.
+ */
+export function seedCatalogue(db: Database.Database): void {
+  const insertProduct = db.prepare(
+    `INSERT OR IGNORE INTO products
+       (id, brand, category, name, tagline, launch_label, brand_id, division_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+  const insertPack = db.prepare(
+    `INSERT OR IGNORE INTO launch_packs
+       (id, product_id, version, language, content, created_at, translation_status)
+     VALUES (?, ?, 1, ?, ?, ?, ?)`
+  );
+  const now = new Date().toISOString();
+  const tx = db.transaction(() => {
+    for (const p of CATALOGUE) {
+      insertProduct.run(
+        p.id, p.brand, p.category, p.name, p.tagline, p.launchLabel,
+        p.brandId, p.divisionId
+      );
+      const langs = CATALOGUE_PACKS[p.id] ?? {};
+      for (const [lang, body] of Object.entries(langs)) {
+        const { status, ...packBody } = body;
+        const pack = {
+          ...packBody,
+          id: `pack-${p.id}-${lang.toLowerCase()}-v1`,
+          productId: p.id,
+          version: 1,
+        };
+        insertPack.run(pack.id, p.id, lang, JSON.stringify(pack), now, status);
+      }
+    }
+  });
+  tx();
+}
 
 export function seedIfEmpty(db: Database.Database): void {
   const row = db.prepare("SELECT COUNT(*) AS n FROM markets").get() as {

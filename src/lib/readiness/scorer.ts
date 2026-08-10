@@ -16,6 +16,7 @@ import type {
   CoachSession,
 } from "@/lib/coach/types";
 import { CERTIFICATION_THRESHOLD } from "@/lib/coach/types";
+import { getDivision } from "@/lib/coach/org";
 import { READINESS_DIMENSIONS } from "./dimensions";
 
 const PERSONALIZATION_WORDS = [
@@ -41,7 +42,8 @@ function coverageScore(hits: number, possible: number): number {
 export function scoreSession(
   session: CoachSession,
   turns: CoachTurn[],
-  pack: LaunchPack
+  pack: LaunchPack,
+  divisionId?: string | null
 ): Scorecard {
   const advisorTurns = turns.filter((t) => t.speaker === "advisor");
   const advisorText = advisorTurns.map((t) => t.text.toLowerCase()).join(" \n ");
@@ -164,11 +166,20 @@ export function scoreSession(
     }
   });
 
+  // Division-weighted overall: a derm pharmacist is judged hardest on
+  // product accuracy, a Luxe advisor on personalisation and tone.
+  const weights = getDivision(divisionId ?? "")?.weights ?? {};
   const numeric = dims.filter((x) => typeof x.score === "number") as Array<
     DimensionScore & { score: number }
   >;
+  const wsum = numeric.reduce((a, x) => a + (weights[x.dimensionId] ?? 1), 0);
   const overall = numeric.length
-    ? Math.round(numeric.reduce((a, x) => a + x.score, 0) / numeric.length)
+    ? Math.round(
+        numeric.reduce(
+          (a, x) => a + x.score * (weights[x.dimensionId] ?? 1),
+          0
+        ) / (wsum || numeric.length)
+      )
     : 0;
 
   const practiceNext = dims

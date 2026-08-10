@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyNexusCookie, NEXUS_COOKIE_NAME } from "@/lib/coach/auth";
-import { getLatestPack, getProduct } from "@/lib/db/repos";
+import { getLatestPack, getProduct, listPackLanguages } from "@/lib/db/repos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,6 +17,13 @@ export async function GET(
   if (!product) {
     return NextResponse.json({ error: "Product not found." }, { status: 404 });
   }
-  const pack = getLatestPack(product.id, "EN");
-  return NextResponse.json({ product, pack });
+  const url = new URL(req.url);
+  const language = (url.searchParams.get("language") || "EN").toUpperCase();
+  const pack = getLatestPack(product.id, language);
+  return NextResponse.json({
+    product,
+    pack,
+    language,
+    languages: listPackLanguages(product.id),
+  });
 }

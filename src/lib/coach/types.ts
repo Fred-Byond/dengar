@@ -76,6 +76,10 @@ export interface Product {
   tagline: string;
   /** e.g. "Priority Launch — Q3 2026" or null for catalogue products. */
   launchLabel: string | null;
+  /** Brand id from src/lib/coach/org.ts. */
+  brandId?: string | null;
+  /** Division id — drives coach persona and rubric weighting. */
+  divisionId?: string | null;
 }
 
 /** One section of the brand-approved launch knowledge pack. */
@@ -101,6 +105,8 @@ export interface LaunchPack {
   productId: string;
   version: number;
   language: string; // session language code, e.g. "EN"
+  /** Governance state — only source/approved packs may run a session. */
+  translationStatus?: string;
   sections: PackSection[];
   objections: ObjectionEntry[];
   doNotSay: string[];

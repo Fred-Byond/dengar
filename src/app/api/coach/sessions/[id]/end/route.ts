@@ -5,6 +5,8 @@ import { READINESS_DIMENSIONS } from "@/lib/readiness/dimensions";
 import {
   endSession,
   getLatestPack,
+  getProduct,
+  getRunnablePack,
   getSession,
   listTurns,
   saveScorecard,
@@ -27,14 +29,15 @@ export async function POST(
     return NextResponse.json({ error: "Session not found." }, { status: 404 });
   }
   const pack =
-    getLatestPack(session.productId, session.language) ??
+    getRunnablePack(session.productId, session.language) ??
     getLatestPack(session.productId, "EN");
   if (!pack) {
     return NextResponse.json({ error: "Launch pack missing." }, { status: 409 });
   }
   const turns = listTurns(session.id);
   endSession(session.id);
-  const scorecard = scoreSession(session, turns, pack);
+  const product = getProduct(session.productId);
+  const scorecard = scoreSession(session, turns, pack, product?.divisionId);
   saveScorecard(scorecard);
   return NextResponse.json({ scorecard, dimensions: READINESS_DIMENSIONS });
 }

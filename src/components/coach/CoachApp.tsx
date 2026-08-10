@@ -41,6 +41,12 @@ const WRAP_AT_SECONDS = 120;
 
 type CatalogFocus = { id: string; label: string };
 type DimensionMeta = { id: string; label: string };
+type CatalogLang = {
+  code: string; englishName: string; nativeName: string;
+  bcp47: string; rtl: boolean; voiceCode: string | null;
+};
+type CatalogDivision = { id: string; shortName: string; advisorType: string };
+type CatalogProduct = Product & { languages?: string[] };
 
 type SessionStart = {
   session: CoachSession;
@@ -106,10 +112,13 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
   const [slots, setSlots] = useState<Slot[]>([]);
   const [day, setDay] = useState<string | null>(null);
   const [slotId, setSlotId] = useState<string | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [focuses, setFocuses] = useState<CatalogFocus[]>([]);
+  const [languages, setLanguages] = useState<CatalogLang[]>([]);
+  const [divisions, setDivisions] = useState<CatalogDivision[]>([]);
   const [productId, setProductId] = useState<string | null>(null);
   const [focus, setFocus] = useState<string>("product-knowledge");
+  const [language, setLanguage] = useState<string>("EN");
   const [appointment, setAppointment] = useState<Appointment | null>(null);
 
   // lobby + session
@@ -124,7 +133,7 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
   const [scorecard, setScorecard] = useState<Scorecard | null>(null);
   const [dimMeta, setDimMeta] = useState<DimensionMeta[]>([]);
 
-  const klleon = useKlleonAvatar({ sdkKey, langCode: "EN", enabled: true });
+  const klleon = useKlleonAvatar({ sdkKey, langCode: language, enabled: true });
 
   const speakRef = useRef(klleon.speak);
   const unlockAudioRef = useRef(klleon.unlockAudio);
@@ -282,13 +291,16 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
       setCtx(context);
       const [{ slots: slotList }, catalog] = await Promise.all([
         api<{ slots: Slot[] }>("/api/coach/slots"),
-        api<{ products: Product[]; focuses: CatalogFocus[] }>(
-          "/api/coach/catalog"
-        ),
+        api<{
+          products: CatalogProduct[]; focuses: CatalogFocus[];
+          languages: CatalogLang[]; divisions: CatalogDivision[];
+        }>("/api/coach/catalog"),
       ]);
       setSlots(slotList);
       setProducts(catalog.products);
       setFocuses(catalog.focuses);
+      setLanguages(catalog.languages ?? []);
+      setDivisions(catalog.divisions ?? []);
       setScreen("slots");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Sign-in failed.");
@@ -304,7 +316,7 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
     try {
       const { appointment: appt } = await api<{ appointment: Appointment }>(
         "/api/coach/appointments",
-        { slotId, productId, focus, language: "EN" }
+        { slotId, productId, focus, language }
       );
       setAppointment(appt);
       setScreen("confirmed");
@@ -313,7 +325,7 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
     } finally {
       setBusy(false);
     }
-  }, [slotId, productId, focus]);
+  }, [slotId, productId, focus, language]);
 
   const enterLobby = useCallback(() => {
     setError(null);
@@ -573,6 +585,12 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
                   {p.launchLabel ? (
                     <span className={styles.launchBadge}>{p.launchLabel}</span>
                   ) : null}
+                  <div className={styles.prodBrand}>
+                    {p.brand}
+                    {p.divisionId
+                      ? ` · ${divisions.find((d) => d.id === p.divisionId)?.shortName ?? ""}`
+                      : ""}
+                  </div>
                   <div className={styles.prodName}>{p.name}</div>
                   <div className={styles.prodTag}>{p.tagline}</div>
                 </span>
@@ -593,11 +611,35 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
           </div>
           <label className={styles.label}>Session language</label>
           <div className={styles.chipRow}>
-            <button className={`${styles.chip} ${styles.sel}`}>English</button>
-            <button className={styles.chip} disabled title="Pending vendor voice test">
-              العربية · 中文 · more soon
-            </button>
+            {languages.map((l) => {
+              const available =
+                !selectedProduct?.languages ||
+                selectedProduct.languages.includes(l.code);
+              return (
+                <button
+                  key={l.code}
+                  className={`${styles.chip}${language === l.code ? ` ${styles.sel}` : ""}`}
+                  disabled={!available}
+                  title={
+                    available
+                      ? l.voiceCode
+                        ? `${l.englishName} — voice verified`
+                        : `${l.englishName} — vendor voice pending`
+                      : `No market-approved ${l.englishName} pack for this product yet`
+                  }
+                  onClick={() => setLanguage(l.code)}
+                  dir={l.rtl ? "rtl" : "ltr"}
+                >
+                  {l.nativeName}
+                  {available && !l.voiceCode ? " •" : ""}
+                </button>
+              );
+            })}
           </div>
+          <p className={styles.footNote} style={{ marginTop: 6, textAlign: "left" }}>
+            Only languages with a market-approved pack are selectable.
+            {" • marks vendor voice pending — text coaching works, spoken voice is in test."}
+          </p>
           {error ? <div className={styles.err}>{error}</div> : null}
           <button
             className={styles.btn}
@@ -667,7 +709,10 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
             <span className={styles.sessionBrand}>L&apos;ORÉAL</span>
             <span className={styles.timer}>{mmss}</span>
           </div>
-          <div className={styles.captionWrap}>
+          <div
+            className={styles.captionWrap}
+            dir={languages.find((l) => l.code === language)?.rtl ? "rtl" : "ltr"}
+          >
             <div className={styles.caption}>
               {awaitingReply ? (
                 <span className={styles.thinking}>Coach is thinking…</span>

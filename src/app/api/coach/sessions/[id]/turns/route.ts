@@ -3,8 +3,8 @@ import { verifySessionCookie, SESSION_COOKIE_NAME } from "@/lib/coach/auth";
 import { coachReply } from "@/lib/coach/engine";
 import {
   addTurn,
-  getLatestPack,
   getProduct,
+  getRunnablePack,
   getSession,
   listTurns,
 } from "@/lib/db/repos";
@@ -37,10 +37,7 @@ export async function POST(
   }
 
   const product = getProduct(session.productId);
-  const pack = product
-    ? getLatestPack(product.id, session.language) ??
-      getLatestPack(product.id, "EN")
-    : null;
+  const pack = product ? getRunnablePack(product.id, session.language) : null;
   if (!product || !pack) {
     return NextResponse.json({ error: "Launch pack missing." }, { status: 409 });
   }

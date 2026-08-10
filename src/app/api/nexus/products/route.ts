@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyNexusCookie, NEXUS_COOKIE_NAME } from "@/lib/coach/auth";
 import { buildPack, type NexusPackInput } from "@/lib/coach/packbuild";
 import type { Product } from "@/lib/coach/types";
-import { listProductsForNexus, saveProductWithPack } from "@/lib/db/repos";
+import { LANGUAGES } from "@/lib/coach/languages";
+import { BRANDS, DIVISIONS, getBrand } from "@/lib/coach/org";
+import {
+  listPackLanguages,
+  listProductsForNexus,
+  saveProductWithPack,
+} from "@/lib/db/repos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,7 +23,18 @@ export async function GET(req: NextRequest) {
   if (!authed(req)) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   }
-  return NextResponse.json({ products: listProductsForNexus() });
+  const products = listProductsForNexus().map((p) => ({
+    ...p,
+    languages: listPackLanguages(p.id),
+  }));
+  return NextResponse.json({
+    products,
+    divisions: DIVISIONS.map((d) => ({
+      id: d.id, name: d.name, shortName: d.shortName, advisorType: d.advisorType,
+    })),
+    brands: BRANDS,
+    languages: LANGUAGES,
+  });
 }
 
 function slugify(name: string): string {
@@ -36,6 +53,7 @@ export async function POST(req: NextRequest) {
     product?: {
       id?: string;
       brand?: string;
+      brandId?: string;
       category?: string;
       name?: string;
       tagline?: string;
@@ -44,6 +62,7 @@ export async function POST(req: NextRequest) {
     pack?: NexusPackInput;
     imageBase64?: string | null;
     imageMime?: string | null;
+    translationStatus?: string;
   } | null;
   const p = body?.product;
   if (!p?.name?.trim() || !body?.pack) {
@@ -55,13 +74,16 @@ export async function POST(req: NextRequest) {
   const category = ["skincare", "haircare", "makeup"].includes(p.category ?? "")
     ? (p.category as Product["category"])
     : "skincare";
+  const brandRef = p.brandId ? getBrand(p.brandId) : null;
   const product: Product = {
     id: p.id?.trim() || slugify(p.name),
-    brand: p.brand?.trim() || "L'Oréal Paris",
+    brand: brandRef?.name || p.brand?.trim() || "L'Oréal Paris",
     category,
     name: p.name.trim(),
     tagline: p.tagline?.trim() || "",
     launchLabel: p.launchLabel?.trim() || null,
+    brandId: brandRef?.id ?? null,
+    divisionId: brandRef?.divisionId ?? null,
   };
   if (!product.id) {
     return NextResponse.json({ error: "Invalid product name." }, { status: 400 });
@@ -92,6 +114,13 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  const { version } = saveProductWithPack({ product, pack, image });
-  return NextResponse.json({ productId: product.id, version });
+  const status = ["source", "approved", "draft"].includes(body.translationStatus ?? "")
+    ? body.translationStatus
+    : undefined;
+  const { version } = saveProductWithPack({
+    product, pack, image, translationStatus: status,
+  });
+  return NextResponse.json({
+    productId: product.id, version, language: pack.language,
+  });
 }

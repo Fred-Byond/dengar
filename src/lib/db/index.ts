@@ -9,7 +9,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
-import { seedIfEmpty } from "./seed";
+import { seedCatalogue, seedIfEmpty } from "./seed";
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS markets (
@@ -131,6 +131,27 @@ function migrate(d: Database.Database): void {
     `INSERT OR IGNORE INTO access_codes (code, distributor_id, active, created_at, role)
      VALUES ('LOREAL-PM-2026', 'gulf-beauty', 1, ?, 'product-team')`
   ).run(new Date().toISOString());
+
+  // Multi-brand: products belong to a brand, which belongs to a division.
+  if (!productCols.includes("brand_id")) {
+    d.exec("ALTER TABLE products ADD COLUMN brand_id TEXT");
+    d.exec("ALTER TABLE products ADD COLUMN division_id TEXT");
+    // Existing seed products are L'Oréal Paris / Consumer Products.
+    d.exec(
+      "UPDATE products SET brand_id = 'loreal-paris', division_id = 'cpd' WHERE brand_id IS NULL"
+    );
+  }
+  // Multi-language governance on packs.
+  const packCols = (
+    d.prepare("PRAGMA table_info(launch_packs)").all() as { name: string }[]
+  ).map((c) => c.name);
+  if (!packCols.includes("translation_status")) {
+    d.exec(
+      "ALTER TABLE launch_packs ADD COLUMN translation_status TEXT NOT NULL DEFAULT 'approved'"
+    );
+    d.exec("UPDATE launch_packs SET translation_status = 'source' WHERE language = 'EN'");
+  }
+  seedCatalogue(d);
 }
 
 export function getDb(): Database.Database {
