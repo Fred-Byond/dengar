@@ -21,6 +21,8 @@ export type UseKlleonAvatarOptions = {
   /** Session language code: MS | EN | ZH | TA | AR */
   langCode: string;
   enabled?: boolean;
+  /** Klleon avatar UUID; defaults to the original dengar avatar. */
+  avatarId?: string;
 };
 
 export type UseKlleonAvatarResult = {
@@ -49,6 +51,7 @@ export function useKlleonAvatar({
   sdkKey,
   langCode,
   enabled = true,
+  avatarId = KLLEON_AVATAR_ID,
 }: UseKlleonAvatarOptions): UseKlleonAvatarResult {
   const avatarRef = useRef<HTMLElement | null>(null);
   const [ready, setReady] = useState(false);
@@ -136,7 +139,7 @@ export function useKlleonAvatar({
         await initKlleonClient(
           {
             sdk_key: sdkKey,
-            avatar_id: KLLEON_AVATAR_ID,
+            avatar_id: avatarId,
             voice_code: codes.voice_code,
             subtitle_code: codes.subtitle_code,
             enable_microphone: true,
@@ -183,7 +186,7 @@ export function useKlleonAvatar({
       releaseKlleonClient();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sdkKey, enabled, flushPending]);
+  }, [sdkKey, enabled, avatarId, flushPending]);
 
   const speak = useCallback(
     (text: string, after?: () => void) => {
