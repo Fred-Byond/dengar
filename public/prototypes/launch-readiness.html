@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Launch Readiness Command — L'Oréal Beauty Coach</title>
+<style>
+  :root {
+    --bg:#121110; --panel:#1b1814; --panel2:#221e18; --line:#332c21;
+    --gold:#c9a44c; --gold-l:#d8b968; --gold-d:#9a7b2d;
+    --txt:#f4efe6; --mut:#a79d8c; --dim:#7a7264;
+    --good:#7fb694; --warn:#d98e62; --bad:#d97a6a;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; }
+  .wrap { max-width:1240px; margin:0 auto; padding:22px 20px 60px; }
+  header { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; justify-content:space-between;
+    padding-bottom:18px; border-bottom:1px solid var(--line); margin-bottom:20px; }
+  .brand { letter-spacing:.3em; font-weight:700; font-size:15px; color:#fff; }
+  .brandSub { letter-spacing:.34em; font-size:9px; color:var(--gold); text-transform:uppercase; margin-top:2px; }
+  h1 { font-family:Didot,"Bodoni MT",Georgia,serif; font-weight:500; font-size:26px; margin:10px 0 2px; color:#fff; }
+  .sub { font-size:12.5px; color:var(--mut); }
+  .pill { display:inline-flex; align-items:center; gap:7px; background:var(--panel);
+    border:1px solid var(--line); border-radius:99px; padding:8px 14px; font-size:12px; color:var(--txt); }
+  .pill b { color:var(--gold-l); }
+  .dot { width:7px; height:7px; border-radius:50%; background:var(--good); }
+  select { background:var(--panel); color:var(--txt); border:1px solid var(--gold-d);
+    border-radius:10px; padding:9px 12px; font-size:13px; font-family:inherit; }
+
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:20px; }
+  .kpi { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
+  .kpi .k { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--mut); font-weight:700; }
+  .kpi .v { font-family:Didot,"Bodoni MT",Georgia,serif; font-size:30px; color:var(--gold-l);
+    margin-top:4px; font-variant-numeric:tabular-nums; }
+  .kpi .d { font-size:11px; color:var(--dim); margin-top:2px; }
+  .kpi .d.up { color:var(--good); } .kpi .d.down { color:var(--warn); }
+
+  .grid { display:grid; grid-template-columns:1.15fr .85fr; gap:14px; }
+  @media (max-width:900px){ .grid { grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:18px 20px; }
+  .card h2 { font-family:Didot,"Bodoni MT",Georgia,serif; font-weight:500; font-size:17px; margin:0 0 3px; color:#fff; }
+  .card .hint { font-size:11.5px; color:var(--dim); margin-bottom:14px; }
+
+  .mrow { display:flex; align-items:center; gap:12px; padding:7px 0; cursor:pointer; border-radius:8px; }
+  .mrow:hover { background:rgba(201,164,76,.06); }
+  .mrow.sel .mname { color:var(--gold-l); }
+  .mname { flex:0 0 118px; font-size:12.5px; font-weight:600; }
+  .mbar { flex:1; height:9px; background:rgba(255,255,255,.07); border-radius:99px; overflow:hidden; }
+  .mfill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--gold-d),var(--gold-l)); }
+  .mnum { flex:0 0 34px; text-align:right; font-size:12.5px; font-weight:700; color:var(--gold-l);
+    font-variant-numeric:tabular-nums; }
+  .mcert { flex:0 0 86px; text-align:right; font-size:11px; color:var(--mut); font-variant-numeric:tabular-nums; }
+
+  .dimrow { margin-bottom:10px; }
+  .dimhead { display:flex; justify-content:space-between; font-size:12px; font-weight:600; margin-bottom:4px; }
+  .dimhead span:last-child { color:var(--gold-l); font-variant-numeric:tabular-nums; }
+  .dimbar { height:7px; background:rgba(255,255,255,.07); border-radius:99px; overflow:hidden; }
+  .dimfill { height:100%; background:linear-gradient(90deg,var(--gold-d),var(--gold-l)); border-radius:99px; }
+
+  table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  th { text-align:left; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--mut);
+    font-weight:700; padding:8px 10px 8px 0; border-bottom:1px solid var(--line); }
+  td { padding:9px 10px 9px 0; border-bottom:1px solid rgba(255,255,255,.05);
+    font-variant-numeric:tabular-nums; vertical-align:middle; }
+  .tstrong { font-weight:600; color:#fff; }
+  .tsub { font-size:11px; color:var(--dim); }
+  .tag { display:inline-block; border-radius:99px; padding:2px 9px; font-size:10.5px; font-weight:700; }
+  .tag.ok { background:rgba(127,182,148,.15); color:var(--good); border:1px solid rgba(127,182,148,.4); }
+  .tag.mid { background:rgba(201,164,76,.13); color:var(--gold-l); border:1px solid rgba(201,164,76,.4); }
+  .tag.low { background:rgba(217,122,106,.13); color:var(--bad); border:1px solid rgba(217,122,106,.4); }
+  .arrow.up { color:var(--good); } .arrow.down { color:var(--warn); }
+
+  .claim { display:flex; align-items:center; gap:10px; padding:6px 0; }
+  .claim .c { flex:1; font-size:12px; }
+  .claim .cb { flex:0 0 130px; height:7px; background:rgba(255,255,255,.07); border-radius:99px; overflow:hidden; }
+  .claim .cf { height:100%; border-radius:99px; }
+  .claim .cp { flex:0 0 38px; text-align:right; font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; }
+
+  .spark { width:100%; height:64px; margin-top:6px; }
+  .adoptRow { display:flex; gap:8px; align-items:center; margin:10px 0; }
+  .adoptLabel { flex:0 0 90px; font-size:12px; color:var(--mut); }
+  .adoptBar { flex:1; height:18px; background:rgba(255,255,255,.06); border-radius:7px; overflow:hidden; display:flex; }
+  .adoptSeg { height:100%; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:var(--mut); margin-top:8px; }
+  .sw { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+  .full { grid-column:1 / -1; }
+  .foot { margin-top:26px; text-align:center; font-size:10.5px; color:var(--dim); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brand">L'ORÉAL <span style="color:var(--gold)">·</span> BEAUTY COACH</div>
+      <div class="brandSub">Launch Readiness Command</div>
+      <h1 id="launch-title">Revitalift 1.5% Pure Hyaluronic Acid Serum</h1>
+      <div class="sub">Priority Launch · Pack v3 live · Week 3 of launch window · SAPMENA + GCC</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span class="pill"><span class="dot"></span> Live · updates nightly</span>
+      <select id="launch-pick" onchange="pickLaunch(this.value)">
+        <option value="rev">Revitalift HA Serum — Priority Launch</option>
+        <option value="gly">Glycolic Bright Serum — New This Week</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Readiness by market</h2>
+      <div class="hint">Average launch-readiness score · certified share of active advisors — click a market to drill down</div>
+      <div id="markets"></div>
+      <h2 style="margin-top:20px">Readiness trend</h2>
+      <div class="hint">Network average across the launch window</div>
+      <svg class="spark" id="trend" viewBox="0 0 560 64" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="card">
+      <h2>Capability by dimension</h2>
+      <div class="hint" id="dim-hint">Network average — all markets</div>
+      <div id="dims"></div>
+      <h2 style="margin-top:20px">Where the message decays</h2>
+      <div class="hint">Share of advisors using each approved claim correctly in role-play</div>
+      <div id="claims"></div>
+    </div>
+
+    <div class="card full">
+      <h2>Distributor drill-down <span id="drill-scope" style="font-size:12px;color:var(--mut);font-weight:400"></span></h2>
+      <div class="hint">The invisible frontline, made visible — who is genuinely ready, before the shop floor</div>
+      <div style="overflow-x:auto"><table id="dist-table">
+        <thead><tr>
+          <th>Distributor</th><th>Market · Territory</th><th>Advisors</th><th>Sessions</th>
+          <th>Avg score</th><th>Fidelity</th><th>Certified</th><th>Trend</th><th>Status</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <h2>Pack version adoption</h2>
+      <div class="hint">Certifications by pack version — is the frontline on this week's message?</div>
+      <div id="adoption"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#5c4d2a"></span>v1 · old message</span>
+        <span><span class="sw" style="background:#9a7b2d"></span>v2</span>
+        <span><span class="sw" style="background:#d8b968"></span>v3 · current</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Re-coaching queue</h2>
+      <div class="hint">Advisors flagged by the scorer — lowest readiness on high-traffic counters</div>
+      <div style="overflow-x:auto"><table id="recoach">
+        <thead><tr><th>Advisor</th><th>Distributor</th><th>Weak dimension</th><th>Score</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    Demo prototype · synthetic data · L'Oréal Beauty Coach — HQ Launch Readiness Intelligence<br>
+    Every score is evidence-based: verbatim advisor quotes, NE abstention, immutable pack-version history.
+  </div>
+</div>
+
+<script>
+"use strict";
+const LAUNCHES = {
+  rev: { title:"Revitalift 1.5% Pure Hyaluronic Acid Serum",
+    kpis:[
+      {k:"Active advisors", v:"248", d:"of 300 enrolled", cls:""},
+      {k:"Certification rate", v:"78%", d:"▲ 6 pts this week", cls:"up"},
+      {k:"Avg readiness", v:"81", d:"▲ 3 pts this week", cls:"up"},
+      {k:"Message fidelity", v:"86%", d:"approved wording used", cls:""},
+      {k:"Sessions this week", v:"412", d:"31 concurrent peak", cls:""},
+      {k:"Time-to-competency", v:"6.2d", d:"target ≤ 10 days", cls:"up"},
+    ],
+    markets:[
+      {m:"UAE", score:87, cert:84, adv:62},
+      {m:"Saudi Arabia", score:83, cert:79, adv:55},
+      {m:"Malaysia", score:81, cert:77, adv:48},
+      {m:"Singapore", score:80, cert:75, adv:26},
+      {m:"Thailand", score:74, cert:64, adv:32},
+      {m:"Vietnam", score:69, cert:52, adv:25},
+    ],
+    dims:{ "All markets":[["Product Accuracy",88],["Message Fidelity",86],["Brand Tone",84],["Objection Handling",74],["Personalization",68],["Upsell Fluency",72]],
+      "UAE":[["Product Accuracy",92],["Message Fidelity",90],["Brand Tone",88],["Objection Handling",81],["Personalization",74],["Upsell Fluency",79]],
+      "Saudi Arabia":[["Product Accuracy",89],["Message Fidelity",87],["Brand Tone",86],["Objection Handling",77],["Personalization",70],["Upsell Fluency",74]],
+      "Malaysia":[["Product Accuracy",87],["Message Fidelity",85],["Brand Tone",84],["Objection Handling",74],["Personalization",69],["Upsell Fluency",72]],
+      "Singapore":[["Product Accuracy",86],["Message Fidelity",84],["Brand Tone",85],["Objection Handling",73],["Personalization",68],["Upsell Fluency",70]],
+      "Thailand":[["Product Accuracy",81],["Message Fidelity",77],["Brand Tone",80],["Objection Handling",66],["Personalization",61],["Upsell Fluency",64]],
+      "Vietnam":[["Product Accuracy",76],["Message Fidelity",70],["Brand Tone",78],["Objection Handling",60],["Personalization",56],["Upsell Fluency",58]] },
+    claims:[
+      ["“1.5% pure hyaluronic acid”",94],
+      ["“dermatologist validated”",91],
+      ["“visibly plumped”",88],
+      ["“two molecular weights”",76],
+      ["“fine lines reduced in two weeks”",64],
+      ["“fragrance-free”",58],
+    ],
+    trend:[58,62,66,69,73,76,79,81],
+    dists:[
+      ["Gulf Beauty Trading","UAE · Dubai",34,96,88,91,88,+4],
+      ["Emerald Distribution","UAE · Abu Dhabi",28,71,85,89,79,+3],
+      ["Riyadh Beauty House","Saudi Arabia · Riyadh",31,84,84,88,81,+5],
+      ["Jeddah Retail Partners","Saudi Arabia · Jeddah",24,52,81,85,75,+2],
+      ["KL Beauty Network","Malaysia · Kuala Lumpur",29,77,83,87,79,+4],
+      ["Penang Beauty Collective","Malaysia · Penang",19,38,78,82,68,+1],
+      ["SG Prestige Retail","Singapore · Central",26,58,80,84,75,+2],
+      ["Siam Beauty Alliance","Thailand · Bangkok",32,61,74,76,64,-1],
+      ["Mekong Beauty Partners","Vietnam · Ho Chi Minh",25,44,69,70,52,-2],
+    ],
+    adoption:{v1:22,v2:41,v3:174},
+    recoach:[
+      ["Advisor #V-0118","Mekong Beauty Partners","Message Fidelity",54],
+      ["Advisor #T-0ratio092","Siam Beauty Alliance","Objection Handling",58],
+      ["Advisor #V-0134","Mekong Beauty Partners","Personalization",59],
+      ["Advisor #M-0071","Penang Beauty Collective","Upsell Fluency",61],
+      ["Advisor #T-0087","Siam Beauty Alliance","Message Fidelity",62],
+    ],
+  },
+  gly: { title:"Glycolic Bright Dark Spot Serum",
+    kpis:[
+      {k:"Active advisors", v:"96", d:"of 300 enrolled", cls:""},
+      {k:"Certification rate", v:"31%", d:"launch day + 4", cls:""},
+      {k:"Avg readiness", v:"66", d:"▲ 9 pts since launch", cls:"up"},
+      {k:"Message fidelity", v:"71%", d:"approved wording used", cls:""},
+      {k:"Sessions this week", v:"188", d:"surge pack active", cls:""},
+      {k:"Time-to-competency", v:"—", d:"tracking", cls:""},
+    ],
+    markets:[
+      {m:"UAE", score:74, cert:44, adv:30},
+      {m:"Saudi Arabia", score:70, cert:38, adv:24},
+      {m:"Malaysia", score:66, cert:30, adv:18},
+      {m:"Singapore", score:64, cert:27, adv:10},
+      {m:"Thailand", score:58, cert:16, adv:9},
+      {m:"Vietnam", score:52, cert:9, adv:5},
+    ],
+    dims:{ "All markets":[["Product Accuracy",74],["Message Fidelity",71],["Brand Tone",80],["Objection Handling",58],["Personalization",60],["Upsell Fluency",55]] },
+    claims:[
+      ["“3.5% glycolic acid complex”",81],
+      ["“visibly reduces dark spots”",77],
+      ["“in two weeks”",62],
+      ["“all skin tones”",48],
+    ],
+    trend:[41,49,58,66],
+    dists:[
+      ["Gulf Beauty Trading","UAE · Dubai",18,52,74,78,46,+9],
+      ["Emerald Distribution","UAE · Abu Dhabi",12,31,73,75,42,+8],
+      ["Riyadh Beauty House","Saudi Arabia · Riyadh",14,36,71,72,40,+7],
+      ["KL Beauty Network","Malaysia · Kuala Lumpur",11,29,67,70,32,+6],
+      ["Siam Beauty Alliance","Thailand · Bangkok",9,17,58,60,16,+4],
+      ["Mekong Beauty Partners","Vietnam · Ho Chi Minh",5,9,52,50,9,+3],
+    ],
+    adoption:{v1:8,v2:22,v3:0},
+    recoach:[
+      ["Advisor #V-0102","Mekong Beauty Partners","Message Fidelity",41],
+      ["Advisor #T-0079","Siam Beauty Alliance","Product Accuracy",47],
+      ["Advisor #M-0055","KL Beauty Network","Objection Handling",51],
+    ],
+  },
+};
+
+let cur = "rev", selMarket = null;
+const $ = (id) => document.getElementById(id);
+
+function statusTag(score){
+  if (score >= 80) return '<span class="tag ok">Launch-ready</span>';
+  if (score >= 68) return '<span class="tag mid">Ramping</span>';
+  return '<span class="tag low">At risk</span>';
+}
+function fillColor(p){ return p >= 80 ? "var(--good)" : p >= 60 ? "var(--gold-l)" : "var(--bad)"; }
+
+function render(){
+  const L = LAUNCHES[cur];
+  $("launch-title").textContent = L.title;
+  $("kpis").innerHTML = L.kpis.map(k =>
+    `<div class="kpi"><div class="k">${k.k}</div><div class="v">${k.v}</div><div class="d ${k.cls}">${k.d}</div></div>`).join("");
+
+  $("markets").innerHTML = L.markets.map(m =>
+    `<div class="mrow${selMarket===m.m?" sel":""}" onclick="pickMarket('${m.m}')">
+       <span class="mname">${m.m}</span>
+       <span class="mbar"><span class="mfill" style="width:${m.score}%"></span></span>
+       <span class="mnum">${m.score}</span>
+       <span class="mcert">${m.cert}% cert · ${m.adv} adv</span>
+     </div>`).join("");
+
+  const dims = L.dims[selMarket] || L.dims["All markets"];
+  $("dim-hint").textContent = selMarket ? `Average — ${selMarket}` : "Network average — all markets";
+  $("dims").innerHTML = dims.map(([n,v]) =>
+    `<div class="dimrow"><div class="dimhead"><span>${n}</span><span>${v}</span></div>
+     <div class="dimbar"><div class="dimfill" style="width:${v}%"></div></div></div>`).join("");
+
+  $("claims").innerHTML = L.claims.map(([c,p]) =>
+    `<div class="claim"><span class="c">${c}</span>
+      <span class="cb"><span class="cf" style="width:${p}%;background:${fillColor(p)}"></span></span>
+      <span class="cp" style="color:${fillColor(p)}">${p}%</span></div>`).join("");
+
+  const rows = L.dists.filter(d => !selMarket || d[1].startsWith(selMarket));
+  $("drill-scope").textContent = selMarket ? `— ${selMarket} (click market again to clear)` : "— all markets";
+  $("dist-table").querySelector("tbody").innerHTML = rows.map(d =>
+    `<tr><td class="tstrong">${d[0]}</td><td class="tsub">${d[1]}</td><td>${d[2]}</td><td>${d[3]}</td>
+      <td class="tstrong">${d[4]}</td><td>${d[5]}%</td><td>${d[6]}%</td>
+      <td class="arrow ${d[7]>=0?"up":"down"}">${d[7]>=0?"▲":"▼"} ${Math.abs(d[7])}</td>
+      <td>${statusTag(d[4])}</td></tr>`).join("");
+
+  const a = L.adoption, total = Math.max(1, a.v1 + a.v2 + a.v3);
+  $("adoption").innerHTML =
+    `<div class="adoptRow"><span class="adoptLabel">Certified on</span>
+      <div class="adoptBar">
+        <span class="adoptSeg" style="width:${a.v1/total*100}%;background:#5c4d2a"></span>
+        <span class="adoptSeg" style="width:${a.v2/total*100}%;background:#9a7b2d"></span>
+        <span class="adoptSeg" style="width:${a.v3/total*100}%;background:#d8b968"></span>
+      </div></div>
+     <div style="font-size:12.5px;color:var(--mut)">
+       ${a.v3 ? `<b style="color:var(--gold-l)">${Math.round(a.v3/total*100)}%</b> of certified advisors are on the current pack (v3).`
+              : `Current pack (v3) certifications begin this week.`}
+       ${a.v1 ? ` <b style="color:var(--warn)">${a.v1}</b> still certified only on the v1 message — recertification queued.` : ""}
+     </div>`;
+
+  $("recoach").querySelector("tbody").innerHTML = L.recoach.map(r =>
+    `<tr><td class="tstrong">${r[0]}</td><td class="tsub">${r[1]}</td><td>${r[2]}</td>
+      <td style="color:var(--bad);font-weight:700">${r[3]}</td>
+      <td><span class="tag mid" style="cursor:pointer">Book re-coach</span></td></tr>`).join("");
+
+  drawTrend(L.trend);
+}
+
+function drawTrend(t){
+  const svg = $("trend"), W = 560, H = 64, pad = 6;
+  const min = Math.min(...t) - 4, max = Math.max(...t) + 4;
+  const x = (i) => pad + i * (W - 2*pad) / (t.length - 1);
+  const y = (v) => H - pad - (v - min) / (max - min) * (H - 2*pad);
+  const pts = t.map((v,i) => `${x(i)},${y(v)}`).join(" ");
+  const last = t[t.length-1];
+  svg.innerHTML =
+    `<polyline points="${pts}" fill="none" stroke="#c9a44c" stroke-width="2"/>` +
+    `<polygon points="${pad},${H-pad} ${pts} ${W-pad},${H-pad}" fill="rgba(201,164,76,.12)" stroke="none"/>` +
+    t.map((v,i) => `<circle cx="${x(i)}" cy="${y(v)}" r="${i===t.length-1?4:2.5}" fill="${i===t.length-1?"#d8b968":"#9a7b2d"}"/>`).join("") +
+    `<text x="${x(t.length-1)-8}" y="${y(last)-8}" fill="#d8b968" font-size="12" font-weight="700">${last}</text>`;
+}
+
+function pickMarket(m){ selMarket = selMarket === m ? null : m; render(); }
+function pickLaunch(v){ cur = v; selMarket = null; render(); }
+render();
+</script>
+</body>
+</html>
