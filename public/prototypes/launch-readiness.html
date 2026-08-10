@@ -98,11 +98,9 @@
       <div class="sub">Priority Launch · Pack v3 live · Week 3 of launch window · SAPMENA + GCC</div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <span class="pill"><span class="dot"></span> Live · updates nightly</span>
-      <select id="launch-pick" onchange="pickLaunch(this.value)">
-        <option value="rev">Revitalift HA Serum — Priority Launch</option>
-        <option value="gly">Glycolic Bright Serum — New This Week</option>
-      </select>
+      <span class="pill"><span class="dot" id="live-dot" style="background:var(--gold)"></span>
+        <span id="live-pill">Demo · synthetic data</span></span>
+      <select id="launch-pick" onchange="pickLaunch(this.value)"></select>
     </div>
   </header>
 
@@ -143,11 +141,7 @@
       <h2>Pack version adoption</h2>
       <div class="hint">Certifications by pack version — is the frontline on this week's message?</div>
       <div id="adoption"></div>
-      <div class="legend">
-        <span><span class="sw" style="background:#5c4d2a"></span>v1 · old message</span>
-        <span><span class="sw" style="background:#9a7b2d"></span>v2</span>
-        <span><span class="sw" style="background:#d8b968"></span>v3 · current</span>
-      </div>
+      <div class="legend" id="adopt-legend"></div>
     </div>
 
     <div class="card">
@@ -213,7 +207,7 @@ const LAUNCHES = {
       ["Siam Beauty Alliance","Thailand · Bangkok",32,61,74,76,64,-1],
       ["Mekong Beauty Partners","Vietnam · Ho Chi Minh",25,44,69,70,52,-2],
     ],
-    adoption:{v1:22,v2:41,v3:174},
+    adoption:[{label:"v1",count:22,current:false},{label:"v2",count:41,current:false},{label:"v3",count:174,current:true}],
     recoach:[
       ["Advisor #V-0118","Mekong Beauty Partners","Message Fidelity",54],
       ["Advisor #T-0ratio092","Siam Beauty Alliance","Objection Handling",58],
@@ -255,7 +249,7 @@ const LAUNCHES = {
       ["Siam Beauty Alliance","Thailand · Bangkok",9,17,58,60,16,+4],
       ["Mekong Beauty Partners","Vietnam · Ho Chi Minh",5,9,52,50,9,+3],
     ],
-    adoption:{v1:8,v2:22,v3:0},
+    adoption:[{label:"v1",count:8,current:false},{label:"v2",count:22,current:true}],
     recoach:[
       ["Advisor #V-0102","Mekong Beauty Partners","Message Fidelity",41],
       ["Advisor #T-0079","Siam Beauty Alliance","Product Accuracy",47],
@@ -275,7 +269,8 @@ function statusTag(score){
 function fillColor(p){ return p >= 80 ? "var(--good)" : p >= 60 ? "var(--gold-l)" : "var(--bad)"; }
 
 function render(){
-  const L = LAUNCHES[cur];
+  const L = DATA[cur];
+  if (!L) return;
   $("launch-title").textContent = L.title;
   $("kpis").innerHTML = L.kpis.map(k =>
     `<div class="kpi"><div class="k">${k.k}</div><div class="v">${k.v}</div><div class="d ${k.cls}">${k.d}</div></div>`).join("");
@@ -307,19 +302,25 @@ function render(){
       <td class="arrow ${d[7]>=0?"up":"down"}">${d[7]>=0?"▲":"▼"} ${Math.abs(d[7])}</td>
       <td>${statusTag(d[4])}</td></tr>`).join("");
 
-  const a = L.adoption, total = Math.max(1, a.v1 + a.v2 + a.v3);
+  const segs = L.adoption, total = Math.max(1, segs.reduce((s,x)=>s+x.count,0));
+  const COLORS = ["#5c4d2a","#9a7b2d","#d8b968"];
+  const colorOf = (i) => segs[i].current ? "#d8b968" : COLORS[Math.min(i, 1)];
+  const curSeg = segs.find((s)=>s.current);
+  const oldest = segs.length > 1 ? segs[0] : null;
   $("adoption").innerHTML =
     `<div class="adoptRow"><span class="adoptLabel">Certified on</span>
-      <div class="adoptBar">
-        <span class="adoptSeg" style="width:${a.v1/total*100}%;background:#5c4d2a"></span>
-        <span class="adoptSeg" style="width:${a.v2/total*100}%;background:#9a7b2d"></span>
-        <span class="adoptSeg" style="width:${a.v3/total*100}%;background:#d8b968"></span>
+      <div class="adoptBar">${segs.map((s,i)=>
+        `<span class="adoptSeg" style="width:${s.count/total*100}%;background:${colorOf(i)}"></span>`).join("")}
       </div></div>
      <div style="font-size:12.5px;color:var(--mut)">
-       ${a.v3 ? `<b style="color:var(--gold-l)">${Math.round(a.v3/total*100)}%</b> of certified advisors are on the current pack (v3).`
-              : `Current pack (v3) certifications begin this week.`}
-       ${a.v1 ? ` <b style="color:var(--warn)">${a.v1}</b> still certified only on the v1 message — recertification queued.` : ""}
+       ${curSeg && curSeg.count
+         ? `<b style="color:var(--gold-l)">${Math.round(curSeg.count/total*100)}%</b> of certifications are on the current pack (${curSeg.label}).`
+         : `Current-pack certifications begin this week.`}
+       ${oldest && !oldest.current && oldest.count
+         ? ` <b style="color:var(--warn)">${oldest.count}</b> still certified on the ${oldest.label} message — recertification queued.` : ""}
      </div>`;
+  $("adopt-legend").innerHTML = segs.map((s,i)=>
+    `<span><span class="sw" style="background:${colorOf(i)}"></span>${s.label}${s.current?" · current":""}</span>`).join("");
 
   $("recoach").querySelector("tbody").innerHTML = L.recoach.map(r =>
     `<tr><td class="tstrong">${r[0]}</td><td class="tsub">${r[1]}</td><td>${r[2]}</td>
@@ -345,7 +346,31 @@ function drawTrend(t){
 
 function pickMarket(m){ selMarket = selMarket === m ? null : m; render(); }
 function pickLaunch(v){ cur = v; selMarket = null; render(); }
-render();
+
+let DATA = LAUNCHES;
+function buildSelector(){
+  $("launch-pick").innerHTML = Object.keys(DATA).map((id) =>
+    `<option value="${id}"${id===cur?" selected":""}>${DATA[id].title}</option>`).join("");
+}
+/* Try live aggregation (works when served from the app at /hq);
+   the standalone demo link keeps the synthetic dataset. */
+(async () => {
+  buildSelector();
+  render();
+  try {
+    const res = await fetch("/api/hq/summary");
+    if (!res.ok) throw new Error();
+    const live = await res.json();
+    if (live.order && live.order.length) {
+      DATA = live.launches;
+      cur = live.order[0]; selMarket = null;
+      $("live-pill").textContent = "Live · aggregated from coaching sessions";
+      $("live-dot").style.background = "var(--good)";
+      buildSelector();
+      render();
+    }
+  } catch { /* stay on synthetic demo data */ }
+})();
 </script>
 </body>
 </html>
