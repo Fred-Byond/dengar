@@ -61,3 +61,25 @@ Klleon variables.
 - WhatsApp reminders, HQ dashboard, and role-play digital customers are
   Phase 2 per the approved proposal.
 - Pack content in `packs.ts` is sample copy, clearly not brand-approved.
+
+## Product Nexus (product-team console) — `/nexus`
+
+The knowledge-ingestion layer: the product team signs in with a
+**product-team access code** (seeded demo: `LOREAL-PM-2026`) and maintains
+the product knowledge library the coach trains on.
+
+- **Library** — every product with its live pack version, photo, category
+  and last-updated date.
+- **Upload / edit** — product details + hero photo (stored in SQLite,
+  served at `/api/coach/product-image/[id]`), and the governed pack in a
+  fixed six-section frame (positioning, hero claims, ingredient story,
+  routine, price positioning, complete-the-routine) plus approved claim
+  phrases, do-not-say list and objection library. Retrieval keywords are
+  derived automatically (`src/lib/coach/packbuild.ts`).
+- **Publish = new immutable pack version.** The coach reads the latest
+  version immediately; history stays auditable. Advisors see new products
+  (with photos) in the catalog with no deploy.
+
+Routes: `/api/nexus/auth`, `/api/nexus/products` (GET list / POST publish),
+`/api/nexus/products/[id]` (detail). Access codes now carry a `role`
+(`advisor` | `product-team`); each app rejects the other's codes.

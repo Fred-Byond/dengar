@@ -32,12 +32,22 @@ export function resolveAccessCode(code: string): AdvisorContext | null {
          JOIN distributors d ON d.id = c.distributor_id
          JOIN territories t ON t.id = d.territory_id
          JOIN markets m ON m.id = d.market_id
-        WHERE c.code = ? AND c.active = 1`
+        WHERE c.code = ? AND c.active = 1 AND c.role = 'advisor'`
     )
     .get(code.trim().toUpperCase()) as
     | Omit<AdvisorContext, "advisorId" | "advisorName" | "role">
     | undefined;
   return row ? { ...row, advisorId: "", advisorName: "", role: "agent" } : null;
+}
+
+/** Product-team access codes gate the Nexus. */
+export function isProductTeamCode(code: string): boolean {
+  const row = getDb()
+    .prepare(
+      "SELECT 1 AS ok FROM access_codes WHERE code = ? AND active = 1 AND role = 'product-team'"
+    )
+    .get(code.trim().toUpperCase());
+  return !!row;
 }
 
 export function createAdvisor(
@@ -102,6 +112,96 @@ export function getProduct(id: string): Product | null {
     tagline: r.tagline,
     launchLabel: r.launch_label,
   };
+}
+
+export interface NexusProductSummary extends Product {
+  packVersion: number | null;
+  packUpdatedAt: string | null;
+  hasImage: boolean;
+}
+
+/** Library view: every product with its latest pack version. */
+export function listProductsForNexus(): NexusProductSummary[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT p.id, p.brand, p.category, p.name, p.tagline, p.launch_label,
+              (p.image_data IS NOT NULL) AS hasImage,
+              (SELECT MAX(version) FROM launch_packs lp WHERE lp.product_id = p.id) AS packVersion,
+              (SELECT MAX(created_at) FROM launch_packs lp WHERE lp.product_id = p.id) AS packUpdatedAt
+         FROM products p ORDER BY p.launch_label IS NULL, p.name`
+    )
+    .all() as Array<{
+    id: string; brand: string; category: Product["category"]; name: string;
+    tagline: string; launch_label: string | null; hasImage: number;
+    packVersion: number | null; packUpdatedAt: string | null;
+  }>;
+  return rows.map((r) => ({
+    id: r.id, brand: r.brand, category: r.category, name: r.name,
+    tagline: r.tagline, launchLabel: r.launch_label,
+    packVersion: r.packVersion, packUpdatedAt: r.packUpdatedAt,
+    hasImage: !!r.hasImage,
+  }));
+}
+
+export function getProductImage(
+  id: string
+): { mime: string; data: Buffer } | null {
+  const row = getDb()
+    .prepare(
+      "SELECT image_mime AS mime, image_data AS data FROM products WHERE id = ? AND image_data IS NOT NULL"
+    )
+    .get(id) as { mime: string; data: Buffer } | undefined;
+  return row ?? null;
+}
+
+/**
+ * Create or update a product and publish a new immutable pack version.
+ * Every save bumps the version — the coach always reads the latest, and
+ * history stays auditable (message governance requirement).
+ */
+export function saveProductWithPack(input: {
+  product: Product;
+  pack: Omit<LaunchPack, "id" | "version" | "productId">;
+  image?: { mime: string; data: Buffer } | null;
+}): { version: number } {
+  const db = getDb();
+  const now = new Date().toISOString();
+  let version = 1;
+  const tx = db.transaction(() => {
+    db.prepare(
+      `INSERT INTO products (id, brand, category, name, tagline, launch_label)
+       VALUES (@id, @brand, @category, @name, @tagline, @launchLabel)
+       ON CONFLICT(id) DO UPDATE SET brand=@brand, category=@category,
+         name=@name, tagline=@tagline, launch_label=@launchLabel`
+    ).run({
+      id: input.product.id, brand: input.product.brand,
+      category: input.product.category, name: input.product.name,
+      tagline: input.product.tagline, launchLabel: input.product.launchLabel,
+    });
+    if (input.image) {
+      db.prepare(
+        "UPDATE products SET image_mime = ?, image_data = ? WHERE id = ?"
+      ).run(input.image.mime, input.image.data, input.product.id);
+    }
+    const maxRow = db
+      .prepare(
+        "SELECT MAX(version) AS v FROM launch_packs WHERE product_id = ? AND language = ?"
+      )
+      .get(input.product.id, input.pack.language) as { v: number | null };
+    version = (maxRow.v ?? 0) + 1;
+    const pack: LaunchPack = {
+      ...input.pack,
+      id: `pack-${input.product.id}-${input.pack.language.toLowerCase()}-v${version}`,
+      productId: input.product.id,
+      version,
+    };
+    db.prepare(
+      `INSERT INTO launch_packs (id, product_id, version, language, content, created_at)
+       VALUES (?, ?, ?, ?, ?, ?)`
+    ).run(pack.id, pack.productId, version, pack.language, JSON.stringify(pack), now);
+  });
+  tx();
+  return { version };
 }
 
 export function getLatestPack(

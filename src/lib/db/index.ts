@@ -109,6 +109,30 @@ CREATE TABLE IF NOT EXISTS scorecards (
 
 let db: Database.Database | null = null;
 
+/** Additive migrations for databases created before a column existed. */
+function migrate(d: Database.Database): void {
+  const productCols = (
+    d.prepare("PRAGMA table_info(products)").all() as { name: string }[]
+  ).map((c) => c.name);
+  if (!productCols.includes("image_mime")) {
+    d.exec("ALTER TABLE products ADD COLUMN image_mime TEXT");
+    d.exec("ALTER TABLE products ADD COLUMN image_data BLOB");
+  }
+  const codeCols = (
+    d.prepare("PRAGMA table_info(access_codes)").all() as { name: string }[]
+  ).map((c) => c.name);
+  if (!codeCols.includes("role")) {
+    d.exec(
+      "ALTER TABLE access_codes ADD COLUMN role TEXT NOT NULL DEFAULT 'advisor'"
+    );
+  }
+  // Product-team code for the Nexus (demo value; issued per team in prod).
+  d.prepare(
+    `INSERT OR IGNORE INTO access_codes (code, distributor_id, active, created_at, role)
+     VALUES ('LOREAL-PM-2026', 'gulf-beauty', 1, ?, 'product-team')`
+  ).run(new Date().toISOString());
+}
+
 export function getDb(): Database.Database {
   if (db) return db;
   const file =
@@ -119,5 +143,6 @@ export function getDb(): Database.Database {
   db.pragma("foreign_keys = ON");
   db.exec(SCHEMA);
   seedIfEmpty(db);
+  migrate(db);
   return db;
 }

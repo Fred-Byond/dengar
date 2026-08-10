@@ -338,6 +338,22 @@
   border-color: var(--gold);
 }
 
+.prodRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.prodImg {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex: 0 0 46px;
+  border: 1px solid rgba(201, 164, 76, 0.35);
+  background: #221d16;
+}
+
 .prodName {
   font-size: 14px;
   font-weight: 700;

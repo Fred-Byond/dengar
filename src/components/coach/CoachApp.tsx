@@ -559,11 +559,24 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
               className={`${styles.prodCard}${productId === p.id ? ` ${styles.sel}` : ""}`}
               onClick={() => setProductId(p.id)}
             >
-              {p.launchLabel ? (
-                <span className={styles.launchBadge}>{p.launchLabel}</span>
-              ) : null}
-              <div className={styles.prodName}>{p.name}</div>
-              <div className={styles.prodTag}>{p.tagline}</div>
+              <span className={styles.prodRow}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/api/coach/product-image/${p.id}`}
+                  alt=""
+                  className={styles.prodImg}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+                <span>
+                  {p.launchLabel ? (
+                    <span className={styles.launchBadge}>{p.launchLabel}</span>
+                  ) : null}
+                  <div className={styles.prodName}>{p.name}</div>
+                  <div className={styles.prodTag}>{p.tagline}</div>
+                </span>
+              </span>
             </button>
           ))}
           <label className={styles.label}>Coaching focus</label>

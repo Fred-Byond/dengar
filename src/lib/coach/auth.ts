@@ -62,3 +62,54 @@ export function verifySessionCookie(
 }
 
 export const SESSION_COOKIE_NAME = COOKIE_NAME;
+
+// ---------- Product Nexus (product-team) session ----------
+
+const NEXUS_COOKIE = "nexus_session";
+
+export interface NexusPayload {
+  editorName: string;
+  exp: number;
+}
+
+export function createNexusCookie(editorName: string): {
+  name: string;
+  value: string;
+  maxAge: number;
+} {
+  const payload: NexusPayload = {
+    editorName,
+    exp: Math.floor(Date.now() / 1000) + MAX_AGE_S,
+  };
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  return { name: NEXUS_COOKIE, value: `${body}.${sign(body)}`, maxAge: MAX_AGE_S };
+}
+
+export function verifyNexusCookie(
+  cookieValue: string | undefined
+): NexusPayload | null {
+  if (!cookieValue) return null;
+  const dot = cookieValue.lastIndexOf(".");
+  if (dot < 0) return null;
+  const body = cookieValue.slice(0, dot);
+  const sig = cookieValue.slice(dot + 1);
+  const expected = sign(body);
+  if (
+    sig.length !== expected.length ||
+    !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))
+  ) {
+    return null;
+  }
+  try {
+    const payload = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf8")
+    ) as NexusPayload;
+    if (payload.exp < Math.floor(Date.now() / 1000)) return null;
+    if (typeof payload.editorName !== "string") return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+export const NEXUS_COOKIE_NAME = NEXUS_COOKIE;
