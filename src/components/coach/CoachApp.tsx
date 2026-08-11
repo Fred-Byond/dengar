@@ -13,6 +13,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useKlleonAvatar } from "@/hooks/useKlleonAvatar";
+import { useWhisperMic } from "@/hooks/useWhisperMic";
 import type { KlleonChatData } from "@/types/klleon";
 import type {
   AdvisorContext,
@@ -43,7 +44,7 @@ type CatalogFocus = { id: string; label: string };
 type DimensionMeta = { id: string; label: string };
 type CatalogLang = {
   code: string; englishName: string; nativeName: string;
-  bcp47: string; rtl: boolean; voiceCode: string | null;
+  bcp47: string; rtl: boolean; voiceCode: string;
 };
 type CatalogDivision = { id: string; shortName: string; advisorType: string };
 type CatalogProduct = Product & { languages?: string[] };
@@ -134,6 +135,9 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
   const [dimMeta, setDimMeta] = useState<DimensionMeta[]>([]);
 
   const klleon = useKlleonAvatar({ sdkKey, langCode: language, enabled: true });
+  // Klleon speaks; Whisper listens. The transcript is scored evidence, so it
+  // goes through Whisper with the session language pinned server-side.
+  const mic = useWhisperMic(start?.session.id ?? null);
 
   const speakRef = useRef(klleon.speak);
   const unlockAudioRef = useRef(klleon.unlockAudio);
@@ -154,6 +158,8 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
   const echoRetryUsedRef = useRef(false);
   const endSessionRef = useRef<() => void>(() => {});
   const sendTurnRef = useRef<(text: string) => void>(() => {});
+  const micRef = useRef<ReturnType<typeof useWhisperMic> | null>(null);
+  micRef.current = mic;
 
   useEffect(() => {
     listeningRef.current = listening;
@@ -206,6 +212,7 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
     closingRef.current = true;
     if (timerRef.current) clearInterval(timerRef.current);
     klleon.cancelStt();
+    micRef.current?.cancel();
     setListening(false);
     setCaption(s.closeLine);
     deliverSpeak(s.closeLine);
@@ -379,16 +386,23 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, lobbyCount]);
 
-  const toggleMic = useCallback(() => {
+  const toggleMic = useCallback(async () => {
     unlockAudioRef.current();
     if (listening) {
-      klleon.endStt();
-    } else {
-      stopSpeechRef.current();
-      const ok = klleon.startStt();
-      if (ok) setListening(true);
+      setListening(false);
+      const text = await mic.stop();
+      if (text && !closingRef.current) {
+        setYouSaid(`\u201c${text}\u201d`);
+        sendTurnRef.current(text);
+      }
+      return;
     }
-  }, [klleon, listening]);
+    // The coach must stop talking before the advisor does, or the avatar's
+    // own voice lands in the recording and gets scored as the advisor's.
+    stopSpeechRef.current();
+    const ok = await mic.start();
+    if (ok) setListening(true);
+  }, [listening, mic]);
 
   // ---------- derived ----------
 
@@ -622,23 +636,20 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
                   disabled={!available}
                   title={
                     available
-                      ? l.voiceCode
-                        ? `${l.englishName} — voice verified`
-                        : `${l.englishName} — vendor voice pending`
+                      ? `${l.englishName} — the coach speaks and listens in this language`
                       : `No market-approved ${l.englishName} pack for this product yet`
                   }
                   onClick={() => setLanguage(l.code)}
                   dir={l.rtl ? "rtl" : "ltr"}
                 >
                   {l.nativeName}
-                  {available && !l.voiceCode ? " •" : ""}
                 </button>
               );
             })}
           </div>
           <p className={styles.footNote} style={{ marginTop: 6, textAlign: "left" }}>
-            Only languages with a market-approved pack are selectable.
-            {" • marks vendor voice pending — text coaching works, spoken voice is in test."}
+            Only languages with a market-approved pack are selectable — the coach
+            will not speak a draft translation as brand truth.
           </p>
           {error ? <div className={styles.err}>{error}</div> : null}
           <button
@@ -690,7 +701,8 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
           <div className={styles.lobbyCount}>{lobbyCount > 0 ? lobbyCount : "…"}</div>
           <div className={styles.checkItem}>
             <span className={styles.checkDot}>{micOk ? "✓" : "…"}</span>
-            Microphone {micOk ? "ready" : "permission needed"}
+            Microphone {micOk ? "ready" : "permission needed"} — your coach hears
+            you in {languages.find((l) => l.code === language)?.englishName ?? "your language"}
           </div>
           <div className={styles.checkItem}>
             <span className={styles.checkDot}>✓</span>
@@ -721,6 +733,7 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
               )}
             </div>
             {youSaid ? <div className={styles.youSaid}>You: {youSaid}</div> : null}
+            {mic.error ? <div className={styles.err}>{mic.error}</div> : null}
           </div>
           <div className={styles.sessionControls}>
             <button className={styles.endBtn} onClick={() => endSessionRef.current()}>
@@ -729,14 +742,18 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
             <div style={{ position: "relative" }}>
               <button
                 className={`${styles.micBtn}${listening ? ` ${styles.listening}` : ""}`}
-                onClick={toggleMic}
-                disabled={awaitingReply}
+                onClick={() => void toggleMic()}
+                disabled={awaitingReply || mic.state === "transcribing"}
                 aria-label={listening ? "Stop talking" : "Talk to coach"}
               >
                 🎙
               </button>
               <span className={styles.micHint}>
-                {listening ? "Tap when done" : "Tap to talk"}
+                {mic.state === "transcribing"
+                  ? "Transcribing…"
+                  : listening
+                    ? "Tap when done"
+                    : "Tap to talk"}
               </span>
             </div>
             <span style={{ width: 88 }} />

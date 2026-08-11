@@ -16,8 +16,16 @@ export interface SessionLanguage {
   nativeName: string;
   bcp47: string;
   rtl: boolean;
-  /** Klleon voice/subtitle code, or null where vendor coverage is unproven. */
-  voiceCode: string | null;
+  /** Klleon voice code — the avatar speaks the pack in this voice. */
+  voiceCode: string;
+  /** Klleon subtitle code; usually the voice code. */
+  subtitleCode: string;
+  /**
+   * ISO-639-1 hint passed to Whisper. Pinning it stops Whisper
+   * language-guessing on short utterances — an advisor saying one Arabic word
+   * must not be transcribed as Farsi and scored against the wrong pack.
+   */
+  whisper: string;
   /** Markets where this is a primary coaching language. */
   markets: string[];
 }
@@ -25,32 +33,38 @@ export interface SessionLanguage {
 export const LANGUAGES: SessionLanguage[] = [
   {
     code: "EN", englishName: "English", nativeName: "English",
-    bcp47: "en-US", rtl: false, voiceCode: "en_us",
+    bcp47: "en-US", rtl: false,
+    voiceCode: "en_us", subtitleCode: "en_us", whisper: "en",
     markets: ["UAE", "Malaysia", "Singapore", "India", "UK", "USA"],
   },
   {
     code: "AR", englishName: "Arabic", nativeName: "العربية",
-    bcp47: "ar-SA", rtl: true, voiceCode: null,
+    bcp47: "ar-SA", rtl: true,
+    voiceCode: "ar_sa", subtitleCode: "ar_sa", whisper: "ar",
     markets: ["UAE", "Saudi Arabia", "Egypt", "Morocco"],
   },
   {
     code: "FR", englishName: "French", nativeName: "Français",
-    bcp47: "fr-FR", rtl: false, voiceCode: null,
+    bcp47: "fr-FR", rtl: false,
+    voiceCode: "fr_fr", subtitleCode: "fr_fr", whisper: "fr",
     markets: ["France", "Morocco", "Côte d'Ivoire", "Canada"],
   },
   {
     code: "ZH", englishName: "Chinese (Mandarin)", nativeName: "中文",
-    bcp47: "zh-CN", rtl: false, voiceCode: null,
+    bcp47: "zh-CN", rtl: false,
+    voiceCode: "zh_cn", subtitleCode: "zh_cn", whisper: "zh",
     markets: ["China", "Taiwan", "Singapore", "Malaysia"],
   },
   {
     code: "JA", englishName: "Japanese", nativeName: "日本語",
-    bcp47: "ja-JP", rtl: false, voiceCode: null,
+    bcp47: "ja-JP", rtl: false,
+    voiceCode: "ja_jp", subtitleCode: "ja_jp", whisper: "ja",
     markets: ["Japan"],
   },
   {
     code: "HI", englishName: "Hindi", nativeName: "हिन्दी",
-    bcp47: "hi-IN", rtl: false, voiceCode: null,
+    bcp47: "hi-IN", rtl: false,
+    voiceCode: "hi_in", subtitleCode: "hi_in", whisper: "hi",
     markets: ["India"],
   },
 ];

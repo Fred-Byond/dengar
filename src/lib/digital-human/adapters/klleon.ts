@@ -3,6 +3,7 @@
  * Keeps SDK calls out of UI components.
  */
 
+import { getLanguage } from "@/lib/coach/languages";
 import type {
   KlleonChatData,
   KlleonChatSdk,
@@ -19,9 +20,18 @@ export type KlleonVoiceCodes = {
   subtitle_code: string;
 };
 
-/** MS uses Indonesian voice as Malay stand-in; others fall back to en_us. */
+/**
+ * Coaching languages resolve from the session-language table, which is the
+ * single source of truth for what the coach may speak. MS (dengar legacy)
+ * keeps its Indonesian stand-in; anything unknown falls back to en_us rather
+ * than letting the avatar attempt a voice that was never confirmed.
+ */
 export function klleonVoiceCodes(langCode: string): KlleonVoiceCodes {
   if (langCode === "MS") return { voice_code: "id_id", subtitle_code: "id_id" };
+  const lang = getLanguage(langCode);
+  if (lang) {
+    return { voice_code: lang.voiceCode, subtitle_code: lang.subtitleCode };
+  }
   return { voice_code: "en_us", subtitle_code: "en_us" };
 }
 
