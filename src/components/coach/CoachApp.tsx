@@ -5,16 +5,16 @@
  *
  * access → slots → setup → confirmed → lobby → session → debrief
  *
- * Reuses the dengar chassis patterns: Klleon avatar puppet (echo/STT),
+ * Reuses the dengar chassis patterns: HoloMe avatar puppet (echo/STT),
  * echo-ack retry for silently dropped speech, screen state machine.
  * The conversation itself is served by /api/coach/sessions/[id]/turns —
  * the governed engine — not a hardcoded script.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useKlleonAvatar } from "@/hooks/useKlleonAvatar";
+import { useHoloMeAvatar } from "@/hooks/useHoloMeAvatar";
 import { useWhisperMic } from "@/hooks/useWhisperMic";
-import type { KlleonChatData } from "@/types/klleon";
+import type { HoloMeChatData } from "@/types/holome";
 import type {
   AdvisorContext,
   Appointment,
@@ -134,17 +134,17 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
   const [scorecard, setScorecard] = useState<Scorecard | null>(null);
   const [dimMeta, setDimMeta] = useState<DimensionMeta[]>([]);
 
-  const klleon = useKlleonAvatar({ sdkKey, langCode: language, enabled: true });
-  // Klleon speaks; Whisper listens. The transcript is scored evidence, so it
+  const holome = useHoloMeAvatar({ sdkKey, langCode: language, enabled: true });
+  // HoloMe speaks; Whisper listens. The transcript is scored evidence, so it
   // goes through Whisper with the session language pinned server-side.
   const mic = useWhisperMic(start?.session.id ?? null);
 
-  const speakRef = useRef(klleon.speak);
-  const unlockAudioRef = useRef(klleon.unlockAudio);
-  const stopSpeechRef = useRef(klleon.stopSpeech);
-  speakRef.current = klleon.speak;
-  unlockAudioRef.current = klleon.unlockAudio;
-  stopSpeechRef.current = klleon.stopSpeech;
+  const speakRef = useRef(holome.speak);
+  const unlockAudioRef = useRef(holome.unlockAudio);
+  const stopSpeechRef = useRef(holome.stopSpeech);
+  speakRef.current = holome.speak;
+  unlockAudioRef.current = holome.unlockAudio;
+  stopSpeechRef.current = holome.stopSpeech;
 
   const startRef = useRef<SessionStart | null>(null);
   startRef.current = start;
@@ -211,7 +211,7 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
     if (!s || closingRef.current) return;
     closingRef.current = true;
     if (timerRef.current) clearInterval(timerRef.current);
-    klleon.cancelStt();
+    holome.cancelStt();
     micRef.current?.cancel();
     setListening(false);
     setCaption(s.closeLine);
@@ -230,14 +230,14 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
       stopSpeechRef.current();
       setScreen("debrief");
     }, 9000);
-  }, [deliverSpeak, klleon]);
+  }, [deliverSpeak, holome]);
   useEffect(() => {
     endSessionRef.current = endSession;
   }, [endSession]);
 
-  // Klleon chat events — the turn loop entry point.
+  // HoloMe chat events — the turn loop entry point.
   useEffect(() => {
-    const unsub = klleon.onChat((data: KlleonChatData) => {
+    const unsub = holome.onChat((data: HoloMeChatData) => {
       const type = data.chat_type || "";
       const msg = data.message || "";
       if (type === "STT_RESULT") {
@@ -256,7 +256,7 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
       }
     });
     return unsub;
-  }, [klleon]);
+  }, [holome]);
 
   const startSessionTimer = useCallback(() => {
     if (timerStartedRef.current) return;
@@ -363,7 +363,7 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
       setSecs(SESSION_SECONDS);
       setScreen("session");
       unlockAudioRef.current();
-      await klleon.waitUntilReady(6000);
+      await holome.waitUntilReady(6000);
       setCaption(started.greeting);
       deliverSpeak(started.greeting);
       startSessionTimer();
@@ -372,7 +372,7 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
     } finally {
       setBusy(false);
     }
-  }, [appointment, deliverSpeak, klleon, startSessionTimer]);
+  }, [appointment, deliverSpeak, holome, startSessionTimer]);
 
   // Lobby countdown → auto start.
   useEffect(() => {
@@ -433,13 +433,13 @@ export function CoachApp({ sdkKey }: { sdkKey: string }) {
       <div className={styles.phone}>
         <div className={styles.scene}>
           <avatar-container
-            ref={klleon.avatarRef as React.RefObject<HTMLElement>}
-            className={`${styles.avatar}${klleon.ready ? ` ${styles.ready}` : ""}`}
+            ref={holome.avatarRef as React.RefObject<HTMLElement>}
+            className={`${styles.avatar}${holome.ready ? ` ${styles.ready}` : ""}`}
           />
         </div>
         {!inSession ? <div className={styles.veil} /> : null}
-        {klleon.error && inSession ? (
-          <div className={styles.klleonErr}>{klleon.error}</div>
+        {holome.error && inSession ? (
+          <div className={styles.holomeErr}>{holome.error}</div>
         ) : null}
 
         {/* Landing */}

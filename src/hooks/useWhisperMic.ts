@@ -5,9 +5,9 @@ import { useCallback, useRef, useState } from "react";
 /**
  * Capture one spoken advisor turn and transcribe it with Whisper.
  *
- * Klleon's built-in STT is tuned for its own conversational loop; here the
+ * HoloMe's built-in STT is tuned for its own conversational loop; here the
  * transcript is scored evidence, so it goes through Whisper with the session
- * language pinned server-side. Klleon remains the voice OUT (the avatar speaks
+ * language pinned server-side. HoloMe remains the voice OUT (the avatar speaks
  * the approved pack); Whisper is the ear.
  *
  * Push-to-talk rather than voice-activity detection: an advisor practising a

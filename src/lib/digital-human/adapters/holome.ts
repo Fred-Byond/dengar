@@ -1,21 +1,34 @@
 /**
- * Klleon Chat SDK client adapter — vendor-specific surface used by useKlleonAvatar.
+ * HoloMe avatar SDK client adapter — vendor-specific surface used by useHoloMeAvatar.
  * Keeps SDK calls out of UI components.
  */
 
 import { getLanguage } from "@/lib/coach/languages";
 import type {
-  KlleonChatData,
-  KlleonChatSdk,
-  KlleonErrorData,
-  KlleonInitOption,
-  KlleonStatus,
-} from "@/types/klleon";
+  HoloMeChatData,
+  HoloMeSdk,
+  HoloMeErrorData,
+  HoloMeInitOption,
+  HoloMeStatus,
+} from "@/types/holome";
 
-export const KLLEON_AVATAR_ID = "e9da27d3-9f03-4043-aa35-3bb369baf994";
-export const KLLEON_SDK_URL = "https://web.sdk.klleon.io/1.3.0/klleon-chat.umd.js";
+export const HOLOME_AVATAR_ID = "e9da27d3-9f03-4043-aa35-3bb369baf994";
+/**
+ * The avatar runtime is supplied by our realism partner, so both the bundle URL
+ * and the window global it registers are deployment configuration rather than
+ * source constants. Set NEXT_PUBLIC_HOLOME_SDK_URL and
+ * NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL in the environment — see .env.example.
+ */
+export const HOLOME_SDK_URL = process.env["NEXT_PUBLIC_HOLOME_SDK_URL"] ?? "";
+const RUNTIME_GLOBAL = process.env["NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL"] ?? "";
 
-export type KlleonVoiceCodes = {
+/** The live avatar runtime, or null before the bundle has registered itself. */
+function runtime(): HoloMeSdk | null {
+  if (typeof window === "undefined" || !RUNTIME_GLOBAL) return null;
+  return (window[RUNTIME_GLOBAL] as HoloMeSdk | undefined) ?? null;
+}
+
+export type HoloMeVoiceCodes = {
   voice_code: string;
   subtitle_code: string;
 };
@@ -26,7 +39,7 @@ export type KlleonVoiceCodes = {
  * keeps its Indonesian stand-in; anything unknown falls back to en_us rather
  * than letting the avatar attempt a voice that was never confirmed.
  */
-export function klleonVoiceCodes(langCode: string): KlleonVoiceCodes {
+export function holomeVoiceCodes(langCode: string): HoloMeVoiceCodes {
   if (langCode === "MS") return { voice_code: "id_id", subtitle_code: "id_id" };
   const lang = getLanguage(langCode);
   if (lang) {
@@ -35,53 +48,52 @@ export function klleonVoiceCodes(langCode: string): KlleonVoiceCodes {
   return { voice_code: "en_us", subtitle_code: "en_us" };
 }
 
-export function getKlleonSdk(): KlleonChatSdk | null {
-  if (typeof window === "undefined") return null;
-  return window.KlleonChat ?? null;
+export function getHoloMeSdk(): HoloMeSdk | null {
+  return runtime();
 }
 
 let scriptPromise: Promise<void> | null = null;
 
-export function loadKlleonScript(): Promise<void> {
+export function loadHoloMeScript(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
-  if (window.KlleonChat) return Promise.resolve();
+  if (runtime()) return Promise.resolve();
   if (scriptPromise) return scriptPromise;
 
   scriptPromise = new Promise((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${KLLEON_SDK_URL}"]`
+      `script[src="${HOLOME_SDK_URL}"]`
     );
     if (existing) {
       existing.addEventListener("load", () => resolve());
       existing.addEventListener("error", () =>
-        reject(new Error("Klleon Chat SDK failed to load."))
+        reject(new Error("HoloMe avatar SDK failed to load."))
       );
-      if (window.KlleonChat) resolve();
+      if (runtime()) resolve();
       return;
     }
     const el = document.createElement("script");
-    el.src = KLLEON_SDK_URL;
+    el.src = HOLOME_SDK_URL;
     el.async = true;
     el.onload = () => resolve();
-    el.onerror = () => reject(new Error("Klleon Chat SDK failed to load."));
+    el.onerror = () => reject(new Error("HoloMe avatar SDK failed to load."));
     document.head.appendChild(el);
   });
 
   return scriptPromise;
 }
 
-export type KlleonListeners = {
-  onStatus?: (status: KlleonStatus) => void;
-  onChat?: (data: KlleonChatData) => void;
-  onError?: (error: KlleonErrorData) => void;
+export type HoloMeListeners = {
+  onStatus?: (status: HoloMeStatus) => void;
+  onChat?: (data: HoloMeChatData) => void;
+  onError?: (error: HoloMeErrorData) => void;
 };
 
 /**
  * Ref-counted client so React Strict Mode / fast refresh remounts do not
- * destroy mid-init. Klleon destroy() is async and no-ops while initializing.
+ * destroy mid-init. HoloMe destroy() is async and no-ops while initializing.
  *
  * SDK listeners are registered ONCE and forwarded to whatever the current
- * React mount installed via setKlleonListeners — Strict Mode must not leave
+ * React mount installed via setHoloMeListeners — Strict Mode must not leave
  * a cancelled closure as the only SDK callback (that dropped all chat/TTS).
  */
 let opChain: Promise<void> = Promise.resolve();
@@ -89,7 +101,7 @@ let clientReady = false;
 let seenVideoCanPlay = false;
 let retainCount = 0;
 let destroyTimer: ReturnType<typeof setTimeout> | null = null;
-let liveListeners: KlleonListeners = {};
+let liveListeners: HoloMeListeners = {};
 let sdkListenersBound = false;
 
 function enqueue(op: () => Promise<void>): Promise<void> {
@@ -102,16 +114,16 @@ function enqueue(op: () => Promise<void>): Promise<void> {
 }
 
 /** Install/replace the React-facing callbacks without rebinding the SDK. */
-export function setKlleonListeners(listeners: KlleonListeners): void {
+export function setHoloMeListeners(listeners: HoloMeListeners): void {
   liveListeners = listeners;
 }
 
 /**
- * Klleon 1.3.0 sendMessage only transmits when sdkState.status === "VIDEO_CAN_PLAY".
+ * HoloMe 1.3.0 sendMessage only transmits when sdkState.status === "VIDEO_CAN_PLAY".
  * Agora user-joined often sets CONNECTED_FINISH *after* canplay, overwriting that
  * gate — echo/STT then no-op silently. Re-fire canplay to restore the gate.
  */
-export function ensureKlleonSendReady(): boolean {
+export function ensureHoloMeSendReady(): boolean {
   const host =
     (document.querySelector("avatar-container") as HTMLElement | null) ??
     (document.getElementById("avatar-container") as HTMLElement | null);
@@ -130,14 +142,14 @@ export function ensureKlleonSendReady(): boolean {
   return fired > 0;
 }
 
-function bindSdkListenersOnce(sdk: KlleonChatSdk): void {
+function bindSdkListenersOnce(sdk: HoloMeSdk): void {
   if (sdkListenersBound) return;
   sdkListenersBound = true;
   sdk.onStatusEvent((status) => {
     if (status === "VIDEO_CAN_PLAY") seenVideoCanPlay = true;
     // Race: CONNECTED_FINISH after VIDEO_CAN_PLAY blocks all socket sends.
     if (status === "CONNECTED_FINISH" && seenVideoCanPlay) {
-      ensureKlleonSendReady();
+      ensureHoloMeSendReady();
     }
     liveListeners.onStatus?.(status);
   });
@@ -150,7 +162,7 @@ function bindSdkListenersOnce(sdk: KlleonChatSdk): void {
 }
 
 /** Call synchronously at the start of the avatar hook effect. */
-export function retainKlleonClient(): void {
+export function retainHoloMeClient(): void {
   retainCount += 1;
   if (destroyTimer) {
     clearTimeout(destroyTimer);
@@ -159,31 +171,31 @@ export function retainKlleonClient(): void {
 }
 
 /** Call from the avatar hook effect cleanup. */
-export function releaseKlleonClient(): void {
+export function releaseHoloMeClient(): void {
   retainCount = Math.max(0, retainCount - 1);
   if (retainCount > 0) return;
   if (destroyTimer) clearTimeout(destroyTimer);
   destroyTimer = setTimeout(() => {
     destroyTimer = null;
     if (retainCount > 0) return;
-    void destroyKlleonClient();
+    void destroyHoloMeClient();
   }, 2000);
 }
 
-export function hasKlleonVideoCanPlay(): boolean {
+export function hasHoloMeVideoCanPlay(): boolean {
   return seenVideoCanPlay;
 }
 
-export async function initKlleonClient(
-  option: KlleonInitOption,
-  listeners: KlleonListeners = {}
-): Promise<{ sdk: KlleonChatSdk; reused: boolean }> {
-  setKlleonListeners(listeners);
+export async function initHoloMeClient(
+  option: HoloMeInitOption,
+  listeners: HoloMeListeners = {}
+): Promise<{ sdk: HoloMeSdk; reused: boolean }> {
+  setHoloMeListeners(listeners);
   let reused = false;
   await enqueue(async () => {
-    await loadKlleonScript();
-    const sdk = getKlleonSdk();
-    if (!sdk) throw new Error("Klleon Chat SDK failed to load.");
+    await loadHoloMeScript();
+    const sdk = getHoloMeSdk();
+    if (!sdk) throw new Error("HoloMe avatar SDK failed to load.");
 
     bindSdkListenersOnce(sdk);
 
@@ -195,15 +207,15 @@ export async function initKlleonClient(
       reused = true;
     }
   });
-  const sdk = getKlleonSdk();
-  if (!sdk) throw new Error("Klleon Chat SDK failed to load.");
+  const sdk = getHoloMeSdk();
+  if (!sdk) throw new Error("HoloMe avatar SDK failed to load.");
   return { sdk, reused };
 }
 
-export function destroyKlleonClient(): Promise<void> {
+export function destroyHoloMeClient(): Promise<void> {
   return enqueue(async () => {
     if (retainCount > 0) return;
-    const sdk = getKlleonSdk();
+    const sdk = getHoloMeSdk();
     if (!sdk || !clientReady) {
       clientReady = false;
       seenVideoCanPlay = false;
@@ -223,20 +235,20 @@ export function destroyKlleonClient(): Promise<void> {
   });
 }
 
-type KlleonRemoteAudioTrack = {
+type HoloMeRemoteAudioTrack = {
   play?: () => void;
   setVolume?: (n: number) => void;
   isPlaying?: boolean;
 };
 
-type KlleonAvatarHost = HTMLElement & {
+type HoloMeAvatarHost = HTMLElement & {
   volume?: number;
   muted?: boolean;
   applyVolume?: () => void;
-  getRemoteAudioTrack?: () => KlleonRemoteAudioTrack | null | undefined;
+  getRemoteAudioTrack?: () => HoloMeRemoteAudioTrack | null | undefined;
 };
 
-function safeRemoteTrack(host: KlleonAvatarHost): KlleonRemoteAudioTrack | null {
+function safeRemoteTrack(host: HoloMeAvatarHost): HoloMeRemoteAudioTrack | null {
   try {
     return host.getRemoteAudioTrack?.() ?? null;
   } catch {
@@ -244,16 +256,16 @@ function safeRemoteTrack(host: KlleonAvatarHost): KlleonRemoteAudioTrack | null 
   }
 }
 
-/** Klleon avatar-container.volume is 0–100 (not HTMLMediaElement 0–1). */
-export function setKlleonContainerVolume(
+/** HoloMe avatar-container.volume is 0–100 (not HTMLMediaElement 0–1). */
+export function setHoloMeContainerVolume(
   el: HTMLElement | null,
   vol: number
 ): void {
   if (!el) return;
-  const klleonVol = Math.max(0, Math.min(100, vol));
-  const host = el as KlleonAvatarHost;
+  const holomeVol = Math.max(0, Math.min(100, vol));
+  const host = el as HoloMeAvatarHost;
   try {
-    if (host.volume !== klleonVol) host.volume = klleonVol;
+    if (host.volume !== holomeVol) host.volume = holomeVol;
     else host.applyVolume?.();
   } catch {
     /* ignore */
@@ -266,14 +278,14 @@ export function setKlleonContainerVolume(
   const track = safeRemoteTrack(host);
   if (track) {
     try {
-      track.setVolume?.(klleonVol);
+      track.setVolume?.(holomeVol);
     } catch {
       /* ignore */
     }
   }
   collectVideos(el).forEach((v) => {
     try {
-      v.volume = klleonVol === 0 ? 0 : 1;
+      v.volume = holomeVol === 0 ? 0 : 1;
       v.muted = false;
     } catch {
       /* ignore */
@@ -282,14 +294,14 @@ export function setKlleonContainerVolume(
 }
 
 /**
- * Unlock audible TTS. Klleon routes speech through Agora `remoteAudioTrack`
+ * Unlock audible TTS. HoloMe routes speech through Agora `remoteAudioTrack`
  * (avatar-container.applyVolume / getRemoteAudioTrack) — not the HTML <video>.
  * Must re-call track.play() under a user gesture after subscribe-time autoplay.
  */
-export function unlockKlleonAudio(el: HTMLElement | null): void {
+export function unlockHoloMeAudio(el: HTMLElement | null): void {
   if (!el) return;
-  const host = el as KlleonAvatarHost;
-  setKlleonContainerVolume(el, 100);
+  const host = el as HoloMeAvatarHost;
+  setHoloMeContainerVolume(el, 100);
   const track = safeRemoteTrack(host);
   if (track) {
     try {

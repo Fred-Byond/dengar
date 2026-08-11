@@ -7,20 +7,24 @@ on:
     branches: [main]
 
 # Repo secret (optional for CI; required for avatar in deploy):
-#   NEXT_PUBLIC_KLLEON_SDK_KEY
+#   NEXT_PUBLIC_HOLOME_SDK_KEY
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Write .env (Klleon)
+      - name: Write .env (HoloMe)
         env:
-          NEXT_PUBLIC_KLLEON_SDK_KEY: ${{ secrets.NEXT_PUBLIC_KLLEON_SDK_KEY }}
+          NEXT_PUBLIC_HOLOME_SDK_KEY: ${{ secrets.NEXT_PUBLIC_HOLOME_SDK_KEY }}
+          NEXT_PUBLIC_HOLOME_SDK_URL: ${{ secrets.NEXT_PUBLIC_HOLOME_SDK_URL }}
+          NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL: ${{ secrets.NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL }}
         run: |
           printf '%s\n' \
-            "KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
-            "NEXT_PUBLIC_KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
+            "HOLOME_SDK_KEY=${NEXT_PUBLIC_HOLOME_SDK_KEY}" \
+            "NEXT_PUBLIC_HOLOME_SDK_KEY=${NEXT_PUBLIC_HOLOME_SDK_KEY}" \
+            "NEXT_PUBLIC_HOLOME_SDK_URL=${NEXT_PUBLIC_HOLOME_SDK_URL}" \
+            "NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL=${NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL}" \
             'PORT=8081' > .env
 
       - uses: actions/setup-node@v4

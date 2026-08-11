@@ -127,11 +127,11 @@ host nginx.
 - **Deploy** (`.github/workflows/deploy.yml`) — on push to `main` (and manual **Run workflow**): SSH + `docker compose up -d --build`.
 
 Set these repository secrets for deploy: `DEPLOY_HOST`, `DEPLOY_USER`,
-`DEPLOY_SSH_KEY`, `DEPLOY_PATH`, `NEXT_PUBLIC_KLLEON_SDK_KEY` (and optionally `DEPLOY_PORT`).
+`DEPLOY_SSH_KEY`, `DEPLOY_PATH`, `NEXT_PUBLIC_HOLOME_SDK_KEY` (and optionally `DEPLOY_PORT`).
 
-Both workflows write a `.env` with your `NEXT_PUBLIC_KLLEON_SDK_KEY` secret mapped to
-both `KLLEON_SDK_KEY` and `NEXT_PUBLIC_KLLEON_SDK_KEY` (deploy writes it on the server
-before `docker compose up`). Production reads `KLLEON_SDK_KEY` at **runtime** — Next
+Both workflows write a `.env` with your `NEXT_PUBLIC_HOLOME_SDK_KEY` secret mapped to
+both `HOLOME_SDK_KEY` and `NEXT_PUBLIC_HOLOME_SDK_KEY` (deploy writes it on the server
+before `docker compose up`). Production reads `HOLOME_SDK_KEY` at **runtime** — Next
 inlines `NEXT_PUBLIC_*` at image build time, so a compose `.env` alone was not enough.
 
 ---

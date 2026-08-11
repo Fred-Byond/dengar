@@ -15,11 +15,11 @@ export const dynamic = "force-dynamic";
  * The frozen HTML prototype remains at /prototypes/dengar-citizen.html for reference.
  */
 export default function ExperiencePage() {
-  // Prefer KLLEON_SDK_KEY (not inlined). Fall back to bracket access so a
+  // Prefer HOLOME_SDK_KEY (not inlined). Fall back to bracket access so a
   // runtime NEXT_PUBLIC_* from compose .env still works after image build.
   const sdkKey =
-    process.env.KLLEON_SDK_KEY ||
-    process.env["NEXT_PUBLIC_KLLEON_SDK_KEY"] ||
+    process.env.HOLOME_SDK_KEY ||
+    process.env["NEXT_PUBLIC_HOLOME_SDK_KEY"] ||
     "";
   return <ExperienceClient sdkKey={sdkKey} />;
 }

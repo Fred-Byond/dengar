@@ -1,6 +1,6 @@
-/** Klleon Chat SDK ambient types (UMD global). */
+/** HoloMe avatar SDK ambient types (UMD global). */
 
-export type KlleonStatus =
+export type HoloMeStatus =
   | "IDLE"
   | "CONNECTING"
   | "CONNECTING_FAILED"
@@ -14,7 +14,7 @@ export type KlleonStatus =
   | "DESTROYED"
   | string;
 
-export type KlleonChatType =
+export type HoloMeChatType =
   | "ACTIVATE_VOICE"
   | "STT_RESULT"
   | "STT_ERROR"
@@ -25,19 +25,19 @@ export type KlleonChatType =
   | "USER_SPEECH_STOPPED"
   | string;
 
-export interface KlleonChatData {
+export interface HoloMeChatData {
   message?: string;
-  chat_type?: KlleonChatType;
+  chat_type?: HoloMeChatType;
   time?: string;
   id?: string;
 }
 
-export interface KlleonErrorData {
+export interface HoloMeErrorData {
   code?: string;
   message?: string;
 }
 
-export interface KlleonInitOption {
+export interface HoloMeInitOption {
   sdk_key: string;
   avatar_id: string;
   voice_code?: string;
@@ -49,12 +49,12 @@ export interface KlleonInitOption {
   user_key?: string;
 }
 
-export interface KlleonChatSdk {
-  init: (option: KlleonInitOption) => Promise<void>;
+export interface HoloMeSdk {
+  init: (option: HoloMeInitOption) => Promise<void>;
   destroy: () => void;
-  onStatusEvent: (cb: (status: KlleonStatus) => void) => void;
-  onChatEvent: (cb: (data: KlleonChatData) => void) => void;
-  onErrorEvent: (cb: (error: KlleonErrorData) => void) => void;
+  onStatusEvent: (cb: (status: HoloMeStatus) => void) => void;
+  onChatEvent: (cb: (data: HoloMeChatData) => void) => void;
+  onErrorEvent: (cb: (error: HoloMeErrorData) => void) => void;
   sendTextMessage: (message: string) => void;
   startStt: () => void;
   endStt: () => void;
@@ -65,8 +65,13 @@ export interface KlleonChatSdk {
 }
 
 declare global {
+  /**
+   * The avatar runtime attaches itself to a window global whose name is set by
+   * the vendor UMD bundle, so it is read by key at runtime rather than named
+   * here. Configure it via NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL.
+   */
   interface Window {
-    KlleonChat?: KlleonChatSdk;
+    [avatarRuntimeGlobal: string]: unknown;
   }
 
   namespace JSX {

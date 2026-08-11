@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DENGAR.ai — Bercakap dengan Menteri</title>
-<script src="https://web.sdk.klleon.io/1.3.0/klleon-chat.umd.js"></script>
+<script src="https://web.sdk.holome.io/1.3.0/holome-avatar.umd.js"></script>
 <style>
 :root{
   --wood-d:#3E2617; --wood-m:#6E4226; --wood-l:#A9713F;
@@ -31,13 +31,13 @@ body{
   #phone{height:92vh;border-radius:38px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 10px #26262b}
 }
 #scene{position:absolute;inset:0;z-index:0;overflow:hidden;background:#1a1410}
-#klleonAvatar{
+#holomeAvatar{
   position:absolute;inset:32px 0 0 0;width:100%;height:auto;
   z-index:1;overflow:hidden;pointer-events:none;
   border-radius:0;
 }
-#klleonAvatar.ready{opacity:1}
-#klleonErr{
+#holomeAvatar.ready{opacity:1}
+#holomeErr{
   position:absolute;left:16px;right:16px;bottom:120px;z-index:9;
   background:rgba(228,0,43,.92);color:#fff;font-size:12px;font-weight:600;
   padding:10px 12px;border-radius:10px;display:none;text-align:center;
@@ -214,12 +214,12 @@ input.f:focus,select.f:focus{border-color:var(--navy)}
     <button id="tglEn" onclick="setUiLang('en')">EN</button>
   </div></div>
 
-  <!-- ===== Klleon avatar scene (full-bleed) ===== -->
+  <!-- ===== HoloMe avatar scene (full-bleed) ===== -->
   <div id="scene">
-    <avatar-container id="klleonAvatar"></avatar-container>
+    <avatar-container id="holomeAvatar"></avatar-container>
   </div>
   <div id="veil"></div>
-  <div id="klleonErr"></div>
+  <div id="holomeErr"></div>
 
   <!-- ================= LANDING ================= -->
   <section class="screen active" id="s-landing">
@@ -787,26 +787,26 @@ const M={
  }
 };
 
-/* ===================== KLLEON AVATAR ===================== */
-const KLLEON_AVATAR_ID='e9da27d3-9f03-4043-aa35-3bb369baf994';
-const KLLEON={ready:false,recording:false,inSession:false,pendingEcho:null,echoAfter:null,expectScriptReply:false,scriptReply:null,scriptTimer:null,audioUnlocked:false,lastEchoToken:0};
+/* ===================== HOLOME AVATAR ===================== */
+const HOLOME_AVATAR_ID='e9da27d3-9f03-4043-aa35-3bb369baf994';
+const HOLOME={ready:false,recording:false,inSession:false,pendingEcho:null,echoAfter:null,expectScriptReply:false,scriptReply:null,scriptTimer:null,audioUnlocked:false,lastEchoToken:0};
 
-function klleonVoiceCodes(langCode){
+function holomeVoiceCodes(langCode){
   if(langCode==='MS')return{voice_code:'id_id',subtitle_code:'id_id'};
   return{voice_code:'en_us',subtitle_code:'en_us'};
 }
-function showKlleonErr(msg){
-  const el=document.getElementById('klleonErr');
+function showHoloMeErr(msg){
+  const el=document.getElementById('holomeErr');
   if(!el)return;
   el.textContent=msg; el.style.display='block';
 }
-function hideKlleonErr(){
-  const el=document.getElementById('klleonErr');
+function hideHoloMeErr(){
+  const el=document.getElementById('holomeErr');
   if(el)el.style.display='none';
 }
 function collectAvatarVideos(){
   const videos=[];
-  const root=document.getElementById('klleonAvatar');
+  const root=document.getElementById('holomeAvatar');
   if(root){
     if(root.tagName==='VIDEO')videos.push(root);
     root.querySelectorAll&&root.querySelectorAll('video').forEach(v=>videos.push(v));
@@ -816,13 +816,13 @@ function collectAvatarVideos(){
   return videos;
 }
 function setAvatarVolume(vol){
-  /* Klleon <avatar-container>.volume is 0–100. Never park at 0 after stream is up —
+  /* HoloMe <avatar-container>.volume is 0–100. Never park at 0 after stream is up —
      Agora remote audio often stays silent after 0→100. */
   const want=Math.max(0,Math.min(100,Number(vol)||0));
-  const klleonVol=(KLLEON.ready||KLLEON.inSession)?Math.max(want,100):want;
-  const el=document.getElementById('klleonAvatar');
+  const holomeVol=(HOLOME.ready||HOLOME.inSession)?Math.max(want,100):want;
+  const el=document.getElementById('holomeAvatar');
   if(el){
-    try{el.volume=klleonVol;}catch(e){}
+    try{el.volume=holomeVol;}catch(e){}
     try{el.muted=false;}catch(e){}
   }
   const videos=collectAvatarVideos();
@@ -836,7 +836,7 @@ function setAvatarVolume(vol){
   });
 }
 function ensureAvatarAudio(){
-  const el=document.getElementById('klleonAvatar');
+  const el=document.getElementById('holomeAvatar');
   if(el){
     try{el.volume=100;}catch(e){}
     try{el.muted=false;}catch(e){}
@@ -852,7 +852,7 @@ function ensureAvatarAudio(){
       states.push({muted:v.muted,volume:v.volume,paused:v.paused});
     }catch(e){states.push({err:String(e)});}
   });
-  KLLEON.audioUnlocked=true;
+  HOLOME.audioUnlocked=true;
 }
 function markMicReady(){
   const item=document.getElementById('micCheck');
@@ -869,30 +869,30 @@ function setCaption(text){
 }
 function speak(text,after){
   setCaption(text);
-  KLLEON.echoAfter=after||null;
+  HOLOME.echoAfter=after||null;
   ensureAvatarAudio();
-  if(!window.KlleonChat||!KLLEON.ready){
-    KLLEON.pendingEcho=text;
+  if(!window.HoloMeChat||!HOLOME.ready){
+    HOLOME.pendingEcho=text;
     if(after)setTimeout(after,2200);
     return;
   }
   try{
     /* Do not stopSpeech() immediately before echo — it can cancel the new TTS. */
     const echoToken=Date.now();
-    KLLEON.lastEchoToken=echoToken;
-    window.KlleonChat.echo(text);
+    HOLOME.lastEchoToken=echoToken;
+    window.HoloMeChat.echo(text);
     setTimeout(()=>{
-      if(KLLEON.lastEchoToken!==echoToken)return;
+      if(HOLOME.lastEchoToken!==echoToken)return;
     },3000);
   }catch(e){
-    console.warn('Klleon echo failed',e);
+    console.warn('HoloMe echo failed',e);
     if(after)setTimeout(after,1500);
   }
 }
 function flushPendingEcho(){
-  if(!KLLEON.pendingEcho||!KLLEON.ready)return;
-  const text=KLLEON.pendingEcho; KLLEON.pendingEcho=null;
-  try{window.KlleonChat.echo(text);}catch(e){console.warn(e);}
+  if(!HOLOME.pendingEcho||!HOLOME.ready)return;
+  const text=HOLOME.pendingEcho; HOLOME.pendingEcho=null;
+  try{window.HoloMeChat.echo(text);}catch(e){console.warn(e);}
 }
 function setListening(on){
   S.listening=on;
@@ -902,21 +902,21 @@ function setListening(on){
 function toggleMic(){
   ensureAvatarAudio();
   if(S.closing)return;
-  if(!window.KlleonChat||!KLLEON.ready){showMicUnavailable();return;}
-  if(S.listening||KLLEON.recording){
-    try{window.KlleonChat.endStt();}catch(e){console.warn(e);}
-    KLLEON.recording=false;
+  if(!window.HoloMeChat||!HOLOME.ready){showMicUnavailable();return;}
+  if(S.listening||HOLOME.recording){
+    try{window.HoloMeChat.endStt();}catch(e){console.warn(e);}
+    HOLOME.recording=false;
     setListening(false);
     return;
   }
-  try{window.KlleonChat.stopSpeech();}catch(e){}
+  try{window.HoloMeChat.stopSpeech();}catch(e){}
   document.getElementById('youSaid').textContent='';
   try{
-    window.KlleonChat.startStt();
-    KLLEON.recording=true;
+    window.HoloMeChat.startStt();
+    HOLOME.recording=true;
     setListening(true);
   }catch(e){
-    console.warn('Klleon startStt failed',e);
+    console.warn('HoloMe startStt failed',e);
     showMicUnavailable();
   }
 }
@@ -931,29 +931,29 @@ function pickScriptReply(){
 }
 function queueScriptReply(){
   const reply=pickScriptReply();
-  KLLEON.expectScriptReply=true;
-  KLLEON.scriptReply=reply;
+  HOLOME.expectScriptReply=true;
+  HOLOME.scriptReply=reply;
   setCaption(reply);
-  clearTimeout(KLLEON.scriptTimer);
-  /* endStt() also triggers Klleon AI. Prefer preempting that PREPARING_RESPONSE;
+  clearTimeout(HOLOME.scriptTimer);
+  /* endStt() also triggers HoloMe AI. Prefer preempting that PREPARING_RESPONSE;
      if AI never starts, echo ourselves. Never stopSpeech after our own echo is in flight. */
-  KLLEON.scriptTimer=setTimeout(()=>{
-    if(!KLLEON.scriptReply)return;
-    const text=KLLEON.scriptReply;
-    KLLEON.scriptReply=null;
-    try{window.KlleonChat&&window.KlleonChat.stopSpeech();}catch(e){}
+  HOLOME.scriptTimer=setTimeout(()=>{
+    if(!HOLOME.scriptReply)return;
+    const text=HOLOME.scriptReply;
+    HOLOME.scriptReply=null;
+    try{window.HoloMeChat&&window.HoloMeChat.stopSpeech();}catch(e){}
     speak(text);
   },700);
 }
 function noteUserUtterance(txt){
   setListening(false);
-  KLLEON.recording=false;
+  HOLOME.recording=false;
   if(S.closing)return;
   if(txt&&txt.trim()&&!S.saidText)S.saidText=txt.trim();
   queueScriptReply();
   S.stage++;
 }
-function handleKlleonChat(chatData){
+function handleHoloMeChat(chatData){
   const type=(chatData&&chatData.chat_type)||'';
   const msg=(chatData&&chatData.message)||'';
   if(type==='STT_RESULT'){
@@ -962,30 +962,30 @@ function handleKlleonChat(chatData){
       noteUserUtterance(msg);
     }
     setListening(false);
-    KLLEON.recording=false;
+    HOLOME.recording=false;
   } else if(type==='STT_ERROR'){
-    /* Klleon: mainly no voice data — not a broken mic. */
+    /* HoloMe: mainly no voice data — not a broken mic. */
     setListening(false);
-    KLLEON.recording=false;
+    HOLOME.recording=false;
     if(!S.closing)queueScriptReply();
   } else if(type==='PREPARING_RESPONSE'){
-    KLLEON.lastEchoToken=0;
+    HOLOME.lastEchoToken=0;
     /* Only preempt while a scripted line is still pending. If scriptReply is null,
        PREPARING_RESPONSE is for our own echo — do NOT stopSpeech (that killed TTS). */
-    if(KLLEON.expectScriptReply&&KLLEON.scriptReply){
-      const text=KLLEON.scriptReply;
-      KLLEON.scriptReply=null;
-      clearTimeout(KLLEON.scriptTimer);
-      try{window.KlleonChat.stopSpeech();}catch(e){}
+    if(HOLOME.expectScriptReply&&HOLOME.scriptReply){
+      const text=HOLOME.scriptReply;
+      HOLOME.scriptReply=null;
+      clearTimeout(HOLOME.scriptTimer);
+      try{window.HoloMeChat.stopSpeech();}catch(e){}
       ensureAvatarAudio();
-      try{window.KlleonChat.echo(text);}catch(e){console.warn(e);}
+      try{window.HoloMeChat.echo(text);}catch(e){console.warn(e);}
     }
   } else if(type==='TEXT'&&msg){
-    if(KLLEON.expectScriptReply)return;
+    if(HOLOME.expectScriptReply)return;
     setCaption(msg);
   } else if(type==='RESPONSE_IS_ENDED'){
-    if(KLLEON.expectScriptReply)KLLEON.expectScriptReply=false;
-    const cb=KLLEON.echoAfter; KLLEON.echoAfter=null;
+    if(HOLOME.expectScriptReply)HOLOME.expectScriptReply=false;
+    const cb=HOLOME.echoAfter; HOLOME.echoAfter=null;
     if(cb)cb();
   } else if(type==='USER_SPEECH_STARTED'){
     setListening(true);
@@ -993,9 +993,9 @@ function handleKlleonChat(chatData){
     /* waiting for STT_RESULT */
   }
 }
-async function initKlleon(){
+async function initHoloMe(){
   const sdkKey=new URLSearchParams(location.search).get('sdk_key')||'';
-  const avatar=document.getElementById('klleonAvatar');
+  const avatar=document.getElementById('holomeAvatar');
   if(avatar){
     avatar.videoStyle={
       objectFit:'cover',
@@ -1006,38 +1006,38 @@ async function initKlleon(){
     setAvatarVolume(100);
   }
   if(!sdkKey){
-    showKlleonErr('Missing Klleon SDK key. Open this page with ?sdk_key=... (same value as NEXT_PUBLIC_KLLEON_SDK_KEY for /experience).');
+    showHoloMeErr('Missing HoloMe SDK key. Open this page with ?sdk_key=... (same value as NEXT_PUBLIC_HOLOME_SDK_KEY for /experience).');
     return;
   }
-  if(!window.KlleonChat){
-    showKlleonErr('Klleon Chat SDK failed to load.');
+  if(!window.HoloMeChat){
+    showHoloMeErr('HoloMe avatar SDK failed to load.');
     return;
   }
-  const {KlleonChat}=window;
-  const codes=klleonVoiceCodes(S.lang.code);
-  KlleonChat.onStatusEvent((status)=>{
+  const {HoloMeChat}=window;
+  const codes=holomeVoiceCodes(S.lang.code);
+  HoloMeChat.onStatusEvent((status)=>{
     if(status==='VIDEO_CAN_PLAY'){
-      KLLEON.ready=true;
-      hideKlleonErr();
+      HOLOME.ready=true;
+      hideHoloMeErr();
       markMicReady();
       setAvatarVolume(100);
       ensureAvatarAudio();
       flushPendingEcho();
     } else if(status==='DESTROYED'){
-      KLLEON.ready=false;
+      HOLOME.ready=false;
     } else if(status==='CONNECTING_FAILED'||status==='SOCKET_FAILED'||status==='STREAMING_FAILED'){
-      showKlleonErr('Klleon connection failed ('+status+'). Check SDK key and domain registration.');
+      showHoloMeErr('HoloMe connection failed ('+status+'). Check SDK key and domain registration.');
     }
   });
-  KlleonChat.onChatEvent(handleKlleonChat);
-  KlleonChat.onErrorEvent((err)=>{
-    console.error('Klleon error',err);
-    if(err&&err.message)showKlleonErr(err.message);
+  HoloMeChat.onChatEvent(handleHoloMeChat);
+  HoloMeChat.onErrorEvent((err)=>{
+    console.error('HoloMe error',err);
+    if(err&&err.message)showHoloMeErr(err.message);
   });
   try{
-    await KlleonChat.init({
+    await HoloMeChat.init({
       sdk_key:sdkKey,
-      avatar_id:KLLEON_AVATAR_ID,
+      avatar_id:HOLOME_AVATAR_ID,
       voice_code:codes.voice_code,
       subtitle_code:codes.subtitle_code,
       enable_microphone:true,
@@ -1045,18 +1045,18 @@ async function initKlleon(){
     });
   }catch(e){
     console.error(e);
-    showKlleonErr('Klleon init failed: '+(e&&e.message?e.message:e));
+    showHoloMeErr('HoloMe init failed: '+(e&&e.message?e.message:e));
   }
 }
 window.addEventListener('pagehide',()=>{
-  try{if(window.KlleonChat)window.KlleonChat.destroy();}catch(e){}
+  try{if(window.HoloMeChat)window.HoloMeChat.destroy();}catch(e){}
 });
 
 /* ===================== SESSION FLOW ===================== */
 function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 function startSession(){
   go('s-session');
-  KLLEON.inSession=true;
+  HOLOME.inSession=true;
   setAvatarVolume(100);
   ensureAvatarAudio();
   S.stage=0; S.secs=300; S.wrapSaid=false; S.closing=false; S.saidText=""; S.voiceNo=null; closed=false;
@@ -1077,9 +1077,9 @@ function tick(){
 function fastForward(){if(!S.closing)S.secs=10;}
 function endSession(){
   S.closing=true; clearInterval(S.timerId);
-  if(KLLEON.recording){
-    try{window.KlleonChat&&window.KlleonChat.cancelStt();}catch(e){}
-    KLLEON.recording=false; setListening(false);
+  if(HOLOME.recording){
+    try{window.HoloMeChat&&window.HoloMeChat.cancelStt();}catch(e){}
+    HOLOME.recording=false; setListening(false);
   }
   const first=(S.name||'rakan').split(' ')[0];
   speak(M.close[S.lang.code](first),()=>setTimeout(showClosing,600));
@@ -1111,8 +1111,8 @@ function animateCounter(target){
 }
 function showClosing(){
   if(closed)return; closed=true;
-  try{window.KlleonChat&&window.KlleonChat.stopSpeech();}catch(e){}
-  KLLEON.inSession=false;
+  try{window.HoloMeChat&&window.HoloMeChat.stopSpeech();}catch(e){}
+  HOLOME.inSession=false;
   document.getElementById('closeName').textContent=(S.name||'rakan').split(' ')[0];
   document.getElementById('closeRef').textContent=S.ref||'TTM-2026-000000';
   document.getElementById('summaryText').innerHTML=buildSummary();
@@ -1128,7 +1128,7 @@ document.querySelectorAll('#stars span').forEach((s,i,arr)=>{
 });
 function restart(){
   closed=false; S.stage=0; S.time=null; S.day=null; S.saidText=""; S.voiceNo=null;
-  KLLEON.inSession=false; KLLEON.recording=false; KLLEON.echoAfter=null; KLLEON.pendingEcho=null;
+  HOLOME.inSession=false; HOLOME.recording=false; HOLOME.echoAfter=null; HOLOME.pendingEcho=null;
   document.querySelectorAll('.day,.slot').forEach(x=>x.classList.remove('sel'));
   document.getElementById('slotNext').disabled=true;
   document.querySelectorAll('#stars span').forEach(x=>x.classList.remove('on'));
@@ -1141,9 +1141,9 @@ renderLangGrid(document.getElementById('langGrid2'),()=>document.getElementById(
 applyI18n();
 syncLangUI();
 document.getElementById('phone').addEventListener('pointerdown',()=>{
-  if((KLLEON.inSession||KLLEON.ready)&&!KLLEON.audioUnlocked)ensureAvatarAudio();
+  if((HOLOME.inSession||HOLOME.ready)&&!HOLOME.audioUnlocked)ensureAvatarAudio();
 },{passive:true});
-initKlleon();
+initHoloMe();
 </script>
 </body>
 </html>

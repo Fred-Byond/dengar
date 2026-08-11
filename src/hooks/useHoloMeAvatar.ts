@@ -3,29 +3,30 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, RefObject } from "react";
 import {
-  ensureKlleonSendReady,
-  hasKlleonVideoCanPlay,
-  initKlleonClient,
-  KLLEON_AVATAR_ID,
-  klleonVoiceCodes,
-  releaseKlleonClient,
-  retainKlleonClient,
-  setKlleonContainerVolume,
-  setKlleonListeners,
-  unlockKlleonAudio,
-} from "@/lib/digital-human/adapters/klleon";
-import type { KlleonChatData, KlleonStatus } from "@/types/klleon";
+  ensureHoloMeSendReady,
+  getHoloMeSdk,
+  hasHoloMeVideoCanPlay,
+  initHoloMeClient,
+  HOLOME_AVATAR_ID,
+  holomeVoiceCodes,
+  releaseHoloMeClient,
+  retainHoloMeClient,
+  setHoloMeContainerVolume,
+  setHoloMeListeners,
+  unlockHoloMeAudio,
+} from "@/lib/digital-human/adapters/holome";
+import type { HoloMeChatData, HoloMeStatus } from "@/types/holome";
 
-export type UseKlleonAvatarOptions = {
+export type UseHoloMeAvatarOptions = {
   sdkKey: string;
   /** Session language code: MS | EN | ZH | TA | AR */
   langCode: string;
   enabled?: boolean;
-  /** Klleon avatar UUID; defaults to the original dengar avatar. */
+  /** HoloMe avatar UUID; defaults to the original dengar avatar. */
   avatarId?: string;
 };
 
-export type UseKlleonAvatarResult = {
+export type UseHoloMeAvatarResult = {
   ready: boolean;
   error: string | null;
   avatarRef: RefObject<HTMLElement | null>;
@@ -40,43 +41,43 @@ export type UseKlleonAvatarResult = {
   unlockAudio: () => void;
   setVolume: (vol: number) => void;
   /** Subscribe to STT / speech lifecycle for session UI. */
-  onChat: (handler: (data: KlleonChatData) => void) => () => void;
+  onChat: (handler: (data: HoloMeChatData) => void) => () => void;
 };
 
 /**
- * Client hook wrapping the Klleon Chat SDK.
+ * Client hook wrapping the HoloMe avatar SDK.
  * TTS audio is Agora remoteAudioTrack — unlockAudio() must run under a gesture.
  */
-export function useKlleonAvatar({
+export function useHoloMeAvatar({
   sdkKey,
   langCode,
   enabled = true,
-  avatarId = KLLEON_AVATAR_ID,
-}: UseKlleonAvatarOptions): UseKlleonAvatarResult {
+  avatarId = HOLOME_AVATAR_ID,
+}: UseHoloMeAvatarOptions): UseHoloMeAvatarResult {
   const avatarRef = useRef<HTMLElement | null>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const readyRef = useRef(false);
   const echoAfterRef = useRef<(() => void) | null>(null);
   const pendingEchoRef = useRef<string | null>(null);
-  const chatHandlersRef = useRef(new Set<(data: KlleonChatData) => void>());
+  const chatHandlersRef = useRef(new Set<(data: HoloMeChatData) => void>());
   readyRef.current = ready;
 
   const setVolume = useCallback((vol: number) => {
-    setKlleonContainerVolume(avatarRef.current, vol);
+    setHoloMeContainerVolume(avatarRef.current, vol);
   }, []);
 
   const unlockAudio = useCallback(() => {
-    unlockKlleonAudio(avatarRef.current);
+    unlockHoloMeAudio(avatarRef.current);
   }, []);
 
   const flushPending = useCallback(() => {
-    if (!pendingEchoRef.current || !window.KlleonChat) return;
+    if (!pendingEchoRef.current || !getHoloMeSdk()) return;
     const text = pendingEchoRef.current;
     pendingEchoRef.current = null;
     try {
-      ensureKlleonSendReady();
-      window.KlleonChat.echo(text);
+      ensureHoloMeSendReady();
+      getHoloMeSdk()!.echo(text);
     } catch {
       /* ignore */
     }
@@ -86,22 +87,22 @@ export function useKlleonAvatar({
     if (!enabled) return;
     if (!sdkKey) {
       setError(
-        "Missing Klleon SDK key. Set KLLEON_SDK_KEY (or NEXT_PUBLIC_KLLEON_SDK_KEY) in .env and restart."
+        "Missing HoloMe SDK key. Set HOLOME_SDK_KEY (or NEXT_PUBLIC_HOLOME_SDK_KEY) in .env and restart."
       );
       return;
     }
 
-    retainKlleonClient();
+    retainHoloMeClient();
     let alive = true;
-    const codes = klleonVoiceCodes(langCode);
+    const codes = holomeVoiceCodes(langCode);
 
-    const onStatus = (status: KlleonStatus) => {
+    const onStatus = (status: HoloMeStatus) => {
       if (!alive) return;
       if (status === "VIDEO_CAN_PLAY") {
         setReady(true);
         setError(null);
-        setKlleonContainerVolume(avatarRef.current, 100);
-        unlockKlleonAudio(avatarRef.current);
+        setHoloMeContainerVolume(avatarRef.current, 100);
+        unlockHoloMeAudio(avatarRef.current);
         flushPending();
       } else if (status === "DESTROYED") {
         setReady(false);
@@ -111,12 +112,12 @@ export function useKlleonAvatar({
         status === "STREAMING_FAILED"
       ) {
         setError(
-          `Klleon connection failed (${status}). Check SDK key and domain registration.`
+          `HoloMe connection failed (${status}). Check SDK key and domain registration.`
         );
       }
     };
 
-    const onChat = (data: KlleonChatData) => {
+    const onChat = (data: HoloMeChatData) => {
       if (!alive) return;
       if (data.chat_type === "RESPONSE_IS_ENDED") {
         const cb = echoAfterRef.current;
@@ -132,11 +133,11 @@ export function useKlleonAvatar({
     };
 
     // Install live listeners BEFORE any await so Strict Mode remount owns events.
-    setKlleonListeners({ onStatus, onChat, onError });
+    setHoloMeListeners({ onStatus, onChat, onError });
 
     (async () => {
       try {
-        await initKlleonClient(
+        await initHoloMeClient(
           {
             sdk_key: sdkKey,
             avatar_id: avatarId,
@@ -160,22 +161,22 @@ export function useKlleonAvatar({
             width: "100%",
             height: "100%",
           };
-          setKlleonContainerVolume(el, 100);
+          setHoloMeContainerVolume(el, 100);
         }
 
         // VIDEO_CAN_PLAY may have fired while the previous Strict Mode mount
         // was tearing down — recover ready from the module flag.
-        if (hasKlleonVideoCanPlay()) {
+        if (hasHoloMeVideoCanPlay()) {
           setReady(true);
           setError(null);
-          unlockKlleonAudio(avatarRef.current);
+          unlockHoloMeAudio(avatarRef.current);
           flushPending();
         }
 
       } catch (e) {
         if (alive) {
           setError(
-            `Klleon init failed: ${e instanceof Error ? e.message : String(e)}`
+            `HoloMe init failed: ${e instanceof Error ? e.message : String(e)}`
           );
         }
       }
@@ -183,7 +184,7 @@ export function useKlleonAvatar({
 
     return () => {
       alive = false;
-      releaseKlleonClient();
+      releaseHoloMeClient();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sdkKey, enabled, avatarId, flushPending]);
@@ -192,15 +193,15 @@ export function useKlleonAvatar({
     (text: string, after?: () => void) => {
       echoAfterRef.current = after ?? null;
       unlockAudio();
-      if (!window.KlleonChat || !ready) {
+      if (!getHoloMeSdk() || !ready) {
         pendingEchoRef.current = text;
         if (after) setTimeout(after, 2200);
         return;
       }
       try {
         // Restore VIDEO_CAN_PLAY gate — CONNECTED_FINISH otherwise drops echo.
-        ensureKlleonSendReady();
-        window.KlleonChat.echo(text);
+        ensureHoloMeSendReady();
+        getHoloMeSdk()!.echo(text);
       } catch {
         if (after) setTimeout(after, 1500);
       }
@@ -209,26 +210,26 @@ export function useKlleonAvatar({
   );
 
   const waitUntilReady = useCallback(async (timeoutMs = 4000) => {
-    if (readyRef.current || hasKlleonVideoCanPlay()) return true;
+    if (readyRef.current || hasHoloMeVideoCanPlay()) return true;
     const t0 = Date.now();
     while (Date.now() - t0 < timeoutMs) {
       await new Promise((r) => setTimeout(r, 100));
-      if (readyRef.current || hasKlleonVideoCanPlay()) return true;
+      if (readyRef.current || hasHoloMeVideoCanPlay()) return true;
     }
-    return readyRef.current || hasKlleonVideoCanPlay();
+    return readyRef.current || hasHoloMeVideoCanPlay();
   }, []);
 
   const startStt = useCallback(() => {
-    if (!window.KlleonChat) return false;
-    if (!readyRef.current && !hasKlleonVideoCanPlay()) return false;
+    if (!getHoloMeSdk()) return false;
+    if (!readyRef.current && !hasHoloMeVideoCanPlay()) return false;
     try {
-      ensureKlleonSendReady();
-      window.KlleonChat.stopSpeech();
+      ensureHoloMeSendReady();
+      getHoloMeSdk()!.stopSpeech();
     } catch {
       /* ignore */
     }
     try {
-      window.KlleonChat.startStt();
+      getHoloMeSdk()!.startStt();
       return true;
     } catch {
       return false;
@@ -237,7 +238,7 @@ export function useKlleonAvatar({
 
   const endStt = useCallback(() => {
     try {
-      window.KlleonChat?.endStt();
+      getHoloMeSdk()?.endStt();
     } catch {
       /* ignore */
     }
@@ -245,7 +246,7 @@ export function useKlleonAvatar({
 
   const cancelStt = useCallback(() => {
     try {
-      window.KlleonChat?.cancelStt();
+      getHoloMeSdk()?.cancelStt();
     } catch {
       /* ignore */
     }
@@ -253,13 +254,13 @@ export function useKlleonAvatar({
 
   const stopSpeech = useCallback(() => {
     try {
-      window.KlleonChat?.stopSpeech();
+      getHoloMeSdk()?.stopSpeech();
     } catch {
       /* ignore */
     }
   }, []);
 
-  const onChat = useCallback((handler: (data: KlleonChatData) => void) => {
+  const onChat = useCallback((handler: (data: HoloMeChatData) => void) => {
     chatHandlersRef.current.add(handler);
     return () => {
       chatHandlersRef.current.delete(handler);

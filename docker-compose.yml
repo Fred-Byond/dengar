@@ -14,8 +14,10 @@ services:
       PORT: "8081"
       HOSTNAME: "0.0.0.0"
       # Pass through from host .env so the standalone server sees them at runtime.
-      KLLEON_SDK_KEY: ${KLLEON_SDK_KEY:-}
-      NEXT_PUBLIC_KLLEON_SDK_KEY: ${NEXT_PUBLIC_KLLEON_SDK_KEY:-}
+      HOLOME_SDK_KEY: ${HOLOME_SDK_KEY:-}
+      NEXT_PUBLIC_HOLOME_SDK_KEY: ${NEXT_PUBLIC_HOLOME_SDK_KEY:-}
+      NEXT_PUBLIC_HOLOME_SDK_URL: ${NEXT_PUBLIC_HOLOME_SDK_URL:-}
+      NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL: ${NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL:-}
     restart: unless-stopped
     mem_limit: 512m
     cpus: 1.0

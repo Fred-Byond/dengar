@@ -7,14 +7,14 @@
  * for the coaching domain.
  */
 
-import { KLLEON_AVATAR_ID } from "@/lib/digital-human/adapters/klleon";
+import { HOLOME_AVATAR_ID } from "@/lib/digital-human/adapters/holome";
 import type { AdvisorContext, CoachingFocus, Product } from "./types";
 
 export interface CoachPersona {
   id: string;
   displayName: string;
   roleLine: string;
-  /** Klleon avatar UUID. Placeholder until the L'Oréal-approved avatar is provisioned. */
+  /** HoloMe avatar UUID. Placeholder until the L'Oréal-approved avatar is provisioned. */
   avatarId: string;
   guardrails: string[];
   /** Fixed lines spoken outside the LLM loop (greeting/wrap/close). */
@@ -34,7 +34,7 @@ export const BEAUTY_COACH_PERSONA: CoachPersona = {
   id: "loreal-beauty-coach-v1",
   displayName: "L'Oréal Beauty Coach",
   roleLine: "Your personal launch-readiness coach",
-  avatarId: KLLEON_AVATAR_ID,
+  avatarId: HOLOME_AVATAR_ID,
   guardrails: [
     "Answer ONLY from the launch knowledge pack provided. Never invent claims, percentages, ingredients, or prices.",
     "If asked something outside the pack, say you will flag it to the brand team and steer back to the launch material.",

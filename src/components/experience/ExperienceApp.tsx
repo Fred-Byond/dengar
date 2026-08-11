@@ -8,8 +8,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useKlleonAvatar } from "@/hooks/useKlleonAvatar";
-import type { KlleonChatData } from "@/types/klleon";
+import { useHoloMeAvatar } from "@/hooks/useHoloMeAvatar";
+import type { HoloMeChatData } from "@/types/holome";
 import { GEO, STATES } from "./geo";
 import { I18N, type UiLang } from "./i18n";
 import {
@@ -168,18 +168,18 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
   const t = I18N[uiLang];
   const veiled = VEILED_SCREENS.has(screen);
 
-  const klleon = useKlleonAvatar({
+  const holome = useHoloMeAvatar({
     sdkKey,
     langCode: sessionLang.code,
     enabled: true,
   });
 
-  const speakRef = useRef(klleon.speak);
-  const stopSpeechRef = useRef(klleon.stopSpeech);
-  const unlockAudioRef = useRef(klleon.unlockAudio);
-  speakRef.current = klleon.speak;
-  stopSpeechRef.current = klleon.stopSpeech;
-  unlockAudioRef.current = klleon.unlockAudio;
+  const speakRef = useRef(holome.speak);
+  const stopSpeechRef = useRef(holome.stopSpeech);
+  const unlockAudioRef = useRef(holome.unlockAudio);
+  speakRef.current = holome.speak;
+  stopSpeechRef.current = holome.stopSpeech;
+  unlockAudioRef.current = holome.unlockAudio;
   saidTextRef.current = saidText;
 
   const days: DayOption[] = useMemo(() => {
@@ -293,7 +293,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
   noteUserUtteranceRef.current = noteUserUtterance;
 
   useEffect(() => {
-    const unsub = klleon.onChat((data: KlleonChatData) => {
+    const unsub = holome.onChat((data: HoloMeChatData) => {
       const type = data.chat_type || "";
       const msg = data.message || "";
       if (type === "STT_RESULT") {
@@ -306,7 +306,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
         }
         setListening(false);
       } else if (type === "STT_ERROR") {
-        // Klleon fires STT_ERROR mainly when there is no voice data (e.g. stop
+        // HoloMe fires STT_ERROR mainly when there is no voice data (e.g. stop
         // without speaking) — not a broken mic. Keep the turn moving.
         setListening(false);
         if (!closingRef.current) queueScriptReplyRef.current();
@@ -338,7 +338,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
     return () => {
       unsub();
     };
-  }, [clearEchoAckWatch, deliverScriptSpeak, klleon.onChat]);
+  }, [clearEchoAckWatch, deliverScriptSpeak, holome.onChat]);
 
   const showClosing = useCallback(() => {
     if (closedRef.current) return;
@@ -382,14 +382,14 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
   const endSession = useCallback(() => {
     closingRef.current = true;
     if (timerRef.current) clearInterval(timerRef.current);
-    klleon.cancelStt();
+    holome.cancelStt();
     setListening(false);
     const first = (name || "rakan").split(" ")[0];
     speakRef.current(M.close[sessionLang.code](first), () => {
       setTimeout(showClosing, 600);
     });
     setTimeout(showClosing, 14000);
-  }, [klleon.cancelStt, name, sessionLang.code, showClosing]);
+  }, [holome.cancelStt, name, sessionLang.code, showClosing]);
 
   useEffect(() => {
     listeningRef.current = listening;
@@ -434,7 +434,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
       const hasGesture = !!opts?.hasUserGesture;
       go("session");
       unlockAudioRef.current();
-      klleon.setVolume(100);
+      holome.setVolume(100);
       stageRef.current = 0;
       setStage(0);
       setSecs(300);
@@ -462,7 +462,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
         setCaption(t.tapToHear);
       }
     },
-    [go, klleon.setVolume, speakGreeting, startSessionTimer, t.tapToHear]
+    [go, holome.setVolume, speakGreeting, startSessionTimer, t.tapToHear]
   );
 
   startSessionRef.current = startSession;
@@ -550,7 +550,7 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
       return;
     }
     if (listeningRef.current) {
-      klleon.endStt();
+      holome.endStt();
       setListening(false);
       return;
     }
@@ -560,14 +560,14 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
       setMicUnavailable(true);
       return;
     }
-    const avatarReady = await klleon.waitUntilReady();
+    const avatarReady = await holome.waitUntilReady();
     if (!avatarReady) {
       setMicUnavailable(true);
       return;
     }
     setYouSaid("");
     setMicUnavailable(false);
-    if (!klleon.startStt()) {
+    if (!holome.startStt()) {
       setMicUnavailable(true);
       return;
     }
@@ -672,13 +672,13 @@ export function ExperienceApp({ sdkKey }: ExperienceAppProps) {
 
         <div className={styles.scene}>
           <avatar-container
-            ref={klleon.avatarRef as React.RefObject<HTMLElement>}
-            className={`${styles.avatar}${klleon.ready ? ` ${styles.ready}` : ""}`}
+            ref={holome.avatarRef as React.RefObject<HTMLElement>}
+            className={`${styles.avatar}${holome.ready ? ` ${styles.ready}` : ""}`}
           />
         </div>
         <div className={styles.veil} />
-        {klleon.error ? (
-          <div className={styles.klleonErr}>{klleon.error}</div>
+        {holome.error ? (
+          <div className={styles.holomeErr}>{holome.error}</div>
         ) : null}
 
         {/* Landing */}

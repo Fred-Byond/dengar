@@ -16,7 +16,7 @@ and beauty advisors, built on the dengar chassis. Route: **`/coach`**.
    objection handling / routine building / price positioning), language.
 5. **Confirmed** → booking reference `LBC-2026-XXXXXX`.
 6. **Lobby** — mic check + launch pack preload.
-7. **Session** — live voice conversation with the Klleon avatar. Every advisor
+7. **Session** — live voice conversation with the HoloMe avatar. Every advisor
    utterance goes to the **governed conversation engine**
    (`src/lib/coach/engine.ts`): Claude answering ONLY from the versioned
    launch knowledge pack; deterministic pack-grounded fallback without an API
@@ -50,11 +50,11 @@ Distribution, Abu Dhabi) · `KL-BEAUTY-2026` (KL Beauty Network, Kuala Lumpur)
 
 See `.env.example`: `ANTHROPIC_API_KEY` (governed engine; optional),
 `COACH_MODEL`, `COACH_SESSION_SECRET`, `COACH_DB_PATH`, plus the existing
-Klleon variables.
+HoloMe variables.
 
 ## Deliberate Phase-1 limits
 
-- Session language is English only pending the Klleon voice-coverage test
+- Session language is English only pending the HoloMe voice-coverage test
   (current vendor mapping falls back to `en_us` for ZH/TA/AR).
 - Scoring is a deterministic heuristic with evidence quotes; the Week-5
   upgrade is an LLM judge on the same rubric (same seam, `readiness/scorer.ts`).

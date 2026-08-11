@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 
 export default function CoachPage() {
   const sdkKey =
-    process.env["KLLEON_SDK_KEY"] ||
-    process.env["NEXT_PUBLIC_KLLEON_SDK_KEY"] ||
+    process.env["HOLOME_SDK_KEY"] ||
+    process.env["NEXT_PUBLIC_HOLOME_SDK_KEY"] ||
     "";
   return <CoachClient sdkKey={sdkKey} />;
 }

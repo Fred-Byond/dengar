@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 # Repo secrets required:
-#   DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_PATH, NEXT_PUBLIC_KLLEON_SDK_KEY
+#   DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_PATH, NEXT_PUBLIC_HOLOME_SDK_KEY
 # Optional:
 #   DEPLOY_PORT (default 22)
 permissions:
@@ -114,7 +114,9 @@ jobs:
       - name: Pull image and restart on server
         uses: appleboy/ssh-action@v1.2.0
         env:
-          NEXT_PUBLIC_KLLEON_SDK_KEY: ${{ secrets.NEXT_PUBLIC_KLLEON_SDK_KEY }}
+          NEXT_PUBLIC_HOLOME_SDK_KEY: ${{ secrets.NEXT_PUBLIC_HOLOME_SDK_KEY }}
+          NEXT_PUBLIC_HOLOME_SDK_URL: ${{ secrets.NEXT_PUBLIC_HOLOME_SDK_URL }}
+          NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL: ${{ secrets.NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_USER: ${{ github.actor }}
           DENGAR_IMAGE: ${{ env.IMAGE }}
@@ -124,7 +126,7 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
           command_timeout: 15m
-          envs: NEXT_PUBLIC_KLLEON_SDK_KEY,GHCR_TOKEN,GHCR_USER,DENGAR_IMAGE
+          envs: NEXT_PUBLIC_HOLOME_SDK_KEY,NEXT_PUBLIC_HOLOME_SDK_URL,NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL,GHCR_TOKEN,GHCR_USER,DENGAR_IMAGE
           script: |
             set -e
             cd "${{ secrets.DEPLOY_PATH }}"
@@ -134,8 +136,10 @@ jobs:
 
             umask 077
             printf '%s\n' \
-              "KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
-              "NEXT_PUBLIC_KLLEON_SDK_KEY=${NEXT_PUBLIC_KLLEON_SDK_KEY}" \
+              "HOLOME_SDK_KEY=${NEXT_PUBLIC_HOLOME_SDK_KEY}" \
+              "NEXT_PUBLIC_HOLOME_SDK_KEY=${NEXT_PUBLIC_HOLOME_SDK_KEY}" \
+              "NEXT_PUBLIC_HOLOME_SDK_URL=${NEXT_PUBLIC_HOLOME_SDK_URL}" \
+              "NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL=${NEXT_PUBLIC_HOLOME_RUNTIME_GLOBAL}" \
               "DENGAR_IMAGE=${DENGAR_IMAGE}" \
               'PORT=8081' > .env
 

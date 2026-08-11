@@ -16,9 +16,9 @@ export interface SessionLanguage {
   nativeName: string;
   bcp47: string;
   rtl: boolean;
-  /** Klleon voice code — the avatar speaks the pack in this voice. */
+  /** HoloMe voice code — the avatar speaks the pack in this voice. */
   voiceCode: string;
-  /** Klleon subtitle code; usually the voice code. */
+  /** HoloMe subtitle code; usually the voice code. */
   subtitleCode: string;
   /**
    * ISO-639-1 hint passed to Whisper. Pinning it stops Whisper
