@@ -83,9 +83,10 @@ dengar/
 │           ├── seed.ts         Deterministic global conversation generator
 │           ├── pulse.ts        Global Pulse aggregation + Lionel's curation queue
 │           └── brief.ts        The Messi World Brief generator
-├── public/prototypes/          The two APPROVED prototypes, served verbatim
-│   ├── dengar-citizen.html
-│   └── national-pulse.html
+├── public/prototypes/          Self-contained demos, served verbatim
+│   ├── dengar-citizen.html     APPROVED DENGAR citizen prototype
+│   ├── national-pulse.html     APPROVED DENGAR dashboard prototype
+│   └── messi-live.html         MESSI.LIVE clickable prototype (one file, no server)
 └── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE
                                 · ROADMAP · MESSI-LIVE · FVIF
 ```
@@ -95,13 +96,16 @@ dengar/
 
 ### About the prototypes
 
-`public/prototypes/*` are the self-contained demos. `dengar-citizen.html` and
-`national-pulse.html` are the **approved** DENGAR prototypes; `messi-live.html` is the
-MESSI.LIVE clickable prototype — one file containing the fan journey, the Global Pulse and
-the World Brief, with the dashboard figures baked in from a run of the real FVIF engine. The app currently serves
-them verbatim at `/experience` and `/dashboard` so there is **zero visual regression** while
-the production React components are built out (see [ROADMAP](docs/ROADMAP.md)). They are the
-single source of truth for the visual identity and copy.
+`dengar-citizen.html` and `national-pulse.html` are the **approved** DENGAR prototypes. The
+app serves them verbatim at `/experience` and `/dashboard` so there is **zero visual
+regression** while the production React components are built out (see
+[ROADMAP](docs/ROADMAP.md)); they are the single source of truth for DENGAR's visual
+identity and copy.
+
+`messi-live.html` is the MESSI.LIVE clickable prototype: one file containing the full fan
+journey, the Global Pulse and the World Brief, with every dashboard figure baked in from a
+run of the real FVIF engine. It has no dependencies and makes no network requests, so it can
+be opened from disk, hosted anywhere, or emailed as a single attachment.
 
 ---
 
