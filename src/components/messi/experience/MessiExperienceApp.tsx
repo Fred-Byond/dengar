@@ -38,8 +38,21 @@ function fmt(secs: number) {
   );
 }
 
-/** MESSI.LIVE lockup: the ten-stripe "M" mark plus the wordmark. */
-function Brand({ territory }: { territory: string }) {
+/**
+ * MESSI.LIVE lockup. On the landing screen the right slot is the language
+ * chooser rather than the territory label — the digital human is the hero, so
+ * the only chrome over him is the brand and the one choice that changes the
+ * conversation.
+ */
+function Brand({
+  territory,
+  langLabel,
+  onPickLang,
+}: {
+  territory: string;
+  langLabel?: string;
+  onPickLang?: () => void;
+}) {
   return (
     <div className={styles.brand}>
       <div className={styles.wordmark}>
@@ -56,9 +69,15 @@ function Brand({ territory }: { territory: string }) {
           MESSI<span>.LIVE</span>
         </div>
       </div>
-      <div className={styles.market}>
-        <div className={styles.t}>{territory}</div>
-      </div>
+      {onPickLang ? (
+        <button type="button" className={styles.langPillTop} onClick={onPickLang}>
+          🌐 {langLabel} ▾
+        </button>
+      ) : (
+        <div className={styles.market}>
+          <div className={styles.t}>{territory}</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -697,13 +716,16 @@ export function MessiExperienceApp({ sdkKey }: MessiExperienceAppProps) {
 
         {/* Landing */}
         <Screen id="landing" active={screen === "landing"} className={styles.sLanding}>
-          <Brand territory={territory} />
+          <Brand
+            territory={territory}
+            langLabel={sessionLang.code}
+            onPickLang={() => setLangModalOpen(true)}
+          />
           <div className={styles.who}>
             <b>Lionel Messi</b>
-            <small>{t.role}</small>
-          </div>
-          <div className={styles.disclosure}>
-            <b>AI:</b> {t.aiDisclosure}
+            <small>
+              {t.role} · {territory}
+            </small>
           </div>
           <div className={styles.heroSpacer} />
           <div className={styles.sheet}>
@@ -712,7 +734,7 @@ export function MessiExperienceApp({ sdkKey }: MessiExperienceAppProps) {
               <em>{t.heroB}</em>
               {t.heroC}
             </h1>
-            <p className={styles.lead}>{t.lead}</p>
+            <p className={styles.lead}>{t.leadShort}</p>
             <div className={styles.steps}>
               <div className={styles.step}>
                 <div className={styles.ic}>📅</div>
@@ -733,21 +755,15 @@ export function MessiExperienceApp({ sdkKey }: MessiExperienceAppProps) {
             <button type="button" className={styles.btn} onClick={() => go("tiers")}>
               {t.cta}
             </button>
-            <div className={styles.langrow}>
-              {LANGS.slice(0, 7).map((l) => (
-                <span key={l.code}>{l.label}</span>
-              ))}
-            </div>
-            <p className={styles.pdpa}>{t.privacy}</p>
             <button
               type="button"
               className={`${styles.btn} ${styles.ghost}`}
-              style={{ marginTop: 10, fontSize: 13 }}
+              style={{ marginTop: 10, fontSize: 13.5 }}
               onClick={startAsReturning}
             >
-              DEMO ⏩ Continue as a fan Messi remembers
+              {t.returningCta}
             </button>
-            <p className={styles.siteUrl}>www.messi.live</p>
+            <p className={styles.pdpa}>{t.privacyShort}</p>
           </div>
         </Screen>
 

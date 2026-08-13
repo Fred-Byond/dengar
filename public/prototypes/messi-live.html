@@ -92,6 +92,14 @@
     padding: 6px 10px; border-radius: 99px; white-space: nowrap;
   }
 
+  @media (max-width: 560px) {
+    .bar { gap: 9px; padding: 8px 12px; }
+    .tabs button { font-size: 11.5px; padding: 7px 9px; }
+    .chip-demo { font-size: 8.5px; padding: 5px 8px; letter-spacing: 0.1em; }
+    .chip-demo .long { display: none; }
+    .lockup .sub { display: none; }
+  }
+
   .view[hidden] { display: none; }
 
   /* ============================ fan stage ============================ */
@@ -142,6 +150,9 @@
   @media (max-width: 460px) {
     .phone { border-radius: 26px; box-shadow: 0 0 0 5px #191f30, 0 20px 50px rgba(0, 0, 0, 0.6); height: calc(100dvh - 96px); }
     .stage { padding: 10px 8px 16px; }
+    .sheet { padding: 70px 16px 18px; }
+    .sheet h2 { font-size: 27px; }
+    .step { padding: 9px 8px; }
   }
 
   /* avatar stage inside the phone */
@@ -152,14 +163,13 @@
     background: radial-gradient(50% 60% at 50% 40%, rgba(146, 190, 232, 0.34) 0%, transparent 70%);
     filter: blur(2px);
   }
-  .figure { position: absolute; left: 50%; bottom: 0; width: 360px; max-width: 94%; height: 94%;
-    transform: translateX(-50%); transform-origin: 50% 100%;
-    animation: breathe 5.5s ease-in-out infinite; }
+  .figure { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 94%;
+    transform-origin: 50% 100%; animation: breathe 5.5s ease-in-out infinite; }
   .figure svg { width: 100%; height: 100%; display: block; }
   .figure .body { fill: url(#figGrad); }
   @keyframes breathe {
-    0%, 100% { transform: translateX(-50%) scale(1); }
-    50% { transform: translateX(-50%) scale(1.016); }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.014); }
   }
   /* the digital human is speaking — the light lifts with the voice */
   .scene .spot { transition: opacity 0.4s; }
@@ -195,14 +205,35 @@
   .screen.on { opacity: 1; pointer-events: auto; transform: none; }
 
   .pad { padding: 20px 18px 26px; }
-  .brandrow { display: flex; align-items: center; justify-content: space-between; padding: 20px 18px 0; }
+  .brandrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 20px 18px 0; }
   .brandrow .wm { font-size: 17px; font-weight: 800; letter-spacing: 0.04em; }
   .brandrow .wm span { font-weight: 300; color: var(--sky); }
   .brandrow .terr { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.12em; color: rgba(238, 242, 251, 0.55); text-align: right; }
+  .langpill {
+    display: inline-flex; align-items: center; gap: 6px; flex: none;
+    background: rgba(6, 10, 20, 0.55); border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #fff; font-size: 12px; padding: 7px 12px; border-radius: 99px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .langpill b { font-family: var(--mono); letter-spacing: 0.06em; }
 
-  .who { padding: 12px 18px 0; }
-  .who b { display: block; font-size: 17px; }
-  .who small { color: rgba(238, 242, 251, 0.6); font-size: 11.5px; }
+  /* language chooser sheet */
+  .langsheet { position: absolute; inset: 0; z-index: 9; display: flex; align-items: flex-end;
+    background: rgba(4, 7, 14, 0.6); backdrop-filter: blur(4px); }
+  .langsheet[hidden] { display: none; }
+  .ls-card { width: 100%; background: #0d1526; border-radius: 22px 22px 0 0; padding: 16px 16px 22px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12); }
+  .ls-card h4 { margin: 0 0 12px; font-size: 14px; display: flex; align-items: center; }
+  .ls-card h4 button { margin-left: auto; border: 0; background: rgba(255, 255, 255, 0.1); color: #fff;
+    width: 28px; height: 28px; border-radius: 50%; }
+  .ls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .ls-grid button { border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.06);
+    color: #fff; font-size: 12.5px; padding: 11px 10px; border-radius: 11px; text-align: left; }
+  .ls-grid button.sel { border-color: var(--sky); background: rgba(127, 178, 224, 0.18); font-weight: 700; }
+
+  .who { padding: 10px 18px 0; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6); }
+  .who b { display: block; font-size: 16px; }
+  .who small { color: rgba(238, 242, 251, 0.62); font-size: 10.5px; }
 
   .disclosure {
     margin: 12px 18px 0; padding: 9px 11px; border-radius: 11px;
@@ -211,15 +242,17 @@
   }
   .disclosure b { color: var(--gold); font-family: var(--mono); letter-spacing: 0.1em; font-size: 9.5px; }
 
+  /* The digital human is the hero: the sheet holds only what the next tap
+     needs, and the scrim starts well below the face. */
   .sheet {
-    margin-top: auto; padding: 20px 18px 24px;
-    background: linear-gradient(180deg, rgba(6, 10, 20, 0) 0%, rgba(6, 10, 20, 0.88) 22%, #060a14 46%);
+    margin-top: auto; padding: 92px 18px 22px;
+    background: linear-gradient(180deg, rgba(6, 10, 20, 0) 0%, rgba(6, 10, 20, 0.72) 34%, #060a14 62%);
   }
-  .sheet h2 { margin: 0 0 8px; font-size: 31px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.04; }
+  .sheet h2 { margin: 0 0 6px; font-size: 30px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.05; }
   .sheet h2 em { font-style: normal; color: var(--gold); }
-  .sheet p.lead { margin: 0 0 16px; font-size: 13.5px; line-height: 1.55; color: rgba(238, 242, 251, 0.7); }
+  .sheet p.lead { margin: 0 0 14px; font-size: 14px; line-height: 1.5; color: rgba(238, 242, 251, 0.72); }
 
-  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 14px; }
   .step { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 13px; padding: 11px 9px; }
   .step b { display: block; font-size: 11.5px; margin-bottom: 2px; }
   .step small { font-size: 10px; line-height: 1.35; color: rgba(238, 242, 251, 0.55); display: block; }
@@ -247,7 +280,7 @@
     font-size: 10px; padding: 4px 8px; border-radius: 99px;
     background: rgba(255, 255, 255, 0.07); color: rgba(238, 242, 251, 0.66);
   }
-  .fine { margin-top: 12px; font-size: 9.8px; line-height: 1.5; color: rgba(238, 242, 251, 0.42); }
+  .fine { margin-top: 10px; text-align: center; font-size: 9.8px; line-height: 1.5; color: rgba(238, 242, 251, 0.45); }
   .site { margin-top: 12px; text-align: center; font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: rgba(238, 242, 251, 0.35); }
 
   /* light cards inside the phone */
@@ -527,7 +560,7 @@
     <button role="tab" aria-selected="false" data-view="brief">World Brief</button>
   </div>
 
-  <div class="chip-demo">CONCEPT DEMO · NOT AFFILIATED WITH LIONEL MESSI</div>
+  <div class="chip-demo">CONCEPT DEMO<span class="long"> · NOT AFFILIATED WITH LIONEL MESSI</span></div>
 </div>
 
 <!-- ============================ FAN EXPERIENCE ============================ -->
@@ -556,15 +589,45 @@
         <div class="scene">
           <div class="spot"></div>
           <div class="figure breathe">
-            <svg viewBox="0 0 300 420" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+            <svg viewBox="0 0 300 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
               <defs>
                 <linearGradient id="figGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#9cc4e8" stop-opacity="0.92" />
-                  <stop offset="55%" stop-color="#4c7cae" stop-opacity="0.72" />
+                  <stop offset="0%" stop-color="#b3d4f0" stop-opacity="0.95" />
+                  <stop offset="38%" stop-color="#6c9ac9" stop-opacity="0.85" />
                   <stop offset="100%" stop-color="#0b1226" stop-opacity="0.1" />
                 </linearGradient>
+                <!-- key light from the left, a warm kicker on the right -->
+                <linearGradient id="rimGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#e8f3ff" stop-opacity="0.75" />
+                  <stop offset="26%" stop-color="#e8f3ff" stop-opacity="0" />
+                  <stop offset="82%" stop-color="#e7b94e" stop-opacity="0" />
+                  <stop offset="100%" stop-color="#e7b94e" stop-opacity="0.45" />
+                </linearGradient>
+                <linearGradient id="fadeGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#fff" stop-opacity="1" />
+                  <stop offset="70%" stop-color="#fff" stop-opacity="1" />
+                  <stop offset="100%" stop-color="#fff" stop-opacity="0" />
+                </linearGradient>
+                <!-- head, neck and shoulders as one silhouette, so overlaps
+                     never show a seam through the translucent fill -->
+                <mask id="figMask">
+                  <rect width="300" height="420" fill="#000" />
+                  <!-- framed as a medium shot: head in the clear zone above
+                       the sheet, shoulders running under it -->
+                  <g fill="#fff">
+                    <ellipse cx="150" cy="78" rx="31" ry="38" />
+                    <rect x="134" y="104" width="32" height="46" rx="13" />
+                    <path d="M150 140c62 0 112 34 128 84 12 38 16 110 16 196H6c0-86 4-158 16-196 16-50 66-84 128-84z" />
+                  </g>
+                </mask>
+                <mask id="fadeMask"><rect width="300" height="420" fill="url(#fadeGrad)" /></mask>
               </defs>
-              <path class="body" d="M150 60c26 0 44 20 44 47 0 18-7 33-17 42 34 12 58 34 68 62 12 33 17 76 19 124H36c2-48 7-91 19-124 10-28 34-50 68-62-10-9-17-24-17-42 0-27 18-47 44-47z" />
+              <g mask="url(#fadeMask)">
+                <g mask="url(#figMask)">
+                  <rect width="300" height="420" fill="url(#figGrad)" />
+                  <rect width="300" height="420" fill="url(#rimGrad)" />
+                </g>
+              </g>
             </svg>
           </div>
           <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -576,34 +639,32 @@
         <section class="screen on" data-screen="landing">
           <div class="brandrow">
             <div class="wm">MESSI<span>.LIVE</span></div>
-            <div class="terr" id="terrLabel">MESSI.LIVE GLOBAL</div>
+            <button class="langpill" id="landLang" type="button">🌐 <b>EN</b> ▾</button>
           </div>
-          <div class="who"><b>Lionel Messi</b><small>Officially authorised digital human</small></div>
-          <div class="disclosure">
-            <b>AI</b> — You are speaking with an official AI-powered digital representation of
-            Lionel Messi. It never makes promises on his behalf.
-          </div>
+          <div class="who"><b>Lionel Messi</b><small id="terrLabel">Officially authorised digital human · MESSI.LIVE GLOBAL</small></div>
           <div class="sheet">
             <h2>Your <em>moment</em> with Messi.</h2>
-            <p class="lead">
-              Five minutes. One to one. In your language. Book a time, and the officially
-              authorised digital human will be there.
-            </p>
+            <p class="lead">Five minutes. One to one. In your language.</p>
             <div class="steps">
               <div class="step"><span class="ic">📅</span><b>Choose a time</b><small>A slot that suits you</small></div>
               <div class="step"><span class="ic">💬</span><b>Speak with Messi</b><small>Five minutes, your language</small></div>
               <div class="step"><span class="ic">🧠</span><b>He remembers</b><small>Pick up where you left off</small></div>
             </div>
             <button class="btn" data-go="tiers">Book my five minutes</button>
-            <button class="btn ghost" id="btnReturning">Continue as a fan Messi remembers</button>
-            <div class="langrow" id="langChips"></div>
+            <button class="btn ghost" id="btnReturning">I've spoken with him before</button>
             <p class="fine">
-              Conversations are private. Memory is optional and you can delete it at any time.
-              Under-18 accounts require a parent or guardian.
+              Official AI digital human — not a live call. Conversations are private.
             </p>
-            <div class="site">www.messi.live</div>
           </div>
         </section>
+
+        <!-- language chooser -->
+        <div class="langsheet" id="langSheet" hidden>
+          <div class="ls-card">
+            <h4>Conversation language <button type="button" id="langClose" aria-label="Close">✕</button></h4>
+            <div class="ls-grid" id="langGrid"></div>
+          </div>
+        </div>
 
         <!-- membership -->
         <section class="screen" data-screen="tiers">
@@ -1020,8 +1081,27 @@
     go(target);
   }));
 
-  /* --- landing --- */
-  $("#langChips").innerHTML = LANGS.slice(0, 7).map((l) => "<span>" + esc(l.label) + "</span>").join("");
+  /* --- landing: language is a first-class choice, on the hero itself --- */
+  function setLang(code) {
+    state.lang = LANGS.filter((l) => l.c === code)[0] || state.lang;
+    $("#landLang").innerHTML = "🌐 <b>" + state.lang.c + "</b> ▾";
+    $("#fLang").value = state.lang.c;
+    $("#lobbyLang").textContent = state.lang.label;
+    $("#sessLang").textContent = "文A · " + state.lang.c;
+    renderLangGrid();
+  }
+  function renderLangGrid() {
+    $("#langGrid").innerHTML = LANGS.map((l) =>
+      '<button type="button" data-l="' + l.c + '"' + (state.lang.c === l.c ? ' class="sel"' : "") +
+      "><bdi>" + esc(l.label) + "</bdi></button>").join("");
+    $$("#langGrid button").forEach((b) => b.addEventListener("click", () => {
+      setLang(b.dataset.l);
+      $("#langSheet").hidden = true;
+    }));
+  }
+  $("#landLang").addEventListener("click", () => { $("#langSheet").hidden = false; });
+  $("#langClose").addEventListener("click", () => { $("#langSheet").hidden = true; });
+  $("#langSheet").addEventListener("click", (e) => { if (e.target.id === "langSheet") $("#langSheet").hidden = true; });
 
   /* --- membership --- */
   function renderTiers() {
@@ -1097,14 +1177,13 @@
       ? '<option value="">Choose your region</option>' + m.regions.map((r) => '<option value="' + esc(r) + '">' + esc(r) + "</option>").join("")
       : '<option value="">Choose a country first</option>';
     if (m) {
-      $("#terrLabel").textContent = m.territory;
-      const l = LANGS.filter((x) => x.c === m.primaryLanguage)[0];
-      if (l) { $("#fLang").value = l.c; state.lang = l; }
+      $("#terrLabel").textContent = "Officially authorised digital human · " + m.territory;
+      setLang(m.primaryLanguage);
     }
     state.region = "";
   });
   $("#fRegion").addEventListener("change", (e) => { state.region = e.target.value; });
-  $("#fLang").addEventListener("change", (e) => { state.lang = LANGS.filter((l) => l.c === e.target.value)[0]; });
+  $("#fLang").addEventListener("change", (e) => setLang(e.target.value));
   $("#fAge").addEventListener("change", (e) => {
     state.age = e.target.value;
     $("#guardianNote").hidden = !(state.age === "under-13" || state.age === "13-17");
@@ -1154,9 +1233,10 @@
   $("#btnReturning").addEventListener("click", () => {
     state.returning = true; state.memory = true; state.name = "Mateo";
     state.country = "Argentina"; state.region = "Rosario"; state.age = "13-17";
-    state.theme = "Academy & trials"; state.lang = LANGS[0]; state.tier = "plus";
+    state.theme = "Academy & trials"; state.tier = "plus";
     state.time = "7:30 PM"; state.day = 0;
-    $("#terrLabel").textContent = "MESSI.LIVE ARGENTINA";
+    setLang("ES");
+    $("#terrLabel").textContent = "Officially authorised digital human · MESSI.LIVE ARGENTINA";
     makeBooking();
     go("reminder");
   });
@@ -1261,6 +1341,7 @@
   });
 
   $("#btnFF").addEventListener("click", () => { state.secs = Math.min(state.secs, 8); });
+  $("#sessLang").addEventListener("click", () => { $("#langSheet").hidden = false; });
 
   function endSession() {
     if (synth) { try { synth.cancel(); } catch (e) {} }
@@ -1578,6 +1659,8 @@
     $("#doc").innerHTML = h;
     $("#btnPrint").addEventListener("click", () => window.print());
   })();
+
+  setLang("EN");
 
   // Preload speech voices where the browser needs a nudge.
   if (window.speechSynthesis) { try { window.speechSynthesis.getVoices(); } catch (e) {} }

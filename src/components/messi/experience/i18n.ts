@@ -18,6 +18,10 @@ export type I18nStrings = {
   heroB: string;
   heroC: string;
   lead: string;
+  /** One-line hero lead — the landing screen belongs to the digital human. */
+  leadShort: string;
+  returningCta: string;
+  privacyShort: string;
   st1: string; st1s: string;
   st2: string; st2s: string;
   st3: string; st3s: string;
@@ -81,6 +85,9 @@ export const I18N: Record<UiLang, I18nStrings> = {
     heroB: "moment",
     heroC: " with Messi.",
     lead: "Five minutes. One to one. In your language. Book a time, and Lionel's officially authorised digital human will be there.",
+    leadShort: "Five minutes. One to one. In your language.",
+    returningCta: "I've spoken with him before",
+    privacyShort: "Official AI digital human — not a live call. Conversations are private.",
     st1: "Choose a time", st1s: "Pick a slot that suits you",
     st2: "Speak with Messi", st2s: "Five minutes, your language",
     st3: "He remembers", st3s: "Pick up where you left off",
@@ -220,6 +227,9 @@ export const I18N: Record<UiLang, I18nStrings> = {
     heroB: "momento",
     heroC: " con Messi.",
     lead: "Cinco minutos. Uno a uno. En tu idioma. Reservá un horario y el humano digital oficialmente autorizado de Leo estará ahí.",
+    leadShort: "Cinco minutos. Uno a uno. En tu idioma.",
+    returningCta: "Ya hablé con él antes",
+    privacyShort: "Humano digital oficial con IA — no es una llamada en vivo. Las conversaciones son privadas.",
     st1: "Elegí un horario", st1s: "El que mejor te quede",
     st2: "Hablá con Messi", st2s: "Cinco minutos, en tu idioma",
     st3: "Él se acuerda", st3s: "Seguí donde lo dejaste",

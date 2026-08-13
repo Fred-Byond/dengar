@@ -207,6 +207,7 @@
 .who {
   padding: 10px 20px 0;
   color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
 }
 
 .who b {
@@ -217,8 +218,8 @@
 }
 
 .who small {
-  font-size: 12px;
-  opacity: 0.85;
+  font-size: 11px;
+  opacity: 0.75;
 }
 
 /* ============ UI LANGUAGE TOGGLE ============ */
@@ -396,23 +397,23 @@
 /* ============ LANDING ============ */
 .sLanding .heroSpacer {
   flex: 1;
-  min-height: 170px;
+  min-height: 210px;
 }
 
 .sLanding .sheet {
   background: linear-gradient(
     180deg,
-    rgba(20, 13, 8, 0) 0%,
-    rgba(20, 13, 8, 0.72) 18%,
-    rgba(16, 11, 7, 0.94) 45%
+    rgba(6, 10, 20, 0) 0%,
+    rgba(6, 10, 20, 0.7) 34%,
+    rgba(6, 10, 20, 0.96) 62%
   );
-  padding: 70px 20px 26px;
+  padding: 92px 20px 24px;
   margin-top: auto;
 }
 
 .sLanding h1 {
   color: #fff;
-  font-size: 30px;
+  font-size: 29px;
   font-weight: 800;
   line-height: 1.12;
   letter-spacing: -0.3px;
@@ -1270,13 +1271,13 @@
 }
 
 .wordmark .mark {
-  width: 26px;
-  height: 26px;
+  width: 23px;
+  height: 23px;
   flex: 0 0 auto;
 }
 
 .wordmark .wm {
-  font-size: 19px;
+  font-size: 16.5px;
   font-weight: 800;
   letter-spacing: 0.6px;
   white-space: nowrap;
@@ -1304,6 +1305,26 @@
   letter-spacing: 0.6px;
   text-align: right;
   opacity: 0.92;
+}
+
+.langPillTop {
+  grid-column: 3;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(6, 10, 20, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 99px;
+  cursor: pointer;
 }
 
 /* The mandatory AI-disclosure strip — present on every entry point. */
