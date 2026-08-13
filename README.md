@@ -38,6 +38,7 @@ authorised digital human — plus the management intelligence platform behind it
 | **Management dashboard** | `/messi/dashboard` | THE MESSI GLOBAL PULSE. Two role views: **Messi** (what the world is asking, the emerging signal, the response queue, duty of care) and **Management** (territories, membership, revenue engines, Global Rights Matrix). |
 | **Conversation Explorer** | `/messi/conversations` | Every conversation as one FVIF record: the question, the confirmed summary, the memory carried forward, the transcript, the care routing. PII masked by default; reveal is audit-logged. |
 | **World Brief** | `/messi/brief` | The recurring weekly deliverable, print/PDF ready. |
+| **Standalone prototype** | `/prototypes/messi-live.html` | One self-contained file — the whole fan journey plus both dashboards, no server, no SDK key. Open it anywhere or hand it to someone as a single file. |
 
 Its intelligence layer is the [Fan Voice Intelligence Framework (FVIF)](docs/FVIF.md) —
 CVIF&rsquo;s sibling, scoring the *conversation as evidence about a fan need*, never the fan as
@@ -94,7 +95,10 @@ dengar/
 
 ### About the prototypes
 
-`public/prototypes/*` are the **approved** self-contained demos. The app currently serves
+`public/prototypes/*` are the self-contained demos. `dengar-citizen.html` and
+`national-pulse.html` are the **approved** DENGAR prototypes; `messi-live.html` is the
+MESSI.LIVE clickable prototype — one file containing the fan journey, the Global Pulse and
+the World Brief, with the dashboard figures baked in from a run of the real FVIF engine. The app currently serves
 them verbatim at `/experience` and `/dashboard` so there is **zero visual regression** while
 the production React components are built out (see [ROADMAP](docs/ROADMAP.md)). They are the
 single source of truth for the visual identity and copy.

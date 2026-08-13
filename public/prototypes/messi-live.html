@@ -1,0 +1,1585 @@
+<title>MESSI.LIVE Prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+<style>
+  /* ------------------------------------------------------------------ *
+   * MESSI.LIVE — standalone clickable prototype.
+   *
+   * One committed visual world: a night-match sky for the fan side, a
+   * blue-biased paper ground for the intelligence side. Both painted
+   * explicitly so the page holds on any host background.
+   * ------------------------------------------------------------------ */
+  :root {
+    --night: #070b16;
+    --night-2: #0b1226;
+    --deep: #0e1730;
+    --slate: #17224a;
+    --sky: #7fb2e0;
+    --sky-deep: #2e6fa7;
+    --gold: #e7b94e;
+    --rose: #f3579a;
+    --paper: #f2f4fa;
+    --card: #ffffff;
+    --ink: #0d1526;
+    --ink-2: #33405c;
+    --muted: #6a7488;
+    --line: #dfe4ee;
+    --ok: #1fae7c;
+    --warn: #d69a1f;
+    --alert: #e07a45;
+    --crit: #d94a63;
+
+    --ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+      "Liberation Mono", monospace;
+
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--night);
+    color: #eef2fb;
+    font-family: var(--ui);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button { font-family: inherit; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ============================ app bar ============================ */
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 16px;
+    background: linear-gradient(90deg, var(--night) 0%, var(--deep) 60%, var(--slate) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  }
+  .lockup { display: flex; align-items: center; gap: 9px; }
+  .lockup .wm { font-size: 16px; font-weight: 800; letter-spacing: 0.04em; line-height: 1; }
+  .lockup .wm span { font-weight: 300; color: var(--sky); }
+  .lockup .sub {
+    margin-top: 3px; color: rgba(255, 255, 255, 0.5);
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+  }
+  .tabs { display: flex; gap: 2px; padding: 3px; background: rgba(255, 255, 255, 0.07); border-radius: 12px; }
+  .tabs button {
+    border: 0; background: transparent; color: rgba(255, 255, 255, 0.68);
+    font-size: 12.5px; font-weight: 700; padding: 8px 13px; border-radius: 9px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .tabs button[aria-selected="true"] { background: #fff; color: var(--deep); }
+  .chip-demo {
+    margin-left: auto; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em;
+    color: var(--gold); border: 1px solid rgba(231, 185, 78, 0.45);
+    padding: 6px 10px; border-radius: 99px; white-space: nowrap;
+  }
+
+  .view[hidden] { display: none; }
+
+  /* ============================ fan stage ============================ */
+  .stage {
+    position: relative;
+    min-height: calc(100dvh - 58px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 22px 16px 34px;
+    background:
+      radial-gradient(70% 45% at 50% -5%, rgba(127, 178, 224, 0.22) 0%, transparent 60%),
+      radial-gradient(120% 90% at 50% 110%, #101c3c 0%, var(--night) 65%);
+    overflow: hidden;
+  }
+  /* faint pitch lines — the subject's own geometry, not decoration */
+  .stage::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(transparent 0 calc(100% - 1px), rgba(127, 178, 224, 0.07) 100%) 0 0 / 100% 78px,
+      radial-gradient(circle at 50% 100%, transparent 0 38%, rgba(127, 178, 224, 0.07) 38.4%, transparent 39%) 0 0 / 100% 100%;
+    pointer-events: none;
+  }
+  .stage-inner { position: relative; display: flex; gap: 34px; align-items: center; flex-wrap: wrap; justify-content: center; }
+
+  .stage-note { max-width: 300px; }
+  .stage-note h1 {
+    margin: 0 0 10px; font-size: clamp(26px, 3vw, 34px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1.05; text-wrap: balance;
+  }
+  .stage-note h1 em { font-style: normal; color: var(--gold); }
+  .stage-note p { margin: 0 0 14px; color: rgba(238, 242, 251, 0.66); font-size: 13.5px; line-height: 1.6; }
+  .stage-note .eyebrow { color: var(--sky); margin-bottom: 12px; display: block; }
+  .stage-note ol { margin: 0; padding-left: 18px; color: rgba(238, 242, 251, 0.6); font-size: 12.5px; line-height: 1.8; }
+  .stage-note ol b { color: #eef2fb; font-weight: 700; }
+  @media (max-width: 900px) { .stage-note { display: none; } }
+
+  /* phone */
+  .phone {
+    position: relative;
+    width: 392px; max-width: 100%;
+    height: min(846px, calc(100dvh - 110px));
+    border-radius: 40px;
+    background: #04060d;
+    overflow: hidden;
+    box-shadow: 0 0 0 9px #191f30, 0 34px 90px rgba(0, 0, 0, 0.65),
+      0 0 70px rgba(46, 111, 167, 0.22);
+  }
+  @media (max-width: 460px) {
+    .phone { border-radius: 26px; box-shadow: 0 0 0 5px #191f30, 0 20px 50px rgba(0, 0, 0, 0.6); height: calc(100dvh - 96px); }
+    .stage { padding: 10px 8px 16px; }
+  }
+
+  /* avatar stage inside the phone */
+  .scene { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(90% 60% at 50% 12%, #16233f 0%, #060a14 70%); }
+  .spot {
+    position: absolute; left: 50%; top: -14%; width: 150%; height: 78%;
+    transform: translateX(-50%);
+    background: radial-gradient(50% 60% at 50% 40%, rgba(146, 190, 232, 0.34) 0%, transparent 70%);
+    filter: blur(2px);
+  }
+  .figure { position: absolute; left: 50%; bottom: 0; width: 360px; max-width: 94%; height: 94%;
+    transform: translateX(-50%); transform-origin: 50% 100%;
+    animation: breathe 5.5s ease-in-out infinite; }
+  .figure svg { width: 100%; height: 100%; display: block; }
+  .figure .body { fill: url(#figGrad); }
+  @keyframes breathe {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.016); }
+  }
+  /* the digital human is speaking — the light lifts with the voice */
+  .scene .spot { transition: opacity 0.4s; }
+  .scene.speaking .spot { animation: lift 2.4s ease-in-out infinite; }
+  @keyframes lift { 0%, 100% { opacity: 1; } 50% { opacity: 0.62; } }
+  .wave { position: absolute; left: 50%; transform: translateX(-50%); bottom: 34%;
+    display: flex; gap: 4px; align-items: flex-end; height: 22px; opacity: 0; transition: opacity 0.3s; }
+  .scene.speaking .wave { opacity: 0.85; }
+  .wave i { width: 3px; border-radius: 2px; background: var(--gold); height: 6px; animation: bar 0.9s ease-in-out infinite; }
+  .wave i:nth-child(2) { animation-delay: 0.12s; } .wave i:nth-child(3) { animation-delay: 0.24s; }
+  .wave i:nth-child(4) { animation-delay: 0.36s; } .wave i:nth-child(5) { animation-delay: 0.48s; }
+  @keyframes bar { 0%, 100% { height: 6px; } 50% { height: 20px; } }
+  .scene .grain { position: absolute; inset: 0; opacity: 0.5;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.022) 0 1px, transparent 1px 3px); }
+  .pill.ai { font-size: 9px; letter-spacing: 0.12em; color: var(--gold); border-color: rgba(231, 185, 78, 0.4); }
+
+  .veil {
+    position: absolute; inset: 0; background: rgba(5, 9, 20, 0.72);
+    backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+    opacity: 0; transition: opacity 0.35s; pointer-events: none;
+  }
+  .phone.veiled .veil { opacity: 1; }
+
+  /* screens */
+  .screen {
+    position: absolute; inset: 0; z-index: 3;
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none; transform: translateY(12px);
+    transition: opacity 0.32s ease, transform 0.32s ease;
+    overflow-y: auto; scrollbar-width: none;
+  }
+  .screen::-webkit-scrollbar { display: none; }
+  .screen.on { opacity: 1; pointer-events: auto; transform: none; }
+
+  .pad { padding: 20px 18px 26px; }
+  .brandrow { display: flex; align-items: center; justify-content: space-between; padding: 20px 18px 0; }
+  .brandrow .wm { font-size: 17px; font-weight: 800; letter-spacing: 0.04em; }
+  .brandrow .wm span { font-weight: 300; color: var(--sky); }
+  .brandrow .terr { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.12em; color: rgba(238, 242, 251, 0.55); text-align: right; }
+
+  .who { padding: 12px 18px 0; }
+  .who b { display: block; font-size: 17px; }
+  .who small { color: rgba(238, 242, 251, 0.6); font-size: 11.5px; }
+
+  .disclosure {
+    margin: 12px 18px 0; padding: 9px 11px; border-radius: 11px;
+    background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 10.5px; line-height: 1.45; color: rgba(238, 242, 251, 0.86);
+  }
+  .disclosure b { color: var(--gold); font-family: var(--mono); letter-spacing: 0.1em; font-size: 9.5px; }
+
+  .sheet {
+    margin-top: auto; padding: 20px 18px 24px;
+    background: linear-gradient(180deg, rgba(6, 10, 20, 0) 0%, rgba(6, 10, 20, 0.88) 22%, #060a14 46%);
+  }
+  .sheet h2 { margin: 0 0 8px; font-size: 31px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.04; }
+  .sheet h2 em { font-style: normal; color: var(--gold); }
+  .sheet p.lead { margin: 0 0 16px; font-size: 13.5px; line-height: 1.55; color: rgba(238, 242, 251, 0.7); }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+  .step { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 13px; padding: 11px 9px; }
+  .step b { display: block; font-size: 11.5px; margin-bottom: 2px; }
+  .step small { font-size: 10px; line-height: 1.35; color: rgba(238, 242, 251, 0.55); display: block; }
+  .step .ic { font-size: 15px; margin-bottom: 5px; display: block; }
+
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; border: 0; border-radius: 14px; padding: 15px;
+    font-size: 15.5px; font-weight: 700; color: #fff;
+    background: linear-gradient(180deg, #3a83c2, var(--sky-deep));
+    transition: transform 0.12s, filter 0.15s;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:active { transform: scale(0.985); }
+  .btn:disabled { filter: grayscale(0.6) opacity(0.45); cursor: default; }
+  .btn.ghost { background: rgba(255, 255, 255, 0.09); border: 1px solid rgba(255, 255, 255, 0.18); font-weight: 600; font-size: 13.5px; }
+  /* ghost sits on the dark sheet by default; inside a light card it flips */
+  .card .btn.ghost { background: #fff; color: var(--ink); border: 1.5px solid var(--line); }
+  .btn.gold { background: linear-gradient(180deg, #efc964, var(--gold)); color: #3a2c00; }
+  .btn.rose { background: linear-gradient(180deg, #f76fab, var(--rose)); }
+  .btn + .btn { margin-top: 9px; }
+
+  .langrow { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 14px; }
+  .langrow span {
+    font-size: 10px; padding: 4px 8px; border-radius: 99px;
+    background: rgba(255, 255, 255, 0.07); color: rgba(238, 242, 251, 0.66);
+  }
+  .fine { margin-top: 12px; font-size: 9.8px; line-height: 1.5; color: rgba(238, 242, 251, 0.42); }
+  .site { margin-top: 12px; text-align: center; font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: rgba(238, 242, 251, 0.35); }
+
+  /* light cards inside the phone */
+  .card {
+    background: rgba(255, 255, 255, 0.97); color: var(--ink);
+    border-radius: 20px; padding: 18px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  }
+  .card h3 { margin: 3px 0 4px; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+  .card .sub { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+  .card .eyebrow { color: var(--sky-deep); display: block; margin-bottom: 2px; }
+  .formwrap { min-height: 100%; display: flex; align-items: center; padding: 54px 16px 22px; }
+  .back {
+    position: absolute; top: 16px; left: 14px; z-index: 6;
+    width: 36px; height: 36px; border-radius: 50%; border: 0;
+    background: rgba(255, 255, 255, 0.92); color: var(--ink); font-size: 17px;
+  }
+
+  label.f { display: block; font-size: 11.5px; font-weight: 700; margin: 13px 0 5px; color: var(--ink); }
+  label.f i { font-style: normal; font-weight: 500; color: var(--muted); }
+  input.f, select.f {
+    width: 100%; font-family: inherit; font-size: 15px; padding: 11px 12px;
+    border: 1.5px solid var(--line); border-radius: 11px; background: #fff; color: var(--ink);
+  }
+  input.f:focus, select.f:focus { outline: none; border-color: var(--sky-deep); }
+  .check { display: flex; gap: 9px; align-items: flex-start; margin-top: 13px; font-size: 11.5px; line-height: 1.4; color: var(--ink-2); }
+  .check input { margin-top: 2px; accent-color: var(--sky-deep); width: 16px; height: 16px; flex: none; }
+  .note-amber { margin-top: 9px; padding: 9px 11px; border-radius: 10px; background: #fff7de; border: 1px solid #f2e2a8; font-size: 11px; line-height: 1.45; color: #6b5900; }
+
+  .tiergrid { display: grid; gap: 9px; margin-top: 11px; }
+  .tier { text-align: left; border: 1.5px solid var(--line); background: #fff; border-radius: 15px; padding: 13px; color: var(--ink); }
+  .tier.sel { border-color: var(--sky-deep); box-shadow: 0 0 0 3px rgba(46, 111, 167, 0.14); }
+  .tier.plus.sel { border-color: var(--rose); box-shadow: 0 0 0 3px rgba(243, 87, 154, 0.14); }
+  .tier .th { display: flex; align-items: baseline; gap: 7px; }
+  .tier .tn { font-size: 14px; font-weight: 800; }
+  .tier .tp { margin-left: auto; font-family: var(--mono); font-size: 10.5px; font-weight: 700; color: var(--sky-deep); }
+  .tier.plus .tp { color: var(--rose); }
+  .tier .tpos { font-size: 11.5px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+  .tier ul { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+  .tier li { font-size: 11.5px; display: flex; gap: 6px; color: var(--ink-2); }
+  .tier li::before { content: "▸"; color: var(--sky-deep); }
+  .badge-plus { background: var(--rose); color: #fff; font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.1em; padding: 3px 6px; border-radius: 99px; }
+
+  .days { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+  .day { flex: 0 0 auto; width: 52px; text-align: center; border: 1.5px solid var(--line); border-radius: 12px; padding: 7px 4px; background: #fff; color: var(--ink); }
+  .day small { display: block; font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .day b { display: block; font-size: 17px; font-weight: 800; }
+  .day em { font-style: normal; font-size: 9px; color: var(--muted); }
+  .day.sel { border-color: var(--sky-deep); background: rgba(46, 111, 167, 0.08); }
+  .day.full { opacity: 0.4; }
+  .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-height: 176px; overflow-y: auto; padding: 2px; }
+  .slot { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 3px; font-size: 12px; background: #fff; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .slot.sel { border-color: var(--sky-deep); background: rgba(46, 111, 167, 0.1); font-weight: 700; }
+  .slot.taken { opacity: 0.32; cursor: not-allowed; }
+  .slot.pri { border-color: rgba(243, 87, 154, 0.5); }
+  .lock { margin-top: 10px; font-size: 10.5px; color: var(--muted); line-height: 1.45; }
+
+  .otp { display: flex; gap: 6px; margin-top: 10px; }
+  .otp input {
+    flex: 1; min-width: 0; text-align: center; font-family: var(--mono); font-size: 20px;
+    padding: 11px 0; border: 1.5px solid var(--line); border-radius: 10px; color: var(--ink); background: #fff;
+  }
+  .hint { margin-top: 10px; font-size: 11.5px; color: var(--muted); }
+  .hint button { border: 0; background: transparent; font-family: var(--mono); font-weight: 700; color: var(--sky-deep); font-size: 12.5px; }
+
+  .tick { width: 54px; height: 54px; margin: 0 auto 8px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center; font-size: 27px; }
+  .refbox { margin-top: 12px; border: 1px dashed var(--line); border-radius: 12px; padding: 10px; text-align: center; }
+  .refbox small { display: block; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-family: var(--mono); }
+  .refbox b { font-family: var(--mono); font-size: 16px; letter-spacing: 0.04em; }
+  .row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+  .row:last-of-type { border-bottom: 0; }
+  .row span { color: var(--muted); }
+  .row b { text-align: right; }
+
+  .wa { background: #e7ffe9; border-radius: 14px; padding: 12px; border: 1px solid #bbefc2; color: #123; }
+  .wa .from { font-size: 10.5px; font-weight: 800; color: #0b7a34; margin-bottom: 5px; }
+  .wa p { margin: 0; font-size: 13px; line-height: 1.5; }
+  .wa .t { text-align: right; font-size: 9.5px; color: #7ba383; margin-top: 6px; font-family: var(--mono); }
+
+  .mid { margin: auto; padding: 20px 18px; width: 100%; }
+  .countwrap { text-align: center; margin-bottom: 16px; }
+  .countwrap small { font-size: 11px; color: rgba(238, 242, 251, 0.6); }
+  .countnum { font-family: var(--mono); font-size: 44px; font-weight: 700; letter-spacing: -0.02em; }
+  .ready { display: grid; gap: 7px; margin-top: 10px; }
+  .ritem { display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--ink-2); }
+  .ritem .dot { width: 22px; height: 22px; border-radius: 50%; background: var(--line); display: grid; place-items: center; font-size: 11px; flex: none; }
+  .ritem.ok .dot { background: var(--ok); color: #fff; }
+  .ritem button { margin-left: auto; border: 1px solid var(--sky-deep); background: #fff; color: var(--sky-deep); font-size: 11px; font-weight: 700; padding: 5px 9px; border-radius: 8px; }
+
+  /* session chrome */
+  .sesstop { display: flex; justify-content: space-between; padding: 18px 16px 0; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono);
+    font-size: 12px; padding: 6px 11px; border-radius: 99px;
+    background: rgba(6, 10, 20, 0.6); border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #fff; backdrop-filter: blur(6px);
+  }
+  .rec { width: 7px; height: 7px; border-radius: 50%; background: var(--crit); animation: blink 1.4s infinite; }
+  @keyframes blink { 50% { opacity: 0.25; } }
+  .sessbottom { margin-top: auto; padding: 0 16px 22px; }
+  .caption {
+    background: rgba(6, 10, 20, 0.72); border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 15px; padding: 13px 14px; font-size: 14.5px; line-height: 1.5;
+    backdrop-filter: blur(8px); min-height: 78px;
+  }
+  .caption .n { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em; color: var(--gold); margin-bottom: 5px; }
+  .yousaid { margin-top: 8px; text-align: center; font-size: 12px; font-style: italic; color: rgba(238, 242, 251, 0.6); min-height: 17px; }
+  .microw { display: flex; flex-direction: column; align-items: center; margin-top: 12px; }
+  .mic {
+    width: 66px; height: 66px; border-radius: 50%; border: 0;
+    background: linear-gradient(180deg, #3a83c2, var(--sky-deep)); color: #fff;
+    display: grid; place-items: center; box-shadow: 0 8px 26px rgba(46, 111, 167, 0.45);
+    transition: transform 0.15s;
+  }
+  .mic svg { width: 27px; height: 27px; fill: currentColor; }
+  .mic.live { background: linear-gradient(180deg, #f76fab, var(--rose)); animation: pulse 1.1s infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+  .miclbl { margin-top: 7px; font-size: 11px; color: rgba(238, 242, 251, 0.66); }
+  .ff {
+    position: absolute; right: 12px; bottom: 12px; z-index: 8;
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em;
+    background: rgba(231, 185, 78, 0.16); border: 1px solid rgba(231, 185, 78, 0.45);
+    color: var(--gold); padding: 6px 9px; border-radius: 8px;
+  }
+
+  .memory { margin-top: 12px; border-radius: 14px; padding: 12px 13px; background: linear-gradient(135deg, rgba(46, 111, 167, 0.1), rgba(127, 178, 224, 0.2)); border: 1px solid rgba(46, 111, 167, 0.28); }
+  .memory .h { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sky-deep); margin-bottom: 5px; }
+  .memory p { margin: 0; font-size: 13px; line-height: 1.5; }
+  .memory small { display: block; margin-top: 6px; font-size: 10.5px; color: var(--muted); }
+  .summary { margin-top: 12px; border-left: 3px solid var(--gold); background: #f6f8fc; border-radius: 0 12px 12px 0; padding: 11px 13px; font-size: 13px; line-height: 1.5; }
+  .summary .h { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+  .counter { margin-top: 12px; text-align: center; }
+  .counter .n { font-family: var(--mono); font-size: 27px; font-weight: 700; color: var(--sky-deep); }
+  .counter small { font-size: 11px; color: var(--muted); }
+  .upsell { margin-top: 12px; border-radius: 14px; padding: 13px; background: linear-gradient(135deg, #2c1030, #4d1442); color: #fff; }
+  .upsell b { display: block; font-size: 14px; margin-bottom: 3px; }
+  .upsell p { margin: 0 0 9px; font-size: 12px; line-height: 1.5; opacity: 0.85; }
+  .stars { display: flex; justify-content: center; gap: 6px; font-size: 25px; color: #d9d2c7; margin-top: 6px; }
+  .stars span.on { color: var(--gold); }
+
+  /* ========================= intelligence side ========================= */
+  .paper { background: var(--paper); color: var(--ink); min-height: calc(100dvh - 58px); }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 18px 18px 60px; }
+  .dash-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .dash-head h2 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
+  .dash-head p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+  .roles { display: flex; gap: 2px; padding: 3px; background: #e3e8f2; border-radius: 11px; margin-left: auto; }
+  .roles button { border: 0; background: transparent; font-size: 12px; font-weight: 700; color: var(--ink-2); padding: 7px 12px; border-radius: 8px; }
+  .roles button[aria-selected="true"] { background: #fff; color: var(--sky-deep); box-shadow: 0 1px 3px rgba(13, 21, 38, 0.12); }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .kpi { position: relative; background: var(--card); border-radius: 15px; padding: 12px 14px; overflow: hidden; box-shadow: 0 1px 2px rgba(13, 21, 38, 0.07); }
+  .kpi i { position: absolute; inset: 0 auto 0 0; width: 3px; }
+  .kpi .l { font-family: var(--mono); font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); }
+  .kpi .v { font-size: 25px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .kpi .s { font-size: 10.5px; color: var(--muted); }
+
+  .grid { display: grid; gap: 12px; margin-top: 12px; }
+  @media (min-width: 1000px) { .grid.c3 { grid-template-columns: 2fr 1fr; } .grid.c2 { grid-template-columns: 1fr 1fr; } }
+  .panel { background: var(--card); border-radius: 15px; padding: 15px; box-shadow: 0 1px 2px rgba(13, 21, 38, 0.07); }
+  .panel > h3 { margin: 0 0 12px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--sky-deep); }
+  .panel.accent { background: linear-gradient(150deg, rgba(127, 178, 224, 0.22), #fff 62%); }
+
+  .barrow + .barrow { margin-top: 11px; }
+  .barrow .t { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+  .barrow .t b { font-weight: 700; }
+  .barrow .t .p { margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .barrow .t .d { width: 54px; text-align: right; font-family: var(--mono); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .barrow .track { height: 9px; border-radius: 5px; background: #e8ecf5; margin-top: 4px; overflow: hidden; }
+  .barrow .fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--sky-deep), var(--sky)); }
+  .barrow .m { margin-top: 3px; font-size: 10.5px; color: var(--muted); }
+  .up { color: var(--ok); } .down { color: var(--crit); } .flat { color: var(--muted); }
+
+  .quote { border-left: 3px solid var(--sky); background: #f6f8fc; padding: 10px 12px; border-radius: 0 10px 10px 0; font-size: 13px; font-style: italic; color: var(--ink-2); }
+  .quote .meta { display: block; margin-top: 5px; font-style: normal; font-size: 10.5px; color: var(--muted); font-family: var(--mono); }
+
+  .carerow { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .carerow + .carerow { margin-top: 7px; }
+  .carerow .sw { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .carerow .n { margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .carerow .pc { width: 38px; text-align: right; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .callout { margin-top: 11px; border-radius: 10px; padding: 9px 11px; font-size: 11.5px; line-height: 1.5; background: rgba(217, 74, 99, 0.07); color: var(--ink-2); }
+
+  .qcards { display: grid; gap: 11px; grid-template-columns: repeat(auto-fit, minmax(285px, 1fr)); }
+  .qcard { background: var(--card); border-radius: 15px; padding: 14px; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(13, 21, 38, 0.07); }
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 7px; border-radius: 6px; background: #eef1f8; color: var(--ink-2); }
+  .tag.sky { background: rgba(127, 178, 224, 0.24); color: #1d5580; }
+  .tag.gold { background: rgba(231, 185, 78, 0.24); color: #7a5c00; }
+  .tag.rose { background: rgba(243, 87, 154, 0.14); color: #a5215f; }
+  .qcard .q { margin: 9px 0 0; font-size: 14px; font-weight: 600; line-height: 1.45; flex: 1; }
+  .qcard .src { margin-top: 8px; font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  .qcard .why { margin-top: 7px; font-size: 11.5px; color: var(--ink-2); line-height: 1.45; }
+  .qcard button { margin-top: 11px; border: 0; border-radius: 11px; padding: 10px; font-size: 12px; font-weight: 700; background: var(--deep); color: #fff; }
+  .qcard button.done { background: rgba(31, 174, 124, 0.14); color: #0f6e4f; }
+  .qcard .pub { margin-top: 6px; font-size: 10.5px; color: var(--muted); }
+
+  .tablewrap { overflow-x: auto; border-radius: 15px; background: var(--card); box-shadow: 0 1px 2px rgba(13, 21, 38, 0.07); }
+  /* Tables do not inherit colour/font from their ancestors in quirks mode —
+     which is how this file renders when opened directly, since it carries no
+     doctype of its own. Set both explicitly so it holds either way. */
+  table { border-collapse: collapse; width: 100%; min-width: 860px; font-size: 12.5px;
+    color: var(--ink); font-family: var(--ui); }
+  td, th { font-family: var(--ui); }
+  th { text-align: left; font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 10px 12px; background: #f7f9fd; }
+  td { padding: 10px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+  td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+  .st { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 7px; border-radius: 6px; }
+  .st.live { background: rgba(31, 174, 124, 0.16); color: #0f6e4f; }
+  .st.launching { background: rgba(231, 185, 78, 0.22); color: #7a5c00; }
+  .st.pipeline { background: #eef1f8; color: var(--muted); }
+  .st.reserved { background: rgba(243, 87, 154, 0.14); color: #a5215f; }
+  .st.available { background: rgba(31, 174, 124, 0.16); color: #0f6e4f; }
+  .st.held { background: rgba(231, 185, 78, 0.22); color: #7a5c00; }
+  .st.prohibited { background: rgba(217, 74, 99, 0.14); color: #a02338; }
+
+  .list { display: grid; gap: 9px; }
+  .item { border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  .item .h { display: flex; align-items: baseline; gap: 8px; }
+  .item .h b { font-size: 13.5px; }
+  .item .h .r { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .item p { margin: 5px 0 0; font-size: 11.5px; color: var(--ink-2); line-height: 1.5; }
+
+  .statrow { display: flex; align-items: baseline; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .statrow:last-child { border-bottom: 0; }
+  .statrow .l b { font-size: 13px; display: block; }
+  .statrow .l small { font-size: 10.5px; color: var(--muted); }
+  .statrow .v { margin-left: auto; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  .split { display: grid; gap: 5px; }
+  .split li { font-size: 12px; color: var(--ink-2); }
+  ul.plain { margin: 0; padding-left: 16px; }
+
+  /* the brief document */
+  .doc { max-width: 880px; margin: 22px auto 60px; background: var(--card); border-radius: 4px; box-shadow: 0 8px 40px rgba(13, 21, 38, 0.13); overflow: hidden; }
+  .doc-head { background: linear-gradient(120deg, var(--night), var(--slate)); color: #fff; padding: 26px 30px; }
+  .doc-head h2 { margin: 16px 0 4px; font-size: 25px; font-weight: 800; letter-spacing: -0.02em; }
+  .doc-head .cls { display: inline-block; margin-top: 11px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; background: rgba(255, 255, 255, 0.16); padding: 5px 9px; border-radius: 6px; }
+  .doc-body { padding: 26px 30px 34px; }
+  .sec { margin-bottom: 26px; }
+  .sec > h3 { margin: 0 0 11px; padding-bottom: 6px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sky-deep); }
+  .sec p.lede { margin: 0 0 12px; font-size: 14.5px; line-height: 1.65; }
+  .ol { counter-reset: a; display: grid; gap: 8px; }
+  .ol .li { display: flex; gap: 11px; background: #f6f8fc; border-radius: 11px; padding: 11px 13px; font-size: 13px; line-height: 1.55; }
+  .ol .li .k { font-family: var(--mono); font-weight: 700; color: var(--sky-deep); }
+
+  .foot { padding: 16px 18px 40px; text-align: center; font-size: 10.5px; color: rgba(238, 242, 251, 0.42); }
+  .paper .foot { color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  @media print {
+    .bar, .no-print { display: none !important; }
+    body, .paper { background: #fff; }
+    .doc { box-shadow: none; margin: 0; }
+  }
+</style>
+
+<div class="bar">
+  <div class="lockup">
+    <svg viewBox="0 0 26 26" width="30" height="30" aria-hidden="true">
+      <circle cx="13" cy="13" r="12" fill="none" stroke="#7FB2E0" stroke-width="1.4" opacity=".55" />
+      <g stroke="#fff" stroke-width="2.4" stroke-linecap="round">
+        <path d="M7 18 V9" /><path d="M13 18 V7" /><path d="M19 18 V9" />
+      </g>
+      <circle cx="13" cy="20.5" r="1.6" fill="#E7B94E" />
+    </svg>
+    <div>
+      <div class="wm">MESSI<span>.LIVE</span></div>
+      <div class="sub">PROTOTYPE · BYOND ASIA</div>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Prototype surfaces">
+    <button role="tab" aria-selected="true" data-view="fan">Fan experience</button>
+    <button role="tab" aria-selected="false" data-view="pulse">Global Pulse</button>
+    <button role="tab" aria-selected="false" data-view="brief">World Brief</button>
+  </div>
+
+  <div class="chip-demo">CONCEPT DEMO · NOT AFFILIATED WITH LIONEL MESSI</div>
+</div>
+
+<!-- ============================ FAN EXPERIENCE ============================ -->
+<section class="view" id="view-fan">
+  <div class="stage">
+    <div class="stage-inner">
+      <aside class="stage-note">
+        <span class="eyebrow">The hero experience</span>
+        <h1>Five minutes. One to one. <em>In your language.</em></h1>
+        <p>
+          Click through the whole journey exactly as a fan would: choose a membership, book a
+          slot, verify, get the reminder, and go into a real five-minute conversation.
+        </p>
+        <ol>
+          <li><b>Book</b> — the slot, the language, the consents</li>
+          <li><b>Meet</b> — five minutes with the digital human</li>
+          <li><b>Return</b> — he remembers what you told him</li>
+        </ol>
+        <p style="margin-top: 16px; font-size: 12px">
+          Turn your sound on. Tap the microphone during the session — the demo simulates the
+          fan's side and speaks Messi's replies aloud where your browser supports it.
+        </p>
+      </aside>
+
+      <div class="phone" id="phone">
+        <div class="scene">
+          <div class="spot"></div>
+          <div class="figure breathe">
+            <svg viewBox="0 0 300 420" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+              <defs>
+                <linearGradient id="figGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#9cc4e8" stop-opacity="0.92" />
+                  <stop offset="55%" stop-color="#4c7cae" stop-opacity="0.72" />
+                  <stop offset="100%" stop-color="#0b1226" stop-opacity="0.1" />
+                </linearGradient>
+              </defs>
+              <path class="body" d="M150 60c26 0 44 20 44 47 0 18-7 33-17 42 34 12 58 34 68 62 12 33 17 76 19 124H36c2-48 7-91 19-124 10-28 34-50 68-62-10-9-17-24-17-42 0-27 18-47 44-47z" />
+            </svg>
+          </div>
+          <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="grain"></div>
+        </div>
+        <div class="veil"></div>
+
+        <!-- landing -->
+        <section class="screen on" data-screen="landing">
+          <div class="brandrow">
+            <div class="wm">MESSI<span>.LIVE</span></div>
+            <div class="terr" id="terrLabel">MESSI.LIVE GLOBAL</div>
+          </div>
+          <div class="who"><b>Lionel Messi</b><small>Officially authorised digital human</small></div>
+          <div class="disclosure">
+            <b>AI</b> — You are speaking with an official AI-powered digital representation of
+            Lionel Messi. It never makes promises on his behalf.
+          </div>
+          <div class="sheet">
+            <h2>Your <em>moment</em> with Messi.</h2>
+            <p class="lead">
+              Five minutes. One to one. In your language. Book a time, and the officially
+              authorised digital human will be there.
+            </p>
+            <div class="steps">
+              <div class="step"><span class="ic">📅</span><b>Choose a time</b><small>A slot that suits you</small></div>
+              <div class="step"><span class="ic">💬</span><b>Speak with Messi</b><small>Five minutes, your language</small></div>
+              <div class="step"><span class="ic">🧠</span><b>He remembers</b><small>Pick up where you left off</small></div>
+            </div>
+            <button class="btn" data-go="tiers">Book my five minutes</button>
+            <button class="btn ghost" id="btnReturning">Continue as a fan Messi remembers</button>
+            <div class="langrow" id="langChips"></div>
+            <p class="fine">
+              Conversations are private. Memory is optional and you can delete it at any time.
+              Under-18 accounts require a parent or guardian.
+            </p>
+            <div class="site">www.messi.live</div>
+          </div>
+        </section>
+
+        <!-- membership -->
+        <section class="screen" data-screen="tiers">
+          <button class="back" data-go="landing">←</button>
+          <div class="formwrap"><div class="card">
+            <span class="eyebrow">Step 1 of 4 · Membership</span>
+            <h3>Free to meet. Premium to build the relationship.</h3>
+            <p class="sub">MESSI.LIVE is the platform. MESSI+ is the membership.</p>
+            <div class="tiergrid" id="tierGrid"></div>
+            <p class="lock">In this market, free access is supported by the territory partner.</p>
+            <button class="btn" data-go="slots" style="margin-top: 12px">Continue</button>
+          </div></div>
+        </section>
+
+        <!-- slots -->
+        <section class="screen" data-screen="slots">
+          <button class="back" data-go="tiers">←</button>
+          <div class="formwrap"><div class="card">
+            <span class="eyebrow">Step 2 of 4 · Your time</span>
+            <h3>When would you like to meet?</h3>
+            <p class="sub">Every conversation is exactly five minutes, one to one.</p>
+            <label class="f">Choose a day</label>
+            <div class="days" id="dayRow"></div>
+            <label class="f">Choose a time</label>
+            <div class="slots" id="slotGrid"></div>
+            <p class="lock" id="slotNote">Your slot is held for 10 minutes while you finish booking.</p>
+            <button class="btn" id="btnSlots" data-go="register" disabled style="margin-top: 12px">Continue</button>
+          </div></div>
+        </section>
+
+        <!-- register -->
+        <section class="screen" data-screen="register">
+          <button class="back" data-go="slots">←</button>
+          <div class="formwrap"><div class="card">
+            <span class="eyebrow">Step 3 of 4 · About you</span>
+            <h3>Tell us who we're meeting</h3>
+            <p class="sub">We only ask for what the conversation needs.</p>
+            <label class="f">Your name</label>
+            <input class="f" id="fName" placeholder="The name Messi should call you" />
+            <label class="f">Mobile number</label>
+            <input class="f" id="fPhone" placeholder="+00 000 000 0000" inputmode="tel" />
+            <label class="f">Country</label>
+            <select class="f" id="fCountry"></select>
+            <label class="f">Region</label>
+            <select class="f" id="fRegion"><option value="">Choose a country first</option></select>
+            <label class="f">Conversation language</label>
+            <select class="f" id="fLang"></select>
+            <label class="f">Age group</label>
+            <select class="f" id="fAge">
+              <option value="">—</option>
+              <option value="under-13">Under 13 (parent or guardian required)</option>
+              <option value="13-17">13–17 (parent or guardian required)</option>
+              <option value="18-24">18–24</option>
+              <option value="25-34">25–34</option>
+              <option value="35+">35+</option>
+            </select>
+            <div id="guardianNote" hidden class="note-amber">
+              A parent or guardian must complete this booking and stay present for the
+              conversation.
+            </div>
+            <label class="f">What would you like to talk about? <i>(optional)</i></label>
+            <select class="f" id="fTheme"></select>
+            <label class="check">
+              <input type="checkbox" id="cAI" />
+              <span>I understand this is an official AI-powered digital representation of Lionel Messi, not a live call.</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="cMem" checked />
+              <span>Remember our conversations so we can carry on next time. (Optional — delete any time.)</span>
+            </label>
+            <button class="btn" id="btnRegister" style="margin-top: 14px">Verify my number</button>
+          </div></div>
+        </section>
+
+        <!-- otp -->
+        <section class="screen" data-screen="otp">
+          <button class="back" data-go="register">←</button>
+          <div class="formwrap"><div class="card">
+            <span class="eyebrow">Step 4 of 4 · Verify</span>
+            <h3>Verify your number</h3>
+            <p class="sub">We sent a six-digit code to <b id="otpPhone"></b></p>
+            <div class="otp" id="otpRow"></div>
+            <p class="hint">Demo code: <button id="otpFill"></button> — tap to fill</p>
+            <button class="btn" data-go="confirmed" style="margin-top: 12px">Confirm my booking</button>
+          </div></div>
+        </section>
+
+        <!-- confirmed -->
+        <section class="screen" data-screen="confirmed">
+          <div class="formwrap"><div class="card">
+            <div class="tick">✓</div>
+            <h3 style="text-align: center">You're booked.</h3>
+            <p class="sub" style="text-align: center">
+              Messi will be ready at your time. We'll remind you an hour before.
+            </p>
+            <div class="refbox"><small>Your reference</small><b id="refA"></b></div>
+            <div style="margin-top: 10px">
+              <div class="row"><span>Date</span><b id="cDate">—</b></div>
+              <div class="row"><span>Time</span><b id="cTime">—</b></div>
+              <div class="row"><span>Language</span><b id="cLang">—</b></div>
+              <div class="row"><span>From</span><b id="cFrom">—</b></div>
+              <div class="row"><span>Membership</span><b id="cTier">—</b></div>
+            </div>
+            <button class="btn ghost" data-go="reminder" style="margin-top: 14px">Skip ahead to the reminder</button>
+          </div></div>
+        </section>
+
+        <!-- reminder -->
+        <section class="screen" data-screen="reminder">
+          <div class="formwrap"><div class="card">
+            <span class="eyebrow">One hour before</span>
+            <h3 style="margin-bottom: 10px">MESSI.LIVE</h3>
+            <div class="wa">
+              <div class="from">MESSI.LIVE</div>
+              <p id="waBody"></p>
+              <div class="t">18:30</div>
+            </div>
+            <button class="btn" id="btnJoin" style="margin-top: 14px">Join now →</button>
+            <p class="sub" style="text-align: center; margin-top: 9px">
+              Your link opens 15 minutes before and closes 10 minutes after.
+            </p>
+          </div></div>
+        </section>
+
+        <!-- lobby -->
+        <section class="screen" data-screen="lobby">
+          <div class="brandrow">
+            <div class="wm">MESSI<span>.LIVE</span></div>
+            <div class="terr">WAITING ROOM</div>
+          </div>
+          <div class="mid">
+            <div class="countwrap">
+              <small>Messi is ready in</small>
+              <div class="countnum" id="lobbyNum">00:08</div>
+              <small style="color: var(--gold)">Demo — shortened countdown</small>
+            </div>
+            <div class="card">
+              <p class="sub" style="text-align: center"><b style="color: var(--ink)">Before you go in</b></p>
+              <div class="ready">
+                <div class="ritem ok"><div class="dot">✓</div><span>Connection ready</span></div>
+                <div class="ritem" id="micItem"><div class="dot">🎤</div><span>Microphone</span><button id="btnMic">Allow</button></div>
+                <div class="ritem ok"><div class="dot" style="background: var(--sky-deep); color: #fff">文</div><span>Language: <b id="lobbyLang" style="margin-left: 4px">English</b></span></div>
+                <div class="ritem ok" id="memItem" hidden><div class="dot" style="background: var(--gold)">🧠</div><span>Messi remembers you</span></div>
+              </div>
+              <p class="sub" style="margin-top: 11px; font-size: 11px">
+                Speak normally, one person at a time. This is an AI-powered digital
+                representation — it will never make promises on Lionel's behalf.
+              </p>
+              <button class="btn" id="btnEnter" style="margin-top: 12px">Enter the conversation</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- session -->
+        <section class="screen" data-screen="session">
+          <div class="sesstop">
+            <div class="pill"><span class="rec"></span><span id="timer">05:00</span></div>
+            <div style="display: flex; gap: 6px">
+              <div class="pill ai">AI DIGITAL HUMAN</div>
+              <div class="pill" id="sessLang">文A · EN</div>
+            </div>
+          </div>
+          <div class="sessbottom">
+            <div class="caption" id="caption" dir="ltr"><span class="n">MESSI</span><span id="captionText">…</span></div>
+            <div class="yousaid" id="youSaid"></div>
+            <div class="microw">
+              <button class="mic" id="btnTalk" aria-label="Tap to speak">
+                <svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4Zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2Z" /></svg>
+              </button>
+              <div class="miclbl" id="micLbl">Tap to speak</div>
+            </div>
+          </div>
+          <button class="ff" id="btnFF">DEMO ⏩ 4:50</button>
+        </section>
+
+        <!-- closing -->
+        <section class="screen" data-screen="closing">
+          <div class="formwrap"><div class="card">
+            <h3 style="text-align: center">That was your moment.</h3>
+            <p class="sub" style="text-align: center">
+              Five minutes, one to one. Your conversation stays private.
+            </p>
+            <div class="refbox"><small>Your reference</small><b id="refB"></b></div>
+            <p class="sub" style="text-align: center; margin-top: 12px">How was it?</p>
+            <div class="stars" id="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+            <div class="summary">
+              <div class="h">What Messi took from your conversation</div>
+              <div id="closeSummary"></div>
+            </div>
+            <div class="memory">
+              <div class="h">What Messi will remember</div>
+              <p id="closeMemory"></p>
+              <small>You can view and delete this at any time in My Messi.</small>
+            </div>
+            <div class="counter">
+              <small>You are fan number</small>
+              <div class="n" id="fanNo">4,138,204</div>
+              <small>to have spoken with Messi on MESSI.LIVE.</small>
+            </div>
+            <div class="upsell" id="upsell">
+              <b>Want to carry this on?</b>
+              <p>MESSI+ members get more conversations, priority scheduling, relationship memory and the full Messi Stories library.</p>
+              <button class="btn rose" data-go="tiers">See MESSI+</button>
+            </div>
+            <button class="btn gold" id="btnToPulse" style="margin-top: 12px">See what this creates for Messi's team →</button>
+            <button class="btn ghost" id="btnRestart">Start again</button>
+          </div></div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    Concept prototype with synthetic data · every session discloses the AI digital human ·
+    not affiliated with, endorsed by, or connected to Lionel Messi or his management
+  </div>
+</section>
+
+<!-- ============================== GLOBAL PULSE ============================== -->
+<section class="view" id="view-pulse" hidden>
+  <div class="paper">
+    <div class="wrap">
+      <div class="dash-head">
+        <div>
+          <h2>The Messi Global Pulse</h2>
+          <p id="periodLabel">Understand millions of fans without reading millions of conversations.</p>
+        </div>
+        <div class="roles" role="tablist" aria-label="Dashboard role">
+          <button role="tab" aria-selected="true" data-role="messi">Messi — the relationship</button>
+          <button role="tab" aria-selected="false" data-role="mgmt">Management — the business</button>
+        </div>
+      </div>
+      <div id="pulseMessi"></div>
+      <div id="pulseMgmt" hidden></div>
+    </div>
+    <div class="foot">
+      Every figure on this page is produced by the Fan Voice Intelligence Framework running
+      over a deterministic synthetic dataset of 320 conversations.
+    </div>
+  </div>
+</section>
+
+<!-- =============================== WORLD BRIEF =============================== -->
+<section class="view" id="view-brief" hidden>
+  <div class="paper">
+    <div class="doc" id="doc"></div>
+  </div>
+</section>
+
+<script type="application/json" id="demo-data">{"markets":[{"country":"Argentina","territory":"MESSI.LIVE ARGENTINA","status":"live","localPrice":"ARS 6.900/mes","presentingPartner":"[Reserved — existing rights holder]","connectivityPartner":"[National connectivity partner — in negotiation]","holoMeSites":6,"primaryLanguage":"ES","regions":["Buenos Aires","Santa Fe","Córdoba","Rosario","Mendoza"]},{"country":"India","territory":"MESSI.LIVE INDIA","status":"live","localPrice":"₹399/month","presentingPartner":"[Presenting Partner — under management review]","connectivityPartner":"[National connectivity partner — in negotiation]","holoMeSites":4,"primaryLanguage":"HI","regions":["Kerala","West Bengal","Maharashtra","Goa","Delhi NCR"]},{"country":"Indonesia","territory":"MESSI.LIVE INDONESIA","status":"live","localPrice":"Rp 79.000/bulan","presentingPartner":"[Presenting Partner — category open]","connectivityPartner":"[National connectivity partner — in negotiation]","holoMeSites":3,"primaryLanguage":"ID","regions":["Jakarta","West Java","East Java","Bali","North Sumatra"]},{"country":"Saudi Arabia","territory":"MESSI.LIVE SAUDI ARABIA","status":"live","localPrice":"SAR 29/شهر","presentingPartner":"[Presenting Partner — under management review]","connectivityPartner":"[National connectivity partner — in negotiation]","holoMeSites":5,"primaryLanguage":"AR","regions":["Riyadh","Makkah","Eastern Province","Madinah"]},{"country":"United States","territory":"MESSI.LIVE USA","status":"live","localPrice":"US$7.99/month","presentingPartner":"[Reserved — existing rights holder]","connectivityPartner":"[National connectivity partner — open]","holoMeSites":7,"primaryLanguage":"EN","regions":["Florida","California","Texas","New York","Illinois"]},{"country":"Mexico","territory":"MESSI.LIVE MÉXICO","status":"launching","localPrice":"MXN 129/mes","presentingPartner":"[Presenting Partner — category open]","connectivityPartner":"[National connectivity partner — open]","holoMeSites":2,"primaryLanguage":"ES","regions":["CDMX","Jalisco","Nuevo León","Puebla"]},{"country":"Brazil","territory":"MESSI.LIVE BRASIL","status":"launching","localPrice":"R$ 29,90/mês","presentingPartner":"[Presenting Partner — category open]","connectivityPartner":"[National connectivity partner — open]","holoMeSites":2,"primaryLanguage":"PT","regions":["São Paulo","Rio de Janeiro","Bahia","Minas Gerais"]},{"country":"Egypt","territory":"MESSI.LIVE EGYPT","status":"launching","localPrice":"EGP 149/شهر","presentingPartner":"[Presenting Partner — category open]","connectivityPartner":"[National connectivity partner — in negotiation]","holoMeSites":1,"primaryLanguage":"AR","regions":["Cairo","Giza","Alexandria"]},{"country":"Malaysia","territory":"MESSI.LIVE MALAYSIA","status":"live","localPrice":"RM 24.90/bulan","presentingPartner":"[Presenting Partner — under management review]","connectivityPartner":"[National connectivity partner — in negotiation]","holoMeSites":3,"primaryLanguage":"MS","regions":["Selangor","Kuala Lumpur","Johor","Penang","Sabah"]},{"country":"Spain","territory":"MESSI.LIVE ESPAÑA","status":"live","localPrice":"€6,99/mes","presentingPartner":"[Reserved — existing rights holder]","connectivityPartner":"[National connectivity partner — open]","holoMeSites":3,"primaryLanguage":"ES","regions":["Cataluña","Madrid","Andalucía","Valencia"]},{"country":"Nigeria","territory":"MESSI.LIVE NIGERIA","status":"pipeline","localPrice":"₦4,500/month","presentingPartner":"[Presenting Partner — category open]","connectivityPartner":"[National connectivity partner — open]","holoMeSites":0,"primaryLanguage":"EN","regions":["Lagos","Abuja","Kano","Rivers"]},{"country":"Japan","territory":"MESSI.LIVE JAPAN","status":"launching","localPrice":"¥980/月","presentingPartner":"[Presenting Partner — under management review]","connectivityPartner":"[National connectivity partner — in negotiation]","holoMeSites":4,"primaryLanguage":"JA","regions":["Tokyo","Osaka","Aichi","Fukuoka"]},{"country":"China","territory":"MESSI.LIVE 中国","status":"reserved","localPrice":"¥49/月","presentingPartner":"[Reserved — existing rights holder]","connectivityPartner":"[National connectivity partner — in negotiation]","holoMeSites":2,"primaryLanguage":"ZH","regions":["Guangdong","Shanghai","Beijing","Zhejiang"]},{"country":"France","territory":"MESSI.LIVE FRANCE","status":"live","localPrice":"€6,99/mois","presentingPartner":"[Reserved — existing rights holder]","connectivityPartner":"[National connectivity partner — open]","holoMeSites":2,"primaryLanguage":"FR","regions":["Île-de-France","PACA","Occitanie"]},{"country":"South Korea","territory":"MESSI.LIVE KOREA","status":"pipeline","localPrice":"₩9,900/월","presentingPartner":"[Presenting Partner — category open]","connectivityPartner":"[National connectivity partner — open]","holoMeSites":1,"primaryLanguage":"KO","regions":["Seoul","Gyeonggi","Busan"]}],"commercial":{"tiers":[{"id":"free","name":"MESSI.LIVE","price":"Free","positioning":"Free to meet. Widely available, potentially subsidised by territorial partners.","benefits":["Scheduled conversations","Limited monthly access","Selected Messi Stories","Public Messi Inspires content","Sponsor-supported experiences"],"mixPct":84,"arpu":0},{"id":"plus","name":"MESSI+","price":"US$5.99–9.99 / month","positioning":"Premium to build the relationship.","benefits":["More conversations each month","Priority scheduling","Relationship memory (My Messi)","Full Messi Stories library","Messi Inspires personalised encouragement","Exclusive career content"],"mixPct":11,"arpu":7.49},{"id":"family","name":"MESSI+ FAMILY","price":"US$14.99–19.99 / month","positioning":"A household relationship, built around children.","benefits":["Multiple profiles","Children's stories with parental controls","Messi Academy for young players","Family experiences and milestones"],"mixPct":4,"arpu":16.99},{"id":"premium","name":"MESSI+ PREMIUM","price":"Priority / on-demand","positioning":"Immediate access and premium personalised moments.","benefits":["Priority or immediate conversations","Longer sessions","Premium personalised experiences","Exclusive content and privileges"],"mixPct":1,"arpu":34.99}],"engines":[{"no":"01","name":"Country partnerships","description":"Territorial presenting partners, one per market, approved category by category.","sharePct":22,"horizon":"Now"},{"no":"02","name":"Mobile operators","description":"Distribution, bundling and connectivity partnerships — the B2B2C engine.","sharePct":19,"horizon":"Now"},{"no":"03","name":"MESSI+ subscriptions","description":"Individual, Family and Premium memberships.","sharePct":24,"horizon":"Now"},{"no":"04","name":"Category sponsorship","description":"Approved partners attached to specific experiences, never to Lionel directly.","sharePct":9,"horizon":"Year 1"},{"no":"05","name":"Messi Academy","description":"Consumer programmes plus schools, clubs, academies and youth institutions.","sharePct":8,"horizon":"Year 1"},{"no":"06","name":"Premium transactions","description":"Priority conversations, personalised moments and special experiences.","sharePct":6,"horizon":"Now"},{"no":"07","name":"Commerce","description":"Merchandise, tickets and official collections attached to the moment.","sharePct":5,"horizon":"Year 1"},{"no":"08","name":"Content licensing","description":"Airlines, hotels, schools, museums, broadcasters and platforms.","sharePct":4,"horizon":"Year 2+"},{"no":"09","name":"Physical experiences","description":"HoloMe installations, fan zones, retail and exhibitions.","sharePct":3,"horizon":"Year 1"}],"rights":[{"category":"Telecommunications / connectivity","status":"held","note":"Primary distribution engine — negotiated territory by territory."},{"category":"Sportswear & equipment","status":"reserved","note":"Existing global relationship — never offered at territory level."},{"category":"Payments & fintech","status":"available","note":"Subscriptions, rewards and commerce enablement."},{"category":"Airlines & travel","status":"available","note":"Content licensing and in-flight experiences."},{"category":"Consumer electronics","status":"available","note":"Device bundling and HoloMe hardware."},{"category":"Food & beverage","status":"held","note":"Under management review — child-audience suitability applies."},{"category":"Education & youth development","status":"available","note":"Natural fit for Messi Academy and Messi For Good."},{"category":"Betting & gambling","status":"prohibited","note":"Never sold. Incompatible with a children's environment."},{"category":"Alcohol & tobacco","status":"prohibited","note":"Never sold. Incompatible with a children's environment."},{"category":"Political & advocacy","status":"prohibited","note":"Never sold. Reserved category in every territory."},{"category":"Crypto & speculative assets","status":"prohibited","note":"Never sold. Brand-safety exclusion."},{"category":"Healthcare & pharmaceutical","status":"reserved","note":"Reserved — no medical claims may attach to the digital human."}],"telco":[{"offer":"“Every premium 5G subscriber receives MESSI.LIVE.”","operatorContribution":"National customer reach + 5G positioning","platformBenefit":"Millions of activated fans without one-by-one acquisition"},{"offer":"“One free 5 Minutes With Messi every month.”","operatorContribution":"Retail, marketing and loyalty programmes","platformBenefit":"A recurring reason to return, funded by the operator"},{"offer":"“MESSI+ FAMILY included with your family plan.”","operatorContribution":"Billing, identity and account integration","platformBenefit":"Family tier scale and low-friction payment"}],"controls":["Sponsor approval","Category veto","Territory approval","Content approval","Campaign approval","Likeness approval","Voice governance","Brand-safety control","Emergency shutdown authority"],"split":{"byond":["Platform engineering and hosting","Digital-human integration and HoloMe deployment","Language and voice operations","FVIF intelligence pipeline and dashboards","Territory launch, billing and telco integration","Fan care tooling and safeguarding workflow"],"management":["Everything that is Lionel Messi","Approved knowledge, stories and values","Likeness, voice and persona governance","Every partner, category and territory","Every piece of published content","Emergency shutdown authority"]},"revenue":{"subscriptionMrr":7784280,"subscriptionArr":93411360,"partnershipArr":28000000,"totalArr":121411360,"byTier":[{"tier":"MESSI.LIVE","fans":3528000,"mrr":0},{"tier":"MESSI+","fans":462000,"mrr":3460380},{"tier":"MESSI+ FAMILY","fans":168000,"mrr":2854320},{"tier":"MESSI+ PREMIUM","fans":42000,"mrr":1469580}]}},"fvif":{"dimensions":[{"id":"sentiment","name":"Sentiment & Emotional Register","purpose":"Identify the fan's emotional position toward a specific TARGET inside the conversation — a moment, a setback, a hope. Sentiment attaches to the target, never to the fan as a permanent attribute.","anchors":[{"score":"+2","label":"Joy / deep gratitude","anchor":"Strong positive emotion tied to a described experience or memory."},{"score":"+1","label":"Warm / hopeful","anchor":"Generally positive, appreciative or optimistic register."},{"score":"0","label":"Neutral or mixed","anchor":"Factual, curious, balanced, or materially positive and negative."},{"score":"-1","label":"Discouraged","anchor":"Doubt, disappointment or low confidence with moderate intensity."},{"score":"-2","label":"Distressed","anchor":"Grief, fear or acute distress linked to the described situation."},{"score":"IE","label":"Insufficient evidence","anchor":"Transcript does not support a fair emotional reading."}]},{"id":"intentClarity","name":"Intent Clarity","purpose":"Can the team understand what the fan actually came for — the question behind the question? This is NOT a language-proficiency score and never penalises a child or a non-native speaker.","anchors":[{"score":"5","label":"Fully clear","anchor":"The ask, the situation behind it and what a good answer looks like are all clear."},{"score":"4","label":"Mostly clear","anchor":"Main intent clear, one element missing or uncertain."},{"score":"3","label":"Identifiable","anchor":"A general intent is identifiable but the specifics are thin."},{"score":"2","label":"Vague","anchor":"The fan spoke, but the intent is fragmented or hard to act on."},{"score":"1","label":"Unformed","anchor":"No coherent intent can be identified from the conversation."},{"score":"NE","label":"Not elicited","anchor":"Digital Messi never gave a fair opening for the fan to say why they came."},{"score":"IE","label":"Insufficient evidence","anchor":"Transcript incomplete, corrupted or too unclear to score."}]},{"id":"contextDepth","name":"Personal Context Depth","purpose":"Separate broad admiration from a specific lived situation. Determines how usable the conversation is as evidence about a real fan need — not whether the fan deserves attention. Every fan deserves attention.","anchors":[{"score":"1","label":"General admiration","anchor":"Praise or excitement with no situation attached."},{"score":"2","label":"Light personal context","anchor":"Some context about the fan's life, but thin or generic."},{"score":"3","label":"Specific situation","anchor":"A concrete circumstance: a team, a trial, an injury, a school, a match."},{"score":"4","label":"Situation with stakes","anchor":"Specific circumstance plus what depends on it and what has already been tried."},{"score":"5","label":"Sustained personal narrative","anchor":"A developed story across time — repeated attempts, family context, a milestone with a date."},{"score":"IE","label":"Insufficient evidence","anchor":"Cannot reliably assess the depth of context."}]},{"id":"significance","name":"Relationship Significance","purpose":"How much this moment matters in the fan's life — based on the described stakes, not on emotional volume, and never on what the fan pays.","anchors":[{"score":"1","label":"Curiosity","anchor":"A light question or a fun exchange. Aggregate and enjoy."},{"score":"2","label":"Meaningful moment","anchor":"A memorable personal moment for the fan. Worth a warm, personalised close."},{"score":"3","label":"Live personal goal","anchor":"Tied to something the fan is actively working toward. Candidate for continuity and MESSI ACADEMY follow-up."},{"score":"4","label":"Milestone or hardship","anchor":"A trial, a loss, an illness, a family milestone. Candidate for Lionel's own 30-second response."},{"score":"5","label":"Life-defining","anchor":"The fan frames this as one of the most important moments of their life. Human review before any public use."},{"score":"IE","label":"Insufficient evidence","anchor":"Significance cannot be determined fairly."}]},{"id":"actionability","name":"Content Actionability","purpose":"Did the fan express something Messi's world can actually make, do or answer — a story, a drill, an academy module, a response, an experience?","anchors":[{"score":"5","label":"Specific & producible","anchor":"A clear, specific request that maps to an existing MESSI.LIVE experience or a producible piece of content."},{"score":"4","label":"Clear request","anchor":"Clear request, but format or scope still needs a decision."},{"score":"3","label":"General direction","anchor":"A theme the fan wants more of is identifiable."},{"score":"2","label":"Expression only","anchor":"The fan shared or asked, but there is no thing to make."},{"score":"1","label":"None","anchor":"No identifiable content or product signal."},{"score":"NE","label":"Not elicited","anchor":"Digital Messi never asked what the fan would like to hear or learn next."},{"score":"IE","label":"Insufficient evidence","anchor":"Request cannot be interpreted with sufficient confidence."}]},{"id":"confirmation","name":"Continuity Confirmation","purpose":"Did the fan agree that the reflected summary was right — the gate that decides whether a memory may be carried into the next conversation?","anchors":[{"score":"C","label":"Confirmed","anchor":"Highest confidence the summary reflects the fan's meaning. Memory may be stored if consent was given."},{"score":"CC","label":"Confirmed with correction","anchor":"Store the corrected version; preserve the correction in the audit trail."},{"score":"NC","label":"Not confirmed","anchor":"Do not treat as validated and do not carry into memory. Transcript-grounded fields only."},{"score":"NE","label":"Not elicited","anchor":"The five minutes ended before the confirm step."},{"score":"IE","label":"Insufficient evidence","anchor":"The fan's response to the confirmation was unclear."}]},{"id":"care","name":"Care & Escalation","purpose":"A duty-of-care routing decision combining distress, vulnerability, the age band of the fan and the presence of a real-world risk. Never a sentiment label.","anchors":[{"score":"Normal","label":"Normal","anchor":"No welfare concern. Aggregate analytics and normal curation."},{"score":"Watch","label":"Watch","anchor":"Discouragement, bullying or persistent low confidence in a young fan. Route to the fan-care queue; consider a MESSI INSPIRES follow-up."},{"score":"Care","label":"Care","anchor":"Disclosed hardship, illness, bereavement or a safety concern. Same-day human review by a trained fan-care officer; localised support signposting."},{"score":"Critical","label":"Critical","anchor":"Disclosure of self-harm risk, abuse or imminent danger. Trigger the pre-approved safeguarding protocol — never automated handling alone, never a scripted avatar reply."}]}],"excluded":["Membership tier, spend or lifetime value","Accent, dialect or language fluency","Vocabulary or sophistication of language","Speaking speed or hesitation","Emotional volume or tone of voice","Follower count, fame or social reach","Country, market size or partner value","Perceived football knowledge"],"invariants":["Every session discloses, before it begins, that this is an official AI-powered digital representation of Lionel Messi.","Digital Messi never makes promises, endorsements or claims on Lionel's behalf.","No medical, legal, financial or transfer/contract commentary — those are reserved categories.","Under-18 sessions run inside the children's environment with verified parental consent and age-appropriate scripts.","Memory is opt-in, reviewable by the fan, and erasable on request.","Management holds likeness, voice, content, campaign and partner approval, plus emergency shutdown authority."],"experiences":[{"id":"five_minutes","name":"5 Minutes With Messi","blurb":"Private one-to-one conversations."},{"id":"stories","name":"Messi Stories","blurb":"Children's and bedtime storytelling."},{"id":"inspires","name":"Messi Inspires","blurb":"Motivation and encouragement."},{"id":"academy","name":"Messi Academy","blurb":"Football development."},{"id":"exclusive","name":"Messi Exclusive","blurb":"Interactive career stories."},{"id":"my_messi","name":"My Messi","blurb":"Personal relationship and memories."},{"id":"moments","name":"Messi Moments","blurb":"Birthdays and important milestones."},{"id":"for_good","name":"Messi For Good","blurb":"Youth and social-impact programmes."}]},"pulse":{"periodLabel":"August 2026 · month to date","registerLabel":"-21 — 9% warm, 53% neutral, 38% discouraged about their own situation","kpis":{"conversations":320,"countries":15,"languages":11,"avgDuration":"4:14","netSentiment":-21,"satisfaction":"4.7","memoryOptInPct":69,"returningPct":22,"plusSharePct":33,"holoMeSharePct":8},"sentiment":{"positive":9,"neutral":53,"negative":38},"topics":[{"label":"Football & training","count":78,"pct":24,"deltaPts":6,"team":"Messi Academy (coaching)","experience":"Messi Academy","sensitive":false},{"label":"Motivation & resilience","count":63,"pct":20,"deltaPts":3,"team":"Messi Inspires (motivation)","experience":"Messi Inspires","sensitive":false},{"label":"Family & childhood","count":56,"pct":18,"deltaPts":2,"team":"Messi Stories (children's)","experience":"Messi Stories","sensitive":false},{"label":"World Cup & career moments","count":51,"pct":16,"deltaPts":-6,"team":"Content Studio","experience":"Messi Exclusive","sensitive":false},{"label":"Academy & trials","count":39,"pct":12,"deltaPts":0,"team":"Messi Academy (coaching)","experience":"Messi Academy","sensitive":false},{"label":"Gratitude & personal stories","count":14,"pct":4,"deltaPts":-3,"team":"Fan Relations","experience":"My Messi","sensitive":false},{"label":"Wellbeing, injury & recovery","count":11,"pct":3,"deltaPts":-1,"team":"Fan Care & Safeguarding","experience":"Messi Inspires","sensitive":true},{"label":"Products, tickets & experiences","count":5,"pct":2,"deltaPts":0,"team":"Commercial & Partnerships","experience":"5 Minutes With Messi","sensitive":false},{"label":"Community & social impact","count":3,"pct":1,"deltaPts":0,"team":"Messi For Good / Foundation","experience":"Messi For Good","sensitive":false}],"emerging":{"label":"Football & training","count":78,"pct":24,"deltaPts":6,"team":"Messi Academy (coaching)","experience":"Messi Academy","sensitive":false},"emergingQuote":{"quote":"How do I improve my first touch when the ball comes at speed?","country":"Saudi Arabia","languageLabel":"العربية","ageBand":"13–17"},"countries":[{"country":"India","territory":"MESSI.LIVE INDIA","status":"live","count":49,"pct":15,"growthPct":32,"netSentiment":-22,"plusSharePct":47,"topTopic":"Football & training","holoMeSites":4},{"country":"Argentina","territory":"MESSI.LIVE ARGENTINA","status":"live","count":40,"pct":13,"growthPct":-18,"netSentiment":-14,"plusSharePct":35,"topTopic":"Family & childhood","holoMeSites":6},{"country":"Indonesia","territory":"MESSI.LIVE INDONESIA","status":"live","count":33,"pct":10,"growthPct":-5,"netSentiment":-27,"plusSharePct":42,"topTopic":"Football & training","holoMeSites":3},{"country":"United States","territory":"MESSI.LIVE USA","status":"live","count":26,"pct":8,"growthPct":-19,"netSentiment":-19,"plusSharePct":19,"topTopic":"Football & training","holoMeSites":7},{"country":"Saudi Arabia","territory":"MESSI.LIVE SAUDI ARABIA","status":"live","count":24,"pct":8,"growthPct":-28,"netSentiment":-10,"plusSharePct":38,"topTopic":"Football & training","holoMeSites":5},{"country":"Brazil","territory":"MESSI.LIVE BRASIL","status":"launching","count":23,"pct":7,"growthPct":20,"netSentiment":-24,"plusSharePct":26,"topTopic":"Football & training","holoMeSites":2},{"country":"Mexico","territory":"MESSI.LIVE MÉXICO","status":"launching","count":21,"pct":7,"growthPct":35,"netSentiment":-21,"plusSharePct":33,"topTopic":"Motivation & resilience","holoMeSites":2},{"country":"Nigeria","territory":"MESSI.LIVE NIGERIA","status":"pipeline","count":19,"pct":6,"growthPct":99,"netSentiment":-18,"plusSharePct":21,"topTopic":"Football & training","holoMeSites":0},{"country":"Egypt","territory":"MESSI.LIVE EGYPT","status":"launching","count":18,"pct":6,"growthPct":8,"netSentiment":-22,"plusSharePct":33,"topTopic":"Motivation & resilience","holoMeSites":1},{"country":"Malaysia","territory":"MESSI.LIVE MALAYSIA","status":"live","count":17,"pct":5,"growthPct":-5,"netSentiment":-21,"plusSharePct":29,"topTopic":"World Cup & career moments","holoMeSites":3},{"country":"Spain","territory":"MESSI.LIVE ESPAÑA","status":"live","count":15,"pct":5,"growthPct":-37,"netSentiment":-23,"plusSharePct":40,"topTopic":"Motivation & resilience","holoMeSites":3},{"country":"Japan","territory":"MESSI.LIVE JAPAN","status":"launching","count":12,"pct":4,"growthPct":151,"netSentiment":-25,"plusSharePct":17,"topTopic":"Motivation & resilience","holoMeSites":4},{"country":"France","territory":"MESSI.LIVE FRANCE","status":"live","count":11,"pct":3,"growthPct":-8,"netSentiment":-32,"plusSharePct":27,"topTopic":"Motivation & resilience","holoMeSites":2},{"country":"China","territory":"MESSI.LIVE 中国","status":"reserved","count":8,"pct":3,"growthPct":-26,"netSentiment":-19,"plusSharePct":38,"topTopic":"World Cup & career moments","holoMeSites":2},{"country":"South Korea","territory":"MESSI.LIVE KOREA","status":"pipeline","count":4,"pct":1,"growthPct":12,"netSentiment":-25,"plusSharePct":0,"topTopic":"Academy & trials","holoMeSites":1}],"fastestGrowingCountry":{"country":"Japan","territory":"MESSI.LIVE JAPAN","status":"launching","count":12,"pct":4,"growthPct":151,"netSentiment":-25,"plusSharePct":17,"topTopic":"Motivation & resilience","holoMeSites":4},"languages":[{"label":"English","count":87,"pct":27},{"label":"Español","count":70,"pct":22},{"label":"हिन्दी","count":41,"pct":13},{"label":"العربية","count":31,"pct":10},{"label":"Bahasa Indonesia","count":24,"pct":8},{"label":"Français","count":18,"pct":6},{"label":"Português","count":15,"pct":5},{"label":"Bahasa Melayu","count":14,"pct":4},{"label":"日本語","count":10,"pct":3},{"label":"中文","count":7,"pct":2},{"label":"한국어","count":3,"pct":1}],"ageBands":[{"band":"Under 13","count":42,"pct":13},{"band":"13–17","count":119,"pct":37},{"band":"18–24","count":71,"pct":22},{"band":"25–34","count":62,"pct":19},{"band":"35+","count":26,"pct":8}],"experiences":[{"name":"Messi Academy","count":117,"pct":37},{"name":"Messi Inspires","count":74,"pct":23},{"name":"Messi Stories","count":56,"pct":18},{"name":"Messi Exclusive","count":51,"pct":16},{"name":"My Messi","count":14,"pct":4},{"name":"5 Minutes With Messi","count":5,"pct":2},{"name":"Messi For Good","count":3,"pct":1}],"care":[{"level":"Critical","count":0,"pct":0},{"level":"Care","count":42,"pct":13},{"level":"Watch","count":18,"pct":6},{"level":"Normal","count":260,"pct":81}],"careQueue":[{"reference":"MSL-2026-100056","topic":"Gratitude & personal stories","care":"Care","country":"Malaysia","region":"Kuala Lumpur","lang":"Bahasa Melayu","age":"25-34","time":"7 min ago","summary":"Fan from Kuala Lumpur, Malaysia shared a personal story about gratitude & personal stories.","reasons":["Care level: Care — same-day fan-care review","Low confidence on a high-significance conversation"]},{"reference":"MSL-2026-100119","topic":"Motivation & resilience","care":"Care","country":"Spain","region":"Andalucía","lang":"Español","age":"under-13","time":"22 min ago","summary":"Fan from Andalucía, Spain asked about motivation & resilience: \"How did you keep believing when people told you that you were too small?\" They asked for: Please tell me what you told yourself at my age.","reasons":["Care level: Care — same-day fan-care review","Minor + high significance — review before any content use"]},{"reference":"MSL-2026-100126","topic":"Gratitude & personal stories","care":"Care","country":"India","region":"Kerala","lang":"हिन्दी","age":"13-17","time":"16 days ago","summary":"Fan from Kerala, India shared a personal story about gratitude & personal stories.","reasons":["Care level: Care — same-day fan-care review","Low confidence on a high-significance conversation","Minor + high significance — review before any content use"]},{"reference":"MSL-2026-100168","topic":"Motivation & resilience","care":"Care","country":"Egypt","region":"Cairo","lang":"English","age":"13-17","time":"6 days ago","summary":"Fan from Cairo, Egypt asked about motivation & resilience: \"How did you keep believing when people told you that you were too small?\" They asked for: Please tell me what you told yourself at my age.","reasons":["Care level: Care — same-day fan-care review","Minor + high significance — review before any content use"]},{"reference":"MSL-2026-100385","topic":"Motivation & resilience","care":"Care","country":"Argentina","region":"Mendoza","lang":"Español","age":"under-13","time":"23 h ago","summary":"Fan from Mendoza, Argentina asked about motivation & resilience: \"How did you keep believing when people told you that you were too small?\" They asked for: Please tell me what you told yourself at my age.","reasons":["Care level: Care — same-day fan-care review","Minor + high significance — review before any content use"]},{"reference":"MSL-2026-100420","topic":"Gratitude & personal stories","care":"Care","country":"Saudi Arabia","region":"Eastern Province","lang":"العربية","age":"13-17","time":"14 h ago","summary":"Fan from Eastern Province, Saudi Arabia shared a personal story about gratitude & personal stories.","reasons":["Care level: Care — same-day fan-care review","Low confidence on a high-significance conversation","Minor + high significance — review before any content use"]},{"reference":"MSL-2026-100490","topic":"Football & training","care":"Care","country":"Japan","region":"Tokyo","lang":"日本語","age":"under-13","time":"15 h ago","summary":"Fan from Tokyo, Japan shared a personal story about football & training.","reasons":["Care level: Care — same-day fan-care review","Low confidence on a high-significance conversation","Minor + high significance — review before any content use"]},{"reference":"MSL-2026-100525","topic":"Motivation & resilience","care":"Care","country":"Egypt","region":"Giza","lang":"العربية","age":"13-17","time":"14 h ago","summary":"Fan from Giza, Egypt asked about motivation & resilience: \"How did you keep believing when people told you that you were too small?\" They asked for: Please tell me what you told yourself at my age.","reasons":["Care level: Care — same-day fan-care review","Minor + high significance — review before any content use"]}],"reviewCount":83,"curation":[{"reference":"MSL-2026-100119","question":"How did you keep believing when people told you that you were too small?","country":"Spain","languageLabel":"Español","ageBand":"Under 13","topic":"Motivation & resilience","significance":4,"similarCount":21,"rationale":"21 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Inspires"},{"reference":"MSL-2026-100189","question":"Next month I have my first professional academy trial. What should I be thinking about on the day?","country":"Mexico","languageLabel":"English","ageBand":"13–17","topic":"Academy & trials","significance":4,"similarCount":27,"rationale":"27 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Academy"},{"reference":"MSL-2026-100035","question":"What were you actually thinking in the moments before the 2022 final penalty?","country":"Mexico","languageLabel":"Español","ageBand":"13–17","topic":"World Cup & career moments","significance":3,"similarCount":25,"rationale":"25 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Exclusive"},{"reference":"MSL-2026-100112","question":"How do I improve my first touch when the ball comes at speed?","country":"Saudi Arabia","languageLabel":"العربية","ageBand":"13–17","topic":"Football & training","significance":2,"similarCount":30,"rationale":"30 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Academy"},{"reference":"MSL-2026-100014","question":"You left Rosario at thirteen. How did you deal with missing your family?","country":"Brazil","languageLabel":"Português","ageBand":"13–17","topic":"Family & childhood","significance":2,"similarCount":15,"rationale":"15 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Stories"},{"reference":"MSL-2026-100385","question":"How did you keep believing when people told you that you were too small?","country":"Argentina","languageLabel":"Español","ageBand":"Under 13","topic":"Motivation & resilience","significance":4,"similarCount":21,"rationale":"21 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Inspires"}],"memory":{"optInPct":69,"hooksReady":108,"returningPct":22},"tiers":[{"tier":"free","label":"MESSI.LIVE (free)","count":213,"pct":67},{"tier":"plus","label":"MESSI+","count":65,"pct":20},{"tier":"family","label":"MESSI+ FAMILY","count":32,"pct":10},{"tier":"premium","label":"MESSI+ PREMIUM","count":10,"pct":3}]},"brief":{"weekLabel":"Week 33 · 10–16 August 2026","classification":"CONFIDENTIAL — DEMO · Auto-generated, human-reviewed before release","headline":"320 conversations across 15 countries and 11 languages. Average conversation 4:14 of the five minutes, satisfaction 4.7/5. Emotional register -21 — 9% warm, 53% neutral, 38% discouraged about their own situation. Football & training both leads the world's questions and grew fastest (+6 pts of share).","themes":[{"rank":1,"topic":"Football & training","conversations":78,"deltaPts":6,"quote":"Fan from Tokyo, Japan shared a personal story about football & training.","quoteCountry":"Japan","quoteLanguage":"日本語","quoteAge":"under-13","countries":["India","Indonesia","Saudi Arabia","Argentina"],"owner":"Messi Academy (coaching)","experience":"Messi Academy"},{"rank":2,"topic":"Motivation & resilience","conversations":63,"deltaPts":3,"quote":"How did you keep believing when people told you that you were too small?","quoteCountry":"Spain","quoteLanguage":"Español","quoteAge":"under-13","countries":["India","Egypt","Mexico","Spain"],"owner":"Messi Inspires (motivation)","experience":"Messi Inspires"},{"rank":3,"topic":"Family & childhood","conversations":56,"deltaPts":2,"quote":"Fan from Puebla, Mexico shared a personal story about family & childhood. They asked for: Tell me a story about being brave, for my son before he sleeps.","quoteCountry":"Mexico","quoteLanguage":"Español","quoteAge":"25-34","countries":["Argentina","India","United States","Saudi Arabia"],"owner":"Messi Stories (children's)","experience":"Messi Stories"},{"rank":4,"topic":"World Cup & career moments","conversations":51,"deltaPts":-6,"quote":"What were you actually thinking in the moments before the 2022 final penalty?","quoteCountry":"Mexico","quoteLanguage":"Español","quoteAge":"13-17","countries":["Indonesia","India","Argentina","Brazil"],"owner":"Content Studio","experience":"Messi Exclusive"},{"rank":5,"topic":"Academy & trials","conversations":39,"deltaPts":0,"quote":"Next month I have my first professional academy trial. What should I be thinking about on the day?","quoteCountry":"Mexico","quoteLanguage":"English","quoteAge":"13-17","countries":["Argentina","Mexico","India","Indonesia"],"owner":"Messi Academy (coaching)","experience":"Messi Academy"}],"askedOfLionel":[{"reference":"MSL-2026-100119","question":"How did you keep believing when people told you that you were too small?","country":"Spain","languageLabel":"Español","ageBand":"Under 13","topic":"Motivation & resilience","significance":4,"similarCount":21,"rationale":"21 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Inspires"},{"reference":"MSL-2026-100189","question":"Next month I have my first professional academy trial. What should I be thinking about on the day?","country":"Mexico","languageLabel":"English","ageBand":"13–17","topic":"Academy & trials","significance":4,"similarCount":27,"rationale":"27 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Academy"},{"reference":"MSL-2026-100035","question":"What were you actually thinking in the moments before the 2022 final penalty?","country":"Mexico","languageLabel":"Español","ageBand":"13–17","topic":"World Cup & career moments","significance":3,"similarCount":25,"rationale":"25 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Exclusive"},{"reference":"MSL-2026-100112","question":"How do I improve my first touch when the ball comes at speed?","country":"Saudi Arabia","languageLabel":"العربية","ageBand":"13–17","topic":"Football & training","significance":2,"similarCount":30,"rationale":"30 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Academy"},{"reference":"MSL-2026-100014","question":"You left Rosario at thirteen. How did you deal with missing your family?","country":"Brazil","languageLabel":"Português","ageBand":"13–17","topic":"Family & childhood","significance":2,"similarCount":15,"rationale":"15 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Stories"},{"reference":"MSL-2026-100385","question":"How did you keep believing when people told you that you were too small?","country":"Argentina","languageLabel":"Español","ageBand":"Under 13","topic":"Motivation & resilience","significance":4,"similarCount":21,"rationale":"21 fans asked substantially the same question this period — one answer reaches all of them.","experience":"Messi Inspires"}],"commissions":[{"title":"Ball mastery & first touch","format":"Coached module — 3 × 4-minute drills with a digital-Messi introduction","rationale":"30 conversations landed on this sub-theme (24% of all conversations sit in football & training, +6 pts period on period). Example: \"How do I improve my first touch when the ball comes at speed?\"","owner":"Messi Academy (coaching)","demand":30},{"title":"Academy trial preparation","format":"Coached module — 3 × 4-minute drills with a digital-Messi introduction","rationale":"27 conversations landed on this sub-theme (12% of all conversations sit in academy & trials, +0 pts period on period). Example: \"Next month I have my first professional academy trial. What should I be thinking about…\"","owner":"Messi Academy (coaching)","demand":27},{"title":"The 2014 defeat","format":"Interactive career story with branching questions","rationale":"26 conversations landed on this sub-theme (16% of all conversations sit in world cup & career moments). Example: \"After 2014 you said you thought about walking away. How did you decide to keep playing…\"","owner":"Content Studio","demand":26},{"title":"2022 final","format":"Interactive career story with branching questions","rationale":"25 conversations landed on this sub-theme (16% of all conversations sit in world cup & career moments). Example: \"What were you actually thinking in the moments before the 2022 final penalty?\"","owner":"Content Studio","demand":25},{"title":"Nerves before a match","format":"Personalised encouragement script + one 30-second Lionel response","rationale":"24 conversations landed on this sub-theme (20% of all conversations sit in motivation & resilience, +3 pts period on period). Example: \"I get so nervous before matches that I cannot eat. Did you ever feel like that?\"","owner":"Messi Inspires (motivation)","demand":24}],"careNote":"0 critical and 42 care-level conversations were routed to trained fan-care officers this week; 18 more are on the watch queue. 83 records in total were held for human review before any content use. No conversation on the care queue was answered by the digital human alone.","territoryWatch":{"growth":"MESSI.LIVE JAPAN · +151% · 12 conversations · top theme Motivation & resilience","attention":"France · emotional register -32 · 11 conversations"},"commercial":[{"headline":"MESSI+ penetration at 33% of conversations","detail":"MESSI+ 20% · MESSI+ FAMILY 10% · MESSI+ PREMIUM 3%. Memory and priority scheduling remain the two benefits fans convert for."},{"headline":"MESSI.LIVE NIGERIA: presenting-partner category still open","detail":"Conversations up 99% period on period with 19 sessions. Strongest available territory to take to market next, subject to management approval."},{"headline":"HoloMe accounted for 8% of conversations","detail":"Physical activations continue to convert into mobile relationships — the scan-to-continue handoff is the highest-intent acquisition path in the platform."},{"headline":"69% of fans opted into relationship memory","detail":"108 continuity hooks are ready for the next conversation, and 22% of this week's conversations were returning fans. Memory is the retention engine, not the paywall."}],"recommendedActions":["Commission a Messi Academy response to \"Football & training\" (78 conversations, +6 pts share) — owner: Messi Academy (coaching).","Brief Lionel on the emerging signal: \"Football & training\" moved +6 pts of share period on period.","Put \"How did you keep believing when people told you that you were too small?\" (Spain, Under 13) at the top of the 30-second response queue — 21 fans asked substantially the same thing.","MESSI.LIVE JAPAN grew 151% period on period (12 conversations, top theme: Motivation & resilience). Recommend a localised campaign and a HoloMe activation review.","France carries the most discouraged emotional register of the material markets (-32) — review the local script, the language quality and the fan-care signposting before scaling spend.","Green-light \"Ball mastery & first touch\" for Messi Academy (coaching) — 30 conversations point at it."]},"sample":[{"reference":"MSL-2026-100000","topic":"World Cup & career moments","sub":"The 2014 defeat","q":"After 2014 you said you thought about walking away. How did you decide to keep playing for Argentina?","country":"Saudi Arabia","region":"Makkah","lang":"العربية","age":"13-17","tier":"free","surface":"holome","care":"Normal","time":"12 h ago","sentiment":0,"hook":null,"review":false},{"reference":"MSL-2026-100007","topic":"World Cup & career moments","sub":"The 2014 defeat","q":"After 2014 you said you thought about walking away. How did you decide to keep playing for Argentina?","country":"Malaysia","region":"Johor","lang":"Bahasa Melayu","age":"13-17","tier":"free","surface":"holome","care":"Normal","time":"5 h ago","sentiment":0,"hook":null,"review":false},{"reference":"MSL-2026-100014","topic":"Family & childhood","sub":"Missing home","q":"You left Rosario at thirteen. How did you deal with missing your family?","country":"Brazil","region":"Bahia","lang":"Português","age":"13-17","tier":"free","surface":"mobile","care":"Normal","time":"23 h ago","sentiment":0,"hook":null,"review":false},{"reference":"MSL-2026-100021","topic":"Football & training","sub":"Weak foot","q":"My weak foot is holding me back. What did you do about yours?","country":"India","region":"Delhi NCR","lang":"हिन्दी","age":"18-24","tier":"plus","surface":"mobile","care":"Normal","time":"23 h ago","sentiment":0,"hook":"Last time you told me i want to learn a training routine I can repeat every day for a season. — how did it go?","review":false},{"reference":"MSL-2026-100028","topic":"Family & childhood","sub":null,"q":"Fan from Puebla, Mexico shared a personal story about family & childhood. They asked for: Tell me a story about being brave, for my son before he sleeps.","country":"Mexico","region":"Puebla","lang":"Español","age":"25-34","tier":"free","surface":"mobile","care":"Normal","time":"4 h ago","sentiment":-1,"hook":"Last time you told me he is starting a new school next week and he is frightened. — how did it go?","review":false},{"reference":"MSL-2026-100035","topic":"World Cup & career moments","sub":"2022 final","q":"What were you actually thinking in the moments before the 2022 final penalty?","country":"Mexico","region":"Puebla","lang":"Español","age":"13-17","tier":"free","surface":"mobile","care":"Normal","time":"13 h ago","sentiment":0,"hook":null,"review":false},{"reference":"MSL-2026-100042","topic":"Motivation & resilience","sub":"Nerves before a match","q":"I get so nervous before matches that I cannot eat. Did you ever feel like that?","country":"India","region":"West Bengal","lang":"English","age":"25-34","tier":"free","surface":"mobile","care":"Normal","time":"36 min ago","sentiment":-1,"hook":null,"review":false},{"reference":"MSL-2026-100049","topic":"World Cup & career moments","sub":"The 2014 defeat","q":"After 2014 you said you thought about walking away. How did you decide to keep playing for Argentina?","country":"China","region":"Beijing","lang":"English","age":"13-17","tier":"free","surface":"mobile","care":"Normal","time":"26 days ago","sentiment":0,"hook":null,"review":false},{"reference":"MSL-2026-100056","topic":"Gratitude & personal stories","sub":"What Messi meant to my family","q":"Fan from Kuala Lumpur, Malaysia shared a personal story about gratitude & personal stories.","country":"Malaysia","region":"Kuala Lumpur","lang":"Bahasa Melayu","age":"25-34","tier":"plus","surface":"holome","care":"Care","time":"7 min ago","sentiment":1,"hook":null,"review":true},{"reference":"MSL-2026-100063","topic":"Family & childhood","sub":null,"q":"Fan from Córdoba, Argentina shared a personal story about family & childhood. They asked for: Tell me a story about being brave, for my son before he sleeps.","country":"Argentina","region":"Córdoba","lang":"Español","age":"25-34","tier":"free","surface":"holome","care":"Normal","time":"19 days ago","sentiment":-1,"hook":"Last time you told me he is starting a new school next week and he is frightened. — how did it go?","review":false},{"reference":"MSL-2026-100070","topic":"Football & training","sub":"Weak foot","q":"My weak foot is holding me back. What did you do about yours?","country":"Mexico","region":"CDMX","lang":"English","age":"25-34","tier":"free","surface":"holome","care":"Normal","time":"6 days ago","sentiment":0,"hook":"Last time you told me i want to learn a training routine I can repeat every day for a season. — how did it go?","review":false},{"reference":"MSL-2026-100077","topic":"World Cup & career moments","sub":"The 2014 defeat","q":"After 2014 you said you thought about walking away. How did you decide to keep playing for Argentina?","country":"United States","region":"New York","lang":"English","age":"18-24","tier":"free","surface":"mobile","care":"Normal","time":"2 days ago","sentiment":0,"hook":null,"review":false},{"reference":"MSL-2026-100084","topic":"Motivation & resilience","sub":null,"q":"My club released me last season and I have not found a new team. Should I keep going?","country":"Egypt","region":"Giza","lang":"العربية","age":"13-17","tier":"plus","surface":"mobile","care":"Watch","time":"6 days ago","sentiment":-2,"hook":"Last time you told me my club released me last season and I have not found a new team. — how did it go?","review":false},{"reference":"MSL-2026-100091","topic":"World Cup & career moments","sub":"The 2014 defeat","q":"After 2014 you said you thought about walking away. How did you decide to keep playing for Argentina?","country":"France","region":"PACA","lang":"Français","age":"13-17","tier":"family","surface":"mobile","care":"Normal","time":"2 h ago","sentiment":0,"hook":null,"review":false}]}</script>
+
+<script>
+(function () {
+  "use strict";
+  const D = JSON.parse(document.getElementById("demo-data").textContent);
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  /* ------------------------------ surfaces ------------------------------ */
+  const views = { fan: $("#view-fan"), pulse: $("#view-pulse"), brief: $("#view-brief") };
+  function showView(name) {
+    Object.keys(views).forEach((k) => { views[k].hidden = k !== name; });
+    $$(".tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.view === name)));
+    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  }
+  $$(".tabs button").forEach((b) => b.addEventListener("click", () => showView(b.dataset.view)));
+
+  /* ============================ FAN EXPERIENCE ============================ */
+
+  const LANGS = [
+    { c: "ES", label: "Español", bcp: "es-AR" },
+    { c: "EN", label: "English", bcp: "en-US" },
+    { c: "AR", label: "العربية", bcp: "ar-SA", rtl: true },
+    { c: "PT", label: "Português", bcp: "pt-BR" },
+    { c: "HI", label: "हिन्दी", bcp: "hi-IN" },
+    { c: "ID", label: "Bahasa Indonesia", bcp: "id-ID" },
+    { c: "ZH", label: "中文", bcp: "zh-CN" },
+    { c: "FR", label: "Français", bcp: "fr-FR" },
+    { c: "JA", label: "日本語", bcp: "ja-JP" },
+    { c: "MS", label: "Bahasa Melayu", bcp: "ms-MY" },
+    { c: "KO", label: "한국어", bcp: "ko-KR" }
+  ];
+
+  // The controlled five-minute script, in the launch languages.
+  const SCRIPT = {
+    greet: {
+      EN: "Hello {n}. It's great to meet you. We have five minutes together — what would you like to talk about?",
+      ES: "Hola {n}. Es un gusto conocerte. Tenemos cinco minutos juntos, ¿de qué te gustaría hablar?",
+      AR: "أهلاً {n}. سعيد بلقائك. أمامنا خمس دقائق معاً — عمّ تود أن نتحدث؟",
+      PT: "Olá {n}. É ótimo te conhecer. Temos cinco minutos juntos — sobre o que você gostaria de falar?",
+      HI: "नमस्ते {n}। आपसे मिलकर बहुत अच्छा लगा। हमारे पास पाँच मिनट हैं — आप किस बारे में बात करना चाहेंगे?",
+      ID: "Halo {n}. Senang bertemu denganmu. Kita punya lima menit bersama — apa yang ingin kamu bicarakan?",
+      ZH: "你好，{n}。很高兴认识你。我们有五分钟的时间——你想聊些什么？",
+      FR: "Bonjour {n}. Ravi de te rencontrer. Nous avons cinq minutes ensemble — de quoi aimerais-tu parler ?",
+      JA: "こんにちは、{n}さん。会えてうれしいです。5分間あります——何について話したいですか？",
+      MS: "Helo {n}. Gembira bertemu dengan anda. Kita ada lima minit bersama — apa yang ingin anda kongsikan?",
+      KO: "안녕하세요, {n}님. 만나서 반갑습니다. 우리에게 5분이 있어요 — 무엇에 대해 이야기하고 싶나요?"
+    },
+    greetBack: {
+      EN: "{n}, welcome back. Last time we spoke you told me what you were working toward — I'd like to hear how it went.",
+      ES: "{n}, bienvenido de nuevo. La última vez me contaste en qué estabas trabajando — me gustaría saber cómo te fue.",
+      AR: "{n}، أهلاً بعودتك. في المرة الماضية أخبرتني بما تسعى إليه — أود أن أعرف كيف سارت الأمور.",
+      PT: "{n}, bem-vindo de volta. Da última vez você me contou no que estava trabalhando — quero saber como foi.",
+      HI: "{n}, आपका फिर से स्वागत है। पिछली बार आपने बताया था कि आप किस चीज़ की तैयारी कर रहे हैं — बताइए, वह कैसा रहा?",
+      ID: "{n}, senang kamu kembali. Terakhir kali kamu bercerita tentang tujuanmu — aku ingin tahu bagaimana hasilnya.",
+      ZH: "{n}，欢迎回来。上次你告诉我你正在为什么努力——我想听听后来怎么样了。",
+      FR: "{n}, content de te revoir. La dernière fois, tu m'as parlé de ton objectif — j'aimerais savoir comment ça s'est passé.",
+      JA: "{n}さん、おかえりなさい。前回、目標を教えてくれましたね——その後どうなったか聞かせてください。",
+      MS: "{n}, selamat kembali. Kali terakhir anda berkongsi matlamat anda — saya ingin tahu perkembangannya.",
+      KO: "{n}님, 다시 만나 반가워요. 지난번에 준비하던 일을 이야기해 주셨죠 — 어떻게 되었는지 듣고 싶어요."
+    },
+    probe: {
+      EN: "Thank you for telling me that. Tell me a little more — what is happening around it, and what would help you most?",
+      ES: "Gracias por contármelo. Contame un poco más: qué está pasando alrededor y qué te ayudaría más.",
+      AR: "شكراً لأنك أخبرتني بذلك. حدثني أكثر قليلاً — ما الذي يحدث حولك، وما الذي سيساعدك أكثر؟",
+      PT: "Obrigado por me contar isso. Me conte um pouco mais — o que está acontecendo em volta e o que mais te ajudaria?",
+      HI: "यह बताने के लिए धन्यवाद। थोड़ा और बताइए — इसके आसपास क्या चल रहा है, और आपकी सबसे ज़्यादा मदद क्या करेगी?",
+      ID: "Terima kasih sudah bercerita. Ceritakan sedikit lagi — apa yang terjadi di sekitarnya, dan apa yang paling membantumu?",
+      ZH: "谢谢你告诉我。再多说一点——当时的情况是怎样的？什么对你帮助最大？",
+      FR: "Merci de me dire cela. Raconte-m'en un peu plus — que se passe-t-il autour, et qu'est-ce qui t'aiderait le plus ?",
+      JA: "話してくれてありがとう。もう少し聞かせて——その周りで何が起きていて、何が一番助けになりますか？",
+      MS: "Terima kasih kerana berkongsi. Ceritakan sedikit lagi — apa yang berlaku, dan apa yang paling membantu anda?",
+      KO: "말해 줘서 고마워요. 조금 더 들려주세요 — 그 주변에서 무슨 일이 있고, 무엇이 가장 도움이 될까요?"
+    },
+    ack: {
+      EN: "I understand. I went through something close to that, and I'll tell you what helped me. Is there anything else you'd like to share?",
+      ES: "Te entiendo. Yo pasé por algo parecido y te voy a contar qué me ayudó. ¿Hay algo más que quieras compartir?",
+      AR: "أفهمك. مررت بشيء قريب من ذلك، وسأخبرك بما ساعدني. هل هناك شيء آخر تود مشاركته؟",
+      PT: "Eu entendo. Passei por algo parecido e vou te contar o que me ajudou. Tem mais alguma coisa que queira compartilhar?",
+      HI: "मैं समझता हूँ। मैं भी कुछ ऐसा ही अनुभव कर चुका हूँ, और बताऊँगा कि मुझे किस चीज़ ने मदद की। कुछ और बताना चाहेंगे?",
+      ID: "Aku mengerti. Aku pernah mengalami hal yang mirip, dan aku akan ceritakan apa yang membantuku. Ada lagi yang ingin kamu ceritakan?",
+      ZH: "我明白。我也经历过类似的事，我会告诉你什么帮到了我。还有别的想说的吗？",
+      FR: "Je comprends. J'ai vécu quelque chose de proche, et je vais te dire ce qui m'a aidé. Y a-t-il autre chose ?",
+      JA: "わかります。私も似た経験をしました。何が助けになったか話しますね。ほかに話したいことはありますか？",
+      MS: "Saya faham. Saya pernah melalui perkara yang serupa, dan saya akan kongsikan apa yang membantu saya. Ada apa-apa lagi?",
+      KO: "이해해요. 저도 비슷한 일을 겪었고, 무엇이 도움이 되었는지 말해 줄게요. 더 나누고 싶은 이야기가 있나요?"
+    },
+    more: {
+      EN: "I'm listening. Keep going.", ES: "Te escucho. Seguí contándome.",
+      AR: "أنا أستمع إليك. تفضل بالمتابعة.", PT: "Estou ouvindo. Pode continuar.",
+      HI: "मैं सुन रहा हूँ। कहिए।", ID: "Aku mendengarkan. Lanjutkan.",
+      ZH: "我在听，请继续。", FR: "Je t'écoute. Continue.",
+      JA: "聞いています。続けてください。", MS: "Saya mendengar. Teruskan.",
+      KO: "듣고 있어요. 계속하세요."
+    },
+    wrap: {
+      EN: "We have about a minute left. Before we finish — is there anything you want me to remember for next time?",
+      ES: "Nos queda un minuto. Antes de terminar, ¿hay algo que quieras que recuerde para la próxima vez?",
+      AR: "بقيت لنا دقيقة تقريباً. قبل أن ننهي — هل هناك ما تود أن أتذكره في المرة القادمة؟",
+      PT: "Falta cerca de um minuto. Antes de terminar — tem algo que você quer que eu lembre para a próxima vez?",
+      HI: "हमारे पास लगभग एक मिनट बचा है। खत्म करने से पहले — कुछ ऐसा है जो मैं अगली बार के लिए याद रखूँ?",
+      ID: "Waktu kita tinggal sekitar satu menit. Sebelum selesai — ada yang ingin kuingat untuk lain kali?",
+      ZH: "我们还有大约一分钟。结束之前——有什么想让我下次记住的吗？",
+      FR: "Il nous reste environ une minute. Avant de finir — y a-t-il quelque chose dont tu veux que je me souvienne ?",
+      JA: "残り1分ほどです。終わる前に——次回のために覚えておいてほしいことはありますか？",
+      MS: "Kita ada kira-kira seminit lagi. Sebelum tamat — ada apa-apa yang anda mahu saya ingat untuk lain kali?",
+      KO: "1분 정도 남았어요. 마치기 전에 — 다음을 위해 기억해 두었으면 하는 게 있나요?"
+    },
+    close: {
+      EN: "Thank you, {n}. I'll remember this. Keep working, and I hope we speak again.",
+      ES: "Gracias, {n}. Me voy a acordar de esto. Seguí trabajando, y ojalá volvamos a hablar.",
+      AR: "شكراً لك، {n}. سأتذكر هذا. واصل العمل، وأتمنى أن نتحدث مرة أخرى.",
+      PT: "Obrigado, {n}. Vou lembrar disso. Continue trabalhando, e espero que a gente converse de novo.",
+      HI: "धन्यवाद, {n}। मैं यह याद रखूँगा। मेहनत जारी रखिए, फिर बात होगी।",
+      ID: "Terima kasih, {n}. Aku akan mengingatnya. Teruslah berlatih, semoga kita bicara lagi.",
+      ZH: "谢谢你，{n}。我会记住的。继续努力，希望我们还能再聊。",
+      FR: "Merci, {n}. Je m'en souviendrai. Continue à travailler, et j'espère qu'on se reparlera.",
+      JA: "ありがとう、{n}さん。覚えておきます。努力を続けて、また話しましょう。",
+      MS: "Terima kasih, {n}. Saya akan ingat perkara ini. Teruskan usaha, semoga kita berbual lagi.",
+      KO: "고마워요, {n}님. 기억할게요. 계속 노력하세요, 또 이야기해요."
+    }
+  };
+
+  // What the fan says when they tap the mic. Simulated so the demo works
+  // anywhere, including where the browser blocks the microphone.
+  const FAN_LINES = {
+    EN: [
+      "Next month I have my first academy trial, and my coach says I'm too small for my age group.",
+      "My family has saved two years for this trip. It's my only chance this season.",
+      "I want to know what you told yourself when people said you wouldn't make it."
+    ],
+    ES: [
+      "El mes que viene tengo mi primera prueba en una academia, y mi entrenador dice que soy muy chico para mi categoría.",
+      "Mi familia ahorró dos años para este viaje. Es mi única oportunidad esta temporada.",
+      "Quiero saber qué te decías a vos mismo cuando te decían que no ibas a llegar."
+    ]
+  };
+
+  const THEMES = [
+    "Football & training", "Motivation & resilience", "World Cup & career moments",
+    "Family & childhood", "Academy & trials", "Wellbeing, injury & recovery",
+    "Just to say thank you"
+  ];
+
+  const state = {
+    tier: "free", lang: LANGS[1], day: null, time: null, name: "", phone: "",
+    country: "", region: "", age: "", theme: "", memory: true, returning: false,
+    ref: "", said: "", stage: 0, secs: 300, listening: false, timer: null, lobby: null
+  };
+
+  const phone = $("#phone");
+  const VEILED = ["tiers", "slots", "register", "otp", "confirmed", "reminder", "closing"];
+
+  function go(name) {
+    $$(".screen", phone).forEach((s) => s.classList.toggle("on", s.dataset.screen === name));
+    phone.classList.toggle("veiled", VEILED.indexOf(name) >= 0);
+    const active = $('.screen[data-screen="' + name + '"]', phone);
+    if (active) active.scrollTop = 0;
+  }
+  $$("[data-go]").forEach((b) => b.addEventListener("click", () => {
+    const target = b.dataset.go;
+    if (target === "confirmed") makeBooking();
+    go(target);
+  }));
+
+  /* --- landing --- */
+  $("#langChips").innerHTML = LANGS.slice(0, 7).map((l) => "<span>" + esc(l.label) + "</span>").join("");
+
+  /* --- membership --- */
+  function renderTiers() {
+    $("#tierGrid").innerHTML = D.commercial.tiers.map((t) =>
+      '<button class="tier' + (t.id === "free" ? "" : " plus") + (state.tier === t.id ? " sel" : "") +
+      '" data-tier="' + t.id + '">' +
+        '<div class="th"><span class="tn">' + esc(t.name) + "</span>" +
+          (t.id === "free" ? "" : '<span class="badge-plus">MESSI+</span>') +
+          '<span class="tp">' + esc(t.price) + "</span></div>" +
+        '<div class="tpos">' + esc(t.positioning) + "</div>" +
+        "<ul>" + t.benefits.slice(0, 4).map((b) => "<li>" + esc(b) + "</li>").join("") + "</ul>" +
+      "</button>").join("");
+    $$("#tierGrid .tier").forEach((el) => el.addEventListener("click", () => {
+      state.tier = el.dataset.tier; renderTiers(); renderSlots();
+    }));
+  }
+  renderTiers();
+
+  /* --- slots --- */
+  const days = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(); d.setDate(d.getDate() + i);
+    days.push({ date: d, full: i === 2 || i === 4 });
+  }
+  function renderDays() {
+    $("#dayRow").innerHTML = days.map((d, i) =>
+      '<button class="day' + (d.full ? " full" : "") + (state.day === i ? " sel" : "") + '" data-i="' + i + '">' +
+        "<small>" + d.date.toLocaleDateString("en-US", { weekday: "short" }) + "</small>" +
+        "<b>" + d.date.getDate() + "</b>" +
+        "<em>" + (d.full ? "Full" : d.date.toLocaleDateString("en-US", { month: "short" })) + "</em>" +
+      "</button>").join("");
+    $$("#dayRow .day").forEach((el) => el.addEventListener("click", () => {
+      const i = +el.dataset.i; if (days[i].full) return;
+      state.day = i; state.time = null; renderDays(); renderSlots(); syncSlotBtn();
+    }));
+  }
+  function slotTimes(seed) {
+    const out = [];
+    for (let h = 5; h <= 6; h++) for (let m = 0; m < 60; m += 5) out.push(h + ":" + String(m).padStart(2, "0") + " PM");
+    ["8:00 PM", "8:05 PM", "8:10 PM", "8:15 PM"].forEach((t) => out.push(t));
+    return out.map((tm, j) => ({ tm, taken: (seed * 7 + j * 13) % 10 < 5, pri: (seed * 3 + j * 5) % 7 === 0 }));
+  }
+  function renderSlots() {
+    if (state.day === null) { $("#slotGrid").innerHTML = '<p class="lock" style="grid-column: 1/-1">Choose a day first.</p>'; return; }
+    const list = slotTimes(state.day);
+    $("#slotGrid").innerHTML = list.map((s) => {
+      const locked = s.taken || (s.pri && state.tier === "free");
+      return '<button class="slot' + (locked ? " taken" : "") + (s.pri ? " pri" : "") +
+        (state.time === s.tm ? " sel" : "") + '" data-t="' + s.tm + '" ' + (locked ? "disabled" : "") + ">" +
+        (s.pri ? "★ " : "") + s.tm + "</button>";
+    }).join("");
+    $$("#slotGrid .slot").forEach((el) => el.addEventListener("click", () => {
+      state.time = el.dataset.t; renderSlots(); syncSlotBtn();
+    }));
+    $("#slotNote").innerHTML = state.tier === "free"
+      ? "Your slot is held for 10 minutes. ★ Priority slots are a MESSI+ benefit — switch membership to take one."
+      : "Your slot is held for 10 minutes. ★ Priority slots are open to you as a MESSI+ member.";
+  }
+  function syncSlotBtn() { $("#btnSlots").disabled = !(state.day !== null && state.time); }
+  renderDays(); renderSlots();
+
+  /* --- register --- */
+  $("#fCountry").innerHTML = '<option value="">Choose your country</option>' +
+    D.markets.map((m) => '<option value="' + esc(m.country) + '">' + esc(m.country) + "</option>").join("");
+  $("#fLang").innerHTML = LANGS.map((l) => '<option value="' + l.c + '"' + (l.c === "EN" ? " selected" : "") + ">" + esc(l.label) + "</option>").join("");
+  $("#fTheme").innerHTML = '<option value="">Let the conversation decide</option>' +
+    THEMES.map((t) => '<option value="' + esc(t) + '">' + esc(t) + "</option>").join("");
+
+  $("#fCountry").addEventListener("change", (e) => {
+    state.country = e.target.value;
+    const m = D.markets.filter((x) => x.country === state.country)[0];
+    $("#fRegion").innerHTML = m
+      ? '<option value="">Choose your region</option>' + m.regions.map((r) => '<option value="' + esc(r) + '">' + esc(r) + "</option>").join("")
+      : '<option value="">Choose a country first</option>';
+    if (m) {
+      $("#terrLabel").textContent = m.territory;
+      const l = LANGS.filter((x) => x.c === m.primaryLanguage)[0];
+      if (l) { $("#fLang").value = l.c; state.lang = l; }
+    }
+    state.region = "";
+  });
+  $("#fRegion").addEventListener("change", (e) => { state.region = e.target.value; });
+  $("#fLang").addEventListener("change", (e) => { state.lang = LANGS.filter((l) => l.c === e.target.value)[0]; });
+  $("#fAge").addEventListener("change", (e) => {
+    state.age = e.target.value;
+    $("#guardianNote").hidden = !(state.age === "under-13" || state.age === "13-17");
+  });
+  $("#fTheme").addEventListener("change", (e) => { state.theme = e.target.value; });
+  $("#cMem").addEventListener("change", (e) => { state.memory = e.target.checked; });
+
+  $("#btnRegister").addEventListener("click", () => {
+    state.name = $("#fName").value.trim();
+    state.phone = $("#fPhone").value.trim();
+    if (!state.name) return alert("Please tell us your name.");
+    if (!state.phone) return alert("Please enter your mobile number.");
+    if (!state.country || !state.region) return alert("Please choose your country and region.");
+    if (!state.age) return alert("Please choose your age group.");
+    if (!$("#cAI").checked) return alert("Please confirm you understand this is an AI digital representation.");
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    $("#otpPhone").textContent = state.phone;
+    $("#otpFill").textContent = code;
+    $("#otpRow").innerHTML = code.split("").map(() => '<input maxlength="1" inputmode="numeric" />').join("");
+    $("#otpFill").onclick = () => {
+      $$("#otpRow input").forEach((el, i) => { el.value = code[i]; });
+    };
+    go("otp");
+  });
+
+  /* --- booking --- */
+  function makeBooking() {
+    state.ref = "MSL-2026-" + String(Math.floor(100000 + Math.random() * 899999));
+    const d = state.day !== null ? days[state.day].date : new Date();
+    $("#refA").textContent = state.ref;
+    $("#refB").textContent = state.ref;
+    $("#cDate").textContent = d.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" });
+    $("#cTime").textContent = state.time || "7:30 PM";
+    $("#cLang").textContent = state.lang.label;
+    $("#cFrom").textContent = (state.region ? state.region + ", " : "") + (state.country || "—");
+    const tier = D.commercial.tiers.filter((t) => t.id === state.tier)[0];
+    $("#cTier").textContent = tier ? tier.name : "MESSI.LIVE";
+    $("#waBody").innerHTML = "⚽ <b>" + esc(firstName()) + "</b>, your five minutes with Messi start at <b>" +
+      esc(state.time || "7:30 PM") + "</b>.<br /><br />Find somewhere quiet, put your headphones in, and tap below when you're ready.<br /><br />Reference: <b>" +
+      esc(state.ref) + "</b>";
+    $("#lobbyLang").textContent = state.lang.label;
+    $("#memItem").hidden = !(state.returning && state.memory);
+    $("#upsell").hidden = state.tier !== "free";
+  }
+  function firstName() { return (state.name || "amigo").split(" ")[0]; }
+
+  $("#btnReturning").addEventListener("click", () => {
+    state.returning = true; state.memory = true; state.name = "Mateo";
+    state.country = "Argentina"; state.region = "Rosario"; state.age = "13-17";
+    state.theme = "Academy & trials"; state.lang = LANGS[0]; state.tier = "plus";
+    state.time = "7:30 PM"; state.day = 0;
+    $("#terrLabel").textContent = "MESSI.LIVE ARGENTINA";
+    makeBooking();
+    go("reminder");
+  });
+
+  /* --- lobby --- */
+  $("#btnJoin").addEventListener("click", () => {
+    go("lobby");
+    let n = 8;
+    $("#lobbyNum").textContent = "00:0" + n;
+    clearInterval(state.lobby);
+    state.lobby = setInterval(() => {
+      n -= 1;
+      $("#lobbyNum").textContent = "00:0" + Math.max(n, 0);
+      if (n <= 0) { clearInterval(state.lobby); }
+    }, 1000);
+  });
+  $("#btnMic").addEventListener("click", function () {
+    const item = $("#micItem");
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then((s) => {
+        s.getTracks().forEach((t) => t.stop());
+        item.classList.add("ok"); $(".dot", item).textContent = "✓"; this.remove();
+      }).catch(() => {
+        item.classList.add("ok"); $(".dot", item).textContent = "✓"; this.textContent = "Simulated";
+      });
+    } else {
+      item.classList.add("ok"); $(".dot", item).textContent = "✓"; this.textContent = "Simulated";
+    }
+  });
+  $("#btnEnter").addEventListener("click", startSession);
+
+  /* --- the conversation --- */
+  const synth = window.speechSynthesis || null;
+  function speak(text) {
+    if (!synth) return;
+    try {
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = state.lang.bcp;
+      u.rate = 0.98; u.pitch = 0.95;
+      const voices = synth.getVoices() || [];
+      const match = voices.filter((v) => v.lang && v.lang.toLowerCase().indexOf(state.lang.bcp.slice(0, 2)) === 0)[0];
+      if (match) u.voice = match;
+      synth.speak(u);
+    } catch (e) { /* speech is a bonus, never a requirement */ }
+  }
+  function line(key) {
+    const set = SCRIPT[key];
+    return (set[state.lang.c] || set.EN).replace("{n}", firstName());
+  }
+  const scene = $(".scene", phone);
+  let speakTimer = null;
+  function say(text) {
+    const cap = $("#captionText");
+    cap.textContent = text;
+    $("#caption").setAttribute("dir", state.lang.rtl ? "rtl" : "ltr");
+    speak(text);
+    // Light and waveform follow the voice — roughly, when the browser gives us
+    // no speech timings at all.
+    scene.classList.add("speaking");
+    clearTimeout(speakTimer);
+    speakTimer = setTimeout(() => scene.classList.remove("speaking"),
+      Math.min(2200 + text.length * 55, 9000));
+  }
+  function fmt(s) { return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+
+  function startSession() {
+    clearInterval(state.lobby);
+    go("session");
+    state.secs = 300; state.stage = 0; state.said = ""; state.wrapped = false;
+    $("#timer").textContent = "05:00";
+    $("#youSaid").textContent = "";
+    $("#sessLang").textContent = "文A · " + state.lang.c;
+    setTimeout(() => say(line(state.returning && state.memory ? "greetBack" : "greet")), 500);
+    clearInterval(state.timer);
+    state.timer = setInterval(() => {
+      state.secs -= 1;
+      $("#timer").textContent = fmt(Math.max(state.secs, 0));
+      if (state.secs === 45 && !state.wrapped) { state.wrapped = true; say(line("wrap")); }
+      if (state.secs <= 0) { clearInterval(state.timer); endSession(); }
+    }, 1000);
+  }
+
+  $("#btnTalk").addEventListener("click", () => {
+    if (state.listening) return;
+    state.listening = true;
+    $("#btnTalk").classList.add("live");
+    $("#micLbl").textContent = "Listening…";
+    $("#youSaid").textContent = "";
+    const lines = FAN_LINES[state.lang.c] || FAN_LINES.EN;
+    const said = lines[Math.min(state.stage, lines.length - 1)];
+    setTimeout(() => {
+      state.listening = false;
+      $("#btnTalk").classList.remove("live");
+      $("#micLbl").textContent = "Tap to speak";
+      $("#youSaid").textContent = "“" + said + "”";
+      if (!state.said) state.said = said;
+      const key = state.stage === 0 ? "probe" : state.stage === 1 ? "ack" : "more";
+      state.stage += 1;
+      setTimeout(() => say(line(key)), 550);
+    }, 2400);
+  });
+
+  $("#btnFF").addEventListener("click", () => { state.secs = Math.min(state.secs, 8); });
+
+  function endSession() {
+    if (synth) { try { synth.cancel(); } catch (e) {} }
+    say(line("close"));
+    setTimeout(showClosing, 2600);
+  }
+
+  function showClosing() {
+    clearInterval(state.timer);
+    const place = state.region && state.country ? state.region + ", " + state.country : (state.country || "your city");
+    const theme = state.theme || THEMES[4];
+    let quote = state.said;
+    if (quote.length > 132) quote = quote.slice(0, 130).replace(/\s+\S*$/, "") + "…";
+    $("#closeSummary").innerHTML = quote
+      ? "You spoke with Messi about <b>" + esc(theme.toLowerCase()) + "</b> from <b>" + esc(place) +
+        "</b>. In your words: <i>“" + esc(quote) + "”</i>"
+      : "You spoke with Messi from <b>" + esc(place) + "</b>. He has noted what matters to you.";
+    $("#closeMemory").textContent = state.memory
+      ? "“" + (quote || theme) + "” — he'll ask you about it next time."
+      : "You chose not to be remembered. Nothing from this conversation is carried forward.";
+    $("#fanNo").textContent = (4138204 + Math.floor(Math.random() * 900)).toLocaleString("en-US");
+    go("closing");
+  }
+
+  $$("#stars span").forEach((s, i) => s.addEventListener("click", () => {
+    $$("#stars span").forEach((x, j) => x.classList.toggle("on", j <= i));
+  }));
+  $("#btnToPulse").addEventListener("click", () => showView("pulse"));
+  $("#btnRestart").addEventListener("click", () => {
+    clearInterval(state.timer);
+    if (synth) { try { synth.cancel(); } catch (e) {} }
+    state.returning = false; state.said = ""; state.stage = 0;
+    go("landing");
+  });
+
+  /* ============================== GLOBAL PULSE ============================== */
+  const P = D.pulse, B = D.brief;
+  $("#periodLabel").textContent = P.periodLabel + " · understand millions of fans without reading millions of conversations.";
+
+  const kpi = (l, v, s, c) =>
+    '<div class="kpi"><i style="background:' + c + '"></i><div class="l">' + esc(l) + '</div><div class="v">' +
+    esc(v) + '</div><div class="s">' + esc(s) + "</div></div>";
+
+  const deltaCls = (n) => (n > 0 ? "up" : n < 0 ? "down" : "flat");
+  const signed = (n) => (n > 0 ? "+" : "") + n;
+
+  function renderMessiView() {
+    const k = P.kpis;
+    let h = '<div class="kpis">' +
+      kpi("Conversations", k.conversations.toLocaleString("en-US"), "this period", "#2E6FA7") +
+      kpi("Countries", k.countries, "territories live", "#7FB2E0") +
+      kpi("Languages", k.languages, "spoken by Messi", "#E7B94E") +
+      kpi("Avg conversation", k.avgDuration, "of five minutes", "#1FAE7C") +
+      kpi("Emotional register", signed(k.netSentiment), "fans' own situations", k.netSentiment >= 0 ? "#1FAE7C" : "#D94A63") +
+      kpi("Satisfaction", k.satisfaction + "/5", "fan-rated", "#F3579A") +
+      "</div>";
+
+    h += '<p style="margin:10px 0 0;font-size:11.5px;color:var(--muted);max-width:900px">' +
+      "Instead of followers, likes and views, MESSI.LIVE measures relationships, conversations, " +
+      "needs, emotions and intent. Emotional register reads the fan’s own situation, not their " +
+      "feeling about Messi — " + esc(P.registerLabel) + ".</p>";
+
+    h += '<div class="grid c3">';
+    h += '<div class="panel"><h3>What the world is asking</h3>' +
+      P.topics.slice(0, 8).map((t) =>
+        '<div class="barrow"><div class="t"><b>' + esc(t.label) + "</b>" +
+        (t.sensitive ? ' <span class="tag rose">sensitive</span>' : "") +
+        '<span class="p num">' + t.pct + '%</span><span class="d ' + deltaCls(t.deltaPts) + '">' +
+        signed(t.deltaPts) + ' pts</span></div>' +
+        '<div class="track"><div class="fill" style="width:' + Math.min(t.pct * 3.4, 100) + '%"></div></div>' +
+        '<div class="m">' + t.count + " conversations · " + esc(t.team) + " · " + esc(t.experience) + "</div></div>"
+      ).join("") + "</div>";
+
+    h += "<div>";
+    if (P.emerging) {
+      h += '<div class="panel accent"><h3>Emerging signal</h3>' +
+        '<div style="font-size:21px;font-weight:800;letter-spacing:-0.02em">' + esc(P.emerging.label) + "</div>" +
+        '<div style="margin-top:3px;font-size:13px;font-weight:700;color:var(--sky-deep)">' +
+        signed(P.emerging.deltaPts) + " pts of share, period on period</div>" +
+        (P.emergingQuote ? '<blockquote class="quote" style="margin:11px 0 0">“' + esc(P.emergingQuote.quote) +
+          '”<span class="meta">' + esc(P.emergingQuote.country) + " · <bdi>" + esc(P.emergingQuote.languageLabel) +
+          "</bdi> · " + esc(P.emergingQuote.ageBand) + "</span></blockquote>" : "") +
+        '<p style="margin:11px 0 0;font-size:11.5px;color:var(--muted)">Owner: <b style="color:var(--ink)">' +
+        esc(P.emerging.team) + '</b> · feeds <b style="color:var(--ink)">' + esc(P.emerging.experience) + "</b></p></div>";
+    }
+    const colour = { Critical: "#D94A63", Care: "#E07A45", Watch: "#E7B94E", Normal: "#C7CDD9" };
+    h += '<div class="panel" style="margin-top:12px"><h3>Care &amp; escalation</h3>' +
+      P.care.map((c) => '<div class="carerow"><span class="sw" style="background:' + colour[c.level] + '"></span><b>' +
+        c.level + '</b><span class="n">' + c.count + '</span><span class="pc">' + c.pct + "%</span></div>").join("") +
+      '<div class="callout">' + P.reviewCount + " conversations held for human review before any content use. " +
+      "No conversation on the care queue is ever answered by the digital human alone.</div></div>";
+    h += "</div></div>";
+
+    // the loop back to Lionel
+    h += '<h3 style="margin:22px 0 3px;font-family:var(--mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--rose)">The loop back to Lionel</h3>' +
+      '<h2 style="margin:0 0 4px;font-size:19px;font-weight:800;letter-spacing:-0.02em">What the world asked you this week</h2>' +
+      '<p style="margin:0 0 12px;font-size:12px;color:var(--muted);max-width:760px">Ranked by how much a personal ' +
+      "answer would matter — significance, personal context, and how many fans asked the same thing. " +
+      "Never ranked by membership tier or market value.</p>";
+    h += '<div class="qcards">' + P.curation.map((q, i) =>
+      '<article class="qcard"><div class="tags"><span class="tag sky">' + esc(q.topic) + "</span>" +
+      '<span class="tag">' + esc(q.ageBand) + "</span>" +
+      (q.similarCount > 1 ? '<span class="tag gold">' + q.similarCount + " asked this</span>" : "") +
+      '</div><p class="q">“' + esc(q.question) + '”</p>' +
+      '<div class="src">' + esc(q.country) + " · <bdi>" + esc(q.languageLabel) + "</bdi> · " + esc(q.reference) + "</div>" +
+      '<p class="why">' + esc(q.rationale) + "</p>" +
+      '<button data-q="' + i + '">Record a 30-second response</button>' +
+      '<p class="pub">Publishes through <b>' + esc(q.experience) + "</b>, localised under the approved process.</p></article>"
+    ).join("") + "</div>";
+
+    // mixes
+    h += '<div class="grid c3" style="margin-top:14px">';
+    h += '<div class="panel"><h3>Country signal</h3>' + P.countries.slice(0, 8).map((c) =>
+      '<div class="barrow"><div class="t"><b>' + esc(c.country) + '</b><span class="p num">' + c.count + "</span>" +
+      '<span class="d ' + deltaCls(c.growthPct) + '">' + signed(c.growthPct) + "%</span></div>" +
+      '<div class="track"><div class="fill" style="width:' + Math.min(c.pct * 5, 100) + '%"></div></div>' +
+      '<div class="m">' + esc(c.territory) + " · top theme " + esc(c.topTopic) + "</div></div>").join("") + "</div>";
+    h += '<div><div class="panel"><h3>The relationship layer</h3>' +
+      statRow("Memory opt-in", P.memory.optInPct + "%", "fans who asked to be remembered") +
+      statRow("Continuity hooks ready", P.memory.hooksReady, "openers for the next conversation") +
+      statRow("Returning fans", P.memory.returningPct + "%", "of this period's conversations") +
+      statRow("MESSI+ share", P.kpis.plusSharePct + "%", "of conversations from members") +
+      statRow("HoloMe share", P.kpis.holoMeSharePct + "%", "physical activations") +
+      '<p style="margin:11px 0 0;font-size:11.5px;color:var(--muted);line-height:1.5">Conversation creates ' +
+      "connection. Memory creates continuity — and continuity, not content volume, is what turns an " +
+      "audience into a relationship.</p></div></div>";
+    h += "</div>";
+
+    // commissions
+    h += '<h3 style="margin:22px 0 3px;font-family:var(--mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--rose)">From listening to production</h3>' +
+      '<h2 style="margin:0 0 12px;font-size:19px;font-weight:800;letter-spacing:-0.02em">What the conversations say to make next</h2>' +
+      '<div class="list">' + B.commissions.map((c) =>
+        '<div class="item"><div class="h"><b>' + esc(c.title) + '</b><span class="r">' + c.demand + " conversations</span></div>" +
+        '<p style="color:var(--sky-deep);font-weight:600">' + esc(c.format) + "</p><p>" + esc(c.rationale) + "</p>" +
+        '<p style="margin-top:6px"><span class="tag">' + esc(c.owner) + "</span></p></div>").join("") + "</div>";
+
+    // governance
+    h += '<div class="grid c2" style="margin-top:14px">' +
+      '<div class="panel"><h3>Excluded from every score</h3><ul class="plain split">' +
+      D.fvif.excluded.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul></div>" +
+      '<div class="panel"><h3>True on every conversation</h3><ul class="plain split">' +
+      D.fvif.invariants.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul></div></div>";
+
+    $("#pulseMessi").innerHTML = h;
+    $$("#pulseMessi .qcard button").forEach((b) => b.addEventListener("click", () => {
+      const done = b.classList.toggle("done");
+      b.textContent = done ? "✓ Queued for Lionel — 30-second response" : "Record a 30-second response";
+    }));
+  }
+
+  function statRow(l, v, s) {
+    return '<div class="statrow"><div class="l"><b>' + esc(l) + "</b><small>" + esc(s) +
+      '</small></div><div class="v">' + esc(v) + "</div></div>";
+  }
+
+  function renderMgmtView() {
+    const r = D.commercial.revenue;
+    const usd = (n) => (n >= 1e6 ? "US$" + (n / 1e6).toFixed(1) + "M" : "US$" + Math.round(n / 1000) + "k");
+    const byCountry = {};
+    D.markets.forEach((m) => { byCountry[m.country] = m; });
+
+    let h = '<div class="kpis">' +
+      kpi("Modelled subscription ARR", usd(r.subscriptionArr), "illustrative, 4.2M active fans", "#F3579A") +
+      kpi("Modelled partnership ARR", usd(r.partnershipArr), "live presenting territories", "#E7B94E") +
+      kpi("Total modelled ARR", usd(r.totalArr), "before commerce & licensing", "#2E6FA7") +
+      kpi("Territories active", P.countries.length, "one platform, many markets", "#1FAE7C") + "</div>";
+
+    h += '<p style="margin:10px 0 14px;font-size:11.5px;color:var(--muted);max-width:900px">Illustrative model for ' +
+      "the management conversation. Every partner slot, category and territory below remains subject to " +
+      "management approval and to existing contractual rights. No partner is named.</p>";
+
+    h += '<div class="tablewrap"><table><thead><tr><th>Territory</th><th>Status</th><th class="r">Conversations</th>' +
+      '<th class="r">Growth</th><th class="r">Register</th><th class="r">MESSI+</th><th class="r">HoloMe</th>' +
+      "<th>Presenting partner</th></tr></thead><tbody>" +
+      P.countries.map((c) => {
+        const m = byCountry[c.country] || {};
+        return "<tr><td><b>" + esc(c.territory) + '</b><div style="font-size:10.5px;color:var(--muted)">Top theme: ' +
+          esc(c.topTopic) + '</div></td><td><span class="st ' + esc(c.status) + '">' + esc(c.status) + "</span></td>" +
+          '<td class="r">' + c.count + '</td><td class="r ' + deltaCls(c.growthPct) + '">' + signed(c.growthPct) + "%</td>" +
+          '<td class="r">' + signed(c.netSentiment) + '</td><td class="r">' + c.plusSharePct + "%</td>" +
+          '<td class="r">' + c.holoMeSites + '</td><td style="font-size:11.5px;color:var(--ink-2)">' +
+          esc(m.presentingPartner || "—") + '<div style="font-size:10.5px;color:var(--muted)">' + esc(m.localPrice || "") +
+          "</div></td></tr>";
+      }).join("") + "</tbody></table></div>";
+
+    h += '<div class="grid c2" style="margin-top:14px">';
+    h += '<div class="panel"><h3>The nine revenue engines</h3>' + D.commercial.engines.map((e) =>
+      '<div class="barrow"><div class="t"><span style="font-family:var(--mono);font-size:11px;color:var(--sky-deep)">' +
+      e.no + '</span> <b>' + esc(e.name) + '</b><span class="p num">' + e.sharePct + '%</span>' +
+      '<span class="d flat">' + esc(e.horizon) + "</span></div>" +
+      '<div class="track"><div class="fill" style="width:' + e.sharePct * 4 + '%"></div></div>' +
+      '<div class="m">' + esc(e.description) + "</div></div>").join("") + "</div>";
+
+    h += '<div class="panel"><h3>MESSI+ — the membership layer</h3><div class="list">' +
+      D.commercial.tiers.map((t) => {
+        const live = P.tiers.filter((x) => x.label.indexOf(t.name) === 0 || x.tier === t.id)[0];
+        const model = r.byTier.filter((x) => x.tier === t.name)[0];
+        return '<div class="item"><div class="h"><b>' + esc(t.name) + '</b><span class="tag">' + esc(t.price) +
+          '</span><span class="r">' + (live ? live.pct + "% of conversations" : "") + "</span></div><p>" +
+          esc(t.positioning) + "</p>" +
+          (model && model.mrr ? '<p style="color:var(--rose);font-weight:600">Modelled ' + usd(model.mrr) +
+            " MRR from " + model.fans.toLocaleString("en-US") + " members</p>" : "") + "</div>";
+      }).join("") + "</div></div>";
+
+    h += '<div class="panel"><h3>Mobile operators as the distribution engine</h3><div class="list">' +
+      D.commercial.telco.map((t) =>
+        '<div class="item"><b style="font-size:13px">' + esc(t.offer) + "</b>" +
+        '<p><span class="tag">Operator brings</span> ' + esc(t.operatorContribution) + "</p>" +
+        '<p><span class="tag">Platform gains</span> ' + esc(t.platformBenefit) + "</p></div>").join("") +
+      '</div><p style="margin:11px 0 0;font-size:12px;font-weight:600;color:var(--sky-deep)">' +
+      "MESSI.LIVE → TELCO → MILLIONS OF FANS. A B2B2C model that does not acquire fans one by one.</p></div>";
+
+    h += '<div class="panel"><h3>Global Rights Matrix — category control</h3>' +
+      D.commercial.rights.map((c) =>
+        '<div style="padding:7px 0;border-bottom:1px solid var(--line)"><div style="display:flex;gap:8px;align-items:center">' +
+        '<span style="flex:1;font-size:12.5px;font-weight:600">' + esc(c.category) + "</span>" +
+        '<span class="st ' + esc(c.status) + '">' + esc(c.status) + "</span></div>" +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + esc(c.note) + "</div></div>").join("") + "</div>";
+    h += "</div>";
+
+    h += '<div class="grid c2" style="margin-top:14px">' +
+      '<div class="panel"><h3>Commercial signals this period</h3><div class="list">' +
+      B.commercial.map((s) => '<div class="item" style="border:0;border-left:3px solid var(--gold);border-radius:0 10px 10px 0;background:#f6f8fc"><b style="font-size:13px">' +
+        esc(s.headline) + "</b><p>" + esc(s.detail) + "</p></div>").join("") + "</div></div>";
+    h += '<div class="panel"><h3>Maximise value. Protect Messi.</h3><div class="grid" style="gap:14px">' +
+      '<div><div style="font-family:var(--mono);font-size:9.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--sky-deep);margin-bottom:5px">BYOND operates</div>' +
+      '<ul class="plain split">' + D.commercial.split.byond.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul></div>" +
+      '<div><div style="font-family:var(--mono);font-size:9.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--rose);margin-bottom:5px">Management controls</div>' +
+      '<ul class="plain split">' + D.commercial.split.management.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul></div></div>" +
+      '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:11px">' +
+      D.commercial.controls.map((c) => '<span class="tag sky">' + esc(c) + "</span>").join("") + "</div></div></div>";
+
+    $("#pulseMgmt").innerHTML = h;
+  }
+
+  renderMessiView();
+  renderMgmtView();
+  $$(".roles button").forEach((b) => b.addEventListener("click", () => {
+    const role = b.dataset.role;
+    $$(".roles button").forEach((x) => x.setAttribute("aria-selected", String(x.dataset.role === role)));
+    $("#pulseMessi").hidden = role !== "messi";
+    $("#pulseMgmt").hidden = role !== "mgmt";
+  }));
+
+  /* =============================== WORLD BRIEF =============================== */
+  (function renderBrief() {
+    const k = P.kpis;
+    let h = '<div class="doc-head"><div style="display:flex;align-items:center;gap:11px">' +
+      '<svg viewBox="0 0 26 26" width="34" height="34" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="none" stroke="#7FB2E0" stroke-width="1.4" opacity=".55" />' +
+      '<g stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M7 18 V9" /><path d="M13 18 V7" /><path d="M19 18 V9" /></g>' +
+      '<circle cx="13" cy="20.5" r="1.6" fill="#E7B94E" /></svg>' +
+      '<div><div style="font-size:15px;font-weight:800;letter-spacing:0.03em">MESSI<span style="font-weight:300;color:var(--sky)">.LIVE</span></div>' +
+      '<div style="font-family:var(--mono);font-size:9px;letter-spacing:0.14em;color:rgba(255,255,255,0.6)">GLOBAL FAN RELATIONSHIP PLATFORM</div></div>' +
+      '<div style="margin-left:auto;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.6)">Prepared by BYOND asia</div></div>' +
+      "<h2>The Messi World Brief</h2>" +
+      '<p style="margin:0;font-size:13px;color:rgba(255,255,255,0.75)">' + esc(B.weekLabel) + "</p>" +
+      '<span class="cls">' + esc(B.classification) + "</span></div>";
+
+    h += '<div class="doc-body">';
+    h += '<div class="sec"><h3>Headline</h3><p class="lede">' + esc(B.headline) + "</p>" +
+      '<div class="kpis" style="margin-top:12px">' +
+      kpi("Conversations", k.conversations.toLocaleString("en-US"), "this week", "#2E6FA7") +
+      kpi("Countries · languages", k.countries + " · " + k.languages, "reach", "#7FB2E0") +
+      kpi("Emotional register", signed(k.netSentiment), "fans' own situations", k.netSentiment >= 0 ? "#1FAE7C" : "#D94A63") +
+      kpi("Avg conversation", k.avgDuration, "of five minutes", "#E7B94E") + "</div></div>";
+
+    h += '<div class="sec"><h3>1 · What the world asked you</h3>' +
+      '<p style="margin:0 0 11px;font-size:12.5px;color:var(--muted)">Six questions, chosen for how much a personal ' +
+      "answer would matter. Record thirty seconds and it reaches every fan who asked something close, in their language.</p>" +
+      '<div class="list">' + B.askedOfLionel.map((q, i) =>
+        '<div class="item"><div class="h"><span style="font-family:var(--mono);color:var(--rose);font-weight:700">' +
+        (i + 1) + '</span><b style="font-size:14px;line-height:1.45">“' + esc(q.question) + '”</b></div>' +
+        '<p style="margin-top:7px"><span class="tag">' + esc(q.country) + " · <bdi>" + esc(q.languageLabel) +
+        "</bdi> · " + esc(q.ageBand) + '</span> <span class="tag sky">' + esc(q.topic) + "</span> " +
+        '<span class="tag gold">' + q.similarCount + " fans asked this</span></p>" +
+        "<p>" + esc(q.rationale) + "</p></div>").join("") + "</div></div>";
+
+    h += '<div class="sec"><h3>2 · What the world is asking about</h3><div class="list">' +
+      B.themes.map((t) =>
+        '<div class="item"><div class="h"><span style="font-family:var(--mono);color:var(--sky-deep);font-weight:700">' +
+        t.rank + '</span><b>' + esc(t.topic) + '</b><span class="r">' + t.conversations + " conversations · " +
+        signed(t.deltaPts) + " pts</span></div>" +
+        '<blockquote class="quote" style="margin:8px 0 0">“' + esc(t.quote) + '”<span class="meta">' +
+        esc(t.quoteCountry) + " · <bdi>" + esc(t.quoteLanguage) + "</bdi> · " + esc(t.quoteAge) + "</span></blockquote>" +
+        '<p style="margin-top:7px"><span class="tag">Strongest in ' + esc(t.countries.join(" · ")) + "</span> " +
+        '<span class="tag">Owner: ' + esc(t.owner) + "</span> " +
+        '<span class="tag">Feeds: ' + esc(t.experience) + "</span></p></div>").join("") + "</div></div>";
+
+    h += '<div class="sec"><h3>3 · Duty of care</h3>' +
+      '<p style="border-left:3px solid var(--crit);background:rgba(217,74,99,0.06);border-radius:0 10px 10px 0;padding:11px 13px;font-size:13px;line-height:1.6;margin:0">' +
+      esc(B.careNote) + "</p>" +
+      '<div class="kpis" style="margin-top:11px">' + P.care.map((c) =>
+        kpi(c.level, String(c.count), c.pct + "% of conversations",
+          c.level === "Critical" ? "#D94A63" : c.level === "Care" ? "#E07A45" : c.level === "Watch" ? "#E7B94E" : "#C7CDD9")
+      ).join("") + "</div></div>";
+
+    h += '<div class="sec"><h3>4 · Territory watch</h3><div class="grid c2">' +
+      '<div class="item"><div style="font-family:var(--mono);font-size:9.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--ok)">Fastest growing</div>' +
+      '<p style="font-size:13.5px;font-weight:600;color:var(--ink)">' + esc(B.territoryWatch.growth) + "</p></div>" +
+      '<div class="item"><div style="font-family:var(--mono);font-size:9.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--rose)">Needs attention</div>' +
+      '<p style="font-size:13.5px;font-weight:600;color:var(--ink)">' + esc(B.territoryWatch.attention) + "</p></div></div></div>";
+
+    h += '<div class="sec"><h3>5 · Recommended this week</h3><div class="ol">' +
+      B.recommendedActions.map((a, i) => '<div class="li"><span class="k">' + (i + 1) + "</span><span>" + esc(a) + "</span></div>").join("") +
+      "</div></div>";
+
+    h += '<div class="no-print" style="margin-bottom:22px"><button class="btn gold" style="max-width:260px" id="btnPrint">Print / Save as PDF</button></div>';
+
+    h += '<p style="font-size:10.5px;color:var(--muted);line-height:1.6;border-top:1px solid var(--line);padding-top:14px;margin:0">' +
+      "Generated from de-identified Fan Insight Records produced by the Fan Voice Intelligence Framework. " +
+      "Every conversation is disclosed to the fan as an official AI-powered digital representation of Lionel Messi. " +
+      "Nothing in this brief is published without management approval. Concept document with synthetic data.</p>";
+    h += "</div>";
+
+    $("#doc").innerHTML = h;
+    $("#btnPrint").addEventListener("click", () => window.print());
+  })();
+
+  // Preload speech voices where the browser needs a nudge.
+  if (window.speechSynthesis) { try { window.speechSynthesis.getVoices(); } catch (e) {} }
+})();
+</script>
