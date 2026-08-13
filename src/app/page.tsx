@@ -79,6 +79,20 @@ export default function Home() {
           <p className="mt-4 text-xs font-semibold text-white/55">
             Demo prototype · synthetic data · AI representation of the Minister (disclosed)
           </p>
+
+          <Link
+            href="/messi"
+            className="mt-8 flex flex-wrap items-center gap-3 rounded-2xl bg-white/10 px-5 py-4 ring-1 ring-white/20 transition hover:bg-white/15"
+          >
+            <span className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-gold">
+              Same concept, different principal
+            </span>
+            <span className="text-sm font-extrabold text-white">
+              MESSI<span className="font-light">.LIVE</span> — five minutes with Lionel Messi&rsquo;s
+              digital human, plus the management intelligence platform behind it
+            </span>
+            <span className="ml-auto text-sm font-extrabold text-white">→</span>
+          </Link>
         </div>
       </section>
 

@@ -19,9 +19,22 @@ export type KlleonVoiceCodes = {
   subtitle_code: string;
 };
 
-/** MS uses Indonesian voice as Malay stand-in; others fall back to en_us. */
+/**
+ * Voice/subtitle codes per session language.
+ *
+ * MS uses the Indonesian voice as a Malay stand-in. Languages the current SDK
+ * build does not carry a voice for fall back to en_us so a session is never
+ * silent — the production deployment maps each MESSI.LIVE language to its own
+ * approved voice (slide 5).
+ */
+const VOICE_BY_LANG: Record<string, string> = {
+  MS: "id_id",
+  ID: "id_id",
+};
+
 export function klleonVoiceCodes(langCode: string): KlleonVoiceCodes {
-  if (langCode === "MS") return { voice_code: "id_id", subtitle_code: "id_id" };
+  const code = VOICE_BY_LANG[langCode];
+  if (code) return { voice_code: code, subtitle_code: code };
   return { voice_code: "en_us", subtitle_code: "en_us" };
 }
 

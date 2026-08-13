@@ -26,6 +26,22 @@ const config: Config = {
         grey: "#6B7180",
         line: "#E3E6EC",
         canvas: "#EEF0F4",
+        /**
+         * MESSI.LIVE palette — the second platform on this codebase.
+         * Argentina sky over a night-match sky, with gold for the moment
+         * itself and MESSI+ rose for the membership layer.
+         */
+        messi: {
+          night: "#080B16",
+          deep: "#0F1730",
+          slate: "#1B2647",
+          sky: "#75AADB",
+          "sky-deep": "#2E6FA7",
+          gold: "#E7B94E",
+          plus: "#F3579A",
+          live: "#22C58B",
+          canvas: "#F2F4F9",
+        },
       },
       fontFamily: {
         sans: [
