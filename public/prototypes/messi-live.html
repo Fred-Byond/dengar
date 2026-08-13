@@ -134,7 +134,20 @@
   .stage-note .eyebrow { color: var(--sky); margin-bottom: 12px; display: block; }
   .stage-note ol { margin: 0; padding-left: 18px; color: rgba(238, 242, 251, 0.6); font-size: 12.5px; line-height: 1.8; }
   .stage-note ol b { color: #eef2fb; font-weight: 700; }
-  @media (max-width: 900px) { .stage-note { display: none; } }
+  .heroslot { margin-top: 18px; padding: 13px 14px; border-radius: 13px;
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); }
+  .heroslot b { font-size: 12.5px; }
+  .heroslot p { margin: 5px 0 10px; font-size: 11.5px; line-height: 1.5; color: rgba(238, 242, 251, 0.55); }
+  .herobtn { display: block; text-align: center; cursor: pointer; border-radius: 10px;
+    background: rgba(127, 178, 224, 0.16); border: 1px solid rgba(127, 178, 224, 0.45);
+    color: var(--sky); font-size: 12px; font-weight: 700; padding: 9px 10px; }
+  .heroclear { display: block; width: 100%; margin-top: 6px; border: 0; background: transparent;
+    color: rgba(238, 242, 251, 0.45); font-size: 11px; padding: 5px; }
+  @media (max-width: 900px) {
+    .stage-note > :not(.heroslot) { display: none; }
+    .stage-note { max-width: 100%; width: 100%; }
+    .heroslot { margin-top: 4px; }
+  }
 
   /* phone */
   .phone {
@@ -157,6 +170,11 @@
 
   /* avatar stage inside the phone */
   .scene { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(90% 60% at 50% 12%, #16233f 0%, #060a14 70%); }
+  /* A real portrait, when one is supplied, replaces the placeholder figure. */
+  .scene .hero { position: absolute; inset: 0; background-size: cover; background-position: 50% 12%; }
+  .scene.has-hero .figure, .scene.has-hero .spot { display: none; }
+  .scene .hero::after { content: ""; position: absolute; inset: 0;
+    background: radial-gradient(120% 80% at 50% 30%, transparent 40%, rgba(4, 7, 14, 0.55) 100%); }
   .spot {
     position: absolute; left: 50%; top: -14%; width: 150%; height: 78%;
     transform: translateX(-50%);
@@ -166,6 +184,10 @@
   .figure { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 94%;
     transform-origin: 50% 100%; animation: breathe 5.5s ease-in-out infinite; }
   .figure svg { width: 100%; height: 100%; display: block; }
+  /* the room behind the figure: a soft light band at shoulder height */
+  .scene::before { content: ""; position: absolute; left: 0; right: 0; top: 46%; height: 34%;
+    background: linear-gradient(180deg, rgba(127, 178, 224, 0.1), transparent);
+    pointer-events: none; }
   .figure .body { fill: url(#figGrad); }
   @keyframes breathe {
     0%, 100% { transform: scale(1); }
@@ -583,10 +605,23 @@
           Turn your sound on. Tap the microphone during the session — the demo simulates the
           fan's side and speaks Messi's replies aloud where your browser supports it.
         </p>
+        <div class="heroslot">
+          <b>The figure is a placeholder.</b>
+          <p>
+            Drop in the portrait you'll pitch with — a still from the licensed avatar, or any
+            image. It stays on your device: nothing is uploaded.
+          </p>
+          <label class="herobtn">
+            Use my own hero image
+            <input type="file" id="heroFile" accept="image/*" hidden />
+          </label>
+          <button type="button" class="heroclear" id="heroClear" hidden>Remove image</button>
+        </div>
       </aside>
 
       <div class="phone" id="phone">
-        <div class="scene">
+        <div class="scene" id="scene">
+          <div class="hero" id="heroImg" hidden></div>
           <div class="spot"></div>
           <div class="figure breathe">
             <svg viewBox="0 0 300 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
@@ -616,6 +651,7 @@
                        the sheet, shoulders running under it -->
                   <g fill="#fff">
                     <ellipse cx="150" cy="78" rx="31" ry="38" />
+                    <path d="M119 72c0-22 14-36 31-36s31 14 31 36c0-12-12-18-31-18s-31 6-31 18z" />
                     <rect x="134" y="104" width="32" height="46" rx="13" />
                     <path d="M150 140c62 0 112 34 128 84 12 38 16 110 16 196H6c0-86 4-158 16-196 16-50 66-84 128-84z" />
                   </g>
@@ -1661,6 +1697,33 @@
   })();
 
   setLang("EN");
+
+  /* --- hero image slot -------------------------------------------------
+     The placeholder figure is replaced by a real portrait when one is
+     supplied. Two ways in: paste a data URI into HERO_IMAGE below, or wire a
+     file input with id="heroFile" (read locally — nothing is ever uploaded,
+     and nothing is fetched, which the artifact's content policy blocks).
+     --------------------------------------------------------------------- */
+  const HERO_IMAGE = "";
+  const heroFile = $("#heroFile"), heroImg = $("#heroImg"), heroClear = $("#heroClear");
+  function applyHero(src) {
+    heroImg.style.backgroundImage = 'url("' + src + '")';
+    heroImg.hidden = false;
+    scene.classList.add("has-hero");
+    if (heroClear) heroClear.hidden = false;
+  }
+  if (HERO_IMAGE) applyHero(HERO_IMAGE);
+  if (heroFile) heroFile.addEventListener("change", () => {
+    const f = heroFile.files && heroFile.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => applyHero(r.result);
+    r.readAsDataURL(f);
+  });
+  if (heroClear) heroClear.addEventListener("click", () => {
+    heroImg.hidden = true; heroImg.style.backgroundImage = "";
+    scene.classList.remove("has-hero"); heroClear.hidden = true; heroFile.value = "";
+  });
 
   // Preload speech voices where the browser needs a nudge.
   if (window.speechSynthesis) { try { window.speechSynthesis.getVoices(); } catch (e) {} }
