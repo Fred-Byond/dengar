@@ -38,7 +38,7 @@ authorised digital human — plus the management intelligence platform behind it
 | **Management dashboard** | `/messi/dashboard` | THE MESSI GLOBAL PULSE. Two role views: **Messi** (what the world is asking, the emerging signal, the response queue, duty of care) and **Management** (territories, membership, revenue engines, Global Rights Matrix). |
 | **Conversation Explorer** | `/messi/conversations` | Every conversation as one FVIF record: the question, the confirmed summary, the memory carried forward, the transcript, the care routing. PII masked by default; reveal is audit-logged. |
 | **World Brief** | `/messi/brief` | The recurring weekly deliverable, print/PDF ready. |
-| **Standalone prototype** | `/prototypes/messi-live.html` | One self-contained file — the whole fan journey plus both dashboards, no server, no SDK key. Open it anywhere or hand it to someone as a single file. |
+| **Standalone prototype** | `/prototypes/messi-live-v1.1.html` | One self-contained file — the whole fan journey plus both dashboards, no server, no SDK key. v1.1 adds the gift-structured session (Story Library), Moment Card, Gift a Moment, the planned-question anticipation window, his-voice mode, the milestone-message demo and Partner Pulse. `messi-live.html` is the v1.0 demo, kept for comparison. |
 
 The full written case — product, commercial model, governance, risk register and execution
 plan — is the Word paper, current version
@@ -109,10 +109,12 @@ regression** while the production React components are built out (see
 [ROADMAP](docs/ROADMAP.md)); they are the single source of truth for DENGAR's visual
 identity and copy.
 
-`messi-live.html` is the MESSI.LIVE clickable prototype: one file containing the full fan
-journey, the Global Pulse and the World Brief, with every dashboard figure baked in from a
-run of the real FVIF engine. It has no dependencies and makes no network requests, so it can
-be opened from disk, hosted anywhere, or emailed as a single attachment.
+`messi-live-v1.1.html` is the current MESSI.LIVE clickable prototype: one file containing
+the full fan journey (including the v1.1 gift structure, Moment Card, gifting, voice modes
+and milestone message), the Global Pulse with the Partner Pulse view, and the World Brief —
+every dashboard figure baked in from a run of the real FVIF engine. `messi-live.html` is the
+v1.0 demo, kept unchanged for comparison. Neither has dependencies nor makes network
+requests, so they can be opened from disk, hosted anywhere, or emailed as attachments.
 
 ---
 
