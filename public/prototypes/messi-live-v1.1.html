@@ -134,20 +134,7 @@
   .stage-note .eyebrow { color: var(--sky); margin-bottom: 12px; display: block; }
   .stage-note ol { margin: 0; padding-left: 18px; color: rgba(238, 242, 251, 0.6); font-size: 12.5px; line-height: 1.8; }
   .stage-note ol b { color: #eef2fb; font-weight: 700; }
-  .heroslot { margin-top: 18px; padding: 13px 14px; border-radius: 13px;
-    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); }
-  .heroslot b { font-size: 12.5px; }
-  .heroslot p { margin: 5px 0 10px; font-size: 11.5px; line-height: 1.5; color: rgba(238, 242, 251, 0.55); }
-  .herobtn { display: block; text-align: center; cursor: pointer; border-radius: 10px;
-    background: rgba(127, 178, 224, 0.16); border: 1px solid rgba(127, 178, 224, 0.45);
-    color: var(--sky); font-size: 12px; font-weight: 700; padding: 9px 10px; }
-  .heroclear { display: block; width: 100%; margin-top: 6px; border: 0; background: transparent;
-    color: rgba(238, 242, 251, 0.45); font-size: 11px; padding: 5px; }
-  @media (max-width: 900px) {
-    .stage-note > :not(.heroslot) { display: none; }
-    .stage-note { max-width: 100%; width: 100%; }
-    .heroslot { margin-top: 4px; }
-  }
+  @media (max-width: 900px) { .stage-note { display: none; } }
 
   /* phone */
   .phone {
@@ -646,18 +633,6 @@
           Turn your sound on. Tap the microphone during the session — the demo simulates the
           fan's side and speaks Messi's replies aloud where your browser supports it.
         </p>
-        <div class="heroslot">
-          <b>The figure is a placeholder.</b>
-          <p>
-            Drop in the portrait you'll pitch with — a still from the licensed avatar, or any
-            image. It stays on your device: nothing is uploaded.
-          </p>
-          <label class="herobtn">
-            Use my own hero image
-            <input type="file" id="heroFile" accept="image/*" hidden />
-          </label>
-          <button type="button" class="heroclear" id="heroClear" hidden>Remove image</button>
-        </div>
       </aside>
 
       <div class="phone" id="phone">
