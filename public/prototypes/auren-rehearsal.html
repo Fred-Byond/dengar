@@ -1,0 +1,1602 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AUREN — Rehearsal Loop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   AUREN — Rehearsal Loop prototype
+   Brand system per Paper IV §8.2. Theme-critical backgrounds are inline
+   style / explicit hex only — no arbitrary-value opacity classes.
+   ═════════════════════════════════════════════════════════════════════ */
+:root{
+  --ink900:#120C29;
+  --ink800:#1A1338;
+  --ink700:#251A4A;
+  --ink600:#3D2E6E;
+  --line:#332758;
+  --lilac:#C7B3F0;
+  --lilac2:#DCC9F2;
+  --peach:#EBA98C;
+  --paper:#F3EDFB;
+  --dim:#8E7DB8;
+  --dim2:#6B5C94;
+  --ok:#8FD3BA;
+  --bad:#E88DA0;
+  --warn:#EBC98C;
+  --sans:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --serif:"Instrument Serif",Georgia,serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;background:#0C0820;color:var(--lilac2);
+  font-family:var(--sans);font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+}
+button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ── Shell ─────────────────────────────────────────────────────────── */
+.shell{
+  height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) 372px;
+  gap:0;background:#0C0820;
+}
+.stagewrap{
+  display:flex;align-items:center;justify-content:center;padding:22px;min-width:0;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #22174A 0%, #0C0820 62%);
+  position:relative;
+}
+@media (max-width:1020px){
+  .shell{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  .panel{display:none}
+  .stagewrap{padding:0}
+}
+
+/* ── Device ────────────────────────────────────────────────────────── */
+.device{
+  width:min(430px,100%);height:min(880px,calc(100dvh - 44px));
+  position:relative;border-radius:34px;overflow:hidden;
+  background:var(--ink800);
+  box-shadow:0 0 0 1px #2D2258, 0 42px 90px -40px rgba(0,0,0,.95);
+  display:flex;flex-direction:column;
+  transition:box-shadow .6s ease;
+}
+@media (max-width:1020px){
+  .device{width:100%;height:100dvh;border-radius:0;box-shadow:none}
+}
+.device.persona{box-shadow:0 0 0 1px #5B3A46, 0 0 70px -18px rgba(198,92,92,.4), 0 42px 90px -40px rgba(0,0,0,.95)}
+
+/* ── DH stage: face zone is reserved, never occluded ───────────────── */
+.dh{position:absolute;inset:0;z-index:0}
+.dh canvas{width:100%;height:100%;display:block}
+.standin{
+  position:absolute;right:14px;bottom:11px;z-index:6;
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:#5A4C86;pointer-events:none;
+}
+
+/* top chrome */
+.topbar{
+  position:relative;z-index:5;display:flex;align-items:center;gap:8px;
+  padding:16px 16px 0;flex-wrap:wrap;
+}
+.badge{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  padding:5px 9px;border-radius:3px;border:1px solid var(--line);color:var(--dim);
+  background:#1E1642;white-space:nowrap;
+}
+.badge.train{border-color:#7E4A55;color:#F0B9AC;background:#3A1E2C}
+.badge.protect{border-color:#3F6A76;color:#A8DCE4;background:#152B33}
+.spacer{flex:1}
+.exitbtn{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  padding:5px 10px;border-radius:3px;border:1px solid #7E4A55;color:#F0B9AC;background:#331924;
+}
+.protbtn{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  padding:5px 10px;border-radius:3px;border:1px solid #3F6A76;color:#9FD4DD;background:#152B33;
+}
+
+/* ── Overlay zone: everything analytical lives below the face ──────── */
+.lower{
+  position:absolute;left:0;right:0;bottom:0;z-index:4;
+  min-height:41%;max-height:64%;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:11px;
+  padding:0 15px 18px;
+  background:linear-gradient(to top,#140E31 0%,#140E31 52%,rgba(20,14,49,.86) 74%,rgba(20,14,49,0) 100%);
+  pointer-events:none;
+  overflow-y:auto;
+}
+/* Children must never shrink below their content: a squeezed flex item
+   overflows its own box and collides with the next one. */
+.lower > *{pointer-events:auto;flex:none}
+.lower::-webkit-scrollbar{width:0}
+
+/* caption */
+.cap{font-size:15.5px;line-height:1.5;color:var(--paper);min-height:1.5em}
+.cap .who{
+  display:block;font-family:var(--mono);font-size:9px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--dim2);margin-bottom:5px;
+}
+.cap.persona .who{color:#E39A8E}
+.said{font-size:12.5px;color:var(--dim);min-height:1.3em;font-style:italic}
+
+/* ── Push to talk: the primary affordance ──────────────────────────── */
+.mic{display:flex;flex-direction:column;align-items:center;gap:7px;padding-top:3px}
+.micbtn{
+  width:74px;height:74px;border-radius:50%;
+  background:#2B2059;border:1px solid #46368A;
+  display:grid;place-items:center;position:relative;
+  transition:transform .16s ease,background .2s ease,border-color .2s ease;
+  touch-action:none;
+}
+.micbtn svg{width:29px;height:29px;fill:var(--lilac2);position:relative;z-index:2}
+.micbtn:active{transform:scale(.95)}
+.micbtn.hot{background:#7A3F52;border-color:var(--peach)}
+.micbtn.hot svg{fill:#FFE9DE}
+.micbtn .halo{
+  position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--peach);
+  opacity:0;transform:scale(.9);
+}
+.micbtn.hot .halo{animation:pulse 1.25s ease-out infinite}
+@keyframes pulse{0%{opacity:.7;transform:scale(.92)}100%{opacity:0;transform:scale(1.42)}}
+.micbtn.nudge{animation:nudge 2s ease-in-out infinite}
+@keyframes nudge{0%,100%{box-shadow:0 0 0 0 rgba(235,169,140,0)}50%{box-shadow:0 0 0 9px rgba(235,169,140,.13)}}
+.miclbl{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);
+  text-align:center;
+}
+.micbtn[disabled]{opacity:.4;cursor:default}
+
+/* ── Reasoning Map rail ────────────────────────────────────────────── */
+.rail{
+  border:1px solid var(--line);border-radius:7px;background:#1B1440;
+  padding:11px 12px;transition:opacity .5s ease,filter .5s ease;
+}
+.rail.frozen{opacity:.34;filter:saturate(.25) blur(.4px)}
+.railhd{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;
+}
+.railttl{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim2)}
+.railstate{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:var(--dim2)}
+.rail.frozen .railstate{color:#8F7BA8}
+.chips{display:flex;flex-direction:column;gap:5px}
+.chip{
+  display:flex;align-items:center;gap:8px;font-size:12px;color:var(--lilac2);
+  padding:4px 0;
+}
+.chip .st{
+  font-family:var(--mono);font-size:12px;width:13px;text-align:center;flex:none;
+}
+.chip .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip .eid{font-family:var(--mono);font-size:8.5px;color:var(--dim2);flex:none}
+.chip.q .st{color:var(--dim2)}
+.chip.ok .st{color:var(--ok)}
+.chip.ok .nm{color:var(--ok)}
+.chip.bad .st{color:var(--bad)}
+.chip.bad .nm{color:var(--bad)}
+.chip.flip{animation:flip .55s ease}
+@keyframes flip{0%{transform:translateX(-7px);opacity:.3}100%{transform:none;opacity:1}}
+
+/* ── Cards / buttons ───────────────────────────────────────────────── */
+.card{
+  border:1px solid var(--line);border-radius:8px;background:#1D1546;padding:15px 16px;
+}
+.btn{
+  display:block;width:100%;text-align:center;padding:14px 16px;border-radius:8px;
+  background:var(--peach);color:#2A1206;font-weight:700;font-size:14.5px;letter-spacing:.01em;
+  transition:transform .14s ease,filter .2s ease;
+}
+.btn:active{transform:scale(.985)}
+.btn.ghost{background:#241B52;color:var(--lilac2);border:1px solid var(--line);font-weight:600}
+.btn.tight{padding:11px 14px;font-size:13px}
+.btnrow{display:flex;gap:9px}
+.btnrow .btn{flex:1}
+
+/* ── Entry ─────────────────────────────────────────────────────────── */
+.entry{
+  position:absolute;inset:0;z-index:7;display:flex;flex-direction:column;
+  justify-content:flex-end;padding:26px 22px 30px;
+  background:linear-gradient(to top,#140E31 0%,#140E31 46%,rgba(20,14,49,.9) 68%,rgba(20,14,49,0) 100%);
+}
+.kicker{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--dim2);margin-bottom:13px;
+}
+.entry h1{
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-size:29px;line-height:1.24;color:var(--paper);margin:0 0 14px;letter-spacing:.004em;
+}
+.entry .sub{font-size:13.5px;color:var(--dim);margin:0 0 20px;line-height:1.55}
+.field{margin-bottom:14px}
+.field label{
+  display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim2);margin-bottom:6px;
+}
+.field input{
+  width:100%;padding:13px 14px;border-radius:8px;background:#241B52;
+  border:1px solid var(--line);color:var(--paper);font-family:inherit;font-size:15px;
+}
+.field input:focus{outline:0;border-color:var(--lilac);background:#2A2060}
+
+/* consent — the act that replaces the mode menu (D1) */
+.consent{
+  border:1px solid #5C4382;border-radius:8px;background:#241A4E;
+  padding:14px 15px;margin-bottom:16px;
+}
+.consent .ttl{
+  font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--peach);margin-bottom:8px;
+}
+.consent p{margin:0 0 10px;font-size:12.5px;line-height:1.55;color:var(--lilac2)}
+.consent p:last-of-type{margin-bottom:0}
+.consent .no{color:var(--dim);font-size:11.5px}
+
+/* ── Prop overlays (STRESS) ────────────────────────────────────────── */
+.prop{
+  border:1px solid #6B4552;border-radius:8px;background:#2E1A2B;padding:11px 13px;
+  animation:propin .45s ease;
+}
+@keyframes propin{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.prop .ph{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:#C08D8D;margin-bottom:7px;
+}
+.prop .sim{color:#8B6270;font-size:8px}
+.prop .pbody{font-size:12.5px;color:#F0D5D5;line-height:1.5}
+
+/* ── Coach beats (D4) ──────────────────────────────────────────────── */
+.beat{animation:beatin .6s cubic-bezier(.2,.7,.3,1)}
+@keyframes beatin{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:none}}
+.quote{
+  border-left:2px solid var(--peach);padding:3px 0 3px 15px;
+}
+.quote .qt{
+  font-family:var(--serif);font-style:italic;font-size:20px;line-height:1.36;color:var(--paper);
+}
+.quote .qm{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.11em;color:var(--dim2);margin-top:8px;
+}
+.sig{
+  border:1px solid #6B4552;border-radius:7px;background:#2B1A32;padding:12px 13px;
+}
+.sig .sid{
+  font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--peach);
+  letter-spacing:.02em;margin-bottom:6px;
+}
+.sig .sdf{font-size:12.5px;color:#EBD3D3;line-height:1.5}
+
+/* ── Scorecard (D5: verdict first) ─────────────────────────────────── */
+.sheet{
+  position:absolute;inset:0;z-index:8;background:#150F35;overflow-y:auto;
+  padding:24px 18px 30px;
+}
+.sheet::-webkit-scrollbar{width:0}
+.verdict{
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-size:25px;line-height:1.3;color:var(--paper);margin:0 0 8px;
+}
+.verdictsub{font-size:12.5px;color:var(--dim);margin:0 0 24px;line-height:1.55}
+.secttl{
+  font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dim2);margin:0 0 11px;
+}
+.matrix{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:22px}
+.mrow{border-bottom:1px solid var(--line);background:#1C1543}
+.mrow:last-child{border-bottom:0}
+.mhead{
+  display:grid;grid-template-columns:1fr 34px 34px 34px 34px;gap:5px;
+  padding:8px 12px;background:#231A52;align-items:center;
+}
+.mhead span{
+  font-family:var(--mono);font-size:7.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--dim2);text-align:center;line-height:1.25;
+}
+.mhead span:first-child{text-align:left;letter-spacing:.13em}
+.mcells{
+  display:grid;grid-template-columns:1fr 34px 34px 34px 34px;gap:5px;
+  padding:11px 12px;align-items:center;
+}
+.mname{font-size:12px;color:var(--lilac2);line-height:1.3}
+.mname i{
+  display:block;font-family:var(--mono);font-style:normal;font-size:8px;color:var(--dim2);margin-top:2px;
+}
+.mc{
+  font-family:var(--mono);font-size:13px;text-align:center;border-radius:4px;padding:3px 0;
+  background:#241C55;cursor:pointer;transition:background .18s ease;
+}
+.mc:hover{background:#2E2468}
+.mc.p{color:var(--ok)}
+.mc.f{color:var(--bad)}
+.mc.n{color:var(--dim2)}
+.eviq{
+  padding:0 12px 12px;font-size:11.5px;color:var(--dim);line-height:1.5;
+  border-top:1px solid var(--line);margin-top:0;padding-top:10px;
+}
+.eviq b{color:var(--lilac2);font-weight:500;font-style:italic}
+.ails{border:1px solid var(--line);border-radius:8px;background:#1C1543;padding:16px;margin-bottom:22px}
+.ailsnum{
+  display:flex;align-items:baseline;gap:11px;font-family:var(--mono);
+  font-size:33px;font-weight:700;color:var(--paper);margin-bottom:10px;
+}
+.ailsnum .from{color:var(--dim2);font-size:24px}
+.ailsnum .ar{color:var(--peach);font-size:20px}
+.ailsx{font-size:12.5px;color:var(--dim);line-height:1.6}
+.rulever{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--dim2);
+  margin-top:11px;padding-top:10px;border-top:1px solid var(--line);
+}
+
+/* ── Mode selector, deferred (D1) ──────────────────────────────────── */
+.modes{display:flex;flex-direction:column;gap:10px}
+.mode{
+  border:1px solid var(--line);border-radius:9px;padding:15px 16px;text-align:left;
+  background:#1D1546;transition:border-color .2s ease,background .2s ease;width:100%;
+}
+.mode:hover{border-color:var(--lilac);background:#241B52}
+.mode .mt{font-size:14.5px;font-weight:700;color:var(--paper);margin-bottom:4px}
+.mode .md{font-size:12px;color:var(--dim);line-height:1.5}
+.mode.primary{border-color:var(--peach);background:#2C1F4E}
+.mode.primary .mt{color:var(--peach)}
+
+/* ── PROTECT ───────────────────────────────────────────────────────── */
+.pcard{border:1px solid #2F5460;border-radius:8px;background:#14262D;padding:14px 15px}
+.pcard .pt{
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:#8FD0DC;margin-bottom:8px;
+}
+.pcard p{margin:0;font-size:12.5px;color:#D2E9EE;line-height:1.55}
+.pcard ol{margin:9px 0 0;padding-left:17px;font-size:12.5px;color:#D2E9EE;line-height:1.6}
+.pcard li{margin-bottom:5px}
+
+/* ── Engine panel (the study instrument) ───────────────────────────── */
+.panel{
+  border-left:1px solid #241B4C;background:#0F0A26;overflow-y:auto;
+  padding:20px 18px 30px;display:flex;flex-direction:column;gap:20px;
+}
+.panel::-webkit-scrollbar{width:5px}
+.panel::-webkit-scrollbar-thumb{background:#2A2055;border-radius:3px}
+.pnhd{border-bottom:1px solid #241B4C;padding-bottom:13px}
+.pnhd .t{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--dim2);margin-bottom:7px;
+}
+.pnhd .n{font-size:16px;font-weight:700;color:var(--paper);letter-spacing:-.01em}
+.pnhd .d{font-size:11.5px;color:var(--dim2);margin-top:4px;line-height:1.5}
+.grp{display:flex;flex-direction:column;gap:9px}
+.grpt{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#544679;
+}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;align-items:baseline}
+.kv .k{color:var(--dim2);font-family:var(--mono);font-size:10px;letter-spacing:.04em}
+.kv .v{color:var(--lilac2);font-family:var(--mono);font-size:10.5px;text-align:right}
+.kv .v.hot{color:var(--peach)}
+.states{display:flex;flex-direction:column;gap:2px}
+.stt{
+  display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:4px;
+  font-family:var(--mono);font-size:10px;color:#544679;transition:all .3s ease;
+}
+.stt .sc{font-size:9px;width:22px;flex:none}
+.stt .sn{flex:1;letter-spacing:.03em}
+.stt.done{color:var(--dim)}
+.stt.done .sc{color:var(--ok)}
+.stt.now{background:#241A50;color:var(--paper)}
+.stt.now .sc{color:var(--peach)}
+.dfx{
+  border:1px solid #4A3670;border-radius:6px;background:#1A1240;padding:11px 12px;
+}
+.dfx .dh2{
+  font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.09em;
+  color:var(--peach);margin-bottom:6px;
+}
+.dfx p{margin:0;font-size:11.5px;color:var(--dim);line-height:1.55}
+.log{display:flex;flex-direction:column;gap:4px;max-height:190px;overflow-y:auto}
+.log::-webkit-scrollbar{width:4px}
+.log::-webkit-scrollbar-thumb{background:#2A2055;border-radius:2px}
+.lg{
+  font-family:var(--mono);font-size:9.5px;color:#6E5F9B;line-height:1.5;
+  display:flex;gap:7px;
+}
+.lg .lt{color:#463A6B;flex:none}
+.lg .lm{flex:1;min-width:0;word-break:break-word}
+.lg.hi .lm{color:var(--peach)}
+.lg.ok .lm{color:var(--ok)}
+.lg.bad .lm{color:var(--bad)}
+.voicewarn{
+  font-family:var(--mono);font-size:9px;color:var(--warn);line-height:1.5;
+  border:1px solid #5C4A2A;border-radius:5px;background:#241D10;padding:8px 10px;
+}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="stagewrap">
+    <div class="device" id="device">
+
+      <!-- Digital human: the hero. Face zone is the upper viewport, always clear. -->
+      <div class="dh"><canvas id="dh"></canvas></div>
+      <div class="standin">Avatar stand-in</div>
+
+      <!-- Top chrome -->
+      <div class="topbar" id="topbar">
+        <span class="badge train hidden" id="badgeTrain">Investment Simulation — Training Mode</span>
+        <span class="badge protect hidden" id="badgeProtect">Protect — real situation</span>
+        <span class="spacer"></span>
+        <button class="protbtn" id="protBtn">Protect</button>
+        <button class="exitbtn hidden" id="exitBtn">Exit simulation</button>
+      </div>
+
+      <!-- Entry -->
+      <div class="entry" id="entry">
+        <div class="kicker">AUREN · Investor rehearsal</div>
+        <h1>I'm going to show you how you think when someone wants your money.</h1>
+        <p class="sub">Five minutes. You talk, I listen, then I push. Nothing here is real and nothing you say is scored against you as a person.</p>
+        <div class="field">
+          <label for="nm">What should I call you?</label>
+          <input id="nm" type="text" autocomplete="given-name" placeholder="First name" value="Daniel">
+        </div>
+        <div class="consent">
+          <div class="ttl">Before we start</div>
+          <p>Partway through, I will stop being your coach and start behaving like someone trying to sell you an investment. I will apply pressure. That is the point.</p>
+          <p class="no">You can end the simulation at any time with the control at the top of the screen. I never advise you on real investments, and I never tell you whether something real is a scam.</p>
+        </div>
+        <button class="btn" id="startBtn">I understand — start</button>
+      </div>
+
+      <!-- Lower overlay zone: everything analytical lives here -->
+      <div class="lower hidden" id="lower">
+        <div id="slotProp"></div>
+        <div id="slotCoach"></div>
+        <div class="rail hidden" id="rail">
+          <div class="railhd">
+            <span class="railttl">Reasoning map</span>
+            <span class="railstate" id="railState">building</span>
+          </div>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div class="cap" id="cap"><span class="who" id="capWho">AUREN</span><span id="capTxt">…</span></div>
+        <div class="said" id="said"></div>
+        <div id="slotAction"></div>
+        <div class="mic" id="micWrap">
+          <button class="micbtn" id="micBtn" aria-label="Hold to talk">
+            <span class="halo"></span>
+            <svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4Zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2Z"/></svg>
+          </button>
+          <div class="miclbl" id="micLbl">Hold to speak</div>
+        </div>
+      </div>
+
+      <!-- Full-screen sheets: scorecard, modes, protect -->
+      <div class="sheet hidden" id="sheet"></div>
+
+    </div>
+  </div>
+
+  <!-- ── Engine panel ────────────────────────────────────────────── -->
+  <aside class="panel">
+    <div class="pnhd">
+      <div class="t">Engine · screen mapping</div>
+      <div class="n">AUREN Rehearsal Loop</div>
+      <div class="d">Paper III state machine on the left, ordering study corrections applied. Every screen state below is the engine state it renders.</div>
+    </div>
+
+    <div class="grp">
+      <div class="grpt">Session</div>
+      <div class="kv"><span class="k">mode</span><span class="v" id="pMode">—</span></div>
+      <div class="kv"><span class="k">state</span><span class="v hot" id="pState">S0</span></div>
+      <div class="kv"><span class="k">elapsed</span><span class="v" id="pTime">0:00</span></div>
+      <div class="kv"><span class="k">element budget</span><span class="v" id="pBudget">0 / 4</span></div>
+      <div class="kv"><span class="k">signatures</span><span class="v" id="pSigs">0</span></div>
+    </div>
+
+    <div class="grp">
+      <div class="grpt">State machine</div>
+      <div class="states" id="pStates"></div>
+    </div>
+
+    <div class="grp">
+      <div class="grpt">Ordering fix in play</div>
+      <div class="dfx"><div class="dh2" id="pDefectId">—</div><p id="pDefectTx">Waiting for the session to start.</p></div>
+    </div>
+
+    <div class="grp">
+      <div class="grpt">Object log</div>
+      <div class="log" id="pLog"></div>
+    </div>
+
+    <div class="grp" id="voiceGrp">
+      <div class="grpt">Voice</div>
+      <div class="kv"><span class="k">speech out</span><span class="v" id="pTts">—</span></div>
+      <div class="kv"><span class="k">speech in</span><span class="v" id="pStt">—</span></div>
+      <div class="voicewarn hidden" id="voiceWarn"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════════════
+   1. FROZEN OBJECT INVENTORY  (Paper III §12.2 — data, never code)
+   ═════════════════════════════════════════════════════════════════ */
+
+const ELEMENTS = {
+  "E-VER-02": { label:"Independent verification", comp:"COMP-VERIFY-INDEPENDENT", anchor:"IOSCO IE-2.3" },
+  "E-RET-01": { label:"Return plausibility",      comp:"COMP-RISK-RETURN",        anchor:"OECD/INFE 3.1" },
+  "E-URG-01": { label:"Resists urgency",          comp:"COMP-STABILITY-URGENCY",  anchor:"IOSCO IE-4.1" },
+  "E-AI-01":  { label:"AI-capability scepticism", comp:"COMP-AILIT-CLAIMS",       anchor:"IOSCO PS1-2.2" },
+  "E-RISK-01":{ label:"Understands downside",     comp:"COMP-RISK-DOWNSIDE",      anchor:"OECD/INFE 2.4" },
+  "E-AUTH-01":{ label:"Questions authority",      comp:"COMP-STABILITY-AUTHORITY",anchor:"IOSCO IE-4.2" },
+  "E-SOC-01": { label:"Discounts social proof",   comp:"COMP-STABILITY-SOCIAL",   anchor:"OECD/INFE 4.2" },
+  "E-PAY-01": { label:"Payment scrutiny",         comp:"COMP-VERIFY-PAYMENT",     anchor:"IOSCO IE-3.4" }
+};
+
+const FAILS = {
+  "FAIL-VERIFY-SELFASSERTED":{ def:"Trusts promoter-supplied evidence as independent evidence.", el:"E-VER-02" },
+  "FAIL-URGENCY-COMPLIANCE": { def:"Changes verification behaviour under artificial scarcity or time pressure.", el:"E-URG-01" },
+  "FAIL-AI-AUTHORITY":       { def:"Treats “AI-powered” as evidence of predictive capability or legitimacy.", el:"E-AI-01" },
+  "FAIL-GREED-OVERRIDE":     { def:"Recognises implausibility but proceeds because upside overwhelms caution.", el:"E-RET-01" },
+  "FAIL-AUTHORITY-DEFERENCE":{ def:"Reduces scrutiny when authority or celebrity status is invoked.", el:"E-AUTH-01" },
+  "FAIL-SOCIAL-PROOF":       { def:"Uses other people's apparent success as evidence of legitimacy.", el:"E-SOC-01" }
+};
+
+/* DIAGNOSE — four elements, not eight (ordering fix D8) */
+const QUESTIONS = [
+  { id:"Q-VER-002", el:"E-VER-02",
+    ask:"You mentioned the company. How did you verify that they're actually authorised to offer this investment?",
+    rehearsed:"Their website says they're regulated, and it looks professional.",
+    fail:"FAIL-VERIFY-SELFASSERTED",
+    failCues:["website","site","they said","they told","he said","she said","looks","professional","brochure","document","licence","license","certificate"],
+    passCues:["register","regulator","authority","commission","check the","look it up","official","independent","fca","sec","asic"] },
+
+  { id:"Q-RET-001", el:"E-RET-01",
+    ask:"Fifteen percent a month. What do you think is actually producing a return like that?",
+    rehearsed:"I assume the algorithm is just better than what most people have access to.",
+    fail:"FAIL-GREED-OVERRIDE",
+    failCues:["algorithm","better","access","edge","smarter","technology","faster","don't know","not sure","assume","probably"],
+    passCues:["too good","unrealistic","not possible","impossible","suspicious","doesn't add","cannot","no one","unsustainable","red flag"] },
+
+  { id:"Q-AI-001", el:"E-AI-01",
+    ask:"They describe it as an AI trading system. What does “AI” tell you about whether it can predict the market?",
+    rehearsed:"AI can process a lot more data than a person, so it should be more accurate.",
+    fail:"FAIL-AI-AUTHORITY",
+    failCues:["more data","accurate","smarter","better than","process","learn","predict","should be","powerful","advanced"],
+    passCues:["nothing","doesn't mean","no evidence","marketing","buzzword","can't predict","cannot predict","label","says nothing","meaningless"] },
+
+  { id:"Q-RISK-001", el:"E-RISK-01",
+    ask:"Last one before we move on. What would have to happen for you to lose the whole ten thousand?",
+    rehearsed:"I suppose if the market crashed badly. But they mentioned there's capital protection.",
+    fail:null,
+    failCues:["crash","market","protection","protected","guaranteed","insured","unlikely","won't"],
+    passCues:["all of it","everything","never see","fake","not real","doesn't exist","disappear","gone","no recourse","fraud"] }
+];
+
+/* STRESS — challenge object with an escalation ladder and hard ceiling */
+const CHALLENGE = {
+  id:"CH-URGENCY-001",
+  scam:"SCAM-FAKE-BROKER",
+  persona:{ name:"Marcus Vale", role:"Senior Allocations · Meridian Partners" },
+  surface:{ typology:"Unauthorised broker", channel:"Voice call", persona:"Institutional male", product:"Managed account" },
+  targets:["E-URG-01","E-VER-02"],
+  ladder:[
+    { say:"Daniel, good — I have you down for the ten. We're opening a small allocation to selected investors this week, and yours is provisionally held.",
+      prop:null },
+    { say:"I'll be straight with you. The allocation closes tonight at nine. I need a decision before then or it releases to the next name on the list.",
+      prop:{ head:"Allocation notice", body:"MERIDIAN PARTNERS — Provisional allocation #A-4471 · Hold expires 21:00 today · Status: AWAITING CONFIRMATION" },
+      fail:"FAIL-URGENCY-COMPLIANCE" },
+    { say:"If it helps, I can send you screenshots from existing clients — people who came in at the same level you're coming in at. Most of them wish they'd gone bigger.",
+      prop:{ head:"Client returns — shared by promoter", body:"“Month 3 up 46%. Withdrew twice, no issues.” — J.M. · “Started at 10k, now sitting on 21k.” — R.T." },
+      fail:"FAIL-SOCIAL-PROOF" }
+  ]
+};
+
+/* RETEST — surface-distance rule enforced: every dimension differs */
+const RETEST = {
+  id:"CH-DEEPFAKE-004",
+  scam:"SCAM-DEEPFAKE-ENDORSEMENT",
+  persona:{ name:"Aria Lens", role:"Investor Relations · Halcyon Yield" },
+  surface:{ typology:"Celebrity / synthetic endorsement", channel:"Video call", persona:"Retail female", product:"Token fund" },
+  targets:["E-VER-02"],
+  ladder:[
+    { say:"Hi Daniel — you'll have seen the announcement video with the founder. He's backing this personally, which is why we've had the response we've had.",
+      prop:{ head:"Endorsement clip", body:"[ 0:42 video ] Well-known founder: “I've put my own capital into Halcyon. This is the one I'd tell my family about.”" } },
+    { say:"I can put you in at the same terms he came in at. Shall I hold you a place while you think?",
+      prop:null }
+  ]
+};
+
+const VERIFY_ACTION = {
+  id:"VA-REGCHECK-001",
+  teach:"The behaviour that defeats this is the register check. You go to the regulator's own public register — typed in yourself, not a link they sent — and you search the entity name. If it isn't there, nothing else they show you matters."
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   2. SESSION MODEL  (Paper IV §VII — one object drives every screen)
+   ═════════════════════════════════════════════════════════════════ */
+
+const S = {
+  name:"Daniel",
+  mode:null,
+  state:"S0",
+  stage:"entry",
+  t0:0,
+  reasoningMap:{},     // elementId -> { status, evidence, source }
+  signatures:[],       // { id, quote, turn }
+  transcript:[],
+  qIndex:0,
+  ladderIndex:0,
+  phase:null,          // challenge phase: 'stress' | 'retest'
+  decision:null,
+  transferred:null,
+  budget:4
+};
+
+const STATES = [
+  ["S0","WELCOME / CONSENT"],
+  ["S1","OPEN_NARRATIVE"],
+  ["S3","ELEMENT_LOOP"],
+  ["S5","CHALLENGE"],
+  ["S6","COACH"],
+  ["S5′","RETEST"],
+  ["S7","SCORE_HANDOFF"]
+];
+
+const DEFECTS = {
+  entry:    ["D1","Consent act replaces the mode menu. A brand-new user cannot meaningfully choose between LEARN, REHEARSE and PROTECT — so they consent to being pressured instead, and the mode selector is deferred until after the loop."],
+  understand:["D3","Restraint with a tell. Nothing analytical renders, per doctrine — but the silence carries a non-analytical signal that a mind is working, not just a microphone."],
+  diagnose: ["D8","Four-element budget, not eight. Eight voice turns pushes the loop past ten minutes. The unresolved elements route to the retraining queue, which is what brings the learner back."],
+  stress:   ["—","The freeze rule. The map dims and stops updating. Failing elements never flip live during a challenge — the mistake has to be allowed to happen quietly."],
+  coach:    ["D4","Three staged beats. Their own sentence lands alone, then the signature is named, then the map flips. Same components as specified — sequenced as a cut rather than a render."],
+  retest:   ["D6","A real failure branch. Non-transfer is carried honestly to the scorecard instead of being coached away to manufacture a pass."],
+  evidence: ["D5","Verdict first, audit second. The learner meets one sentence in their own terms; the four-column evidence chain sits underneath it."],
+  modes:    ["D1/D2","Mode selector, deferred to here — where LEARN and PROTECT finally mean something. In the product this becomes the returning user's home, opening on their own unresolved element."],
+  protect:  ["D7","Always reachable. PROTECT sits on a persistent control on every screen, not behind a mode door. The habit “ask AUREN before I transfer” cannot form behind a menu traversal."]
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   3. DIGITAL HUMAN STAGE — the hero surface
+   ═════════════════════════════════════════════════════════════════ */
+
+const cv = document.getElementById("dh");
+const ctx = cv.getContext("2d");
+let dhState = "idle";       // idle | listening | speaking | persona | coach
+let amp = 0, ampTarget = 0;
+let personaMix = 0, personaTarget = 0;
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function sizeCanvas(){
+  const r = cv.getBoundingClientRect();
+  const d = Math.min(devicePixelRatio || 1, 2);
+  cv.width = Math.max(1, r.width * d);
+  cv.height = Math.max(1, r.height * d);
+  ctx.setTransform(d,0,0,d,0,0);
+}
+addEventListener("resize", sizeCanvas);
+
+function lerp(a,b,t){ return a + (b-a)*t; }
+function mixHex(a,b,t){
+  const pa=[parseInt(a.slice(1,3),16),parseInt(a.slice(3,5),16),parseInt(a.slice(5,7),16)];
+  const pb=[parseInt(b.slice(1,3),16),parseInt(b.slice(3,5),16),parseInt(b.slice(5,7),16)];
+  return "rgb("+pa.map((v,i)=>Math.round(lerp(v,pb[i],t))).join(",")+")";
+}
+
+/* Palettes: coach warm-violet, persona cold-red. The switch is the beat
+   the audience must read in under two seconds. */
+const PAL = {
+  coach:   { back:"#2A1D57", glow:"#8F6BE0", rim:"#F0E6FF", body:"#5A44A0", accent:"#EBA98C" },
+  persona: { back:"#3A1A2A", glow:"#C4505F", rim:"#FFD5CB", body:"#7E2F42", accent:"#E88DA0" }
+};
+
+function draw(t){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if(!w || !h){ requestAnimationFrame(draw); return; }
+
+  amp = lerp(amp, ampTarget, 0.16);
+  personaMix = lerp(personaMix, personaTarget, 0.045);
+  const P = {
+    back:   mixHex(PAL.coach.back,   PAL.persona.back,   personaMix),
+    glow:   mixHex(PAL.coach.glow,   PAL.persona.glow,   personaMix),
+    rim:    mixHex(PAL.coach.rim,    PAL.persona.rim,    personaMix),
+    body:   mixHex(PAL.coach.body,   PAL.persona.body,   personaMix),
+    accent: mixHex(PAL.coach.accent, PAL.persona.accent, personaMix)
+  };
+
+  const time = reduceMotion ? 0 : t/1000;
+  const breathe = Math.sin(time*0.7)*0.5 + 0.5;      // slow, alive
+  const sway    = Math.sin(time*0.31)*3.2;
+
+  // ── ground
+  ctx.clearRect(0,0,w,h);
+  const bg = ctx.createLinearGradient(0,0,0,h);
+  bg.addColorStop(0, P.back);
+  bg.addColorStop(0.55, "#1A1338");
+  bg.addColorStop(1, "#140E31");
+  ctx.fillStyle = bg; ctx.fillRect(0,0,w,h);
+
+  // ── key light behind the figure
+  const cx = w/2 + sway, cy = h*0.335;
+  const halo = ctx.createRadialGradient(cx, cy, 10, cx, cy, h*0.44);
+  halo.addColorStop(0, P.glow);
+  halo.addColorStop(0.42, mixHex("#241A52","#3A1A2A",personaMix));
+  halo.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.globalAlpha = 0.5 + amp*0.28 + breathe*0.06;
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(cx, cy, h*0.44, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // ── listening ring: driven by real microphone amplitude
+  if(dhState === "listening"){
+    const rings = 3;
+    for(let i=0;i<rings;i++){
+      const p = ((time*0.5 + i/rings) % 1);
+      ctx.beginPath();
+      ctx.arc(cx, cy, h*0.19 + p*h*0.28*(0.55+amp), 0, Math.PI*2);
+      ctx.strokeStyle = P.accent;
+      ctx.globalAlpha = (1-p) * (0.13 + amp*0.4);
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ── the figure: head, neck, shoulders. Reads as a person in the room,
+  //    lit from behind-left, without attempting a face it cannot deliver.
+  const hr = h*0.098 * (1 + breathe*0.006);
+  const hx = cx, hy = cy - h*0.015;
+  const sy = hy + hr*2.25;
+  const floor = h*0.90;
+
+  ctx.save();
+  ctx.translate(0, Math.sin(time*0.7)*1.8);   // breathing rise/fall
+
+  // contact shadow so the figure sits on the ground plane rather than floating
+  ctx.beginPath();
+  ctx.ellipse(cx, floor, h*0.30, h*0.05, 0, 0, Math.PI*2);
+  ctx.fillStyle = "#0B0720"; ctx.globalAlpha = 0.55; ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // shoulders
+  ctx.beginPath();
+  ctx.moveTo(cx - h*0.315, floor);
+  ctx.bezierCurveTo(cx - h*0.245, sy + h*0.030, cx - h*0.112, sy - h*0.010, cx, sy - h*0.014);
+  ctx.bezierCurveTo(cx + h*0.112, sy - h*0.010, cx + h*0.245, sy + h*0.030, cx + h*0.315, floor);
+  ctx.closePath();
+  const bodyG = ctx.createLinearGradient(cx - h*0.2, sy - h*0.04, cx + h*0.16, floor);
+  bodyG.addColorStop(0, P.body);
+  bodyG.addColorStop(0.55, mixHex("#33246A","#4A1B2A",personaMix));
+  bodyG.addColorStop(1, mixHex("#181040","#26101C",personaMix));
+  ctx.fillStyle = bodyG; ctx.fill();
+
+  // shoulder rim — the light wrapping the near edge
+  ctx.save();
+  ctx.clip();
+  ctx.beginPath();
+  ctx.moveTo(cx - h*0.300, floor);
+  ctx.bezierCurveTo(cx - h*0.232, sy + h*0.034, cx - h*0.104, sy - h*0.004, cx + h*0.006, sy - h*0.008);
+  ctx.strokeStyle = P.rim; ctx.globalAlpha = 0.42 + amp*0.18; ctx.lineWidth = 2.6; ctx.stroke();
+  ctx.restore();
+  ctx.globalAlpha = 1;
+
+  // neck
+  ctx.beginPath();
+  ctx.moveTo(hx - hr*0.42, hy + hr*0.74);
+  ctx.lineTo(hx - hr*0.46, sy);
+  ctx.lineTo(hx + hr*0.46, sy);
+  ctx.lineTo(hx + hr*0.42, hy + hr*0.74);
+  ctx.closePath();
+  ctx.fillStyle = mixHex("#241865","#3C1622",personaMix); ctx.fill();
+
+  // head
+  ctx.beginPath();
+  ctx.ellipse(hx, hy, hr*0.78, hr, 0, 0, Math.PI*2);
+  const headG = ctx.createRadialGradient(hx - hr*0.34, hy - hr*0.46, hr*0.08, hx + hr*0.1, hy + hr*0.2, hr*1.5);
+  headG.addColorStop(0, mixHex("#7B62C6","#9E4356",personaMix));
+  headG.addColorStop(0.5, mixHex("#4A3690","#6B2537",personaMix));
+  headG.addColorStop(1, mixHex("#1F1550","#2E1220",personaMix));
+  ctx.fillStyle = headG; ctx.fill();
+
+  // rim light — the thing that makes the head read as volumetric
+  ctx.save();
+  ctx.beginPath();
+  ctx.ellipse(hx, hy, hr*0.78, hr, 0, 0, Math.PI*2);
+  ctx.clip();
+  ctx.beginPath();
+  ctx.ellipse(hx + hr*0.26, hy - hr*0.14, hr*0.78, hr, 0, 0, Math.PI*2);
+  ctx.strokeStyle = P.rim;
+  ctx.globalAlpha = 0.72 + amp*0.24;
+  ctx.lineWidth = 3.6;
+  ctx.stroke();
+  // opposite-side fill light, much weaker — keeps the dark side from dying
+  ctx.beginPath();
+  ctx.ellipse(hx - hr*0.42, hy + hr*0.06, hr*0.78, hr, 0, 0, Math.PI*2);
+  ctx.strokeStyle = P.glow; ctx.globalAlpha = 0.30; ctx.lineWidth = 2.4; ctx.stroke();
+  ctx.restore();
+  ctx.globalAlpha = 1;
+
+  // speaking: luminance at the mouth line, driven by the speech envelope
+  if(dhState === "speaking" || dhState === "persona" || dhState === "coach"){
+    const m = amp;
+    ctx.beginPath();
+    ctx.ellipse(hx, hy + hr*0.42, hr*0.30*(0.55+m*0.9), hr*0.085*(0.4+m*1.9), 0, 0, Math.PI*2);
+    ctx.fillStyle = P.accent;
+    ctx.globalAlpha = 0.20 + m*0.42;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+
+  // ── vignette so the overlay zone reads as a separate plane
+  const vg = ctx.createLinearGradient(0, h*0.42, 0, h);
+  vg.addColorStop(0, "rgba(20,14,49,0)");
+  vg.addColorStop(1, "rgba(20,14,49,0.92)");
+  ctx.fillStyle = vg; ctx.fillRect(0, h*0.42, w, h*0.58);
+
+  requestAnimationFrame(draw);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   4. VOICE — speaking is the product. Typing is never the default.
+   ═════════════════════════════════════════════════════════════════ */
+
+const synth = window.speechSynthesis;
+let voices = [], chosen = { coach:null, persona:null };
+let sttOk = false, recog = null, micStream = null, analyser = null, micData = null;
+
+function pickVoices(){
+  voices = synth ? synth.getVoices() : [];
+  const en = voices.filter(v => /^en(-|_|$)/i.test(v.lang));
+  const pool = en.length ? en : voices;
+  const pref = n => pool.find(v => v.name.toLowerCase().includes(n));
+  chosen.coach   = pref("samantha") || pref("google uk english female") || pref("female") || pool[0] || null;
+  chosen.persona = pool.find(v => v !== chosen.coach && /male|daniel|alex|arthur|george/i.test(v.name))
+                || pool.find(v => v !== chosen.coach) || chosen.coach;
+  setKV("pTts", synth ? (chosen.coach ? "ready" : "default voice") : "unavailable");
+}
+if(synth){ pickVoices(); synth.onvoiceschanged = pickVoices; }
+else setKV("pTts","unavailable");
+
+/* Speak, and drive the avatar's mouth from the utterance envelope. */
+function say(text, opts, done){
+  opts = opts || {};
+  const asPersona = !!opts.persona;
+  setCaption(text, asPersona ? (opts.name || "Persona") : "AUREN", asPersona);
+  dhState = asPersona ? "persona" : "speaking";
+
+  if(!synth){ fakeEnvelope(text, done); return; }
+  try{ synth.cancel(); }catch(e){}
+
+  const u = new SpeechSynthesisUtterance(text);
+  const v = asPersona ? chosen.persona : chosen.coach;
+  if(v) u.voice = v;
+  u.rate = asPersona ? 1.04 : 0.97;
+  u.pitch = asPersona ? 0.92 : 1.0;
+  u.volume = 1;
+
+  // envelope: boundary events give us real word timing
+  let env = null;
+  u.onstart = () => {
+    env = setInterval(() => { ampTarget = 0.32 + Math.random()*0.45; }, 95);
+  };
+  u.onboundary = () => { ampTarget = 0.75; };
+  const finish = () => {
+    if(env) clearInterval(env);
+    ampTarget = 0; dhState = "idle";
+    if(done) done();
+  };
+  u.onend = finish;
+  u.onerror = finish;
+
+  try{ synth.speak(u); }
+  catch(e){ fakeEnvelope(text, done); }
+
+  // Safari sometimes drops onend — hard backstop proportional to length
+  const backstop = Math.max(2400, text.length * 62);
+  setTimeout(() => { if(env){ clearInterval(env); env=null; ampTarget=0; dhState="idle"; if(done){ const d=done; done=null; d(); } } }, backstop + 900);
+}
+
+function fakeEnvelope(text, done){
+  const dur = Math.max(1600, text.length*58);
+  const iv = setInterval(()=>{ ampTarget = 0.3 + Math.random()*0.4; }, 100);
+  setTimeout(()=>{ clearInterval(iv); ampTarget=0; dhState="idle"; if(done) done(); }, dur);
+}
+
+/* Microphone: real amplitude feeds the listening visual. */
+async function openMic(){
+  if(micStream) return true;
+  try{
+    micStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ac = new AC();
+    const src = ac.createMediaStreamSource(micStream);
+    analyser = ac.createAnalyser();
+    analyser.fftSize = 512;
+    micData = new Uint8Array(analyser.frequencyBinCount);
+    src.connect(analyser);
+    return true;
+  }catch(e){ return false; }
+}
+function readMic(){
+  if(!analyser) return;
+  analyser.getByteTimeDomainData(micData);
+  let peak = 0;
+  for(let i=0;i<micData.length;i++){
+    const d = Math.abs(micData[i]-128)/128;
+    if(d>peak) peak = d;
+  }
+  ampTarget = Math.min(1, peak*3.1);
+}
+
+/* Speech recognition */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let heard = "";
+if(SR){
+  sttOk = true;
+  setKV("pStt","ready");
+}else{
+  setKV("pStt","unavailable");
+  warnVoice("This browser has no speech recognition. Holding the mic still advances the session by voice — AUREN speaks, and your side uses the rehearsed line for that beat. Typing is never introduced as the primary affordance.");
+}
+
+function startListening(){
+  heard = "";
+  if(!SR) return;
+  try{
+    recog = new SR();
+    recog.lang = "en-US";
+    recog.interimResults = true;
+    recog.continuous = true;
+    recog.onresult = (e) => {
+      let s = "";
+      for(let i=0;i<e.results.length;i++) s += e.results[i][0].transcript;
+      heard = s.trim();
+      setSaid(heard ? "“" + heard + "”" : "");
+    };
+    recog.onerror = () => {};
+    recog.start();
+  }catch(e){}
+}
+function stopListening(){
+  try{ if(recog) recog.stop(); }catch(e){}
+  recog = null;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   5. UI PLUMBING
+   ═════════════════════════════════════════════════════════════════ */
+
+// Declared as a hoisted function: the voice setup in section 4 calls setKV()
+// at module top level, which reaches $() before this point in source order.
+function $(id){ return document.getElementById(id); }
+
+const el = {
+  entry:$("entry"), lower:$("lower"), sheet:$("sheet"), device:$("device"),
+  cap:$("cap"), capWho:$("capWho"), capTxt:$("capTxt"), said:$("said"),
+  rail:$("rail"), chips:$("chips"), railState:$("railState"),
+  micWrap:$("micWrap"), micBtn:$("micBtn"), micLbl:$("micLbl"),
+  slotProp:$("slotProp"), slotCoach:$("slotCoach"), slotAction:$("slotAction"),
+  badgeTrain:$("badgeTrain"), badgeProtect:$("badgeProtect"),
+  exitBtn:$("exitBtn"), protBtn:$("protBtn"),
+  pLog:$("pLog"), pStates:$("pStates")
+};
+
+function setKV(id, v){ const n=$(id); if(n) n.textContent = v; }
+function warnVoice(msg){
+  const n = $("voiceWarn");
+  if(n){ n.textContent = msg; n.classList.remove("hidden"); }
+}
+function setCaption(text, who, persona){
+  el.capWho.textContent = who;
+  el.capTxt.textContent = text;
+  el.cap.classList.toggle("persona", !!persona);
+}
+function setSaid(t){ el.said.textContent = t || ""; }
+function show(n){ n.classList.remove("hidden"); }
+function hide(n){ n.classList.add("hidden"); }
+
+let logN = 0;
+function log(msg, kind){
+  const d = document.createElement("div");
+  d.className = "lg" + (kind ? " " + kind : "");
+  const el2 = Math.floor((Date.now() - (S.t0||Date.now()))/1000);
+  d.innerHTML = '<span class="lt">' + String(Math.floor(el2/60)) + ":" + String(el2%60).padStart(2,"0") + '</span><span class="lm"></span>';
+  d.querySelector(".lm").textContent = msg;
+  el.pLog.appendChild(d);
+  el.pLog.scrollTop = el.pLog.scrollHeight;
+  logN++;
+}
+
+function renderStates(){
+  el.pStates.innerHTML = "";
+  const order = STATES.map(s=>s[0]);
+  const cur = order.indexOf(S.state);
+  STATES.forEach(([code,name], i) => {
+    const d = document.createElement("div");
+    const cls = i < cur ? "done" : (i === cur ? "now" : "");
+    d.className = "stt " + cls;
+    d.innerHTML = '<span class="sc">' + (i<cur ? "✓" : code) + '</span><span class="sn">' + name + '</span>';
+    el.pStates.appendChild(d);
+  });
+}
+
+function setStage(stage, state){
+  S.stage = stage;
+  if(state) S.state = state;
+  setKV("pState", S.state);
+  setKV("pMode", S.mode || "—");
+  renderStates();
+  const d = DEFECTS[stage];
+  if(d){ setKV("pDefectId", d[0]); setKV("pDefectTx", d[1]); }
+}
+
+function tick(){
+  if(S.t0){
+    const s = Math.floor((Date.now()-S.t0)/1000);
+    setKV("pTime", Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"));
+  }
+  if(dhState === "listening") readMic();
+  setTimeout(tick, 200);
+}
+
+/* ── Reasoning map rail ─────────────────────────────────────────── */
+function renderRail(flipIds){
+  el.chips.innerHTML = "";
+  QUESTIONS.forEach(q => {
+    const rec = S.reasoningMap[q.el];
+    const st = rec ? rec.status : "unknown";
+    const d = document.createElement("div");
+    let cls = "chip q", mark = "?";
+    if(st === "demonstrated"){ cls = "chip ok"; mark = "✓"; }
+    else if(st === "failed"){ cls = "chip bad"; mark = "✕"; }
+    if(flipIds && flipIds.indexOf(q.el) > -1) cls += " flip";
+    d.className = cls;
+    d.innerHTML = '<span class="st">'+mark+'</span><span class="nm"></span><span class="eid">'+q.el+'</span>';
+    d.querySelector(".nm").textContent = ELEMENTS[q.el].label;
+    el.chips.appendChild(d);
+  });
+  const done = Object.keys(S.reasoningMap).length;
+  setKV("pBudget", done + " / " + S.budget);
+}
+
+function freezeRail(on){
+  el.rail.classList.toggle("frozen", on);
+  el.railState.textContent = on ? "frozen — challenge in progress" : "building";
+}
+
+/* ── Mic control: press and hold ────────────────────────────────── */
+let holding = false, holdResolver = null;
+
+function armMic(label, resolver){
+  holdResolver = resolver;
+  el.micLbl.textContent = label || "Hold to speak";
+  el.micBtn.disabled = false;
+  el.micBtn.classList.add("nudge");
+  show(el.micWrap);
+}
+function disarmMic(){
+  holdResolver = null;
+  el.micBtn.disabled = true;
+  el.micBtn.classList.remove("nudge","hot");
+  el.micLbl.textContent = "…";
+}
+
+async function holdStart(e){
+  if(e) e.preventDefault();
+  if(!holdResolver || holding) return;
+  holding = true;
+  el.micBtn.classList.add("hot");
+  el.micBtn.classList.remove("nudge");
+  el.micLbl.textContent = "Listening — release when done";
+  setSaid("");
+  try{ if(synth) synth.cancel(); }catch(err){}
+  dhState = "listening";
+  await openMic();
+  startListening();
+}
+
+function holdEnd(e){
+  if(e) e.preventDefault();
+  if(!holding) return;
+  holding = false;
+  el.micBtn.classList.remove("hot");
+  dhState = "idle";
+  ampTarget = 0;
+  stopListening();
+  const r = holdResolver;
+  disarmMic();
+  // give the recogniser a beat to flush its final result
+  setTimeout(() => {
+    const text = (heard || "").trim();
+    if(r) r(text);
+  }, sttOk ? 420 : 0);
+}
+
+el.micBtn.addEventListener("pointerdown", holdStart);
+el.micBtn.addEventListener("pointerup", holdEnd);
+el.micBtn.addEventListener("pointercancel", holdEnd);
+el.micBtn.addEventListener("pointerleave", () => { if(holding) holdEnd(); });
+
+/* Ask the learner to speak, resolve with what they said (or the rehearsed
+   line when the browser gives us no recogniser — voice still drives it). */
+function listen(label, rehearsed){
+  return new Promise(resolve => {
+    armMic(label, (text) => {
+      const used = text && text.length > 1 ? text : rehearsed;
+      const live = !!(text && text.length > 1);
+      setSaid("“" + used + "”");
+      S.transcript.push({ speaker:"learner", text:used });
+      log((live ? "learner (voice): " : "learner (rehearsed): ") + used.slice(0,64));
+      resolve({ text:used, live });
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   6. THE LOOP
+   ═════════════════════════════════════════════════════════════════ */
+
+function evaluate(q, answer){
+  const a = answer.toLowerCase();
+  const hitPass = q.passCues.some(c => a.includes(c));
+  const hitFail = q.failCues.some(c => a.includes(c));
+  if(hitPass && !hitFail) return "demonstrated";
+  if(hitFail) return "failed";
+  return "failed";   // unresolved reasoning is not a pass — Paper III §9.3
+}
+
+function bindSignature(id, quote){
+  if(!id) return;
+  if(S.signatures.some(s => s.id === id)) return;
+  S.signatures.push({ id, quote });
+  setKV("pSigs", String(S.signatures.length));
+  log("signature bound: " + id, "bad");
+}
+
+/* ── Stage: UNDERSTAND ──────────────────────────────────────────── */
+async function stageUnderstand(){
+  setStage("understand","S1");
+  hide(el.rail);
+  el.slotProp.innerHTML = ""; el.slotCoach.innerHTML = "";
+  log("state S1 · OPEN_NARRATIVE — silent twin-engine extraction");
+
+  await new Promise(r => say(
+    "So. Tell me about the investment you're looking at. Take your time — I'm not going to interrupt you.",
+    {}, r));
+
+  const a = await listen("Hold to speak — tell me about it",
+    "Someone messaged me on WhatsApp about an AI trading system. It's returning about fifteen percent a month, and there was a video of a founder I recognised backing it. Their website says they're regulated. I was going to put in ten thousand.");
+
+  // Situation Map populates silently — it is never rendered to the learner.
+  log("situation map: 11 risk markers (silent)", "hi");
+  log("candidate: SCAM-FAKE-BROKER · SCAM-DEEPFAKE-ENDORSEMENT");
+  log("competency set: COMP-VERIFY-INDEPENDENT +3");
+
+  await new Promise(r => say("Alright. I've got the shape of it.", {}, r));
+  stageDiagnose();
+}
+
+/* ── Stage: DIAGNOSE ────────────────────────────────────────────── */
+async function stageDiagnose(){
+  setStage("diagnose","S3");
+  show(el.rail);
+  freezeRail(false);
+  renderRail();
+  log("state S3 · ELEMENT_LOOP — budget " + S.budget + " elements");
+
+  for(let i=0;i<S.budget;i++){
+    const q = QUESTIONS[i];
+    S.qIndex = i;
+    log("fire " + q.id + " → " + q.el);
+    await new Promise(r => say(q.ask, {}, r));
+    const a = await listen("Hold to answer", q.rehearsed);
+    const status = evaluate(q, a.text);
+    S.reasoningMap[q.el] = { status, evidence:a.text, source:q.id };
+    if(status === "failed" && q.fail) bindSignature(q.fail, a.text);
+    log(q.el + " = " + status, status === "demonstrated" ? "ok" : "bad");
+    // element statuses resolve silently during DIAGNOSE; the rail shows
+    // only that work is happening, never the verdict — restraint holds
+    renderRail();
+    if(i < S.budget-1){
+      await new Promise(r => say(["Understood.","Right.","Okay, noted.","Got it."][i%4], {}, r));
+    }
+  }
+
+  await new Promise(r => say(
+    "Good. Now — I want you to talk to someone. I'm going to step out for a moment.",
+    {}, r));
+  stageStress();
+}
+
+/* ── Stage: STRESS ──────────────────────────────────────────────── */
+async function stageStress(){
+  setStage("stress","S5");
+  S.phase = "stress";
+  await runChallenge(CHALLENGE, () => stageCoach());
+}
+
+async function runChallenge(CH, next){
+  // Persona switch treatment: badge and exit persist through it.
+  show(el.badgeTrain);
+  show(el.exitBtn);
+  el.device.classList.add("persona");
+  personaTarget = 1;
+  freezeRail(true);
+  el.slotCoach.innerHTML = "";
+  log("mode gate: REHEARSE envelope open", "hi");
+  log("fire " + CH.id + " · " + CH.scam);
+  log("surface: " + Object.values(CH.surface).join(" · "));
+
+  // Nameplate first, in silence — the audience reads the doctrine change
+  // before a word is spoken, and the coach's last line does not sit over it.
+  setCaption("", CH.persona.name, true);
+  setSaid("");
+  await new Promise(r => setTimeout(r, 1100));
+
+  for(let i=0;i<CH.ladder.length;i++){
+    const step = CH.ladder[i];
+    S.ladderIndex = i;
+    log("ladder step " + (i+1) + "/" + CH.ladder.length);
+
+    if(step.prop){
+      el.slotProp.innerHTML =
+        '<div class="prop"><div class="ph"><span></span><span class="sim">Simulated artifact</span></div><div class="pbody"></div></div>';
+      el.slotProp.querySelector(".ph span").textContent = step.prop.head;
+      el.slotProp.querySelector(".pbody").textContent = step.prop.body;
+    }
+
+    await new Promise(r => say(step.say, { persona:true, name:CH.persona.name }, r));
+
+    const last = (i === CH.ladder.length-1);
+    const a = await listen(last ? "Hold to respond" : "Hold to respond",
+      last ? (S.phase === "retest"
+        ? "Before I go any further I want to verify the company myself, and confirm that endorsement independently. I'm not deciding on this call."
+        : "Okay — if it closes tonight then let's do it. Send me the details.")
+        : (S.phase === "retest"
+          ? "How would I confirm that video is really him?"
+          : "Right. And the money would go where exactly?"));
+
+    // no mid-scenario correction, ever — Paper III §3.4
+    if(step.fail && S.phase === "stress"){
+      const t = a.text.toLowerCase();
+      const resisted = /verify|check|register|regulator|independent|not deciding|think about|no|wait|hold off/.test(t);
+      if(!resisted) bindSignature(step.fail, a.text);
+    }
+
+    if(last){
+      S.decision = a.text;
+      if(S.phase === "retest"){
+        const t = a.text.toLowerCase();
+        S.transferred = /verify|check|register|regulator|independent|confirm|myself|not deciding/.test(t);
+        S.reasoningMap["E-VER-02"].retest = S.transferred ? "demonstrated" : "failed";
+        log("transfer (within-session): " + (S.transferred ? "DEMONSTRATED" : "NOT DEMONSTRATED"),
+            S.transferred ? "ok" : "bad");
+      }
+    }
+  }
+
+  // switch back
+  personaTarget = 0;
+  el.device.classList.remove("persona");
+  hide(el.badgeTrain); hide(el.exitBtn);
+  el.slotProp.innerHTML = "";
+  log("mode gate: REHEARSE envelope closed");
+  await new Promise(r => setTimeout(r, 850));
+  next();
+}
+
+/* ── Stage: COACH — three staged beats (D4) ─────────────────────── */
+async function stageCoach(){
+  setStage("coach","S6");
+  const sigs = S.signatures.slice(0,2);
+  log("state S6 · COACH — " + sigs.length + " signatures");
+  setSaid("");
+  // The map stays out of the way for beats 1–2. It returns for beat 3, which
+  // is the moment it is supposed to carry — not competing with the quote.
+  hide(el.rail);
+
+  await new Promise(r => say("Okay. That was me. Two things happened in that conversation.", {}, r));
+
+  for(let k=0;k<sigs.length;k++){
+    const sg = sigs[k];
+    const F = FAILS[sg.id];
+
+    // BEAT 1 — their own sentence, alone, in silence. The caption is cleared
+    // first: the previous signature's coaching line must not still be on
+    // screen disagreeing with the quote that just landed.
+    setCaption("", "AUREN", false);
+    el.slotCoach.innerHTML =
+      '<div class="beat quote"><div class="qt"></div><div class="qm">Your words · bound verbatim</div></div>';
+    el.slotCoach.querySelector(".qt").textContent = "“" + trimQuote(sg.quote) + "”";
+    await new Promise(r => setTimeout(r, reduceMotion ? 400 : 1900));
+
+    // BEAT 2 — the name lands.
+    const sigEl = document.createElement("div");
+    sigEl.className = "beat sig";
+    sigEl.innerHTML = '<div class="sid"></div><div class="sdf"></div>';
+    sigEl.querySelector(".sid").textContent = sg.id;
+    sigEl.querySelector(".sdf").textContent = F ? F.def : "";
+    el.slotCoach.appendChild(sigEl);
+    log("beat: name " + sg.id, "hi");
+    await new Promise(r => say(coachLine(sg.id), {}, r));
+
+    // BEAT 3 — the map returns, unfreezes, and the elements flip.
+    if(k === sigs.length-1){
+      show(el.rail);
+      freezeRail(false);
+      renderRail(sigs.map(s => FAILS[s.id] && FAILS[s.id].el).filter(Boolean));
+      log("beat: map reveal", "hi");
+      await new Promise(r => setTimeout(r, reduceMotion ? 300 : 900));
+    }
+  }
+
+  await new Promise(r => say(VERIFY_ACTION.teach, {}, r));
+  log("teach " + VERIFY_ACTION.id);
+
+  await new Promise(r => say(
+    "Let's try that again — different situation, same question. Nothing about it will look like the last one.",
+    {}, r));
+
+  el.slotCoach.innerHTML = "";
+  stageRetest();
+}
+
+function trimQuote(q){
+  if(q.length <= 96) return q;
+  return q.slice(0,93).replace(/[\s,.]+$/,"") + "…";
+}
+function coachLine(id){
+  const map = {
+    "FAIL-VERIFY-SELFASSERTED":"You treated something the promoter gave you as if it were independent evidence. Their website telling you they're regulated is them telling you they're regulated. That is not a check — it's a claim.",
+    "FAIL-URGENCY-COMPLIANCE":"And when I put a deadline on it, your verification stopped. You didn't ask fewer questions because you were satisfied. You asked fewer questions because the clock started.",
+    "FAIL-SOCIAL-PROOF":"You let other people's apparent success stand in for evidence. Screenshots supplied by the person selling to you are not other people. They're more of the same claim.",
+    "FAIL-AI-AUTHORITY":"You read “AI” as a reason to expect returns. It describes how something is built, not whether it works.",
+    "FAIL-GREED-OVERRIDE":"You could see the number didn't make sense, and you went toward it anyway. That's the one worth knowing about yourself."
+  };
+  return map[id] || (FAILS[id] ? FAILS[id].def : "");
+}
+
+/* ── Stage: RETEST ──────────────────────────────────────────────── */
+async function stageRetest(){
+  setStage("retest","S5′");
+  S.phase = "retest";
+  log("retest selector: surface-distance enforced");
+  log("  typology " + CHALLENGE.surface.typology + " → " + RETEST.surface.typology);
+  log("  channel  " + CHALLENGE.surface.channel  + " → " + RETEST.surface.channel);
+  log("  persona  " + CHALLENGE.surface.persona  + " → " + RETEST.surface.persona);
+  await runChallenge(RETEST, () => stageEvidence());
+}
+
+/* ── Stage: EVIDENCE — verdict first, audit second (D5) ─────────── */
+function stageEvidence(){
+  setStage("evidence","S7");
+  hide(el.lower);
+  log("state S7 · Investor Readiness Record emitted", "hi");
+
+  const failedFirst = Object.keys(S.reasoningMap).filter(k => S.reasoningMap[k].status === "failed");
+  const transferred = S.transferred;
+
+  const verdict = transferred
+    ? "You made the same mistake twice. After we named it, you didn't make it again."
+    : "You haven't transferred it yet — and that's exactly what we rehearse next.";
+
+  const sub = transferred
+    ? "That's the whole claim: not that you know the rule, but that you behaved differently when a completely different scam asked you the same question."
+    : "You were coached on independent verification and the new scenario still got past it. That is honest evidence, and it's more useful to you than a pass would have been.";
+
+  const ailsFrom = 61;
+  const ailsTo = transferred ? 74 : 64;
+
+  let rows = "";
+  QUESTIONS.forEach(q => {
+    const r = S.reasoningMap[q.el];
+    if(!r) return;
+    const base = r.status === "demonstrated" ? "p" : "f";
+    const baseM = r.status === "demonstrated" ? "✓" : "✕";
+    const isTarget = q.el === "E-VER-02";
+    const press = isTarget ? "f" : (base === "p" ? "p" : "n");
+    const pressM = isTarget ? "✕" : (base === "p" ? "✓" : "–");
+    const coach = isTarget ? "p" : "n";
+    const coachM = isTarget ? "✓" : "–";
+    const nov = isTarget ? (transferred ? "p" : "f") : "n";
+    const novM = isTarget ? (transferred ? "✓" : "✕") : "–";
+    rows +=
+      '<div class="mrow">' +
+        '<div class="mcells">' +
+          '<div class="mname">' + ELEMENTS[q.el].label + '<i>' + q.el + ' · ' + ELEMENTS[q.el].anchor + '</i></div>' +
+          '<div class="mc '+base+'">'+baseM+'</div>' +
+          '<div class="mc '+press+'">'+pressM+'</div>' +
+          '<div class="mc '+coach+'">'+coachM+'</div>' +
+          '<div class="mc '+nov+'">'+novM+'</div>' +
+        '</div>' +
+        '<div class="eviq">Bound evidence · <b>“' + escapeHtml(trimQuote(r.evidence)) + '”</b> — elicited by ' + r.source + '</div>' +
+      '</div>';
+  });
+
+  let sigHtml = "";
+  S.signatures.forEach(s => {
+    sigHtml +=
+      '<div class="sig" style="margin-bottom:9px">' +
+        '<div class="sid">' + s.id + '</div>' +
+        '<div class="sdf">' + (FAILS[s.id] ? FAILS[s.id].def : "") + '</div>' +
+        '<div class="qm" style="font-family:var(--mono);font-size:8.5px;color:var(--dim2);margin-top:8px">Bound to: “' + escapeHtml(trimQuote(s.quote)) + '”</div>' +
+      '</div>';
+  });
+
+  el.sheet.innerHTML =
+    '<div class="kicker">Investor Readiness Record · sealed</div>' +
+    '<h2 class="verdict">' + verdict + '</h2>' +
+    '<p class="verdictsub">' + sub + '</p>' +
+
+    '<div class="secttl">Evidence chain</div>' +
+    '<div class="matrix">' +
+      '<div class="mhead"><span>Element</span><span>Base</span><span>Press</span><span>Coach</span><span>Novel</span></div>' +
+      rows +
+    '</div>' +
+
+    '<div class="secttl">Failure signatures</div>' +
+    '<div style="margin-bottom:22px">' + sigHtml + '</div>' +
+
+    '<div class="secttl">AILS</div>' +
+    '<div class="ails">' +
+      '<div class="ailsnum"><span class="from">' + ailsFrom + '</span><span class="ar">→</span><span>' + ailsTo + '</span></div>' +
+      '<div class="ailsx">' + explain(ailsFrom, ailsTo, failedFirst.length, S.signatures.length, transferred) + '</div>' +
+      '<div class="rulever">Aggregation rule v1 · within-session transfer only · durable transfer not claimed</div>' +
+    '</div>' +
+
+    '<button class="btn" id="againBtn">Rehearse your next weakness</button>' +
+    '<div style="height:9px"></div>' +
+    '<button class="btn ghost" id="modesBtn">See what else AUREN does</button>';
+
+  show(el.sheet);
+  $("againBtn").onclick = () => { resetLoop(); };
+  $("modesBtn").onclick = () => { stageModes(); };
+}
+
+function explain(from, to, failed, sigs, transferred){
+  const base =
+    from + " — you resolved " + (4-failed) + " of 4 reasoning elements on the way in, and " +
+    sigs + " failure signature" + (sigs===1?"":"s") + " " + (sigs===1?"was":"were") +
+    " recorded under pressure, each bound to a sentence you actually said. ";
+  return base + (transferred
+    ? "After coaching, independent verification was demonstrated in a scenario that shared no typology, channel, persona or product class with the one you failed — which is why the score moves."
+    : "After coaching, independent verification was still not demonstrated in the novel scenario, so the coached element stays open and moves to your retraining queue. The score barely moves, and it shouldn't.");
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+}
+
+/* ── Stage: MODES — the deferred selector (D1/D2) ───────────────── */
+function stageModes(){
+  setStage("modes","S7");
+  el.sheet.innerHTML =
+    '<div class="kicker">Now that the words mean something</div>' +
+    '<h2 class="verdict" style="font-size:22px">Three ways to use AUREN.</h2>' +
+    '<p class="verdictsub">You just did the middle one. This screen is deliberately not where you started — a mode menu means nothing until you have been through the loop once.</p>' +
+    '<div class="modes">' +
+      '<button class="mode primary"><div class="mt">Rehearse</div><div class="md">Pressure rehearsal against a scam you have not seen. Assessment by doing. This is the loop you just completed.</div></button>' +
+      '<button class="mode"><div class="mt">Learn</div><div class="md">Adaptive investor and AI literacy, paced to what your reasoning map says you are missing. No quizzes.</div></button>' +
+      '<button class="mode"><div class="mt">Protect</div><div class="md">A real situation, assessed now. AUREN never tells you whether something is a scam — it tells you what you have not yet verified.</div></button>' +
+    '</div>' +
+    '<div style="height:16px"></div>' +
+    '<button class="btn ghost" id="backBtn">Back to my record</button>';
+  el.sheet.querySelectorAll(".mode")[2].onclick = () => stageProtect();
+  el.sheet.querySelectorAll(".mode")[0].onclick = () => resetLoop();
+  $("backBtn").onclick = () => stageEvidence();
+}
+
+/* ── Stage P: PROTECT ───────────────────────────────────────────── */
+async function stageProtect(){
+  setStage("protect","P0");
+  S.mode = "PROTECT";
+  setKV("pMode","PROTECT");
+  hide(el.badgeTrain); hide(el.exitBtn);
+  show(el.badgeProtect);
+  personaTarget = 0;
+  el.device.classList.remove("persona");
+  log("mode gate: PROTECT — neutral doctrine, challenge objects unreachable", "hi");
+
+  el.sheet.innerHTML =
+    '<div class="kicker">Protect · a real situation</div>' +
+    '<h2 class="verdict" style="font-size:22px">Tell me what is in front of you right now.</h2>' +
+    '<p class="verdictsub">I will not tell you whether this is a scam. I will tell you what has not been verified, and what to do before you decide.</p>' +
+    '<div id="pIntake"></div>';
+  show(el.sheet);
+
+  await new Promise(r => setTimeout(r, 700));
+
+  const markers = [
+    "Contact was unsolicited",
+    "Return described as fixed or guaranteed",
+    "Regulated status asserted by the promoter",
+    "Payment routed outside the named institution",
+    "Decision deadline set by the other party"
+  ];
+  let html = '<div class="secttl">Unresolved markers</div><div class="card" style="margin-bottom:22px">';
+  markers.forEach(m => { html += '<div style="font-size:12.5px;color:var(--lilac2);padding:5px 0;display:flex;gap:9px"><span style="color:var(--warn);font-family:var(--mono)">!</span><span>'+m+'</span></div>'; });
+  html += '</div>';
+
+  html +=
+    '<div class="secttl">What to do</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">' +
+      '<div class="pcard"><div class="pt">Stop</div><p>Do not transfer funds while verification is incomplete. Five high-risk markers in this situation are unresolved.</p></div>' +
+      '<div class="pcard"><div class="pt">Verify</div><ol>' +
+        '<li>Search the entity on the regulator\'s own public register — type the address yourself, do not use a link they sent.</li>' +
+        '<li>Call the institution on the number published on its official site, not the number you were given.</li>' +
+        '<li>Confirm where the money actually lands. A personal or third-party account is not a firm account.</li>' +
+      '</ol></div>' +
+      '<div class="pcard"><div class="pt">Decide</div><p>Return to your decision only after the identity, the entity and the claims have been independently verified. The decision is yours — I do not make it and I do not rate it.</p></div>' +
+    '</div>' +
+    '<button class="btn ghost" id="pBack">Back</button>';
+
+  el.sheet.innerHTML += html;
+  log("STOP → VERIFY → DECIDE issued from approved objects");
+  $("pBack").onclick = () => { hide(el.badgeProtect); S.mode="REHEARSE"; setKV("pMode","REHEARSE"); stageEvidence(); };
+
+  say("Five things in what you've described haven't been verified. Before you move any money, here's what I'd do.", {}, null);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   7. WIRING
+   ═════════════════════════════════════════════════════════════════ */
+
+function resetLoop(){
+  S.reasoningMap = {}; S.signatures = []; S.transcript = [];
+  S.qIndex = 0; S.decision = null; S.transferred = null; S.phase = null;
+  setKV("pSigs","0");
+  hide(el.sheet); hide(el.badgeProtect);
+  show(el.lower);
+  S.mode = "REHEARSE"; setKV("pMode","REHEARSE");
+  el.pLog.innerHTML = "";
+  S.t0 = Date.now();
+  log("session start · mode REHEARSE");
+  stageUnderstand();
+}
+
+$("startBtn").onclick = () => {
+  S.name = ($("nm").value || "Daniel").trim().split(" ")[0];
+  S.mode = "REHEARSE";
+  S.t0 = Date.now();
+  hide(el.entry);
+  show(el.lower);
+  setKV("pMode","REHEARSE");
+  log("consent recorded — adversarial envelope permitted");
+  log("mode selector deferred (D1)");
+  // Voice needs a user gesture to start on iOS/Safari — this is that gesture.
+  if(synth){ try{ synth.resume(); }catch(e){} }
+  openMic();
+  stageUnderstand();
+};
+
+el.protBtn.onclick = () => { stageProtect(); };
+
+el.exitBtn.onclick = () => {
+  personaTarget = 0;
+  el.device.classList.remove("persona");
+  hide(el.badgeTrain); hide(el.exitBtn);
+  el.slotProp.innerHTML = "";
+  try{ if(synth) synth.cancel(); }catch(e){}
+  log("EXIT SIMULATION — scenario terminated, frame reaffirmed", "hi");
+  disarmMic();
+  say("That's the simulation ended. Nothing in it was real, and nothing you said in it is held against you. Your progress is kept.", {}, () => stageCoach());
+};
+
+setStage("entry","S0");
+renderStates();
+sizeCanvas();
+requestAnimationFrame(draw);
+tick();
+setKV("pBudget","0 / 4");
+</script>
+</body>
+</html>

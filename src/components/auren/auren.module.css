@@ -1,0 +1,895 @@
+/*
+ * AUREN experience styles.
+ *
+ * Brand system per Paper IV §8.2:
+ *   #1A1338 · #251A4A · #3D2E6E · #C7B3F0 · #DCC9F2 · #EBA98C
+ *   Plus Jakarta Sans · Instrument Serif italic · JetBrains Mono
+ *
+ * BINDING CONSTRAINT (Paper IV §8.2): arbitrary-value opacity classes fail
+ * silently in the artifact runtime and on iOS Safari. Every theme-critical
+ * background here is an explicit hex or an inline style — never a computed
+ * opacity utility.
+ *
+ * LAYOUT LAW (Experience Principle 1): the face zone is the upper viewport and
+ * is never occluded. Overlay content is constrained to `.lower` by the layout
+ * system, not by convention — there is no path for a component to render over
+ * the face without moving itself out of that container.
+ */
+
+.root {
+  --ink900: #120c29;
+  --ink800: #1a1338;
+  --ink700: #251a4a;
+  --ink600: #3d2e6e;
+  --line: #332758;
+  --lilac: #c7b3f0;
+  --lilac2: #dcc9f2;
+  --peach: #eba98c;
+  --paper: #f3edfb;
+  --dim: #8e7db8;
+  --dim2: #6b5c94;
+  --ok: #8fd3ba;
+  --bad: #e88da0;
+  --warn: #ebc98c;
+  --sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --serif: "Instrument Serif", Georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  background: radial-gradient(120% 90% at 50% -10%, #22174a 0%, #0c0820 62%);
+  font-family: var(--sans);
+  color: var(--lilac2);
+  padding: 22px;
+}
+.root *,
+.root *::before,
+.root *::after {
+  box-sizing: border-box;
+}
+
+/* ── Device ──────────────────────────────────────────────────────────── */
+.device {
+  position: relative;
+  width: min(430px, 100%);
+  height: min(880px, calc(100dvh - 44px));
+  border-radius: 34px;
+  overflow: hidden;
+  background: #1a1338;
+  box-shadow: 0 0 0 1px #2d2258, 0 42px 90px -40px rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.6s ease;
+}
+.devicePersona {
+  box-shadow: 0 0 0 1px #5b3a46, 0 0 70px -18px rgba(198, 92, 92, 0.4),
+    0 42px 90px -40px rgba(0, 0, 0, 0.95);
+}
+@media (max-width: 620px) {
+  .root {
+    padding: 0;
+  }
+  .device {
+    width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* ── Face zone: the digital human, never occluded ────────────────────── */
+.faceZone {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #1a1338;
+}
+.faceZone :global(avatar-container),
+.avatarSlot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.faceZone :global(avatar-container.ready),
+.avatarSlot.ready {
+  opacity: 1;
+}
+.avatarFallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(70% 50% at 50% 34%, #3b2a72 0%, #1a1338 70%);
+}
+.avatarFallback span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5a4c86;
+  text-align: center;
+  padding: 0 30px;
+  line-height: 1.7;
+}
+.personaWash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #4a1e2c 0%, #2a1220 100%);
+  opacity: 0;
+  transition: opacity 1s ease;
+  pointer-events: none;
+  mix-blend-mode: color;
+}
+.personaWashOn {
+  opacity: 0.62;
+}
+
+/* ── Top chrome ──────────────────────────────────────────────────────── */
+.topbar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 0;
+  flex-wrap: wrap;
+}
+.badge {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  padding: 5px 9px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  color: var(--dim);
+  background: #1e1642;
+  white-space: nowrap;
+}
+.badgeTrain {
+  border-color: #7e4a55;
+  color: #f0b9ac;
+  background: #3a1e2c;
+}
+.badgeProtect {
+  border-color: #3f6a76;
+  color: #a8dce4;
+  background: #152b33;
+}
+.spacer {
+  flex: 1;
+}
+.pill {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  background: #241b52;
+  color: var(--lilac2);
+  cursor: pointer;
+}
+.pillExit {
+  border-color: #7e4a55;
+  color: #f0b9ac;
+  background: #331924;
+}
+.pillProtect {
+  border-color: #3f6a76;
+  color: #9fd4dd;
+  background: #152b33;
+}
+
+/* ── Overlay zone: all analytical content lives below the face ───────── */
+.lower {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  min-height: 41%;
+  max-height: 64%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 11px;
+  padding: 0 15px 18px;
+  background: linear-gradient(
+    to top,
+    #140e31 0%,
+    #140e31 52%,
+    rgba(20, 14, 49, 0.86) 74%,
+    rgba(20, 14, 49, 0) 100%
+  );
+  pointer-events: none;
+  overflow-y: auto;
+}
+/* Children must never shrink below their content. A squeezed flex item
+   overflows its own box and collides with the next one — which is exactly
+   what happens during COACH, when quote, signature and rail are all live. */
+.lower > * {
+  pointer-events: auto;
+  flex: none;
+}
+
+.caption {
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--paper);
+  min-height: 1.5em;
+}
+.captionWho {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--dim2);
+  margin-bottom: 5px;
+}
+.captionPersona .captionWho {
+  color: #e39a8e;
+}
+.said {
+  font-size: 12.5px;
+  color: var(--dim);
+  min-height: 1.3em;
+  font-style: italic;
+}
+
+/* ── Push-to-talk: the primary affordance, always ────────────────────── */
+.mic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding-top: 3px;
+}
+.micBtn {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: #2b2059;
+  border: 1px solid #46368a;
+  display: grid;
+  place-items: center;
+  position: relative;
+  cursor: pointer;
+  touch-action: none;
+  transition: transform 0.16s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.micBtn svg {
+  width: 29px;
+  height: 29px;
+  fill: var(--lilac2);
+  position: relative;
+  z-index: 2;
+}
+.micBtn:active {
+  transform: scale(0.95);
+}
+.micBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.micHot {
+  background: #7a3f52;
+  border-color: var(--peach);
+}
+.micHot svg {
+  fill: #ffe9de;
+}
+.halo {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid var(--peach);
+  opacity: 0;
+  transform: scale(0.9);
+}
+.micHot .halo {
+  animation: pulse 1.25s ease-out infinite;
+}
+@keyframes pulse {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.42);
+  }
+}
+.micLbl {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: center;
+}
+
+/* ── Reasoning Map rail ──────────────────────────────────────────────── */
+.rail {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #1b1440;
+  padding: 11px 12px;
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+/* The freeze rule (Experience Principle 6): the map dims and stops updating
+   during a challenge. Failing elements never flip live — live feedback tips
+   off the learner and converts behaviour measurement back into test-taking. */
+.railFrozen {
+  opacity: 0.34;
+  filter: saturate(0.25) blur(0.4px);
+}
+.railHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+.railTitle {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--dim2);
+}
+.railState {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  color: var(--dim2);
+}
+.chips {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--lilac2);
+  padding: 4px 0;
+}
+.chipMark {
+  font-family: var(--mono);
+  font-size: 12px;
+  width: 13px;
+  text-align: center;
+  flex: none;
+  color: var(--dim2);
+}
+.chipName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chipId {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  color: var(--dim2);
+  flex: none;
+}
+.chipOk .chipMark,
+.chipOk .chipName {
+  color: var(--ok);
+}
+.chipBad .chipMark,
+.chipBad .chipName {
+  color: var(--bad);
+}
+.chipFlip {
+  animation: flip 0.55s ease;
+}
+@keyframes flip {
+  0% {
+    transform: translateX(-7px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* ── Buttons / cards ─────────────────────────────────────────────────── */
+.btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #eba98c;
+  color: #2a1206;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14.5px;
+  cursor: pointer;
+  transition: transform 0.14s ease;
+}
+.btn:active {
+  transform: scale(0.985);
+}
+.btnGhost {
+  background: #241b52;
+  color: var(--lilac2);
+  border: 1px solid var(--line);
+  font-weight: 600;
+}
+
+/* ── Entry ───────────────────────────────────────────────────────────── */
+.entry {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 26px 22px 30px;
+  overflow-y: auto;
+  background: linear-gradient(
+    to top,
+    #140e31 0%,
+    #140e31 46%,
+    rgba(20, 14, 49, 0.9) 68%,
+    rgba(20, 14, 49, 0) 100%
+  );
+}
+.kicker {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+  color: var(--dim2);
+  margin-bottom: 13px;
+}
+.entryTitle {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 29px;
+  line-height: 1.24;
+  color: var(--paper);
+  margin: 0 0 14px;
+}
+.entrySub {
+  font-size: 13.5px;
+  color: var(--dim);
+  margin: 0 0 20px;
+  line-height: 1.55;
+}
+.field {
+  margin-bottom: 14px;
+}
+.field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim2);
+  margin-bottom: 6px;
+}
+.field input {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 8px;
+  background: #241b52;
+  border: 1px solid var(--line);
+  color: var(--paper);
+  font-family: inherit;
+  font-size: 15px;
+}
+.field input:focus {
+  outline: 0;
+  border-color: var(--lilac);
+  background: #2a2060;
+}
+
+/* The consent act that replaces the first-run mode menu (ordering fix D1). */
+.consent {
+  border: 1px solid #5c4382;
+  border-radius: 8px;
+  background: #241a4e;
+  padding: 14px 15px;
+  margin-bottom: 16px;
+}
+.consentTitle {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--peach);
+  margin-bottom: 8px;
+}
+.consent p {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--lilac2);
+}
+.consent p:last-child {
+  margin-bottom: 0;
+  color: var(--dim);
+  font-size: 11.5px;
+}
+
+/* ── Scenario prop overlays (STRESS) ─────────────────────────────────── */
+.prop {
+  border: 1px solid #6b4552;
+  border-radius: 8px;
+  background: #2e1a2b;
+  padding: 11px 13px;
+  animation: propIn 0.45s ease;
+}
+@keyframes propIn {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.propHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c08d8d;
+  margin-bottom: 7px;
+}
+.propSim {
+  color: #8b6270;
+  font-size: 8px;
+}
+.propBody {
+  font-size: 12.5px;
+  color: #f0d5d5;
+  line-height: 1.5;
+}
+
+/* ── Coach beats (ordering fix D4) ───────────────────────────────────── */
+.beat {
+  animation: beatIn 0.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+@keyframes beatIn {
+  from {
+    opacity: 0;
+    transform: translateY(13px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.quote {
+  border-left: 2px solid var(--peach);
+  padding: 3px 0 3px 15px;
+}
+.quoteText {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 20px;
+  line-height: 1.36;
+  color: var(--paper);
+}
+.quoteMeta {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.11em;
+  color: var(--dim2);
+  margin-top: 8px;
+}
+.sig {
+  border: 1px solid #6b4552;
+  border-radius: 7px;
+  background: #2b1a32;
+  padding: 12px 13px;
+}
+.sigId {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--peach);
+  margin-bottom: 6px;
+}
+.sigDef {
+  font-size: 12.5px;
+  color: #ebd3d3;
+  line-height: 1.5;
+}
+
+/* ── Sheets: scorecard, modes, protect ───────────────────────────────── */
+.sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: #150f35;
+  overflow-y: auto;
+  padding: 24px 18px 30px;
+}
+.verdict {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 1.3;
+  color: var(--paper);
+  margin: 0 0 8px;
+}
+.verdictSub {
+  font-size: 12.5px;
+  color: var(--dim);
+  margin: 0 0 24px;
+  line-height: 1.55;
+}
+.sectionTitle {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim2);
+  margin: 0 0 11px;
+}
+.matrix {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+.mRow {
+  border-bottom: 1px solid var(--line);
+  background: #1c1543;
+}
+.mRow:last-child {
+  border-bottom: 0;
+}
+.mHead {
+  display: grid;
+  grid-template-columns: 1fr 34px 34px 34px 34px;
+  gap: 5px;
+  padding: 8px 12px;
+  background: #231a52;
+  align-items: center;
+}
+.mHead span {
+  font-family: var(--mono);
+  font-size: 7.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dim2);
+  text-align: center;
+  line-height: 1.25;
+}
+.mHead span:first-child {
+  text-align: left;
+  letter-spacing: 0.13em;
+}
+.mCells {
+  display: grid;
+  grid-template-columns: 1fr 34px 34px 34px 34px;
+  gap: 5px;
+  padding: 11px 12px;
+  align-items: center;
+}
+.mName {
+  font-size: 12px;
+  color: var(--lilac2);
+  line-height: 1.3;
+}
+.mName i {
+  display: block;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 8px;
+  color: var(--dim2);
+  margin-top: 2px;
+}
+.mCell {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-align: center;
+  border-radius: 4px;
+  padding: 3px 0;
+  background: #241c55;
+  border: 0;
+  color: var(--dim2);
+  cursor: pointer;
+}
+.mCell:hover {
+  background: #2e2468;
+}
+.mPass {
+  color: var(--ok);
+}
+.mFail {
+  color: var(--bad);
+}
+.evidence {
+  padding: 10px 12px 12px;
+  font-size: 11.5px;
+  color: var(--dim);
+  line-height: 1.5;
+  border-top: 1px solid var(--line);
+}
+.evidence b {
+  color: var(--lilac2);
+  font-weight: 500;
+  font-style: italic;
+}
+.ails {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #1c1543;
+  padding: 16px;
+  margin-bottom: 22px;
+}
+.ailsNum {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  font-family: var(--mono);
+  font-size: 33px;
+  font-weight: 700;
+  color: var(--paper);
+  margin-bottom: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.ailsFrom {
+  color: var(--dim2);
+  font-size: 24px;
+}
+.ailsArrow {
+  color: var(--peach);
+  font-size: 20px;
+}
+.ailsExplain {
+  font-size: 12.5px;
+  color: var(--dim);
+  line-height: 1.6;
+}
+.ruleVersion {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  color: var(--dim2);
+  margin-top: 11px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+/* ── Mode selector, deferred to post-loop (D1/D2) ────────────────────── */
+.modes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mode {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 15px 16px;
+  text-align: left;
+  background: #1d1546;
+  width: 100%;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.mode:hover {
+  border-color: var(--lilac);
+  background: #241b52;
+}
+.modePrimary {
+  border-color: var(--peach);
+  background: #2c1f4e;
+}
+.modeTitle {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--paper);
+  margin-bottom: 4px;
+}
+.modePrimary .modeTitle {
+  color: var(--peach);
+}
+.modeDesc {
+  font-size: 12px;
+  color: var(--dim);
+  line-height: 1.5;
+}
+
+/* ── PROTECT ─────────────────────────────────────────────────────────── */
+.pCard {
+  border: 1px solid #2f5460;
+  border-radius: 8px;
+  background: #14262d;
+  padding: 14px 15px;
+}
+.pTitle {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8fd0dc;
+  margin-bottom: 8px;
+}
+.pCard p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #d2e9ee;
+  line-height: 1.55;
+}
+.pCard ol {
+  margin: 9px 0 0;
+  padding-left: 17px;
+  font-size: 12.5px;
+  color: #d2e9ee;
+  line-height: 1.6;
+}
+.pCard li {
+  margin-bottom: 5px;
+}
+.marker {
+  display: flex;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--lilac2);
+  padding: 5px 0;
+}
+.markerBang {
+  color: var(--warn);
+  font-family: var(--mono);
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.error {
+  position: absolute;
+  z-index: 9;
+  left: 15px;
+  right: 15px;
+  top: 56px;
+  border: 1px solid #6b4552;
+  border-radius: 7px;
+  background: #2b1a32;
+  padding: 11px 13px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.6;
+  color: #f0b9ac;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root *,
+  .root *::before,
+  .root *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

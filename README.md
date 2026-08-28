@@ -16,6 +16,7 @@ The product has **two halves**:
 | **Citizen experience** | `/experience` | Bookable, multilingual, 5-minute controlled session with the Minister&rsquo;s digital human. The political narrative and the source of the data. |
 | **Ministry intelligence** | `/dashboard` | DENGAR Intelligence — sentiment map, top issues, citizen suggestions, urgent review queue, action tracker. Two role views: **Minister** (the pulse) and **Secretary General** (assign, track, resolve). The enduring value and the recurring revenue. |
 | **Session Explorer** | `/sessions` | Dashboard view 5, **React-native**. Search/filter every session, open the CVIF Session Insight Record, read the transcript (original + English), work the urgent queue. PII masked by default; reveal is audit-logged. Wired to the real CVIF scorer. |
+| **AUREN rehearsal** | `/auren` | Investor rehearsal loop for the AUREN programme — a second configuration of the same governed-interview method. Voice-first digital-human session: understand → diagnose → stress → coach → retest → evidence chain. See [`docs/AUREN-ORDERING.md`](docs/AUREN-ORDERING.md). |
 
 The **intelligence layer** — the moat — is the [Citizen Voice Intelligence Framework
 (CVIF)](docs/CVIF.md): it scores the *conversation as evidence about an issue*, never the
@@ -32,24 +33,30 @@ dengar/
 │   │   ├── page.tsx            Product hub (this README, as a page)
 │   │   ├── experience/         Citizen experience  → /experience
 │   │   ├── dashboard/          National Pulse       → /dashboard
-│   │   └── sessions/           Session Explorer     → /sessions  (dashboard view 5)
+│   │   ├── sessions/           Session Explorer     → /sessions  (dashboard view 5)
+│   │   └── auren/              AUREN rehearsal loop → /auren
 │   ├── components/
-│   │   └── SessionExplorer.tsx React-native view over the CVIF scorer
+│   │   ├── SessionExplorer.tsx React-native view over the CVIF scorer
+│   │   └── auren/              Stage router, Reasoning Map rail, coach beats, scorecard
 │   └── lib/
 │       ├── types.ts            Domain model (Citizen, Slot, Booking, Session, Insight, AuditLog)
 │       ├── seed.ts             Deterministic session generator (feeds the Session Explorer)
 │       ├── briefing.ts         Weekly Ministry Briefing generator
 │       ├── digital-human/      ★ Digital-human SDK seam (interface + mock; team implements adapter)
+│       ├── auren/              ★ AUREN knowledge objects + session state machine
+│       │   ├── objects.ts      Frozen inventory (elements, signatures, questions, challenges)
+│       │   └── session.ts      Session model, retest selector, mode gate, AILS rule
 │       └── cvif/               ★ Citizen Voice Intelligence Framework (the intelligence layer)
 │           ├── types.ts        Session Insight Record + dimension types
 │           ├── dimensions.ts   The 7 dimension rubrics, excluded confounds, review triggers
 │           ├── taxonomy.ts     Home-Ministry topic taxonomy + department routing
 │           ├── scorer.ts       Scoring pipeline (deterministic now, LLM-swappable)
 │           └── index.ts        Public API
-├── public/prototypes/          The two APPROVED prototypes, served verbatim
+├── public/prototypes/          The APPROVED prototypes, served verbatim
 │   ├── dengar-citizen.html
-│   └── national-pulse.html
-└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP
+│   ├── national-pulse.html
+│   └── auren-rehearsal.html    Voice-first AUREN loop (no SDK key needed)
+└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP · AUREN-ORDERING
 ```
 
 > **Team taking this over?** Start at [`docs/ENGINEERING-HANDOFF.md`](docs/ENGINEERING-HANDOFF.md) —
