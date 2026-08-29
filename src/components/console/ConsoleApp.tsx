@@ -602,7 +602,7 @@ function GatePanel({
             <span className={styles.eyebrow}>Publish gate</span>
             <h2>{packName} release report</h2>
             <p>
-              Nine tests, six of them blocking. The gate is not a report
+              Ten tests, seven of them blocking. The gate is not a report
               generated after release — it is the condition of release.
             </p>
           </div>

@@ -2,7 +2,8 @@
  * The publish gate.
  *
  * Generalised from Beauty Intelligence §3.3 (eight tests, four hard) across
- * all three papers, which yields nine tests and six hard gates.
+ * all three papers, and extended by the Candidate-set test that the first run
+ * proved was missing. Ten tests, seven of them hard.
  *
  * Beauty's framing is the one that matters and it is carried verbatim into
  * the implementation: "The gate is not a report generated after release; it is

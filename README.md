@@ -54,7 +54,7 @@ dengar/
 │       │   ├── schema.ts       Three-axis eligibility, 8-state lifecycle, conflict resolutions
 │       │   ├── verticals.ts    AUREN · Pioneer · Beauty pack declarations
 │       │   ├── library.ts      Seeded libraries (AUREN migrated from the running one)
-│       │   ├── gate.ts         Nine tests, six blocking, no waive path
+│       │   ├── gate.ts         Ten tests, seven blocking, no waive path
 │       │   └── release.ts      Content-addressed bundles + the named-approver ledger
 │       └── cvif/               ★ Citizen Voice Intelligence Framework (the intelligence layer)
 │           ├── types.ts        Session Insight Record + dimension types

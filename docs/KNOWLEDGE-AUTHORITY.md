@@ -52,7 +52,7 @@ sign in (name + role)
   → choose vertical   ── AUREN │ Pioneer │ Beauty
   → object library    ── registry, status, anchors, eligibility
   → object detail     ── advance through the chain, or retire
-  → publish gate      ── nine tests, six blocking
+  → publish gate      ── ten tests, seven blocking
   → release report    ── the screen that closes a compliance-led buyer
   → release           ── enabled only when every hard gate passes
   → release ledger    ── who signed it, when, into which markets
@@ -87,7 +87,8 @@ disagree, and each is a fork if decided wrongly — so each is settled in
 ## The publish gate
 
 Generalised from Beauty Intelligence §3.3 (eight tests, four hard) across all
-three papers: **nine tests, six blocking**. Implemented in `gate.ts` and run
+three papers, plus the Candidate-set test the first run proved was missing:
+**ten tests, seven blocking**. Implemented in `gate.ts` and run
 against real libraries, not fixtures.
 
 | Test | Blocking | Asserts |
@@ -172,7 +173,7 @@ src/lib/console/
   schema.ts      Unified object model. The four conflict resolutions live here.
   verticals.ts   The three packs: doctrine, modes, languages, markets, surfaces.
   library.ts     Seeded libraries. AUREN is migrated from the RUNNING library.
-  gate.ts        Nine tests, six blocking. No waive path.
+  gate.ts        Ten tests, seven blocking. No waive path.
   release.ts     Content-addressed bundles; the ledger that carries names.
 
 src/components/console/
