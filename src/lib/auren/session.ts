@@ -9,6 +9,7 @@
  * from a one-to-one rendering of them — see ORDERING below.
  */
 
+import { t, ui, type Lang } from "./i18n";
 import {
   CHALLENGES,
   ELEMENTS,
@@ -84,6 +85,8 @@ export interface TranscriptTurn {
 
 export interface AurenSession {
   learnerName: string;
+  /** First-class dimension of every scored determination (Paper III §10.2). */
+  lang: Lang;
   mode: Mode | null;
   engineState: EngineState;
   stage: Stage;
@@ -108,6 +111,13 @@ export interface AurenSession {
   /** Cross-typology retest outcome — within-session transfer only. */
   transferred: boolean | null;
 
+  /**
+   * Signatures the Coach actually explained. Only these may show a coach
+   * result on the scorecard — an element whose signature was recorded but
+   * never taught has not been coached, and crediting it overstates the record.
+   */
+  coachedSignatures: string[];
+
   questionIndex: number;
 
   /**
@@ -128,9 +138,13 @@ export interface AurenSession {
   };
 }
 
-export function createSession(learnerName: string): AurenSession {
+export function createSession(
+  learnerName: string,
+  lang: Lang = "EN"
+): AurenSession {
   return {
     learnerName,
+    lang,
     mode: null,
     engineState: "S0",
     stage: "landing",
@@ -142,6 +156,7 @@ export function createSession(learnerName: string): AurenSession {
     activeChallengeId: null,
     ladderIndex: 0,
     transferred: null,
+    coachedSignatures: [],
     questionIndex: 0,
     account: {
       signedIn: false,
@@ -197,20 +212,27 @@ export function budgetedQuestions(): QuestionObject[] {
  */
 export function evaluateAnswer(
   question: QuestionObject,
-  answer: string
+  answer: string,
+  lang: Lang
 ): ElementStatus {
   const a = answer.toLowerCase();
-  const passed = question.satisfactionCues.pass.some((c) => a.includes(c));
-  const failed = question.satisfactionCues.fail.some((c) => a.includes(c));
+  const cues = question.satisfactionCues[lang] ?? question.satisfactionCues.EN;
+  const passed = cues.pass.some((c) => a.includes(c.toLowerCase()));
+  const failed = cues.fail.some((c) => a.includes(c.toLowerCase()));
   if (passed && !failed) return "demonstrated";
   return "failed";
 }
 
 /** Did the learner resist at this rung of the escalation ladder? */
-export function resistedPressure(answer: string): boolean {
-  return /verify|check|register|regulator|independent|confirm|myself|not deciding|think about|hold off|wait|no thanks/i.test(
-    answer
-  );
+const RESISTANCE: Record<Lang, RegExp> = {
+  EN: /verify|check|register|regulator|independent|confirm|myself|not deciding|think about|hold off|wait|no thanks/i,
+  ES: /verific|comprob|registro|regulador|independiente|confirmar|por mi cuenta|no voy a decidir|pensarlo|esperar|no, gracias/i,
+  ZH: /核实|核查|查一下|自己查|监管|独立|确认|不决定|再想想|等一下|先等|不用了/,
+  AR: /تحقق|أتحقق|السجل|الجهة|الهيئة|مستقل|أتأكد|بنفسي|لن أقرر|أفكر|انتظر|لا شكرًا/,
+};
+
+export function resistedPressure(answer: string, lang: Lang): boolean {
+  return (RESISTANCE[lang] ?? RESISTANCE.EN).test(answer);
 }
 
 /**
@@ -287,21 +309,48 @@ export function computeAils(session: AurenSession): AilsResult {
   ).length;
   const sigCount = session.signatures.length;
   const transferred = session.transferred === true;
+  const lang = session.lang;
 
   const before = Math.round(45 + (resolved / Math.max(qs.length, 1)) * 30);
   const after = before + (transferred ? 13 : 3);
 
-  const head =
-    `${before} — you resolved ${resolved} of ${qs.length} reasoning elements on the way in, and ` +
-    `${sigCount} failure signature${sigCount === 1 ? "" : "s"} ` +
-    `${sigCount === 1 ? "was" : "were"} recorded under pressure, each bound to a sentence you actually said. `;
+  const head = AILS_HEAD[lang](before, resolved, qs.length, sigCount);
+  const tail = transferred ? AILS_TAIL_PASS[lang] : AILS_TAIL_FAIL[lang];
 
-  const tail = transferred
-    ? "After coaching, independent verification was demonstrated in a scenario sharing no typology, channel, persona or product class with the one you failed — which is why the score moves."
-    : "After coaching, independent verification was still not demonstrated in the novel scenario, so the coached element stays open and moves to your retraining queue. The score barely moves, and it should not.";
-
-  return { before, after, explainability: head + tail };
+  return { before, after, explainability: `${head} ${tail}` };
 }
+
+type HeadFn = (
+  score: number,
+  resolved: number,
+  total: number,
+  signatures: number
+) => string;
+
+const AILS_HEAD: Record<Lang, HeadFn> = {
+  EN: (s, r, t2, n) =>
+    `${s} — you resolved ${r} of ${t2} reasoning elements on the way in, and ${n} failure signature${n === 1 ? "" : "s"} ${n === 1 ? "was" : "were"} recorded under pressure, each bound to a sentence you actually said.`,
+  ES: (s, r, t2, n) =>
+    `${s} — resolviste ${r} de ${t2} elementos de razonamiento a la entrada, y se registraron ${n} firma${n === 1 ? "" : "s"} de fallo bajo presión, cada una vinculada a una frase que dijiste realmente.`,
+  ZH: (s, r, t2, n) =>
+    `${s} — 进入时你解决了 ${t2} 个推理要素中的 ${r} 个，并在压力下记录到 ${n} 项失效特征，每一项都绑定到你实际说过的一句话。`,
+  AR: (s, r, t2, n) =>
+    `${s} — حسمت ${r} من أصل ${t2} من عناصر التفكير عند الدخول، وسُجّلت ${n} من أنماط الإخفاق تحت الضغط، كل واحدة منها موثّقة بجملة قلتها فعلًا.`,
+};
+
+const AILS_TAIL_PASS: Record<Lang, string> = {
+  EN: "After coaching, independent verification was demonstrated in a scenario sharing no typology, channel, persona or product class with the one you failed — which is why the score moves.",
+  ES: "Tras la orientación, demostraste verificación independiente en un escenario que no comparte tipología, canal, personaje ni clase de producto con aquel en el que fallaste. Por eso se mueve la puntuación.",
+  ZH: "接受指导后，你在一个与失败情境在类型、渠道、人物和产品类别上均不相同的场景中，展现了独立核实。分数正因如此而变动。",
+  AR: "بعد التوجيه، أثبتّ التحقق المستقل في سيناريو لا يشترك مع السيناريو الذي أخفقت فيه في النمط ولا القناة ولا الشخصية ولا فئة المنتج — ولهذا تتغيّر الدرجة.",
+};
+
+const AILS_TAIL_FAIL: Record<Lang, string> = {
+  EN: "After coaching, independent verification was still not demonstrated in the novel scenario, so the coached element stays open and moves to your retraining queue. The score barely moves, and it should not.",
+  ES: "Tras la orientación, la verificación independiente siguió sin demostrarse en el escenario nuevo, así que el elemento trabajado queda abierto y pasa a tu cola de repaso. La puntuación apenas se mueve, y no debería.",
+  ZH: "接受指导后，你在新情境中仍未展现独立核实，因此该要素保持未决状态并进入你的复训队列。分数几乎不动——本就不该动。",
+  AR: "بعد التوجيه، لم يظهر التحقق المستقل في السيناريو الجديد، لذا يبقى العنصر المعالَج مفتوحًا وينتقل إلى قائمة إعادة التدريب. الدرجة تكاد لا تتحرك، وهذا هو الصواب.",
+};
 
 /**
  * The learner-facing verdict — the ordering study's D5.
@@ -316,17 +365,22 @@ export function verdictFor(session: AurenSession): {
   headline: string;
   sub: string;
 } {
+  const lang = session.lang;
   if (session.transferred) {
     return {
-      headline:
-        "You made the same mistake twice. After we named it, you didn't make it again.",
-      sub: "That is the whole claim: not that you know the rule, but that you behaved differently when a completely different scam asked you the same question.",
+      headline: ui("verdictPassHead", lang),
+      sub: ui("verdictPassSub", lang),
     };
   }
   return {
-    headline: "You haven't transferred it yet — and that's exactly what we rehearse next.",
-    sub: "You were coached on independent verification and the new scenario still got past it. That is honest evidence, and it is more useful to you than a pass would have been.",
+    headline: ui("verdictFailHead", lang),
+    sub: ui("verdictFailSub", lang),
   };
+}
+
+/** Element label in the learner's language. */
+export function elementLabel(elementId: string, lang: Lang): string {
+  return t(ELEMENTS[elementId].label, lang);
 }
 
 /** Elements due for re-test — populates the retraining queue (Paper III §9.1). */

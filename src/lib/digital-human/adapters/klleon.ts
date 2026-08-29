@@ -20,9 +20,23 @@ export type KlleonVoiceCodes = {
 };
 
 /** MS uses Indonesian voice as Malay stand-in; others fall back to en_us. */
+const VOICE_CODES: Record<string, KlleonVoiceCodes> = {
+  MS: { voice_code: "id_id", subtitle_code: "id_id" },
+  ES: { voice_code: "es_es", subtitle_code: "es_es" },
+  ZH: { voice_code: "zh_cn", subtitle_code: "zh_cn" },
+  AR: { voice_code: "ar_sa", subtitle_code: "ar_sa" },
+  EN: { voice_code: "en_us", subtitle_code: "en_us" },
+};
+
+/**
+ * Map a session language onto the avatar's voice and subtitle codes.
+ *
+ * The digital human speaks the learner's language, so this is not a display
+ * setting — an English voice reading a Spanish utterance is a different
+ * product. Unknown codes fall back to English rather than failing the session.
+ */
 export function klleonVoiceCodes(langCode: string): KlleonVoiceCodes {
-  if (langCode === "MS") return { voice_code: "id_id", subtitle_code: "id_id" };
-  return { voice_code: "en_us", subtitle_code: "en_us" };
+  return VOICE_CODES[langCode] ?? VOICE_CODES.EN;
 }
 
 export function getKlleonSdk(): KlleonChatSdk | null {

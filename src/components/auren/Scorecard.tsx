@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ELEMENTS, FAILURE_SIGNATURES } from "@/lib/auren/objects";
+import { t, ui } from "@/lib/auren/i18n";
 import {
   AILS_RULE_VERSION,
   budgetedQuestions,
@@ -35,6 +36,7 @@ export function Scorecard({
   onModes: () => void;
   onCertify: () => void;
 }) {
+  const lang = session.lang;
   const [open, setOpen] = useState<string | null>(null);
   const verdict = verdictFor(session);
   const ails = computeAils(session);
@@ -42,18 +44,18 @@ export function Scorecard({
 
   return (
     <div className={styles.sheet}>
-      <div className={styles.kicker}>Investor Readiness Record · sealed</div>
+      <div className={styles.kicker}>{ui("recordSealed", lang)}</div>
       <h2 className={styles.verdict}>{verdict.headline}</h2>
       <p className={styles.verdictSub}>{verdict.sub}</p>
 
-      <p className={styles.sectionTitle}>Evidence chain</p>
+      <p className={styles.sectionTitle}>{ui("evidenceChain", lang)}</p>
       <div className={styles.matrix}>
         <div className={styles.mHead}>
-          <span>Element</span>
-          <span>Base</span>
-          <span>Press</span>
-          <span>Coach</span>
-          <span>Novel</span>
+          <span>{ui("colElement", lang)}</span>
+          <span>{ui("colBase", lang)}</span>
+          <span>{ui("colPress", lang)}</span>
+          <span>{ui("colCoach", lang)}</span>
+          <span>{ui("colNovel", lang)}</span>
         </div>
 
         {questions.map((q) => {
@@ -61,8 +63,8 @@ export function Scorecard({
           const record = session.reasoningMap[id];
           if (!record) return null;
 
-          const coached = session.signatures.some(
-            (s) => FAILURE_SIGNATURES[s.failId]?.negatedElement === id
+          const coached = session.coachedSignatures.some(
+            (failId) => FAILURE_SIGNATURES[failId]?.negatedElement === id
           );
           const passedBaseline = record.status === "demonstrated";
 
@@ -81,7 +83,7 @@ export function Scorecard({
             <div className={styles.mRow} key={id}>
               <div className={styles.mCells}>
                 <div className={styles.mName}>
-                  {ELEMENTS[id].label}
+                  {t(ELEMENTS[id].label, lang)}
                   <i>
                     {id} · {ELEMENTS[id].authorityAnchor}
                   </i>
@@ -92,7 +94,7 @@ export function Scorecard({
                     type="button"
                     className={`${styles.mCell} ${c.cls}`}
                     onClick={() => setOpen(open === id ? null : id)}
-                    aria-label={`Show evidence for ${ELEMENTS[id].label}`}
+                    aria-label={t(ELEMENTS[id].label, lang)}
                   >
                     {c.mark}
                   </button>
@@ -100,8 +102,9 @@ export function Scorecard({
               </div>
               {open === id ? (
                 <div className={styles.evidence}>
-                  Bound evidence · <b>“{trimQuote(record.evidence, 120)}”</b> —
-                  elicited by {record.sourceObjectId}
+                  {ui("boundEvidence", lang)} ·{" "}
+                  <b>“{trimQuote(record.evidence, 120)}”</b> —{" "}
+                  {ui("elicitedBy", lang)} {record.sourceObjectId}
                 </div>
               ) : null}
             </div>
@@ -111,16 +114,18 @@ export function Scorecard({
 
       {session.signatures.length > 0 ? (
         <>
-          <p className={styles.sectionTitle}>Failure signatures</p>
+          <p className={styles.sectionTitle}>{ui("failureSignatures", lang)}</p>
           <div className={styles.stack}>
             {session.signatures.map((s) => {
               const fail = FAILURE_SIGNATURES[s.failId];
               return (
                 <div className={styles.sig} key={s.failId}>
                   <div className={styles.sigId}>{s.failId}</div>
-                  <div className={styles.sigDef}>{fail?.definition}</div>
+                  <div className={styles.sigDef}>
+                    {fail ? t(fail.definition, lang) : null}
+                  </div>
                   <div className={styles.quoteMeta}>
-                    Bound to: “{trimQuote(s.quote)}”
+                    {ui("boundTo", lang)}: “{trimQuote(s.quote)}”
                   </div>
                 </div>
               );
@@ -140,8 +145,7 @@ export function Scorecard({
         {/* The claim made aloud is within-session transfer only. Durable
             transfer is the pilot's question — restraint as credibility. */}
         <div className={styles.ruleVersion}>
-          {AILS_RULE_VERSION} · within-session transfer only · durable transfer
-          not claimed
+          {AILS_RULE_VERSION} · {ui("ruleFooter", lang)}
         </div>
       </div>
 
@@ -149,7 +153,7 @@ export function Scorecard({
           chain they want to be able to prove. */}
       {session.account.certificateId ? (
         <div className={styles.notice}>
-          This record is certified. Certificate {session.account.certificateId}.
+          {ui("certifiedNotice", lang)} {session.account.certificateId}.
         </div>
       ) : (
         <>
@@ -158,7 +162,7 @@ export function Scorecard({
             className={`${styles.btn} ${styles.btnGhost}`}
             onClick={onCertify}
           >
-            Verify my identity and certify this record
+            {ui("certifyBtn", lang)}
           </button>
           <div style={{ height: 9 }} />
         </>
@@ -166,7 +170,7 @@ export function Scorecard({
 
       {/* The retention loop: the next weakness, named, one tap away. */}
       <button type="button" className={styles.btn} onClick={onAgain}>
-        Rehearse your next weakness
+        {ui("againBtn", lang)}
       </button>
       <div style={{ height: 9 }} />
       <button
@@ -174,7 +178,7 @@ export function Scorecard({
         className={`${styles.btn} ${styles.btnGhost}`}
         onClick={onModes}
       >
-        See what else AUREN does
+        {ui("modesBtn", lang)}
       </button>
     </div>
   );

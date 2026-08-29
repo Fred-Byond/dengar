@@ -531,6 +531,46 @@
   font-size: 11.5px;
 }
 
+
+/* ── Arabic typography ───────────────────────────────────────────────
+   Two things break Arabic if you only flip direction:
+   1. letter-spacing severs the cursive joining, so every word renders as
+      disconnected letterforms. It is neutralised throughout RTL.
+   2. JetBrains Mono and Instrument Serif carry no Arabic glyphs, so the
+      browser falls back per-glyph and the result is ransom-note text.
+      Noto Sans/Naskh Arabic sit AFTER the Latin faces in each stack, so
+      element ids and scores still render mono while Arabic renders properly. */
+.rtl {
+  --sans: "Noto Sans Arabic", "Plus Jakarta Sans", -apple-system, sans-serif;
+  --serif: "Noto Naskh Arabic", "Instrument Serif", Georgia, serif;
+  --mono: "JetBrains Mono", "Noto Sans Arabic", ui-monospace, monospace;
+}
+.rtl * {
+  letter-spacing: normal;
+}
+.rtl .qt {
+  font-style: normal;
+}
+
+/* Arabic runs right-to-left. Direction is set on the device so every child
+   — captions, rails, cards, the scorecard matrix — mirrors together. */
+.rtl {
+  direction: rtl;
+}
+.rtl .certVal,
+.rtl .mHead span,
+.rtl .mCell {
+  text-align: start;
+}
+.fidelity {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+  color: var(--dim2);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
 /* ── Landing: the front door ─────────────────────────────────────────── */
 .landing {
   justify-content: space-between;
@@ -845,8 +885,11 @@
   }
 }
 .quote {
-  border-left: 2px solid var(--peach);
-  padding: 3px 0 3px 15px;
+  /* Logical properties so the accent rail sits on the reading-start edge in
+     Arabic as well as Latin scripts. */
+  border-inline-start: 2px solid var(--peach);
+  padding: 3px 0;
+  padding-inline-start: 15px;
 }
 .quoteText {
   font-family: var(--serif);
@@ -928,7 +971,7 @@
 }
 .mHead {
   display: grid;
-  grid-template-columns: 1fr 34px 34px 34px 34px;
+  grid-template-columns: 1fr 40px 40px 40px 40px;
   gap: 5px;
   padding: 8px 12px;
   background: #231a52;
@@ -936,12 +979,16 @@
 }
 .mHead span {
   font-family: var(--mono);
-  font-size: 7.5px;
-  letter-spacing: 0.06em;
+  font-size: 7px;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--dim2);
   text-align: center;
-  line-height: 1.25;
+  line-height: 1.2;
+  /* Column labels are longer in Spanish than in English — they must wrap
+     inside their cell rather than run into the neighbouring one. */
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 .mHead span:first-child {
   text-align: left;
@@ -949,7 +996,7 @@
 }
 .mCells {
   display: grid;
-  grid-template-columns: 1fr 34px 34px 34px 34px;
+  grid-template-columns: 1fr 40px 40px 40px 40px;
   gap: 5px;
   padding: 11px 12px;
   align-items: center;

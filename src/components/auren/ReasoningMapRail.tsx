@@ -1,6 +1,7 @@
 "use client";
 
 import { ELEMENTS } from "@/lib/auren/objects";
+import { t, ui, type Lang } from "@/lib/auren/i18n";
 import type { AurenSession } from "@/lib/auren/session";
 import styles from "./auren.module.css";
 
@@ -24,10 +25,12 @@ export function ReasoningMapRail({
   elementIds,
   state,
   flipped,
+  lang,
 }: {
   session: AurenSession;
   elementIds: string[];
   state: RailState;
+  lang: Lang;
   /** Elements that just flipped — animated once, on reveal. */
   flipped?: string[];
 }) {
@@ -36,9 +39,13 @@ export function ReasoningMapRail({
   return (
     <div className={`${styles.rail} ${frozen ? styles.railFrozen : ""}`}>
       <div className={styles.railHead}>
-        <span className={styles.railTitle}>Reasoning map</span>
+        <span className={styles.railTitle}>{ui("reasoningMap", lang)}</span>
         <span className={styles.railState}>
-          {frozen ? "frozen — challenge in progress" : state}
+          {frozen
+            ? ui("railFrozen", lang)
+            : state === "revealed"
+              ? ui("railRevealed", lang)
+              : ui("railBuilding", lang)}
         </span>
       </div>
       <div className={styles.chips}>
@@ -66,7 +73,7 @@ export function ReasoningMapRail({
           return (
             <div key={id} className={cls}>
               <span className={styles.chipMark}>{mark}</span>
-              <span className={styles.chipName}>{element.label}</span>
+              <span className={styles.chipName}>{t(element.label, lang)}</span>
               <span className={styles.chipId}>{id}</span>
             </div>
           );

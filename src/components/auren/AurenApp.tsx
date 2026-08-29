@@ -4,6 +4,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useKlleonAvatar } from "@/hooks/useKlleonAvatar";
 import type { KlleonChatData } from "@/types/klleon";
 import {
+  LANGUAGES,
+  UI,
+  languageMeta,
+  t,
+  tList,
+  ui,
+  type Lang,
+} from "@/lib/auren/i18n";
+import {
   CHALLENGES,
   FAILURE_SIGNATURES,
   PROTECT_MARKERS,
@@ -33,9 +42,12 @@ export type AurenAppProps = { sdkKey: string };
 
 const BEAT_PAUSE = 1900;
 
+/** Conversational glue — the only free-form utterances in the loop. */
+const UI_ACKS = UI.ackWords;
+
 export function AurenApp({ sdkKey }: AurenAppProps) {
   const [stage, setStage] = useState<Stage>("landing");
-  const [lang, setLang] = useState("EN");
+  const [lang, setLang] = useState<Lang>("EN");
   const [phone, setPhone] = useState("+60 12 345 6789");
   const [codeSent, setCodeSent] = useState(false);
   const [verifyStep, setVerifyStep] = useState(0);
@@ -47,17 +59,17 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
   const [railState, setRailState] = useState<RailState>("building");
   const [flipped, setFlipped] = useState<string[]>([]);
   const [micArmed, setMicArmed] = useState(false);
-  const [micLabel, setMicLabel] = useState("Hold to speak");
+  const [micLabel, setMicLabel] = useState("");
   const [holding, setHolding] = useState(false);
   const [prop, setProp] = useState<{ head: string; body: string } | null>(null);
   const [coachSig, setCoachSig] = useState<BoundSignature | null>(null);
   const [coachBeat, setCoachBeat] = useState<CoachBeat>(1);
   const [, bump] = useState(0);
 
-  const sessionRef = useRef<AurenSession>(createSession("Daniel"));
+  const sessionRef = useRef<AurenSession>(createSession("Daniel", "EN"));
   const rerender = useCallback(() => bump((n) => n + 1), []);
 
-  const klleon = useKlleonAvatar({ sdkKey, langCode: "EN", enabled: true });
+  const klleon = useKlleonAvatar({ sdkKey, langCode: lang, enabled: true });
   const speakRef = useRef(klleon.speak);
   speakRef.current = klleon.speak;
 
@@ -128,7 +140,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
   const holdStart = useCallback(() => {
     if (!micArmed || holding) return;
     setHolding(true);
-    setMicLabel("Listening — release when done");
+    setMicLabel(ui("listening", sessionRef.current.lang));
     setSaid("");
     heardRef.current = "";
     klleon.unlockAudio();
@@ -164,13 +176,9 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
     setProp(null);
     setCoachSig(null);
 
-    await say(
-      "So. Tell me about the investment you're looking at. Take your time — I'm not going to interrupt you."
-    );
-    await listen(
-      "Hold to speak — tell me about it",
-      "Someone messaged me on WhatsApp about an AI trading system. It's returning about fifteen percent a month, and there was a video of a founder I recognised backing it. Their website says they're regulated. I was going to put in ten thousand."
-    );
+    const lg = sessionRef.current.lang;
+    await say(ui("understandOpener", lg));
+    await listen(ui("holdTellMe", lg), ui("narrativeRehearsed", lg));
 
     // Situation Map populates silently. It routes scenarios and PROTECT
     // markers; AILS never reads it, and REHEARSE never renders it.
@@ -182,7 +190,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       "messenger-channel",
     ];
 
-    await say("Alright. I've got the shape of it.");
+    await say(ui("understandClose", lg));
     void runDiagnose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goStage, say, listen]);
@@ -193,13 +201,17 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
     goStage("diagnose", "S3");
     setRailState("building");
 
+    const lg = sessionRef.current.lang;
     const questions = budgetedQuestions();
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
       sessionRef.current.questionIndex = i;
-      await say(q.ask);
-      const answer = await listen("Hold to answer", q.rehearsedAnswer);
-      const status = evaluateAnswer(q, answer);
+      await say(t(q.ask, lg));
+      const answer = await listen(
+        ui("holdToAnswer", lg),
+        t(q.rehearsedAnswer, lg)
+      );
+      const status = evaluateAnswer(q, answer, lg);
       sessionRef.current.reasoningMap[q.targetElement] = {
         status,
         evidence: answer,
@@ -208,13 +220,12 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       if (status === "failed") bindSignature(sessionRef.current, q.failSignature ?? undefined, answer);
       rerender();
       if (i < questions.length - 1) {
-        await say(["Understood.", "Right.", "Okay, noted.", "Got it."][i % 4]);
+        const acks = tList(UI_ACKS, lg);
+        await say(acks[i % acks.length]);
       }
     }
 
-    await say(
-      "Good. Now — I want you to talk to someone. I'm going to step out for a moment."
-    );
+    await say(ui("stressHandoff", lg));
     void runChallenge(CHALLENGES[0], "stress");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goStage, say, listen, rerender]);
@@ -237,6 +248,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       // The nameplate lands first, in silence. The audience reads the
       // doctrine change before a word is spoken, and the coach's last line
       // does not sit over a persona-framed field.
+      const lg = sessionRef.current.lang;
       setCaption("");
       setCaptionWho(challenge.persona.name);
       setSaid("");
@@ -246,20 +258,29 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       for (let i = 0; i < ladder.length; i++) {
         const step = ladder[i];
         sessionRef.current.ladderIndex = i;
-        setProp(step.prop);
-        await say(step.say, { persona: challenge.persona.name });
+        setProp(
+          step.prop
+            ? { head: t(step.prop.head, lg), body: t(step.prop.body, lg) }
+            : null
+        );
+        await say(t(step.say, lg), { persona: challenge.persona.name });
 
+        const replies = tList(challenge.rehearsedReplies, lg);
         const answer = await listen(
-          "Hold to respond",
-          challenge.rehearsedReplies[i] ?? "I'd want to think about it."
+          ui("holdToRespond", lg),
+          replies[i] ?? replies[replies.length - 1]
         );
 
-        if (phase === "stress" && step.failSignature && !resistedPressure(answer)) {
+        if (
+          phase === "stress" &&
+          step.failSignature &&
+          !resistedPressure(answer, lg)
+        ) {
           bindSignature(sessionRef.current, step.failSignature, answer);
         }
 
         if (i === ladder.length - 1 && phase === "retest") {
-          const transferred = resistedPressure(answer);
+          const transferred = resistedPressure(answer, lg);
           sessionRef.current.transferred = transferred;
           const target = challenge.targetElements[0];
           const record = sessionRef.current.reasoningMap[target];
@@ -286,8 +307,10 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
     goStage("coach", "S6");
     setSaid("");
     const signatures = sessionRef.current.signatures.slice(0, 2);
+    sessionRef.current.coachedSignatures = signatures.map((x) => x.failId);
 
-    await say("Okay. That was me. Two things happened in that conversation.");
+    const lg = sessionRef.current.lang;
+    await say(ui("coachOpener", lg));
 
     for (let k = 0; k < signatures.length; k++) {
       const sig = signatures[k];
@@ -304,7 +327,8 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
 
       // Beat 2 — the name lands.
       setCoachBeat(2);
-      await say(FAILURE_SIGNATURES[sig.failId]?.coaching ?? "");
+      const coachLine = FAILURE_SIGNATURES[sig.failId]?.coaching;
+      await say(coachLine ? t(coachLine, lg) : "");
 
       // Beat 3 — the map unfreezes and the coached elements flip.
       if (k === signatures.length - 1) {
@@ -318,10 +342,8 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       }
     }
 
-    await say(VERIFICATION_ACTIONS["VA-REGCHECK-001"].teach);
-    await say(
-      "Let's try that again — different situation, same question. Nothing about it will look like the last one."
-    );
+    await say(t(VERIFICATION_ACTIONS["VA-REGCHECK-001"].teach, lg));
+    await say(ui("coachHandoff", lg));
     setCoachSig(null);
     setFlipped([]);
 
@@ -358,9 +380,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
     setIsPersona(false);
     setMicArmed(false);
     resolverRef.current = null;
-    await say(
-      "That's the simulation ended. Nothing in it was real, and nothing you said in it is held against you. Your progress is kept."
-    );
+    await say(ui("exitAck", sessionRef.current.lang));
     void runCoach();
   }, [klleon, say, runCoach]);
 
@@ -376,6 +396,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
   }, [rerender, runUnderstand]);
 
   const session = sessionRef.current;
+  const meta = languageMeta(lang);
   const inChallenge = stage === "stress" || stage === "retest";
   const started = stage !== "landing" && stage !== "auth" && stage !== "entry";
   const inLoop =
@@ -389,7 +410,11 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
   return (
     <div className={styles.root}>
       <div
-        className={`${styles.device} ${isPersona ? styles.devicePersona : ""}`}
+        dir={meta.rtl ? "rtl" : "ltr"}
+        lang={meta.bcp}
+        className={`${styles.device} ${isPersona ? styles.devicePersona : ""} ${
+          meta.rtl ? styles.rtl : ""
+        }`}
       >
         {/* Face zone — the digital human. Nothing renders over it. */}
         <div className={styles.faceZone}>
@@ -418,12 +443,12 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
         <div className={styles.topbar}>
           {inChallenge ? (
             <span className={`${styles.badge} ${styles.badgeTrain}`}>
-              Investment Simulation — Training Mode
+              {ui("trainingBadge", lang)}
             </span>
           ) : null}
           {stage === "protect" ? (
             <span className={`${styles.badge} ${styles.badgeProtect}`}>
-              Protect — real situation
+              {ui("protectBadge", lang)}
             </span>
           ) : null}
           <span className={styles.spacer} />
@@ -435,7 +460,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               className={`${styles.pill} ${styles.pillProtect}`}
               onClick={() => goStage("protect", "P0")}
             >
-              Protect
+              {ui("protectBtn", lang)}
             </button>
           ) : null}
           {inChallenge ? (
@@ -444,7 +469,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               className={`${styles.pill} ${styles.pillExit}`}
               onClick={() => void exitSimulation()}
             >
-              Exit simulation
+              {ui("exitSim", lang)}
             </button>
           ) : null}
         </div>
@@ -460,22 +485,11 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               <span className={styles.wordmarkText}>AUREN</span>
             </div>
             <div>
-              <div className={styles.kicker}>Investor readiness · rehearsal</div>
-              <h1 className={styles.landingTitle}>
-                Everyone knows the rules. Almost nobody follows them when
-                someone is pushing.
-              </h1>
-              <p className={styles.entrySub}>
-                AUREN is not a course. It is a five-minute rehearsal with an AI
-                coach who listens, finds where your reasoning breaks, then puts
-                you under the exact pressure a real scam would.
-              </p>
+              <div className={styles.kicker}>{ui("landingKicker", lang)}</div>
+              <h1 className={styles.landingTitle}>{ui("landingTitle", lang)}</h1>
+              <p className={styles.entrySub}>{ui("landingLead", lang)}</p>
               <div className={styles.creds}>
-                {[
-                  "You speak. There are no quizzes and nothing to type.",
-                  "Everything you are told about yourself is quoted back from your own words.",
-                  "Nothing here is real, and AUREN never advises you on a real investment.",
-                ].map((c, i) => (
+                {[ui("cred1", lang), ui("cred2", lang), ui("cred3", lang)].map((c, i) => (
                   <div className={styles.cred} key={c}>
                     <span className={styles.credNum}>
                       {String(i + 1).padStart(2, "0")}
@@ -485,17 +499,26 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
                 ))}
               </div>
               <div className={styles.langRow}>
-                {["EN", "MS", "ZH", "AR"].map((l) => (
+                {LANGUAGES.map((l) => (
                   <button
                     type="button"
-                    key={l}
-                    className={`${styles.langChip} ${lang === l ? styles.langOn : ""}`}
-                    onClick={() => setLang(l)}
+                    key={l.code}
+                    lang={l.bcp}
+                    className={`${styles.langChip} ${
+                      lang === l.code ? styles.langOn : ""
+                    }`}
+                    onClick={() => {
+                      setLang(l.code);
+                      sessionRef.current.lang = l.code;
+                    }}
                   >
-                    {{ EN: "English", MS: "Bahasa Melayu", ZH: "中文", AR: "العربية" }[l]}
+                    {l.endonym}
                   </button>
                 ))}
               </div>
+              {/* Fidelity status is surfaced, not hidden: Paper III §10.2 bars
+                  representing an unreviewed variant as deployment-ready. */}
+              <div className={styles.fidelity}>{ui("fidelityNote", lang)}</div>
             </div>
             <div>
               {/* The primary path never touches an account — Paper IV keeps
@@ -506,15 +529,15 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
                 className={styles.btn}
                 onClick={() => goStage("entry", "S0")}
               >
-                Begin my first rehearsal
+                {ui("beginBtn", lang)}
               </button>
-              <div className={styles.noAccount}>No account needed</div>
+              <div className={styles.noAccount}>{ui("noAccount", lang)}</div>
               <button
                 type="button"
                 className={styles.linkBtn}
                 onClick={() => goStage("auth", "S0")}
               >
-                I already have a record — sign in
+                {ui("signInLink", lang)}
               </button>
             </div>
           </div>
@@ -522,16 +545,15 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
 
         {stage === "auth" ? (
           <div className={styles.entry}>
-            <div className={styles.kicker}>Sign in</div>
+            <div className={styles.kicker}>{ui("authKicker", lang)}</div>
             <h2 className={styles.entryTitle} style={{ fontSize: 25 }}>
-              Pick up where your last rehearsal left off.
+              {ui("authTitle", lang)}
             </h2>
             <p className={styles.entrySub}>
-              Your record is tied to a number, not a password. We send a
-              six-digit code.
+              {ui("authSub", lang)}
             </p>
             <div className={styles.field}>
-              <label htmlFor="auren-phone">Mobile number</label>
+              <label htmlFor="auren-phone">{ui("phoneLabel", lang)}</label>
               <input
                 id="auren-phone"
                 type="tel"
@@ -543,7 +565,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
             </div>
             {codeSent ? (
               <div className={styles.field}>
-                <label htmlFor="auren-otp">Six-digit code</label>
+                <label htmlFor="auren-otp">{ui("otpLabel", lang)}</label>
                 <input
                   id="auren-otp"
                   type="text"
@@ -554,9 +576,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               </div>
             ) : null}
             <div className={styles.notice}>
-              Signing in stores your reasoning map and your retraining queue. It
-              does not verify who you are — identity verification happens later,
-              only if you want your record certified.
+              {ui("authNotice", lang)}
             </div>
             <button
               type="button"
@@ -571,31 +591,25 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
                 goStage("entry", "S0");
               }}
             >
-              {codeSent ? "Verify and continue" : "Send me a code"}
+              {codeSent ? ui("verifyContinueBtn", lang) : ui("sendCodeBtn", lang)}
             </button>
             <button
               type="button"
               className={styles.linkBtn}
               onClick={() => goStage("entry", "S0")}
             >
-              Skip — start without an account
+              {ui("authSkip", lang)}
             </button>
           </div>
         ) : null}
 
         {stage === "entry" ? (
           <div className={styles.entry}>
-            <div className={styles.kicker}>AUREN · Investor rehearsal</div>
-            <h1 className={styles.entryTitle}>
-              I&apos;m going to show you how you think when someone wants your
-              money.
-            </h1>
-            <p className={styles.entrySub}>
-              Five minutes. You talk, I listen, then I push. Nothing here is
-              real and nothing you say is scored against you as a person.
-            </p>
+            <div className={styles.kicker}>{ui("entryKicker", lang)}</div>
+            <h1 className={styles.entryTitle}>{ui("entryTitle", lang)}</h1>
+            <p className={styles.entrySub}>{ui("entrySub", lang)}</p>
             <div className={styles.field}>
-              <label htmlFor="auren-name">What should I call you?</label>
+              <label htmlFor="auren-name">{ui("nameLabel", lang)}</label>
               <input
                 id="auren-name"
                 type="text"
@@ -605,24 +619,16 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               />
             </div>
             <div className={styles.consent}>
-              <div className={styles.consentTitle}>Before we start</div>
-              <p>
-                Partway through, I will stop being your coach and start behaving
-                like someone trying to sell you an investment. I will apply
-                pressure. That is the point.
-              </p>
-              <p>
-                You can end the simulation at any time with the control at the
-                top of the screen. I never advise you on real investments, and I
-                never tell you whether something real is a scam.
-              </p>
+              <div className={styles.consentTitle}>{ui("consentTitle", lang)}</div>
+              <p>{ui("consent1", lang)}</p>
+              <p>{ui("consent2", lang)}</p>
             </div>
             <button
               type="button"
               className={styles.btn}
               onClick={() => void start()}
             >
-              I understand — start
+              {ui("startBtn", lang)}
             </button>
           </div>
         ) : null}
@@ -633,14 +639,18 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               <div className={styles.prop}>
                 <div className={styles.propHead}>
                   <span>{prop.head}</span>
-                  <span className={styles.propSim}>Simulated artifact</span>
+                  <span className={styles.propSim}>{ui("simulatedArtifact", lang)}</span>
                 </div>
                 <div className={styles.propBody}>{prop.body}</div>
               </div>
             ) : null}
 
             {coachSig ? (
-              <CoachEvidencePanel signature={coachSig} beat={coachBeat} />
+              <CoachEvidencePanel
+                signature={coachSig}
+                beat={coachBeat}
+                lang={lang}
+              />
             ) : null}
 
             {stage !== "understand" &&
@@ -650,6 +660,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
                 elementIds={elementIds}
                 state={railState}
                 flipped={flipped}
+                lang={lang}
               />
             ) : null}
 
@@ -672,7 +683,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
                 onPointerUp={holdEnd}
                 onPointerCancel={holdEnd}
                 onPointerLeave={() => holding && holdEnd()}
-                aria-label="Hold to talk"
+                aria-label={ui("holdToSpeak", lang)}
               >
                 <span className={styles.halo} />
                 <svg viewBox="0 0 24 24">
@@ -680,7 +691,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
                 </svg>
               </button>
               <div className={styles.micLbl}>
-                {micArmed ? micLabel : "…"}
+                {micArmed ? micLabel || ui("holdToSpeak", lang) : "…"}
               </div>
             </div>
           </div>
@@ -700,15 +711,12 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
 
         {stage === "verify" ? (
           <div className={styles.sheet}>
-            <div className={styles.kicker}>Verified certification</div>
+            <div className={styles.kicker}>{ui("verifyKicker", lang)}</div>
             <h2 className={styles.verdict} style={{ fontSize: 22 }}>
-              Make this record provable.
+              {ui("verifyTitleHead", lang)}
             </h2>
             <p className={styles.verdictSub}>
-              Your rehearsal already stands on its own. Certification ties it to
-              a verified identity so an employer, a regulator or an institution
-              can rely on it. It is optional, and nothing you have done is lost
-              if you stop here.
+              {ui("verifySub", lang)}
             </p>
 
             <div className={styles.matrix} style={{ padding: "4px 14px" }}>
@@ -735,11 +743,11 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
             {verifyStep === 0 ? (
               <>
                 <div className={styles.field}>
-                  <label htmlFor="v-name">Full legal name</label>
+                  <label htmlFor="v-name">{ui("legalName", lang)}</label>
                   <input id="v-name" type="text" defaultValue={`${session.learnerName} Reyes`} />
                 </div>
                 <div className={styles.field}>
-                  <label htmlFor="v-dob">Date of birth</label>
+                  <label htmlFor="v-dob">{ui("dob", lang)}</label>
                   <input id="v-dob" type="text" inputMode="numeric" defaultValue="14 / 03 / 1989" />
                 </div>
               </>
@@ -748,10 +756,10 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               <div className={styles.scanBox}>
                 <div className={styles.scanIcon}>🪪</div>
                 <div className={styles.scanText}>
-                  Position your passport or ID inside the frame.
+                  {ui("scanDocPrompt", lang)}
                 </div>
                 <div className={styles.scanNote}>
-                  Simulated capture — no document is read
+                  {ui("scanDocNote", lang)}
                 </div>
               </div>
             ) : null}
@@ -759,17 +767,16 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               <div className={styles.scanBox}>
                 <div className={styles.scanIcon}>🙂</div>
                 <div className={styles.scanText}>
-                  Look at the camera and turn your head slowly to the left.
+                  {ui("livenessPrompt", lang)}
                 </div>
                 <div className={styles.scanNote}>
-                  Simulated liveness — no camera is opened
+                  {ui("livenessNote", lang)}
                 </div>
               </div>
             ) : null}
             {verifyStep === 3 ? (
               <div className={styles.notice}>
-                Identity confirmed. Sealing your Investor Readiness Record
-                against it now.
+                {ui("sealingNotice", lang)}
               </div>
             ) : null}
 
@@ -787,47 +794,53 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               }}
             >
               {verifyStep === VERIFICATION_STEPS.length - 1
-                ? "Issue my certificate"
-                : "Continue"}
+                ? ui("issueBtn", lang)
+                : ui("continueBtn", lang)}
             </button>
             <button
               type="button"
               className={styles.linkBtn}
               onClick={() => goStage("evidence", "S7")}
             >
-              Not now — back to my record
+              {ui("notNow", lang)}
             </button>
           </div>
         ) : null}
 
         {stage === "certified" ? (
           <div className={styles.sheet}>
-            <div className={styles.kicker}>Certified</div>
+            <div className={styles.kicker}>{ui("certifiedKicker", lang)}</div>
             <h2 className={styles.verdict} style={{ fontSize: 23 }}>
-              Your record is now provable.
+              {ui("certifiedTitle", lang)}
             </h2>
             {/* Certification binds the result to an identity. It never
                 improves the result, and saying so is the point. */}
             <p className={styles.verdictSub}>
-              The evidence chain has not changed — certification does not
-              improve your result, it only binds it to a verified identity.
-              That distinction is the point.
+              {ui("certifiedSub", lang)}
             </p>
             <div className={styles.certCard}>
               <div className={styles.certLabel}>
-                Investor Readiness Certificate
+                {ui("certLabel", lang)}
               </div>
               <div className={styles.certName}>{session.learnerName} Reyes</div>
               <div className={styles.certId}>
                 {session.account.certificateId}
               </div>
               {[
-                ["Issued", new Date().toISOString().slice(0, 10)],
-                ["Identity", "Verified — document + liveness"],
-                ["Elements evidenced", String(Object.keys(session.reasoningMap).length)],
-                ["Transfer", session.transferred ? "Demonstrated" : "Not yet"],
-                ["Scope", "Within-session"],
-                ["Rule", "aggregation-rule-v1"],
+                [ui("certIssued", lang), new Date().toISOString().slice(0, 10)],
+                [ui("certIdentity", lang), ui("certIdentityValue", lang)],
+                [
+                  ui("certElements", lang),
+                  String(Object.keys(session.reasoningMap).length),
+                ],
+                [
+                  ui("certTransfer", lang),
+                  session.transferred
+                    ? ui("certDemonstrated", lang)
+                    : ui("certNotYet", lang),
+                ],
+                [ui("certScope", lang), ui("certScopeValue", lang)],
+                [ui("certRule", lang), "aggregation-rule-v1"],
               ].map(([k, v]) => (
                 <div className={styles.certRow} key={k}>
                   <span className={styles.certKey}>{k}</span>
@@ -836,30 +849,26 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               ))}
             </div>
             <div className={styles.notice}>
-              The certificate attests to a rehearsal, not to investment
-              competence, and it makes no claim about durable behaviour change.
-              AUREN does not share it with anyone — you do.
+              {ui("certDisclaimer", lang)}
             </div>
             <button
               type="button"
               className={styles.btn}
               onClick={() => goStage("evidence", "S7")}
             >
-              Back to my record
+              {ui("backToRecord", lang)}
             </button>
           </div>
         ) : null}
 
         {stage === "modes" ? (
           <div className={styles.sheet}>
-            <div className={styles.kicker}>Now that the words mean something</div>
+            <div className={styles.kicker}>{ui("modesKicker", lang)}</div>
             <h2 className={styles.verdict} style={{ fontSize: 22 }}>
-              Three ways to use AUREN.
+              {ui("modesTitle", lang)}
             </h2>
             <p className={styles.verdictSub}>
-              You just did the middle one. This screen is deliberately not where
-              you started — a mode menu means nothing until you have been
-              through the loop once.
+              {ui("modesSub", lang)}
             </p>
             <div className={styles.modes}>
               <button
@@ -867,28 +876,23 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
                 className={`${styles.mode} ${styles.modePrimary}`}
                 onClick={restart}
               >
-                <div className={styles.modeTitle}>Rehearse</div>
+                <div className={styles.modeTitle}>{ui("modeRehearse", lang)}</div>
                 <div className={styles.modeDesc}>
-                  Pressure rehearsal against a scam you have not seen.
-                  Assessment by doing — the loop you just completed.
+                  {ui("modeRehearseDesc", lang)}
                 </div>
               </button>
               <button type="button" className={styles.mode}>
-                <div className={styles.modeTitle}>Learn</div>
-                <div className={styles.modeDesc}>
-                  Adaptive investor and AI literacy, paced to what your
-                  reasoning map says you are missing. No quizzes.
-                </div>
+                <div className={styles.modeTitle}>{ui("modeLearn", lang)}</div>
+                <div className={styles.modeDesc}>{ui("modeLearnDesc", lang)}</div>
               </button>
               <button
                 type="button"
                 className={styles.mode}
                 onClick={() => goStage("protect", "P0")}
               >
-                <div className={styles.modeTitle}>Protect</div>
+                <div className={styles.modeTitle}>{ui("modeProtect", lang)}</div>
                 <div className={styles.modeDesc}>
-                  A real situation, assessed now. AUREN never tells you whether
-                  something is a scam — it tells you what you have not verified.
+                  {ui("modeProtectDesc", lang)}
                 </div>
               </button>
             </div>
@@ -898,25 +902,24 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               className={`${styles.btn} ${styles.btnGhost}`}
               onClick={() => goStage("evidence", "S7")}
             >
-              Back to my record
+              {ui("backToRecord", lang)}
             </button>
           </div>
         ) : null}
 
         {stage === "protect" ? (
           <div className={styles.sheet}>
-            <div className={styles.kicker}>Protect · a real situation</div>
+            <div className={styles.kicker}>{ui("protectKicker", lang)}</div>
             <h2 className={styles.verdict} style={{ fontSize: 22 }}>
-              Tell me what is in front of you right now.
+              {ui("protectTitle", lang)}
             </h2>
             <p className={styles.verdictSub}>
-              I will not tell you whether this is a scam. I will tell you what
-              has not been verified, and what to do before you decide.
+              {ui("protectSub", lang)}
             </p>
 
-            <p className={styles.sectionTitle}>Unresolved markers</p>
+            <p className={styles.sectionTitle}>{ui("unresolvedMarkers", lang)}</p>
             <div className={styles.stack}>
-              {PROTECT_MARKERS.map((m) => (
+              {tList(PROTECT_MARKERS, lang).map((m) => (
                 <div className={styles.marker} key={m}>
                   <span className={styles.markerBang}>!</span>
                   <span>{m}</span>
@@ -924,30 +927,26 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               ))}
             </div>
 
-            <p className={styles.sectionTitle}>What to do</p>
+            <p className={styles.sectionTitle}>{ui("whatToDo", lang)}</p>
             <div className={styles.stack}>
               <div className={styles.pCard}>
-                <div className={styles.pTitle}>Stop</div>
+                <div className={styles.pTitle}>{ui("stopTitle", lang)}</div>
                 <p>
-                  Do not transfer funds while verification is incomplete.
-                  {` ${PROTECT_MARKERS.length} `}
-                  high-risk markers in this situation are unresolved.
+                  {ui("stopBody", lang)}
                 </p>
               </div>
               <div className={styles.pCard}>
-                <div className={styles.pTitle}>Verify</div>
+                <div className={styles.pTitle}>{ui("verifyTitle", lang)}</div>
                 <ol>
-                  {VERIFICATION_ACTIONS["VA-REGCHECK-001"].steps.map((s) => (
+                  {tList(VERIFICATION_ACTIONS["VA-REGCHECK-001"].steps, lang).map((s) => (
                     <li key={s}>{s}</li>
                   ))}
                 </ol>
               </div>
               <div className={styles.pCard}>
-                <div className={styles.pTitle}>Decide</div>
+                <div className={styles.pTitle}>{ui("decideTitle", lang)}</div>
                 <p>
-                  Return to your decision only after the identity, the entity
-                  and the claims have been independently verified. The decision
-                  is yours — I do not make it and I do not rate it.
+                  {ui("decideBody", lang)}
                 </p>
               </div>
             </div>
@@ -959,7 +958,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
                 goStage(session.transferred === null ? "entry" : "evidence", "S7")
               }
             >
-              Back
+              {ui("back", lang)}
             </button>
           </div>
         ) : null}

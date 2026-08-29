@@ -137,6 +137,62 @@ the result.
 
 ---
 
+## Languages
+
+Four variants ship: **English, Spanish, Chinese, Arabic** — text *and* voice.
+
+Paper III §10.2 makes language a first-class dimension of every scored
+determination, not a display setting. So the localisation reaches all the way
+into the engine:
+
+| Layer | What is localised |
+|---|---|
+| **Voice out** | Speech-synthesis voice selected for the session's BCP-47 tag, with a distinct persona voice so the doctrine switch is *audible*. In the React build, `klleonVoiceCodes` maps the language onto the avatar's own voice and subtitle codes. |
+| **Voice in** | Speech recognition runs in the session language. |
+| **Knowledge objects** | Questions, challenges, escalation ladders, scenario props, failure-signature definitions and coaching lines, verification actions, PROTECT markers, element labels. |
+| **Satisfaction cues** | **The critical one.** A Spanish answer is evaluated against Spanish cues. Ship English cues only, and every element silently fails for every non-English learner while the UI looks perfectly translated. |
+| **Resistance detection** | Per-language patterns, because "I want to verify that myself" is not a translation exercise — it is the behaviour the retest measures. |
+| **AILS explainability** | Composed from record fields in the learner's language. |
+
+### One source, two builds
+
+`src/lib/auren/i18n.ts` and `objects.ts` are canonical. The self-contained
+prototype gets its copy injected by `npm run locale`
+(`scripts/build-prototype-locale.mjs`), which compiles both files and writes the
+result between markers in the HTML. **Do not hand-edit the prototype's locale
+block** — a demo that has drifted from the product is worse than no demo.
+
+### Arabic
+
+Right-to-left is set on the device element so captions, rails, cards and the
+scorecard matrix mirror together. Two things break Arabic if you only flip
+direction, and both are handled: `letter-spacing` severs the cursive joining and
+is neutralised throughout RTL; and the Latin faces carry no Arabic glyphs, so
+Noto Sans/Naskh Arabic sit *after* them in each stack — element ids and scores
+still render monospaced while Arabic renders properly.
+
+### Fidelity status — read this before Madrid
+
+Paper III §10.2: *"Language variants deploy only with fidelity status passed."*
+Every variant carries its status, and the landing screen shows it:
+
+| Language | Status |
+|---|---|
+| English | `passed` |
+| Spanish | `review-pending` |
+| Chinese | `review-pending` |
+| Arabic | `review-pending` |
+
+The three non-English variants are complete and demonstrable, but they have not
+been through native review. **Spanish is the one to get reviewed before Madrid** —
+it is the host language, a native speaker in the room will hear any stiffness in
+the persona's pressure lines, and those lines have to sound like a real
+salesperson or the whole authentic-pressure doctrine reads as translation. Set
+the status to `passed` in `i18n.ts` once a reviewer signs it off; the landing
+copy follows automatically.
+
+---
+
 ## Invariants a future change must not break
 
 These are doctrine from Paper III, not preferences. Each is enforced in code at the
@@ -174,6 +230,12 @@ place named, so a component change cannot quietly undo it.
 12. **The figure is sized from a figure box, not the viewport.** Deriving the
     digital-human proportions from height alone throws the shoulders past both
     edges on a phone and it stops reading as a person.
+13. **Satisfaction cues are localized with the question.** Adding a language
+    means adding its cues and its resistance pattern, or the variant looks
+    translated and scores every learner as failing.
+14. **Only signatures the Coach explained may show a coach result.** An element
+    whose signature was recorded but never taught has not been coached, and
+    crediting it on the scorecard overstates the record.
 
 ---
 

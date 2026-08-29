@@ -1,3 +1,7 @@
+/* Type for the AUREN experience (Paper IV §8.2) plus the Arabic faces its
+   RTL variant needs — the Latin faces carry no Arabic glyphs. */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;700;800&family=Noto+Naskh+Arabic:wght@400;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

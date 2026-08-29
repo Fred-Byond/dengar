@@ -1,6 +1,7 @@
 "use client";
 
 import { FAILURE_SIGNATURES } from "@/lib/auren/objects";
+import { t, ui, type Lang } from "@/lib/auren/i18n";
 import type { BoundSignature } from "@/lib/auren/session";
 import styles from "./auren.module.css";
 
@@ -23,9 +24,11 @@ export type CoachBeat = 1 | 2 | 3;
 export function CoachEvidencePanel({
   signature,
   beat,
+  lang,
 }: {
   signature: BoundSignature;
   beat: CoachBeat;
+  lang: Lang;
 }) {
   const fail = FAILURE_SIGNATURES[signature.failId];
 
@@ -33,13 +36,13 @@ export function CoachEvidencePanel({
     <>
       <div className={`${styles.beat} ${styles.quote}`}>
         <div className={styles.quoteText}>“{trimQuote(signature.quote)}”</div>
-        <div className={styles.quoteMeta}>Your words · bound verbatim</div>
+        <div className={styles.quoteMeta}>{ui("yourWords", lang)}</div>
       </div>
 
       {beat >= 2 && fail ? (
         <div className={`${styles.beat} ${styles.sig}`}>
           <div className={styles.sigId}>{fail.failId}</div>
-          <div className={styles.sigDef}>{fail.definition}</div>
+          <div className={styles.sigDef}>{t(fail.definition, lang)}</div>
         </div>
       ) : null}
     </>

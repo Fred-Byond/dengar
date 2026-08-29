@@ -16,7 +16,7 @@ The product has **two halves**:
 | **Citizen experience** | `/experience` | Bookable, multilingual, 5-minute controlled session with the Minister&rsquo;s digital human. The political narrative and the source of the data. |
 | **Ministry intelligence** | `/dashboard` | DENGAR Intelligence — sentiment map, top issues, citizen suggestions, urgent review queue, action tracker. Two role views: **Minister** (the pulse) and **Secretary General** (assign, track, resolve). The enduring value and the recurring revenue. |
 | **Session Explorer** | `/sessions` | Dashboard view 5, **React-native**. Search/filter every session, open the CVIF Session Insight Record, read the transcript (original + English), work the urgent queue. PII masked by default; reveal is audit-logged. Wired to the real CVIF scorer. |
-| **AUREN rehearsal** | `/auren` | Investor rehearsal loop for the AUREN programme — a second configuration of the same governed-interview method. Voice-first digital-human session: understand → diagnose → stress → coach → retest → evidence chain. See [`docs/AUREN-ORDERING.md`](docs/AUREN-ORDERING.md). |
+| **AUREN rehearsal** | `/auren` | Investor rehearsal loop for the AUREN programme — a second configuration of the same governed-interview method. Voice-first digital-human session in **English / Español / 中文 / العربية**: understand → diagnose → stress → coach → retest → evidence chain. See [`docs/AUREN-ORDERING.md`](docs/AUREN-ORDERING.md). |
 
 The **intelligence layer** — the moat — is the [Citizen Voice Intelligence Framework
 (CVIF)](docs/CVIF.md): it scores the *conversation as evidence about an issue*, never the
@@ -44,6 +44,7 @@ dengar/
 │       ├── briefing.ts         Weekly Ministry Briefing generator
 │       ├── digital-human/      ★ Digital-human SDK seam (interface + mock; team implements adapter)
 │       ├── auren/              ★ AUREN knowledge objects + session state machine
+│       │   ├── i18n.ts         EN/ES/ZH/AR variants + fidelity status (canonical)
 │       │   ├── objects.ts      Frozen inventory (elements, signatures, questions, challenges)
 │       │   └── session.ts      Session model, retest selector, mode gate, AILS rule
 │       └── cvif/               ★ Citizen Voice Intelligence Framework (the intelligence layer)
@@ -55,7 +56,9 @@ dengar/
 ├── public/prototypes/          The APPROVED prototypes, served verbatim
 │   ├── dengar-citizen.html
 │   ├── national-pulse.html
-│   └── auren-rehearsal.html    Voice-first AUREN loop (no SDK key needed)
+│   └── auren-rehearsal.html    Voice-first AUREN loop, 4 languages (no SDK key needed)
+├── scripts/
+│   └── build-prototype-locale.mjs  `npm run locale` — injects the canonical copy
 └── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP · AUREN-ORDERING
 ```
 
@@ -78,6 +81,7 @@ npm install
 npm run dev       # http://localhost:3000
 npm run build     # production build
 npm run typecheck # tsc --noEmit
+npm run locale    # regenerate the prototype's locale from src/lib/auren
 ```
 
 Requires Node 18.17+.

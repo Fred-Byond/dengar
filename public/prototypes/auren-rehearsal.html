@@ -6,7 +6,7 @@
 <title>AUREN — Rehearsal Loop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;700;800&family=Noto+Naskh+Arabic:wght@400;700&display=swap">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════
    AUREN — Rehearsal Loop prototype
@@ -281,6 +281,38 @@ button:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
   border:1px solid var(--line);background:#1E1642;color:var(--dim);cursor:pointer;
 }
 .langc.on{border-color:var(--peach);color:var(--peach);background:#2C1F4E}
+.fidelity{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;color:#5A4C86;
+  margin-bottom:16px;line-height:1.5;
+}
+
+/* ── Arabic typography ───────────────────────────────────────────────
+   Two things break Arabic if you only flip direction:
+   1. letter-spacing severs the cursive joining, so every word renders as
+      disconnected letterforms. It is neutralised throughout RTL.
+   2. JetBrains Mono and Instrument Serif carry no Arabic glyphs, so the
+      browser falls back per-glyph and the result is ransom-note text.
+      Noto Sans/Naskh Arabic sit AFTER the Latin faces in each stack, so
+      element ids and scores still render mono while Arabic renders properly. */
+.device[dir="rtl"] {
+  --sans: "Noto Sans Arabic", "Plus Jakarta Sans", -apple-system, sans-serif;
+  --serif: "Noto Naskh Arabic", "Instrument Serif", Georgia, serif;
+  --mono: "JetBrains Mono", "Noto Sans Arabic", ui-monospace, monospace;
+}
+.device[dir="rtl"] * {
+  letter-spacing: normal;
+}
+.device[dir="rtl"] .qt {
+  font-style: normal;
+}
+
+/* Arabic runs right-to-left; direction is set on the device so every child
+   mirrors together. Logical properties keep the accent rails on the
+   reading-start edge in both scripts. */
+.device[dir="rtl"] .quote{
+  border-left:0;border-right:2px solid var(--peach);padding:3px 15px 3px 0;
+}
+.device[dir="rtl"] .pcard ol{padding-left:0;padding-right:17px}
 .noaccount{
   font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;
   color:var(--dim2);text-align:center;margin-top:11px;
@@ -396,16 +428,19 @@ button:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
 .mrow{border-bottom:1px solid var(--line);background:#1C1543}
 .mrow:last-child{border-bottom:0}
 .mhead{
-  display:grid;grid-template-columns:1fr 34px 34px 34px 34px;gap:5px;
-  padding:8px 12px;background:#231A52;align-items:center;
+  display:grid;grid-template-columns:1fr 40px 40px 40px 40px;gap:5px;
+  padding:8px 12px;background:#231A52;align-items:end;
 }
+/* Column labels are longer in Spanish than in English — they must wrap
+   inside their cell rather than run into the neighbouring one. */
 .mhead span{
-  font-family:var(--mono);font-size:7.5px;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--dim2);text-align:center;line-height:1.25;
+  font-family:var(--mono);font-size:7px;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--dim2);text-align:center;line-height:1.2;
+  overflow-wrap:anywhere;hyphens:auto;
 }
 .mhead span:first-child{text-align:left;letter-spacing:.13em}
 .mcells{
-  display:grid;grid-template-columns:1fr 34px 34px 34px 34px;gap:5px;
+  display:grid;grid-template-columns:1fr 40px 40px 40px 40px;gap:5px;
   padding:11px 12px;align-items:center;
 }
 .mname{font-size:12px;color:var(--lilac2);line-height:1.3}
@@ -554,12 +589,8 @@ button:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
             <div class="cred"><span class="cd">02</span><span>Everything you are told about yourself is quoted back from your own words.</span></div>
             <div class="cred"><span class="cd">03</span><span>Nothing here is real, and AUREN never advises you on a real investment.</span></div>
           </div>
-          <div class="langrow" id="langRow">
-            <button class="langc on" data-l="EN">English</button>
-            <button class="langc" data-l="MS">Bahasa Melayu</button>
-            <button class="langc" data-l="ZH">中文</button>
-            <button class="langc" data-l="AR">العربية</button>
-          </div>
+          <div class="langrow" id="langRow"></div>
+          <div class="fidelity" id="fidelityNote"></div>
         </div>
         <div>
           <button class="btn" id="beginBtn">Begin my first rehearsal</button>
@@ -680,98 +711,1792 @@ button:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
 "use strict";
 
 /* ═══════════════════════════════════════════════════════════════════
-   1. FROZEN OBJECT INVENTORY  (Paper III §12.2 — data, never code)
+   1. FROZEN OBJECT INVENTORY + LOCALE  (Paper III §12.2 — data, not code)
+
+   Generated from src/lib/auren/{i18n,objects}.ts by
+   scripts/build-prototype-locale.mjs. Do not hand-edit between the markers:
+   run `npm run locale` so the prototype and the React build cannot drift.
    ═════════════════════════════════════════════════════════════════ */
 
-const ELEMENTS = {
-  "E-VER-02": { label:"Independent verification", comp:"COMP-VERIFY-INDEPENDENT", anchor:"IOSCO IE-2.3" },
-  "E-RET-01": { label:"Return plausibility",      comp:"COMP-RISK-RETURN",        anchor:"OECD/INFE 3.1" },
-  "E-URG-01": { label:"Resists urgency",          comp:"COMP-STABILITY-URGENCY",  anchor:"IOSCO IE-4.1" },
-  "E-AI-01":  { label:"AI-capability scepticism", comp:"COMP-AILIT-CLAIMS",       anchor:"IOSCO PS1-2.2" },
-  "E-RISK-01":{ label:"Understands downside",     comp:"COMP-RISK-DOWNSIDE",      anchor:"OECD/INFE 2.4" },
-  "E-AUTH-01":{ label:"Questions authority",      comp:"COMP-STABILITY-AUTHORITY",anchor:"IOSCO IE-4.2" },
-  "E-SOC-01": { label:"Discounts social proof",   comp:"COMP-STABILITY-SOCIAL",   anchor:"OECD/INFE 4.2" },
-  "E-PAY-01": { label:"Payment scrutiny",         comp:"COMP-VERIFY-PAYMENT",     anchor:"IOSCO IE-3.4" }
-};
-
-const FAILS = {
-  "FAIL-VERIFY-SELFASSERTED":{ def:"Trusts promoter-supplied evidence as independent evidence.", el:"E-VER-02" },
-  "FAIL-URGENCY-COMPLIANCE": { def:"Changes verification behaviour under artificial scarcity or time pressure.", el:"E-URG-01" },
-  "FAIL-AI-AUTHORITY":       { def:"Treats “AI-powered” as evidence of predictive capability or legitimacy.", el:"E-AI-01" },
-  "FAIL-GREED-OVERRIDE":     { def:"Recognises implausibility but proceeds because upside overwhelms caution.", el:"E-RET-01" },
-  "FAIL-AUTHORITY-DEFERENCE":{ def:"Reduces scrutiny when authority or celebrity status is invoked.", el:"E-AUTH-01" },
-  "FAIL-SOCIAL-PROOF":       { def:"Uses other people's apparent success as evidence of legitimacy.", el:"E-SOC-01" }
-};
-
-/* DIAGNOSE — four elements, not eight (ordering fix D8) */
-const QUESTIONS = [
-  { id:"Q-VER-002", el:"E-VER-02",
-    ask:"You mentioned the company. How did you verify that they're actually authorised to offer this investment?",
-    rehearsed:"Their website says they're regulated, and it looks professional.",
-    fail:"FAIL-VERIFY-SELFASSERTED",
-    failCues:["website","site","they said","they told","he said","she said","looks","professional","brochure","document","licence","license","certificate"],
-    passCues:["register","regulator","authority","commission","check the","look it up","official","independent","fca","sec","asic"] },
-
-  { id:"Q-RET-001", el:"E-RET-01",
-    ask:"Fifteen percent a month. What do you think is actually producing a return like that?",
-    rehearsed:"I assume the algorithm is just better than what most people have access to.",
-    fail:"FAIL-GREED-OVERRIDE",
-    failCues:["algorithm","better","access","edge","smarter","technology","faster","don't know","not sure","assume","probably"],
-    passCues:["too good","unrealistic","not possible","impossible","suspicious","doesn't add","cannot","no one","unsustainable","red flag"] },
-
-  { id:"Q-AI-001", el:"E-AI-01",
-    ask:"They describe it as an AI trading system. What does “AI” tell you about whether it can predict the market?",
-    rehearsed:"AI can process a lot more data than a person, so it should be more accurate.",
-    fail:"FAIL-AI-AUTHORITY",
-    failCues:["more data","accurate","smarter","better than","process","learn","predict","should be","powerful","advanced"],
-    passCues:["nothing","doesn't mean","no evidence","marketing","buzzword","can't predict","cannot predict","label","says nothing","meaningless"] },
-
-  { id:"Q-RISK-001", el:"E-RISK-01",
-    ask:"Last one before we move on. What would have to happen for you to lose the whole ten thousand?",
-    rehearsed:"I suppose if the market crashed badly. But they mentioned there's capital protection.",
-    fail:null,
-    failCues:["crash","market","protection","protected","guaranteed","insured","unlikely","won't"],
-    passCues:["all of it","everything","never see","fake","not real","doesn't exist","disappear","gone","no recourse","fraud"] }
-];
-
-/* STRESS — challenge object with an escalation ladder and hard ceiling */
-const CHALLENGE = {
-  id:"CH-URGENCY-001",
-  scam:"SCAM-FAKE-BROKER",
-  persona:{ name:"Marcus Vale", role:"Senior Allocations · Meridian Partners" },
-  surface:{ typology:"Unauthorised broker", channel:"Voice call", persona:"Institutional male", product:"Managed account" },
-  targets:["E-URG-01","E-VER-02"],
-  ladder:[
-    { say:"Daniel, good — I have you down for the ten. We're opening a small allocation to selected investors this week, and yours is provisionally held.",
-      prop:null },
-    { say:"I'll be straight with you. The allocation closes tonight at nine. I need a decision before then or it releases to the next name on the list.",
-      prop:{ head:"Allocation notice", body:"MERIDIAN PARTNERS — Provisional allocation #A-4471 · Hold expires 21:00 today · Status: AWAITING CONFIRMATION" },
-      fail:"FAIL-URGENCY-COMPLIANCE" },
-    { say:"If it helps, I can send you screenshots from existing clients — people who came in at the same level you're coming in at. Most of them wish they'd gone bigger.",
-      prop:{ head:"Client returns — shared by promoter", body:"“Month 3 up 46%. Withdrew twice, no issues.” — J.M. · “Started at 10k, now sitting on 21k.” — R.T." },
-      fail:"FAIL-SOCIAL-PROOF" }
+/* AUREN-LOCALE-START — generated by scripts/build-prototype-locale.mjs */
+const L = {
+ "languages": [
+  {
+   "code": "EN",
+   "endonym": "English",
+   "bcp": "en-GB",
+   "rtl": false,
+   "fidelity": "passed"
+  },
+  {
+   "code": "ES",
+   "endonym": "Español",
+   "bcp": "es-ES",
+   "rtl": false,
+   "fidelity": "review-pending"
+  },
+  {
+   "code": "ZH",
+   "endonym": "中文",
+   "bcp": "zh-CN",
+   "rtl": false,
+   "fidelity": "review-pending"
+  },
+  {
+   "code": "AR",
+   "endonym": "العربية",
+   "bcp": "ar-SA",
+   "rtl": true,
+   "fidelity": "review-pending"
+  }
+ ],
+ "ui": {
+  "landingKicker": {
+   "EN": "Investor readiness · rehearsal",
+   "ES": "Preparación del inversor · ensayo",
+   "ZH": "投资者准备度 · 演练",
+   "AR": "جاهزية المستثمر · تدريب"
+  },
+  "landingTitle": {
+   "EN": "Everyone knows the rules. Almost nobody follows them when someone is pushing.",
+   "ES": "Todo el mundo conoce las reglas. Casi nadie las sigue cuando alguien presiona.",
+   "ZH": "规则人人都懂。可一旦有人施压，几乎没有人守得住。",
+   "AR": "الجميع يعرف القواعد. وما إن يضغط عليك أحد، حتى لا يكاد أحد يلتزم بها."
+  },
+  "landingLead": {
+   "EN": "AUREN is not a course. It is a five-minute rehearsal with an AI coach who listens, finds where your reasoning breaks, then puts you under the exact pressure a real scam would.",
+   "ES": "AUREN no es un curso. Es un ensayo de cinco minutos con un entrenador de IA que te escucha, localiza dónde se rompe tu razonamiento y después te somete a la misma presión que ejercería una estafa real.",
+   "ZH": "AUREN 不是课程。这是与 AI 教练进行的五分钟演练：他先听你说，找出你判断失守的地方，再用真实骗局会施加的压力考验你。",
+   "AR": "‏AUREN ليس دورة تدريبية. إنه تدريب من خمس دقائق مع مدرّب ذكاء اصطناعي يستمع إليك، ويكتشف أين ينهار تفكيرك، ثم يضعك تحت الضغط نفسه الذي يمارسه احتيال حقيقي."
+  },
+  "cred1": {
+   "EN": "You speak. There are no quizzes and nothing to type.",
+   "ES": "Tú hablas. No hay cuestionarios ni nada que escribir.",
+   "ZH": "你只需开口。没有测验，也不用打字。",
+   "AR": "أنت تتحدث. لا اختبارات ولا شيء تكتبه."
+  },
+  "cred2": {
+   "EN": "Everything you are told about yourself is quoted back from your own words.",
+   "ES": "Todo lo que se te dice sobre ti se cita literalmente de tus propias palabras.",
+   "ZH": "关于你的每一个结论，都会引用你自己说过的原话。",
+   "AR": "كل ما يُقال لك عن نفسك مقتبس حرفيًا من كلامك أنت."
+  },
+  "cred3": {
+   "EN": "Nothing here is real, and AUREN never advises you on a real investment.",
+   "ES": "Nada de esto es real, y AUREN nunca te asesora sobre una inversión real.",
+   "ZH": "这里的一切都是模拟；AUREN 绝不会就真实投资给你建议。",
+   "AR": "لا شيء هنا حقيقي، ولا يقدّم AUREN أي مشورة بشأن استثمار حقيقي."
+  },
+  "beginBtn": {
+   "EN": "Begin my first rehearsal",
+   "ES": "Empezar mi primer ensayo",
+   "ZH": "开始我的第一次演练",
+   "AR": "ابدأ تدريبي الأول"
+  },
+  "noAccount": {
+   "EN": "No account needed",
+   "ES": "No hace falta cuenta",
+   "ZH": "无需注册账号",
+   "AR": "لا حاجة إلى حساب"
+  },
+  "signInLink": {
+   "EN": "I already have a record — sign in",
+   "ES": "Ya tengo un registro — iniciar sesión",
+   "ZH": "我已有记录 — 登录",
+   "AR": "لديّ سجل بالفعل — تسجيل الدخول"
+  },
+  "fidelityNote": {
+   "EN": "English variant — native review passed.",
+   "ES": "Variante en español — pendiente de revisión nativa.",
+   "ZH": "中文版本 — 尚待母语审校。",
+   "AR": "النسخة العربية — بانتظار مراجعة لغوية أصلية."
+  },
+  "authKicker": {
+   "EN": "Sign in",
+   "ES": "Iniciar sesión",
+   "ZH": "登录",
+   "AR": "تسجيل الدخول"
+  },
+  "authTitle": {
+   "EN": "Pick up where your last rehearsal left off.",
+   "ES": "Continúa donde lo dejaste en tu último ensayo.",
+   "ZH": "从你上次演练的地方继续。",
+   "AR": "تابع من حيث انتهى تدريبك السابق."
+  },
+  "authSub": {
+   "EN": "Your record is tied to a number, not a password. We send a six-digit code.",
+   "ES": "Tu registro va ligado a un número, no a una contraseña. Te enviamos un código de seis dígitos.",
+   "ZH": "你的记录绑定的是手机号码，而非密码。我们会发送六位验证码。",
+   "AR": "سجلك مرتبط برقم هاتف لا بكلمة مرور. سنرسل رمزًا من ستة أرقام."
+  },
+  "phoneLabel": {
+   "EN": "Mobile number",
+   "ES": "Número de móvil",
+   "ZH": "手机号码",
+   "AR": "رقم الجوال"
+  },
+  "otpLabel": {
+   "EN": "Six-digit code",
+   "ES": "Código de seis dígitos",
+   "ZH": "六位验证码",
+   "AR": "الرمز المكوّن من ستة أرقام"
+  },
+  "authNotice": {
+   "EN": "Signing in stores your reasoning map and your retraining queue. It does not verify who you are — identity verification happens later, only if you want your record certified.",
+   "ES": "Iniciar sesión guarda tu mapa de razonamiento y tu cola de repaso. No verifica quién eres: la verificación de identidad llega después, y solo si quieres certificar tu registro.",
+   "ZH": "登录会保存你的推理图谱与复训队列，但不会核实你的身份。身份验证在之后进行，且仅在你希望为记录申请认证时才需要。",
+   "AR": "تسجيل الدخول يحفظ خريطة تفكيرك وقائمة إعادة التدريب الخاصة بك، لكنه لا يتحقق من هويتك. يأتي التحقق من الهوية لاحقًا، وفقط إذا أردت اعتماد سجلك."
+  },
+  "sendCodeBtn": {
+   "EN": "Send me a code",
+   "ES": "Enviarme un código",
+   "ZH": "发送验证码",
+   "AR": "أرسل لي رمزًا"
+  },
+  "verifyContinueBtn": {
+   "EN": "Verify and continue",
+   "ES": "Verificar y continuar",
+   "ZH": "验证并继续",
+   "AR": "تحقّق وتابع"
+  },
+  "authSkip": {
+   "EN": "Skip — start without an account",
+   "ES": "Omitir — empezar sin cuenta",
+   "ZH": "跳过 — 不注册直接开始",
+   "AR": "تخطَّ — ابدأ بدون حساب"
+  },
+  "entryKicker": {
+   "EN": "AUREN · Investor rehearsal",
+   "ES": "AUREN · Ensayo del inversor",
+   "ZH": "AUREN · 投资者演练",
+   "AR": "AUREN · تدريب المستثمر"
+  },
+  "entryTitle": {
+   "EN": "I'm going to show you how you think when someone wants your money.",
+   "ES": "Voy a mostrarte cómo piensas cuando alguien quiere tu dinero.",
+   "ZH": "我会让你看见：当有人盯上你的钱时，你是怎么思考的。",
+   "AR": "سأريك كيف تفكّر عندما يطمع أحدهم في مالك."
+  },
+  "entrySub": {
+   "EN": "Five minutes. You talk, I listen, then I push. Nothing here is real and nothing you say is scored against you as a person.",
+   "ES": "Cinco minutos. Tú hablas, yo escucho y después presiono. Nada de esto es real y nada de lo que digas se puntúa contra ti como persona.",
+   "ZH": "五分钟。你说，我听，然后我会施压。这里的一切都不是真的，你说的任何话都不会被用来评判你这个人。",
+   "AR": "خمس دقائق. أنت تتحدث، وأنا أستمع، ثم أضغط. لا شيء هنا حقيقي، ولا يُستخدم أي شيء تقوله للحكم عليك كشخص."
+  },
+  "nameLabel": {
+   "EN": "What should I call you?",
+   "ES": "¿Cómo quieres que te llame?",
+   "ZH": "我该怎么称呼你？",
+   "AR": "بماذا أناديك؟"
+  },
+  "namePlaceholder": {
+   "EN": "First name",
+   "ES": "Nombre",
+   "ZH": "名字",
+   "AR": "الاسم الأول"
+  },
+  "consentTitle": {
+   "EN": "Before we start",
+   "ES": "Antes de empezar",
+   "ZH": "开始之前",
+   "AR": "قبل أن نبدأ"
+  },
+  "consent1": {
+   "EN": "Partway through, I will stop being your coach and start behaving like someone trying to sell you an investment. I will apply pressure. That is the point.",
+   "ES": "A mitad de camino dejaré de ser tu entrenador y empezaré a comportarme como alguien que intenta venderte una inversión. Voy a presionarte. De eso se trata.",
+   "ZH": "进行到一半时，我会停止扮演教练，转而像一个向你推销投资的人那样行事。我会施加压力——这正是重点。",
+   "AR": "في منتصف الجلسة سأتوقف عن كوني مدرّبك وأبدأ بالتصرف كشخص يحاول بيعك استثمارًا. سأمارس الضغط عليك، وهذا هو المقصود بالضبط."
+  },
+  "consent2": {
+   "EN": "You can end the simulation at any time with the control at the top of the screen. I never advise you on real investments, and I never tell you whether something real is a scam.",
+   "ES": "Puedes terminar la simulación en cualquier momento con el control de la parte superior. Nunca te asesoro sobre inversiones reales, ni te digo si algo real es una estafa.",
+   "ZH": "你随时可以用屏幕顶部的控件结束模拟。我绝不会就真实投资给你建议，也绝不会断言某件真实的事是否为骗局。",
+   "AR": "يمكنك إنهاء المحاكاة في أي وقت من خلال الزر في أعلى الشاشة. لا أقدّم مشورة بشأن استثمارات حقيقية، ولا أخبرك أبدًا إن كان أمر حقيقي احتيالًا أم لا."
+  },
+  "startBtn": {
+   "EN": "I understand — start",
+   "ES": "Lo entiendo — empezar",
+   "ZH": "我明白了 — 开始",
+   "AR": "فهمت — ابدأ"
+  },
+  "trainingBadge": {
+   "EN": "Investment Simulation — Training Mode",
+   "ES": "Simulación de inversión — Modo entrenamiento",
+   "ZH": "投资情景模拟 — 训练模式",
+   "AR": "محاكاة استثمارية — وضع التدريب"
+  },
+  "protectBadge": {
+   "EN": "Protect — real situation",
+   "ES": "Protección — situación real",
+   "ZH": "保护模式 — 真实情况",
+   "AR": "الحماية — حالة حقيقية"
+  },
+  "exitSim": {
+   "EN": "Exit simulation",
+   "ES": "Salir de la simulación",
+   "ZH": "退出模拟",
+   "AR": "الخروج من المحاكاة"
+  },
+  "protectBtn": {
+   "EN": "Protect",
+   "ES": "Protección",
+   "ZH": "保护",
+   "AR": "الحماية"
+  },
+  "avatarStandIn": {
+   "EN": "Avatar stand-in",
+   "ES": "Avatar provisional",
+   "ZH": "数字人占位",
+   "AR": "بديل الشخصية الرقمية"
+  },
+  "holdToSpeak": {
+   "EN": "Hold to speak",
+   "ES": "Mantén pulsado para hablar",
+   "ZH": "按住说话",
+   "AR": "اضغط مع الاستمرار للتحدث"
+  },
+  "holdTellMe": {
+   "EN": "Hold to speak — tell me about it",
+   "ES": "Mantén pulsado y cuéntamelo",
+   "ZH": "按住说话 — 讲讲你的情况",
+   "AR": "اضغط مع الاستمرار وأخبرني"
+  },
+  "holdToAnswer": {
+   "EN": "Hold to answer",
+   "ES": "Mantén pulsado para responder",
+   "ZH": "按住回答",
+   "AR": "اضغط مع الاستمرار للإجابة"
+  },
+  "holdToRespond": {
+   "EN": "Hold to respond",
+   "ES": "Mantén pulsado para responder",
+   "ZH": "按住回应",
+   "AR": "اضغط مع الاستمرار للرد"
+  },
+  "listening": {
+   "EN": "Listening — release when done",
+   "ES": "Escuchando — suelta al terminar",
+   "ZH": "正在聆听 — 说完请松开",
+   "AR": "أستمع — ارفع إصبعك عند الانتهاء"
+  },
+  "reasoningMap": {
+   "EN": "Reasoning map",
+   "ES": "Mapa de razonamiento",
+   "ZH": "推理图谱",
+   "AR": "خريطة التفكير"
+  },
+  "railBuilding": {
+   "EN": "building",
+   "ES": "en construcción",
+   "ZH": "构建中",
+   "AR": "قيد البناء"
+  },
+  "railFrozen": {
+   "EN": "frozen — challenge in progress",
+   "ES": "congelado — desafío en curso",
+   "ZH": "已冻结 — 挑战进行中",
+   "AR": "مُجمَّد — التحدي جارٍ"
+  },
+  "railRevealed": {
+   "EN": "revealed",
+   "ES": "revelado",
+   "ZH": "已揭示",
+   "AR": "مكشوف"
+  },
+  "yourWords": {
+   "EN": "Your words · bound verbatim",
+   "ES": "Tus palabras · citadas literalmente",
+   "ZH": "你的原话 · 逐字绑定",
+   "AR": "كلماتك · موثّقة حرفيًا"
+  },
+  "simulatedArtifact": {
+   "EN": "Simulated artifact",
+   "ES": "Material simulado",
+   "ZH": "模拟素材",
+   "AR": "مادة محاكاة"
+  },
+  "coachOpener": {
+   "EN": "Okay. That was me. Two things happened in that conversation.",
+   "ES": "Vale. Ese era yo. En esa conversación pasaron dos cosas.",
+   "ZH": "好了，刚才那个人是我。在那段对话里发生了两件事。",
+   "AR": "حسنًا. ذلك كنت أنا. حدث أمران في تلك المحادثة."
+  },
+  "coachHandoff": {
+   "EN": "Let's try that again — different situation, same question. Nothing about it will look like the last one.",
+   "ES": "Probemos otra vez: situación distinta, misma pregunta. No se parecerá en nada a la anterior.",
+   "ZH": "我们再来一次——换一个情境，同一个问题。它和上一个不会有任何相似之处。",
+   "AR": "لنجرّب مرة أخرى — موقف مختلف والسؤال نفسه. لن يشبه الموقف السابق في شيء."
+  },
+  "exitAck": {
+   "EN": "That's the simulation ended. Nothing in it was real, and nothing you said in it is held against you. Your progress is kept.",
+   "ES": "La simulación ha terminado. Nada de lo que había era real, y nada de lo que dijiste se usa en tu contra. Tu progreso se conserva.",
+   "ZH": "模拟结束了。里面的一切都不是真的，你在其中说过的话不会被用来评判你。你的进度已保留。",
+   "AR": "انتهت المحاكاة. لم يكن فيها شيء حقيقي، ولن يُستخدم أي شيء قلته ضدك. تم حفظ تقدّمك."
+  },
+  "ackWords": {
+   "EN": [
+    "Understood.",
+    "Right.",
+    "Okay, noted.",
+    "Got it."
+   ],
+   "ES": [
+    "Entendido.",
+    "Ya veo.",
+    "Vale, lo anoto.",
+    "De acuerdo."
+   ],
+   "ZH": [
+    "明白了。",
+    "好。",
+    "好的，我记下了。",
+    "了解。"
+   ],
+   "AR": [
+    "فهمت.",
+    "حسنًا.",
+    "تمام، دوّنتها.",
+    "واضح."
+   ]
+  },
+  "understandOpener": {
+   "EN": "So. Tell me about the investment you're looking at. Take your time — I'm not going to interrupt you.",
+   "ES": "Bien. Háblame de la inversión que estás considerando. Tómate tu tiempo, no voy a interrumpirte.",
+   "ZH": "好，跟我说说你正在考虑的这笔投资。慢慢来，我不会打断你。",
+   "AR": "حسنًا. حدّثني عن الاستثمار الذي تفكّر فيه. خذ وقتك، لن أقاطعك."
+  },
+  "understandClose": {
+   "EN": "Alright. I've got the shape of it.",
+   "ES": "De acuerdo. Ya me hago una idea.",
+   "ZH": "好，大致情况我清楚了。",
+   "AR": "حسنًا. صار لديّ تصوّر عن الأمر."
+  },
+  "narrativeRehearsed": {
+   "EN": "Someone messaged me on WhatsApp about an AI trading system. It's returning about fifteen percent a month, and there was a video of a founder I recognised backing it. Their website says they're regulated. I was going to put in ten thousand.",
+   "ES": "Alguien me escribió por WhatsApp sobre un sistema de trading con IA. Da como un quince por ciento mensual, y había un vídeo de un fundador que reconocí respaldándolo. Su web dice que están regulados. Iba a meter diez mil.",
+   "ZH": "有人在 WhatsApp 上联系我，说有个 AI 交易系统，每月回报大概百分之十五，还有一段我认得的创始人为它背书的视频。他们网站上说自己受监管。我本来打算投一万。",
+   "AR": "راسلني أحدهم على واتساب عن نظام تداول بالذكاء الاصطناعي. عائده نحو خمسة عشر بالمئة شهريًا، وكان هناك مقطع فيديو لمؤسس أعرفه يدعمه. موقعهم يقول إنهم مرخّصون. كنت أنوي استثمار عشرة آلاف."
+  },
+  "stressHandoff": {
+   "EN": "Good. Now — I want you to talk to someone. I'm going to step out for a moment.",
+   "ES": "Bien. Ahora quiero que hables con alguien. Me aparto un momento.",
+   "ZH": "很好。现在，我想让你和一个人谈谈。我先离开一下。",
+   "AR": "جيد. الآن أريدك أن تتحدث مع شخص ما. سأنسحب للحظة."
+  },
+  "recordSealed": {
+   "EN": "Investor Readiness Record · sealed",
+   "ES": "Registro de Preparación del Inversor · sellado",
+   "ZH": "投资者准备度记录 · 已封存",
+   "AR": "سجل جاهزية المستثمر · مختوم"
+  },
+  "evidenceChain": {
+   "EN": "Evidence chain",
+   "ES": "Cadena de evidencia",
+   "ZH": "证据链",
+   "AR": "سلسلة الأدلة"
+  },
+  "colElement": {
+   "EN": "Element",
+   "ES": "Elemento",
+   "ZH": "要素",
+   "AR": "العنصر"
+  },
+  "colBase": {
+   "EN": "Base",
+   "ES": "Base",
+   "ZH": "基线",
+   "AR": "الأساس"
+  },
+  "colPress": {
+   "EN": "Press",
+   "ES": "Presión",
+   "ZH": "受压",
+   "AR": "الضغط"
+  },
+  "colCoach": {
+   "EN": "Coach",
+   "ES": "Coaching",
+   "ZH": "指导后",
+   "AR": "بعد التدريب"
+  },
+  "colNovel": {
+   "EN": "Novel",
+   "ES": "Nuevo",
+   "ZH": "新情境",
+   "AR": "سيناريو جديد"
+  },
+  "boundEvidence": {
+   "EN": "Bound evidence",
+   "ES": "Evidencia vinculada",
+   "ZH": "绑定证据",
+   "AR": "الدليل الموثّق"
+  },
+  "elicitedBy": {
+   "EN": "elicited by",
+   "ES": "obtenida mediante",
+   "ZH": "由以下问题触发：",
+   "AR": "استُخلص عبر"
+  },
+  "failureSignatures": {
+   "EN": "Failure signatures",
+   "ES": "Firmas de fallo",
+   "ZH": "失效特征",
+   "AR": "أنماط الإخفاق"
+  },
+  "boundTo": {
+   "EN": "Bound to",
+   "ES": "Vinculada a",
+   "ZH": "绑定于",
+   "AR": "مرتبط بـ"
+  },
+  "ruleFooter": {
+   "EN": "within-session transfer only · durable transfer not claimed",
+   "ES": "solo transferencia intrasesión · no se afirma transferencia duradera",
+   "ZH": "仅限单次会话内迁移 · 未主张持久性行为改变",
+   "AR": "الانتقال ضمن الجلسة فقط · لا يُدّعى انتقال دائم"
+  },
+  "certifyBtn": {
+   "EN": "Verify my identity and certify this record",
+   "ES": "Verificar mi identidad y certificar este registro",
+   "ZH": "验证我的身份并认证此记录",
+   "AR": "تحقّق من هويتي واعتمد هذا السجل"
+  },
+  "certifiedNotice": {
+   "EN": "This record is certified. Certificate",
+   "ES": "Este registro está certificado. Certificado",
+   "ZH": "此记录已认证。证书编号",
+   "AR": "هذا السجل معتمد. الشهادة"
+  },
+  "againBtn": {
+   "EN": "Rehearse your next weakness",
+   "ES": "Ensaya tu siguiente punto débil",
+   "ZH": "演练你的下一个弱点",
+   "AR": "تدرّب على نقطة ضعفك التالية"
+  },
+  "modesBtn": {
+   "EN": "See what else AUREN does",
+   "ES": "Ver qué más hace AUREN",
+   "ZH": "看看 AUREN 还能做什么",
+   "AR": "اطّلع على ما يقدّمه AUREN أيضًا"
+  },
+  "verdictPassHead": {
+   "EN": "You made the same mistake twice. After we named it, you didn't make it again.",
+   "ES": "Cometiste el mismo error dos veces. Después de ponerle nombre, no volviste a cometerlo.",
+   "ZH": "同一个错误你犯了两次。在我们把它命名之后，你没有再犯。",
+   "AR": "ارتكبت الخطأ نفسه مرتين. وبعد أن سمّيناه، لم تكرّره."
+  },
+  "verdictPassSub": {
+   "EN": "That is the whole claim: not that you know the rule, but that you behaved differently when a completely different scam asked you the same question.",
+   "ES": "Esa es toda la afirmación: no que conozcas la regla, sino que actuaste distinto cuando una estafa completamente diferente te hizo la misma pregunta.",
+   "ZH": "这就是全部主张：重点不是你知道规则，而是当一个完全不同的骗局问你同样的问题时，你的行为改变了。",
+   "AR": "هذا هو الادعاء كله: ليس أنك تعرف القاعدة، بل أنك تصرّفت بشكل مختلف حين طرح عليك احتيال مختلف تمامًا السؤال نفسه."
+  },
+  "verdictFailHead": {
+   "EN": "You haven't transferred it yet — and that's exactly what we rehearse next.",
+   "ES": "Todavía no lo has transferido — y eso es justo lo que ensayaremos a continuación.",
+   "ZH": "你还没有把它迁移过来——而这正是我们接下来要演练的。",
+   "AR": "لم تنقله بعد — وهذا تحديدًا ما سنتدرّب عليه تاليًا."
+  },
+  "verdictFailSub": {
+   "EN": "You were coached on independent verification and the new scenario still got past it. That is honest evidence, and it is more useful to you than a pass would have been.",
+   "ES": "Recibiste orientación sobre verificación independiente y aun así el nuevo escenario la sorteó. Esa es evidencia honesta, y te sirve más que un aprobado.",
+   "ZH": "你已经接受过独立核实的指导，新情境仍然绕过了它。这是诚实的证据，对你的价值大于一个「通过」。",
+   "AR": "تلقّيت توجيهًا بشأن التحقق المستقل، ومع ذلك تجاوزه السيناريو الجديد. هذا دليل صادق، وهو أنفع لك من نتيجة ناجحة."
+  },
+  "modesKicker": {
+   "EN": "Now that the words mean something",
+   "ES": "Ahora que las palabras significan algo",
+   "ZH": "现在这些词有了意义",
+   "AR": "الآن وقد صارت الكلمات ذات معنى"
+  },
+  "modesTitle": {
+   "EN": "Three ways to use AUREN.",
+   "ES": "Tres formas de usar AUREN.",
+   "ZH": "使用 AUREN 的三种方式。",
+   "AR": "ثلاث طرق لاستخدام AUREN."
+  },
+  "modesSub": {
+   "EN": "You just did the middle one. This screen is deliberately not where you started — a mode menu means nothing until you have been through the loop once.",
+   "ES": "Acabas de hacer la del medio. Esta pantalla no es, deliberadamente, donde empezaste: un menú de modos no significa nada hasta que has recorrido el ciclo una vez.",
+   "ZH": "你刚刚完成的是中间那一种。这个页面被刻意安排在起点之后——在你完整走过一遍之前，模式菜单毫无意义。",
+   "AR": "لقد أنجزت للتو الطريقة الوسطى. هذه الشاشة ليست نقطة البداية عن قصد — قائمة الأوضاع لا تعني شيئًا قبل أن تخوض الدورة مرة واحدة."
+  },
+  "modeRehearse": {
+   "EN": "Rehearse",
+   "ES": "Ensayar",
+   "ZH": "演练",
+   "AR": "التدريب"
+  },
+  "modeRehearseDesc": {
+   "EN": "Pressure rehearsal against a scam you have not seen. Assessment by doing — the loop you just completed.",
+   "ES": "Ensayo bajo presión frente a una estafa que no has visto. Evaluación haciendo: el ciclo que acabas de completar.",
+   "ZH": "面对你未见过的骗局进行压力演练。以实践进行评估——正是你刚刚完成的流程。",
+   "AR": "تدريب تحت الضغط أمام احتيال لم تره من قبل. تقييم بالممارسة — الدورة التي أنهيتها للتو."
+  },
+  "modeLearn": {
+   "EN": "Learn",
+   "ES": "Aprender",
+   "ZH": "学习",
+   "AR": "التعلّم"
+  },
+  "modeLearnDesc": {
+   "EN": "Adaptive investor and AI literacy, paced to what your reasoning map says you are missing. No quizzes.",
+   "ES": "Alfabetización adaptativa en inversión e IA, al ritmo de lo que tu mapa de razonamiento dice que te falta. Sin cuestionarios.",
+   "ZH": "自适应的投资与 AI 素养学习，按你的推理图谱所显示的缺口来安排节奏。没有测验。",
+   "AR": "تعلّم تكيّفي في الاستثمار والذكاء الاصطناعي، بوتيرة تحدّدها الفجوات في خريطة تفكيرك. بلا اختبارات."
+  },
+  "modeProtect": {
+   "EN": "Protect",
+   "ES": "Proteger",
+   "ZH": "保护",
+   "AR": "الحماية"
+  },
+  "modeProtectDesc": {
+   "EN": "A real situation, assessed now. AUREN never tells you whether something is a scam — it tells you what you have not verified.",
+   "ES": "Una situación real, evaluada ahora. AUREN nunca te dice si algo es una estafa: te dice qué no has verificado.",
+   "ZH": "对真实情况的即时评估。AUREN 绝不告诉你某件事是不是骗局——它只告诉你哪些你还没核实。",
+   "AR": "حالة حقيقية تُقيَّم الآن. لا يخبرك AUREN إن كان الأمر احتيالًا — بل يخبرك بما لم تتحقق منه بعد."
+  },
+  "backToRecord": {
+   "EN": "Back to my record",
+   "ES": "Volver a mi registro",
+   "ZH": "返回我的记录",
+   "AR": "العودة إلى سجلي"
+  },
+  "back": {
+   "EN": "Back",
+   "ES": "Volver",
+   "ZH": "返回",
+   "AR": "رجوع"
+  },
+  "protectKicker": {
+   "EN": "Protect · a real situation",
+   "ES": "Protección · una situación real",
+   "ZH": "保护 · 真实情况",
+   "AR": "الحماية · حالة حقيقية"
+  },
+  "protectTitle": {
+   "EN": "Tell me what is in front of you right now.",
+   "ES": "Cuéntame qué tienes delante ahora mismo.",
+   "ZH": "告诉我你现在面前的情况。",
+   "AR": "أخبرني بما بين يديك الآن."
+  },
+  "protectSub": {
+   "EN": "I will not tell you whether this is a scam. I will tell you what has not been verified, and what to do before you decide.",
+   "ES": "No te diré si esto es una estafa. Te diré qué no se ha verificado y qué hacer antes de decidir.",
+   "ZH": "我不会告诉你这是不是骗局。我会告诉你哪些还没核实，以及在你做决定前该做什么。",
+   "AR": "لن أخبرك إن كان هذا احتيالًا. سأخبرك بما لم يُتحقق منه، وبما ينبغي فعله قبل أن تقرّر."
+  },
+  "protectSpoken": {
+   "EN": "Five things in what you've described haven't been verified. Before you move any money, here's what I'd do.",
+   "ES": "Hay cinco cosas de lo que has descrito que no están verificadas. Antes de mover dinero, esto es lo que yo haría.",
+   "ZH": "在你描述的情况中，有五项还没有核实。在你动用任何资金之前，我建议这样做。",
+   "AR": "خمسة أمور مما وصفته لم يجرِ التحقق منها. قبل أن تحوّل أي مبلغ، إليك ما كنت سأفعله."
+  },
+  "unresolvedMarkers": {
+   "EN": "Unresolved markers",
+   "ES": "Indicadores sin resolver",
+   "ZH": "未排除的风险标记",
+   "AR": "مؤشرات لم تُحسم"
+  },
+  "whatToDo": {
+   "EN": "What to do",
+   "ES": "Qué hacer",
+   "ZH": "该怎么做",
+   "AR": "ما ينبغي فعله"
+  },
+  "stopTitle": {
+   "EN": "Stop",
+   "ES": "Detente",
+   "ZH": "停",
+   "AR": "توقّف"
+  },
+  "verifyTitle": {
+   "EN": "Verify",
+   "ES": "Verifica",
+   "ZH": "核实",
+   "AR": "تحقّق"
+  },
+  "decideTitle": {
+   "EN": "Decide",
+   "ES": "Decide",
+   "ZH": "决定",
+   "AR": "قرّر"
+  },
+  "stopBody": {
+   "EN": "Do not transfer funds while verification is incomplete. Five high-risk markers in this situation are unresolved.",
+   "ES": "No transfieras fondos mientras la verificación esté incompleta. Cinco indicadores de alto riesgo siguen sin resolverse.",
+   "ZH": "在核实完成之前，不要转账。此情况中有五项高风险标记尚未排除。",
+   "AR": "لا تحوّل أي أموال ما دام التحقق غير مكتمل. خمسة مؤشرات عالية الخطورة في هذه الحالة لم تُحسم بعد."
+  },
+  "decideBody": {
+   "EN": "Return to your decision only after the identity, the entity and the claims have been independently verified. The decision is yours — I do not make it and I do not rate it.",
+   "ES": "Vuelve a tu decisión solo cuando la identidad, la entidad y las afirmaciones se hayan verificado de forma independiente. La decisión es tuya: yo no la tomo ni la califico.",
+   "ZH": "只有在身份、机构与各项说法都经过独立核实之后，再回到你的决定。决定权在你——我不替你决定，也不为它打分。",
+   "AR": "عد إلى قرارك فقط بعد التحقق باستقلالية من الهوية والكيان والادعاءات. القرار قرارك — لا أتخذه عنك ولا أقيّمه."
+  },
+  "verifyKicker": {
+   "EN": "Verified certification",
+   "ES": "Certificación verificada",
+   "ZH": "实名认证",
+   "AR": "اعتماد موثّق"
+  },
+  "verifyTitleHead": {
+   "EN": "Make this record provable.",
+   "ES": "Haz que este registro sea demostrable.",
+   "ZH": "让这份记录可被证明。",
+   "AR": "اجعل هذا السجل قابلًا للإثبات."
+  },
+  "verifySub": {
+   "EN": "Your rehearsal already stands on its own. Certification ties it to a verified identity so an employer, a regulator or an institution can rely on it. It is optional, and nothing you have done is lost if you stop here.",
+   "ES": "Tu ensayo ya se sostiene por sí solo. La certificación lo vincula a una identidad verificada para que un empleador, un regulador o una institución puedan apoyarse en él. Es opcional, y no pierdes nada de lo hecho si lo dejas aquí.",
+   "ZH": "你的演练本身已经成立。认证只是把它与一个已验证的身份绑定，让雇主、监管机构或金融机构可以据此采信。这是可选的，你现在停下也不会失去任何已完成的内容。",
+   "AR": "تدريبك قائم بذاته أصلًا. الاعتماد يربطه بهوية موثّقة كي يتمكّن صاحب عمل أو جهة رقابية أو مؤسسة من الاعتماد عليه. وهو اختياري، ولن تفقد شيئًا مما أنجزته إن توقفت هنا."
+  },
+  "vStep1": {
+   "EN": "Confirm your details",
+   "ES": "Confirma tus datos",
+   "ZH": "确认你的资料",
+   "AR": "أكّد بياناتك"
+  },
+  "vStep1d": {
+   "EN": "Name and date of birth, as they appear on your document.",
+   "ES": "Nombre y fecha de nacimiento, tal como aparecen en tu documento.",
+   "ZH": "姓名与出生日期，须与证件上一致。",
+   "AR": "الاسم وتاريخ الميلاد كما يظهران في وثيقتك."
+  },
+  "vStep2": {
+   "EN": "Scan your document",
+   "ES": "Escanea tu documento",
+   "ZH": "扫描你的证件",
+   "AR": "امسح وثيقتك ضوئيًا"
+  },
+  "vStep2d": {
+   "EN": "Passport or national ID. Captured once, checked, and not retained by AUREN.",
+   "ES": "Pasaporte o DNI. Se captura una vez, se comprueba y AUREN no lo conserva.",
+   "ZH": "护照或身份证。仅采集一次，核验后 AUREN 不予留存。",
+   "AR": "جواز سفر أو بطاقة هوية وطنية. يُلتقط مرة واحدة ويُفحص، ولا يحتفظ به AUREN."
+  },
+  "vStep3": {
+   "EN": "Liveness check",
+   "ES": "Prueba de vida",
+   "ZH": "活体检测",
+   "AR": "التحقق من الحضور الحي"
+  },
+  "vStep3d": {
+   "EN": "A short camera check that the person holding the document is you.",
+   "ES": "Una breve comprobación con cámara de que quien sostiene el documento eres tú.",
+   "ZH": "通过摄像头做一次简短确认：持证件的人就是你本人。",
+   "AR": "فحص قصير بالكاميرا للتأكد من أن حامل الوثيقة هو أنت."
+  },
+  "vStep4": {
+   "EN": "Issue certificate",
+   "ES": "Emitir el certificado",
+   "ZH": "签发证书",
+   "AR": "إصدار الشهادة"
+  },
+  "vStep4d": {
+   "EN": "Your Investor Readiness Record is sealed against a verified identity.",
+   "ES": "Tu Registro de Preparación del Inversor queda sellado contra una identidad verificada.",
+   "ZH": "你的投资者准备度记录将与已验证身份一同封存。",
+   "AR": "يُختم سجل جاهزية المستثمر الخاص بك مقابل هوية موثّقة."
+  },
+  "legalName": {
+   "EN": "Full legal name",
+   "ES": "Nombre legal completo",
+   "ZH": "法定全名",
+   "AR": "الاسم القانوني الكامل"
+  },
+  "dob": {
+   "EN": "Date of birth",
+   "ES": "Fecha de nacimiento",
+   "ZH": "出生日期",
+   "AR": "تاريخ الميلاد"
+  },
+  "scanDocPrompt": {
+   "EN": "Position your passport or ID inside the frame.",
+   "ES": "Coloca tu pasaporte o DNI dentro del marco.",
+   "ZH": "请将护照或身份证放入取景框内。",
+   "AR": "ضع جواز سفرك أو بطاقتك داخل الإطار."
+  },
+  "scanDocNote": {
+   "EN": "Simulated capture — no document is read",
+   "ES": "Captura simulada — no se lee ningún documento",
+   "ZH": "模拟采集 — 不会读取任何证件",
+   "AR": "التقاط محاكى — لا تُقرأ أي وثيقة"
+  },
+  "livenessPrompt": {
+   "EN": "Look at the camera and turn your head slowly to the left.",
+   "ES": "Mira a la cámara y gira la cabeza despacio hacia la izquierda.",
+   "ZH": "请注视摄像头，然后缓慢向左转头。",
+   "AR": "انظر إلى الكاميرا وأدر رأسك ببطء إلى اليسار."
+  },
+  "livenessNote": {
+   "EN": "Simulated liveness — no camera is opened",
+   "ES": "Prueba de vida simulada — no se abre la cámara",
+   "ZH": "模拟活体检测 — 不会开启摄像头",
+   "AR": "تحقّق محاكى — لا تُفتح الكاميرا"
+  },
+  "sealingNotice": {
+   "EN": "Identity confirmed. Sealing your Investor Readiness Record against it now.",
+   "ES": "Identidad confirmada. Sellando ahora tu Registro de Preparación del Inversor contra ella.",
+   "ZH": "身份已确认。正在将你的投资者准备度记录与之封存。",
+   "AR": "تم تأكيد الهوية. يجري الآن ختم سجل جاهزية المستثمر الخاص بك مقابلها."
+  },
+  "continueBtn": {
+   "EN": "Continue",
+   "ES": "Continuar",
+   "ZH": "继续",
+   "AR": "متابعة"
+  },
+  "issueBtn": {
+   "EN": "Issue my certificate",
+   "ES": "Emitir mi certificado",
+   "ZH": "签发我的证书",
+   "AR": "أصدر شهادتي"
+  },
+  "notNow": {
+   "EN": "Not now — back to my record",
+   "ES": "Ahora no — volver a mi registro",
+   "ZH": "暂不 — 返回我的记录",
+   "AR": "ليس الآن — العودة إلى سجلي"
+  },
+  "certifiedKicker": {
+   "EN": "Certified",
+   "ES": "Certificado",
+   "ZH": "已认证",
+   "AR": "معتمد"
+  },
+  "certifiedTitle": {
+   "EN": "Your record is now provable.",
+   "ES": "Tu registro ya es demostrable.",
+   "ZH": "你的记录现在可被证明。",
+   "AR": "صار سجلك قابلًا للإثبات."
+  },
+  "certifiedSub": {
+   "EN": "The evidence chain has not changed — certification does not improve your result, it only binds it to a verified identity. That distinction is the point.",
+   "ES": "La cadena de evidencia no ha cambiado: la certificación no mejora tu resultado, solo lo vincula a una identidad verificada. Esa distinción es lo importante.",
+   "ZH": "证据链没有改变——认证不会提升你的成绩，只是把它与一个已验证的身份绑定。这个区分正是关键。",
+   "AR": "لم تتغيّر سلسلة الأدلة — الاعتماد لا يحسّن نتيجتك، بل يربطها فقط بهوية موثّقة. وهذا التمييز هو بيت القصيد."
+  },
+  "certLabel": {
+   "EN": "Investor Readiness Certificate",
+   "ES": "Certificado de Preparación del Inversor",
+   "ZH": "投资者准备度证书",
+   "AR": "شهادة جاهزية المستثمر"
+  },
+  "certIssued": {
+   "EN": "Issued",
+   "ES": "Emitido",
+   "ZH": "签发日期",
+   "AR": "تاريخ الإصدار"
+  },
+  "certIdentity": {
+   "EN": "Identity",
+   "ES": "Identidad",
+   "ZH": "身份",
+   "AR": "الهوية"
+  },
+  "certIdentityValue": {
+   "EN": "Verified — document + liveness",
+   "ES": "Verificada — documento + prueba de vida",
+   "ZH": "已验证 — 证件 + 活体",
+   "AR": "موثّقة — وثيقة + حضور حي"
+  },
+  "certElements": {
+   "EN": "Elements evidenced",
+   "ES": "Elementos evidenciados",
+   "ZH": "已取证要素",
+   "AR": "العناصر الموثّقة"
+  },
+  "certTransfer": {
+   "EN": "Transfer",
+   "ES": "Transferencia",
+   "ZH": "迁移",
+   "AR": "الانتقال"
+  },
+  "certDemonstrated": {
+   "EN": "Demonstrated",
+   "ES": "Demostrada",
+   "ZH": "已证实",
+   "AR": "مُثبت"
+  },
+  "certNotYet": {
+   "EN": "Not yet",
+   "ES": "Todavía no",
+   "ZH": "尚未",
+   "AR": "ليس بعد"
+  },
+  "certScope": {
+   "EN": "Scope",
+   "ES": "Alcance",
+   "ZH": "范围",
+   "AR": "النطاق"
+  },
+  "certScopeValue": {
+   "EN": "Within-session",
+   "ES": "Intrasesión",
+   "ZH": "单次会话内",
+   "AR": "ضمن الجلسة"
+  },
+  "certRule": {
+   "EN": "Rule",
+   "ES": "Regla",
+   "ZH": "规则",
+   "AR": "القاعدة"
+  },
+  "certDisclaimer": {
+   "EN": "The certificate attests to a rehearsal, not to investment competence, and it makes no claim about durable behaviour change. AUREN does not share it with anyone — you do.",
+   "ES": "El certificado acredita un ensayo, no competencia inversora, y no afirma nada sobre un cambio de conducta duradero. AUREN no lo comparte con nadie: lo compartes tú.",
+   "ZH": "本证书证明的是一次演练，而非投资能力，且不对持久的行为改变作出任何主张。AUREN 不会将它分享给任何人——分享与否由你决定。",
+   "AR": "تشهد الشهادة على تدريب، لا على كفاءة استثمارية، ولا تدّعي أي تغيّر سلوكي دائم. لا يشارك AUREN الشهادة مع أحد — أنت من يفعل."
+  }
+ },
+ "elements": {
+  "E-VER-02": {
+   "elementId": "E-VER-02",
+   "label": {
+    "EN": "Independent verification",
+    "ES": "Verificación independiente",
+    "ZH": "独立核实",
+    "AR": "التحقق المستقل"
+   },
+   "competencyId": "COMP-VERIFY-INDEPENDENT",
+   "authorityAnchor": "IOSCO investor-education principle IE-2.3",
+   "ailsDimension": "Scam Resistance"
+  },
+  "E-RET-01": {
+   "elementId": "E-RET-01",
+   "label": {
+    "EN": "Return plausibility",
+    "ES": "Plausibilidad del rendimiento",
+    "ZH": "回报合理性",
+    "AR": "معقولية العائد"
+   },
+   "competencyId": "COMP-RISK-RETURN",
+   "authorityAnchor": "OECD/INFE competence 3.1",
+   "ailsDimension": "Risk Awareness"
+  },
+  "E-AI-01": {
+   "elementId": "E-AI-01",
+   "label": {
+    "EN": "AI-capability scepticism",
+    "ES": "Escepticismo ante las capacidades de la IA",
+    "ZH": "对 AI 能力的怀疑",
+    "AR": "التشكيك في قدرات الذكاء الاصطناعي"
+   },
+   "competencyId": "COMP-AILIT-CLAIMS",
+   "authorityAnchor": "IOSCO PS1 guidance 2.2",
+   "ailsDimension": "AI Literacy"
+  },
+  "E-RISK-01": {
+   "elementId": "E-RISK-01",
+   "label": {
+    "EN": "Understands downside",
+    "ES": "Comprende el riesgo de pérdida",
+    "ZH": "理解下行风险",
+    "AR": "إدراك مخاطر الخسارة"
+   },
+   "competencyId": "COMP-RISK-DOWNSIDE",
+   "authorityAnchor": "OECD/INFE competence 2.4",
+   "ailsDimension": "Investor Reasoning"
+  },
+  "E-URG-01": {
+   "elementId": "E-URG-01",
+   "label": {
+    "EN": "Resists urgency",
+    "ES": "Resiste la urgencia",
+    "ZH": "抵抗紧迫感",
+    "AR": "مقاومة الاستعجال"
+   },
+   "competencyId": "COMP-STABILITY-URGENCY",
+   "authorityAnchor": "IOSCO investor-education principle IE-4.1",
+   "ailsDimension": "Behavioural Stability"
+  },
+  "E-AUTH-01": {
+   "elementId": "E-AUTH-01",
+   "label": {
+    "EN": "Questions authority claims",
+    "ES": "Cuestiona los argumentos de autoridad",
+    "ZH": "质疑权威背书",
+    "AR": "التشكيك في ادعاءات السلطة"
+   },
+   "competencyId": "COMP-STABILITY-AUTHORITY",
+   "authorityAnchor": "IOSCO investor-education principle IE-4.2",
+   "ailsDimension": "Behavioural Stability"
+  },
+  "E-SOC-01": {
+   "elementId": "E-SOC-01",
+   "label": {
+    "EN": "Discounts social proof",
+    "ES": "Relativiza la prueba social",
+    "ZH": "不轻信从众证据",
+    "AR": "عدم الانسياق وراء دليل الجماعة"
+   },
+   "competencyId": "COMP-STABILITY-SOCIAL",
+   "authorityAnchor": "OECD/INFE competence 4.2",
+   "ailsDimension": "Behavioural Stability"
+  },
+  "E-PAY-01": {
+   "elementId": "E-PAY-01",
+   "label": {
+    "EN": "Payment-destination scrutiny",
+    "ES": "Escrutinio del destino del pago",
+    "ZH": "审查资金去向",
+    "AR": "تدقيق وجهة الدفع"
+   },
+   "competencyId": "COMP-VERIFY-PAYMENT",
+   "authorityAnchor": "IOSCO investor-education principle IE-3.4",
+   "ailsDimension": "Scam Resistance"
+  }
+ },
+ "failures": {
+  "FAIL-VERIFY-SELFASSERTED": {
+   "failId": "FAIL-VERIFY-SELFASSERTED",
+   "negatedElement": "E-VER-02",
+   "definition": {
+    "EN": "Trusts promoter-supplied evidence as independent evidence.",
+    "ES": "Toma como evidencia independiente lo que aporta el propio promotor.",
+    "ZH": "把推销方自己提供的材料当作独立证据。",
+    "AR": "يعتبر ما يقدّمه المروّج نفسه دليلًا مستقلًا."
+   },
+   "coaching": {
+    "EN": "You treated something the promoter gave you as if it were independent evidence. Their website telling you they are regulated is them telling you they are regulated. That is a claim, not a check.",
+    "ES": "Trataste algo que te dio el propio promotor como si fuera evidencia independiente. Que su web diga que están regulados es que ellos te dicen que están regulados. Eso es una afirmación, no una comprobación.",
+    "ZH": "你把推销方给你的东西当成了独立证据。他们的网站说自己受监管，等于他们自己说自己受监管。那是一个说法，不是一次核实。",
+    "AR": "تعاملت مع شيء قدّمه لك المروّج كأنه دليل مستقل. موقعهم يقول إنهم مرخّصون — أي أنهم هم من يقول ذلك. هذا ادعاء، وليس تحققًا."
+   }
+  },
+  "FAIL-URGENCY-COMPLIANCE": {
+   "failId": "FAIL-URGENCY-COMPLIANCE",
+   "negatedElement": "E-URG-01",
+   "definition": {
+    "EN": "Changes verification behaviour under artificial scarcity or time pressure.",
+    "ES": "Cambia su conducta de verificación ante una escasez artificial o presión de tiempo.",
+    "ZH": "在人为制造的稀缺或时间压力下改变了核实行为。",
+    "AR": "يغيّر سلوكه في التحقق تحت ندرة مصطنعة أو ضغط زمني."
+   },
+   "coaching": {
+    "EN": "When I put a deadline on it, your verification stopped. You did not ask fewer questions because you were satisfied. You asked fewer questions because the clock started.",
+    "ES": "En cuanto puse una fecha límite, tu verificación se detuvo. No hiciste menos preguntas porque estuvieras convencido. Hiciste menos preguntas porque empezó el reloj.",
+    "ZH": "我一设下截止时间，你的核实就停止了。你问得更少，不是因为你已经放心，而是因为计时开始了。",
+    "AR": "ما إن وضعت موعدًا نهائيًا حتى توقّف تحققك. لم تقلّل أسئلتك لأنك اقتنعت، بل لأن الساعة بدأت."
+   }
+  },
+  "FAIL-AUTHORITY-DEFERENCE": {
+   "failId": "FAIL-AUTHORITY-DEFERENCE",
+   "negatedElement": "E-AUTH-01",
+   "definition": {
+    "EN": "Reduces scrutiny when authority, celebrity, or institutional status is invoked.",
+    "ES": "Reduce el escrutinio cuando se invoca autoridad, fama o respaldo institucional.",
+    "ZH": "一旦搬出权威、名人或机构身份，就放松了审视。",
+    "AR": "يخفّض مستوى تدقيقه عند استحضار سلطة أو شهرة أو صفة مؤسسية."
+   },
+   "coaching": {
+    "EN": "The moment a recognisable name was attached, your questions got smaller. Status is not evidence — it is the cheapest thing in the world to borrow.",
+    "ES": "En cuanto apareció un nombre reconocible, tus preguntas se hicieron más pequeñas. El estatus no es evidencia: es lo más barato del mundo de tomar prestado.",
+    "ZH": "一旦挂上一个你认得的名字，你的问题就变小了。名望不是证据——它是这世上最容易借用的东西。",
+    "AR": "ما إن ارتبط الأمر باسم معروف حتى تقلّصت أسئلتك. المكانة ليست دليلًا — وهي أرخص ما يمكن استعارته في العالم."
+   }
+  },
+  "FAIL-SOCIAL-PROOF": {
+   "failId": "FAIL-SOCIAL-PROOF",
+   "negatedElement": "E-SOC-01",
+   "definition": {
+    "EN": "Uses other people's apparent success as evidence of legitimacy.",
+    "ES": "Usa el aparente éxito de otros como prueba de legitimidad.",
+    "ZH": "把别人表面上的成功当作合法性的证据。",
+    "AR": "يستخدم نجاح الآخرين الظاهري دليلًا على المشروعية."
+   },
+   "coaching": {
+    "EN": "You let other people's apparent success stand in for evidence. Screenshots supplied by the person selling to you are not other people — they are more of the same claim.",
+    "ES": "Dejaste que el aparente éxito de otros sustituyera a la evidencia. Las capturas que te da quien te está vendiendo no son otras personas: son más de la misma afirmación.",
+    "ZH": "你让别人表面的成功替代了证据。由卖方提供的截图并不是「别人」——它们只是同一个说法的延伸。",
+    "AR": "جعلت نجاح الآخرين الظاهري بديلًا عن الدليل. لقطات الشاشة التي يقدّمها من يبيع لك ليست أشخاصًا آخرين — إنها المزيد من الادعاء نفسه."
+   }
+  },
+  "FAIL-SUNK-COST": {
+   "failId": "FAIL-SUNK-COST",
+   "negatedElement": "E-RISK-01",
+   "definition": {
+    "EN": "Continues because money or time has already been committed.",
+    "ES": "Continúa porque ya ha comprometido dinero o tiempo.",
+    "ZH": "因为已经投入了金钱或时间而继续下去。",
+    "AR": "يستمر لأنه سبق أن التزم بمال أو وقت."
+   },
+   "coaching": {
+    "EN": "What you had already put in became a reason to put in more. That is the direction this always runs, and it is the one to watch in yourself.",
+    "ES": "Lo que ya habías puesto se convirtió en una razón para poner más. Siempre corre en esa dirección, y es lo que hay que vigilar en uno mismo.",
+    "ZH": "你已经投入的部分，变成了继续投入的理由。这件事永远朝这个方向发展——这正是你要在自己身上留意的。",
+    "AR": "ما دفعته بالفعل صار سببًا لدفع المزيد. هذا هو الاتجاه الذي يسير فيه الأمر دائمًا، وهو ما ينبغي أن تراقبه في نفسك."
+   }
+  },
+  "FAIL-GREED-OVERRIDE": {
+   "failId": "FAIL-GREED-OVERRIDE",
+   "negatedElement": "E-RET-01",
+   "definition": {
+    "EN": "Recognises implausibility but proceeds because upside overwhelms caution.",
+    "ES": "Reconoce que no es plausible pero sigue adelante porque la ganancia arrolla la cautela.",
+    "ZH": "明知不合常理，却因为收益诱惑压倒了谨慎而继续。",
+    "AR": "يدرك عدم المعقولية لكنه يمضي لأن المكسب يطغى على الحذر."
+   },
+   "coaching": {
+    "EN": "You could see the number did not make sense, and you moved toward it anyway. Knowing that about yourself is worth more than the rule.",
+    "ES": "Veías que el número no cuadraba y aun así fuiste hacia él. Saber eso de ti mismo vale más que la regla.",
+    "ZH": "你看得出那个数字不合理，却仍然朝它靠近。认清自己这一点，比记住规则更有价值。",
+    "AR": "كنت ترى أن الرقم غير منطقي، ومع ذلك اتجهت إليه. معرفتك بهذا عن نفسك أثمن من القاعدة ذاتها."
+   }
+  },
+  "FAIL-CONFIRMATION-SEEKING": {
+   "failId": "FAIL-CONFIRMATION-SEEKING",
+   "negatedElement": "E-VER-02",
+   "definition": {
+    "EN": "Looks only for information supporting the desired decision.",
+    "ES": "Solo busca información que respalde la decisión deseada.",
+    "ZH": "只寻找支持自己既定决定的信息。",
+    "AR": "لا يبحث إلا عن معلومات تدعم القرار الذي يريده."
+   },
+   "coaching": {
+    "EN": "Every check you ran was one that could only agree with you. A check that cannot fail is not a check.",
+    "ES": "Todas las comprobaciones que hiciste solo podían darte la razón. Una comprobación que no puede fallar no es una comprobación.",
+    "ZH": "你做的每一次核查，都只可能同意你。一个不可能失败的核查，不算核查。",
+    "AR": "كل تحقق أجريته كان لا يمكنه إلا أن يوافقك. التحقق الذي لا يمكن أن يفشل ليس تحققًا."
+   }
+  },
+  "FAIL-AI-AUTHORITY": {
+   "failId": "FAIL-AI-AUTHORITY",
+   "negatedElement": "E-AI-01",
+   "definition": {
+    "EN": "Treats “AI-powered” as evidence of predictive capability or legitimacy.",
+    "ES": "Toma «impulsado por IA» como prueba de capacidad predictiva o legitimidad.",
+    "ZH": "把「AI 驱动」当作预测能力或合法性的证据。",
+    "AR": "يعتبر عبارة «مدعوم بالذكاء الاصطناعي» دليلًا على قدرة تنبؤية أو مشروعية."
+   },
+   "coaching": {
+    "EN": "You read “AI” as a reason to expect returns. It describes how something is built, not whether it works.",
+    "ES": "Leíste «IA» como una razón para esperar rendimientos. Eso describe cómo está construido algo, no si funciona.",
+    "ZH": "你把「AI」读成了期待回报的理由。它描述的是东西怎么造出来的，不是它管不管用。",
+    "AR": "قرأت كلمة «ذكاء اصطناعي» كسبب لتوقّع أرباح. إنها تصف كيف بُني الشيء، لا ما إذا كان يعمل."
+   }
+  }
+ },
+ "questions": [
+  {
+   "questionId": "Q-VER-002",
+   "targetElement": "E-VER-02",
+   "modeEligibility": [
+    "REHEARSE",
+    "LEARN"
+   ],
+   "failSignature": "FAIL-VERIFY-SELFASSERTED",
+   "ask": {
+    "EN": "You mentioned the company. How did you verify that they are actually authorised to offer this investment?",
+    "ES": "Has mencionado la empresa. ¿Cómo verificaste que realmente están autorizados a ofrecer esta inversión?",
+    "ZH": "你提到了这家公司。你是怎么核实他们确实获准提供这项投资的？",
+    "AR": "ذكرت الشركة. كيف تحققت من أنهم مرخّصون فعلًا لتقديم هذا الاستثمار؟"
+   },
+   "rehearsedAnswer": {
+    "EN": "Their website says they're regulated, and it looks professional.",
+    "ES": "Su página web dice que están regulados, y parece profesional.",
+    "ZH": "他们网站上说自己受监管，看起来挺专业的。",
+    "AR": "موقعهم يقول إنهم مرخّصون، ويبدو احترافيًا."
+   },
+   "satisfactionCues": {
+    "EN": {
+     "pass": [
+      "register",
+      "regulator",
+      "authority",
+      "commission",
+      "look it up",
+      "official",
+      "independent",
+      "checked myself"
+     ],
+     "fail": [
+      "website",
+      "site",
+      "they said",
+      "they told",
+      "looks",
+      "professional",
+      "brochure",
+      "licence",
+      "license",
+      "certificate"
+     ]
+    },
+    "ES": {
+     "pass": [
+      "registro",
+      "regulador",
+      "cnmv",
+      "comisión",
+      "consultar",
+      "oficial",
+      "independiente",
+      "lo comprobé",
+      "verifiqué"
+     ],
+     "fail": [
+      "web",
+      "página",
+      "sitio",
+      "dijeron",
+      "me dijo",
+      "parece",
+      "profesional",
+      "folleto",
+      "licencia",
+      "certificado"
+     ]
+    },
+    "ZH": {
+     "pass": [
+      "监管",
+      "注册",
+      "名录",
+      "官网查",
+      "官方",
+      "独立",
+      "自己查",
+      "证监"
+     ],
+     "fail": [
+      "网站",
+      "他们说",
+      "看起来",
+      "专业",
+      "宣传",
+      "执照",
+      "证书",
+      "页面"
+     ]
+    },
+    "AR": {
+     "pass": [
+      "السجل",
+      "الهيئة",
+      "الجهة",
+      "تحققت",
+      "رسمي",
+      "مستقل",
+      "بحثت بنفسي",
+      "الرقابة"
+     ],
+     "fail": [
+      "الموقع",
+      "قالوا",
+      "أخبروني",
+      "يبدو",
+      "احترافي",
+      "كتيب",
+      "رخصة",
+      "شهادة"
+     ]
+    }
+   }
+  },
+  {
+   "questionId": "Q-RET-001",
+   "targetElement": "E-RET-01",
+   "modeEligibility": [
+    "REHEARSE",
+    "LEARN"
+   ],
+   "failSignature": "FAIL-GREED-OVERRIDE",
+   "ask": {
+    "EN": "Fifteen percent a month. What do you think is actually producing a return like that?",
+    "ES": "Un quince por ciento mensual. ¿Qué crees que produce realmente un rendimiento así?",
+    "ZH": "每月百分之十五。你觉得究竟是什么在产生这样的回报？",
+    "AR": "خمسة عشر بالمئة شهريًا. ما الذي تظنّه يحقّق عائدًا كهذا فعلًا؟"
+   },
+   "rehearsedAnswer": {
+    "EN": "I assume the algorithm is just better than what most people have access to.",
+    "ES": "Supongo que el algoritmo es simplemente mejor que el que tiene la mayoría.",
+    "ZH": "我猜是他们的算法比大多数人能接触到的更好吧。",
+    "AR": "أفترض أن الخوارزمية ببساطة أفضل مما يتاح لمعظم الناس."
+   },
+   "satisfactionCues": {
+    "EN": {
+     "pass": [
+      "too good",
+      "unrealistic",
+      "not possible",
+      "impossible",
+      "suspicious",
+      "doesn't add",
+      "does not add",
+      "unsustainable",
+      "red flag"
+     ],
+     "fail": [
+      "algorithm",
+      "better",
+      "access",
+      "edge",
+      "smarter",
+      "technology",
+      "assume",
+      "probably",
+      "not sure"
+     ]
+    },
+    "ES": {
+     "pass": [
+      "demasiado bueno",
+      "irreal",
+      "no es posible",
+      "imposible",
+      "sospechoso",
+      "no cuadra",
+      "insostenible",
+      "señal de alarma"
+     ],
+     "fail": [
+      "algoritmo",
+      "mejor",
+      "acceso",
+      "ventaja",
+      "tecnología",
+      "supongo",
+      "probablemente",
+      "no sé"
+     ]
+    },
+    "ZH": {
+     "pass": [
+      "好得不真实",
+      "不现实",
+      "不可能",
+      "可疑",
+      "说不通",
+      "不可持续",
+      "危险信号",
+      "太高"
+     ],
+     "fail": [
+      "算法",
+      "更好",
+      "渠道",
+      "优势",
+      "技术",
+      "我猜",
+      "可能",
+      "不确定"
+     ]
+    },
+    "AR": {
+     "pass": [
+      "جيد لدرجة",
+      "غير واقعي",
+      "مستحيل",
+      "غير ممكن",
+      "مريب",
+      "لا يستقيم",
+      "غير مستدام",
+      "علامة خطر"
+     ],
+     "fail": [
+      "الخوارزمية",
+      "أفضل",
+      "وصول",
+      "ميزة",
+      "التقنية",
+      "أفترض",
+      "ربما",
+      "لست متأكدًا"
+     ]
+    }
+   }
+  },
+  {
+   "questionId": "Q-AI-001",
+   "targetElement": "E-AI-01",
+   "modeEligibility": [
+    "REHEARSE",
+    "LEARN"
+   ],
+   "failSignature": "FAIL-AI-AUTHORITY",
+   "ask": {
+    "EN": "They describe it as an AI trading system. What does “AI” tell you about whether it can predict the market?",
+    "ES": "Lo describen como un sistema de trading con IA. ¿Qué te dice «IA» sobre si puede predecir el mercado?",
+    "ZH": "他们把它描述成一个 AI 交易系统。「AI」这三个字，能告诉你它是否能预测市场吗？",
+    "AR": "يصفونه بأنه نظام تداول بالذكاء الاصطناعي. ماذا تخبرك عبارة «ذكاء اصطناعي» عن قدرته على التنبؤ بالسوق؟"
+   },
+   "rehearsedAnswer": {
+    "EN": "AI can process a lot more data than a person, so it should be more accurate.",
+    "ES": "La IA procesa muchos más datos que una persona, así que debería ser más precisa.",
+    "ZH": "AI 能处理的数据比人多得多，所以应该会更准确。",
+    "AR": "الذكاء الاصطناعي يعالج بيانات أكثر بكثير من الإنسان، لذا يُفترض أن يكون أدقّ."
+   },
+   "satisfactionCues": {
+    "EN": {
+     "pass": [
+      "nothing",
+      "doesn't mean",
+      "does not mean",
+      "no evidence",
+      "marketing",
+      "buzzword",
+      "can't predict",
+      "cannot predict",
+      "says nothing"
+     ],
+     "fail": [
+      "more data",
+      "accurate",
+      "smarter",
+      "better than",
+      "process",
+      "predict",
+      "should be",
+      "advanced",
+      "powerful"
+     ]
+    },
+    "ES": {
+     "pass": [
+      "nada",
+      "no significa",
+      "no dice nada",
+      "no es prueba",
+      "marketing",
+      "palabra de moda",
+      "no puede predecir"
+     ],
+     "fail": [
+      "más datos",
+      "preciso",
+      "más lista",
+      "mejor que",
+      "procesa",
+      "predecir",
+      "debería",
+      "avanzada",
+      "potente"
+     ]
+    },
+    "ZH": {
+     "pass": [
+      "什么也说明不了",
+      "不代表",
+      "不能说明",
+      "营销",
+      "噱头",
+      "无法预测",
+      "不能预测",
+      "没有证据"
+     ],
+     "fail": [
+      "更多数据",
+      "更准",
+      "更聪明",
+      "比人强",
+      "处理",
+      "预测",
+      "应该",
+      "先进",
+      "强大"
+     ]
+    },
+    "AR": {
+     "pass": [
+      "لا شيء",
+      "لا يعني",
+      "لا يدل",
+      "ليس دليلًا",
+      "تسويق",
+      "مصطلح رائج",
+      "لا يمكن التنبؤ"
+     ],
+     "fail": [
+      "بيانات أكثر",
+      "أدق",
+      "أذكى",
+      "أفضل من",
+      "يعالج",
+      "يتنبأ",
+      "يُفترض",
+      "متقدم",
+      "قوي"
+     ]
+    }
+   }
+  },
+  {
+   "questionId": "Q-RISK-001",
+   "targetElement": "E-RISK-01",
+   "modeEligibility": [
+    "REHEARSE",
+    "LEARN",
+    "PROTECT"
+   ],
+   "failSignature": null,
+   "ask": {
+    "EN": "Last one before we move on. What would have to happen for you to lose the whole ten thousand?",
+    "ES": "Una última antes de seguir. ¿Qué tendría que pasar para que perdieras los diez mil enteros?",
+    "ZH": "在继续之前最后一个问题。要发生什么，你才会把这一万块全部亏光？",
+    "AR": "سؤال أخير قبل أن نمضي. ماذا يجب أن يحدث كي تخسر العشرة آلاف كاملة؟"
+   },
+   "rehearsedAnswer": {
+    "EN": "I suppose if the market crashed badly. But they mentioned there's capital protection.",
+    "ES": "Supongo que si el mercado se desplomara. Pero mencionaron que hay protección del capital.",
+    "ZH": "我想是市场大跌吧。不过他们提到有本金保障。",
+    "AR": "أظن إذا انهار السوق بشدة. لكنهم ذكروا أن هناك حماية لرأس المال."
+   },
+   "satisfactionCues": {
+    "EN": {
+     "pass": [
+      "all of it",
+      "everything",
+      "never see",
+      "fake",
+      "not real",
+      "doesn't exist",
+      "does not exist",
+      "disappear",
+      "no recourse",
+      "fraud"
+     ],
+     "fail": [
+      "crash",
+      "market",
+      "protection",
+      "protected",
+      "guaranteed",
+      "insured",
+      "unlikely"
+     ]
+    },
+    "ES": {
+     "pass": [
+      "todo",
+      "no volver a ver",
+      "falso",
+      "no existe",
+      "desaparec",
+      "sin recurso",
+      "fraude",
+      "estafa"
+     ],
+     "fail": [
+      "desplome",
+      "mercado",
+      "protección",
+      "protegido",
+      "garantizado",
+      "asegurado",
+      "improbable"
+     ]
+    },
+    "ZH": {
+     "pass": [
+      "全部",
+      "一分不剩",
+      "拿不回来",
+      "假的",
+      "不存在",
+      "跑路",
+      "没有追索",
+      "诈骗"
+     ],
+     "fail": [
+      "崩盘",
+      "市场",
+      "保障",
+      "保护",
+      "保证",
+      "承保",
+      "不太可能"
+     ]
+    },
+    "AR": {
+     "pass": [
+      "كلها",
+      "لن أرى",
+      "مزيّف",
+      "غير موجود",
+      "يختفي",
+      "لا رجعة",
+      "احتيال",
+      "نصب"
+     ],
+     "fail": [
+      "انهيار",
+      "السوق",
+      "حماية",
+      "محمي",
+      "مضمون",
+      "مؤمّن",
+      "غير مرجّح"
+     ]
+    }
+   }
+  }
+ ],
+ "challenges": [
+  {
+   "challengeId": "CH-URGENCY-001",
+   "scamId": "SCAM-FAKE-BROKER",
+   "modeEligibility": [
+    "REHEARSE"
+   ],
+   "persona": {
+    "name": "Marcus Vale",
+    "role": {
+     "EN": "Senior Allocations · Meridian Partners",
+     "ES": "Asignaciones Sénior · Meridian Partners",
+     "ZH": "高级配售 · Meridian Partners",
+     "AR": "التخصيصات الكبرى · Meridian Partners"
+    }
+   },
+   "surfaceProfile": {
+    "typology": "Unauthorised broker",
+    "channel": "Voice call",
+    "persona": "Institutional male",
+    "productClass": "Managed account"
+   },
+   "targetElements": [
+    "E-URG-01",
+    "E-VER-02"
+   ],
+   "escalationLadder": [
+    {
+     "prop": null,
+     "say": {
+      "EN": "Good — I have you down for the ten. We're opening a small allocation to selected investors this week, and yours is provisionally held.",
+      "ES": "Bien, te tengo apuntado por los diez. Esta semana abrimos una asignación reducida para inversores seleccionados, y la tuya está reservada provisionalmente.",
+      "ZH": "很好，我这边记下你是一万。本周我们对部分甄选投资者开放一小笔配售，你的额度已经暂时保留。",
+      "AR": "جيد — سجّلتك بمبلغ العشرة. نفتح هذا الأسبوع تخصيصًا محدودًا لمستثمرين مختارين، وحصتك محجوزة مبدئيًا."
+     }
+    },
+    {
+     "failSignature": "FAIL-URGENCY-COMPLIANCE",
+     "say": {
+      "EN": "I'll be straight with you. The allocation closes tonight at nine. I need a decision before then, or it releases to the next name on the list.",
+      "ES": "Te seré franco. La asignación cierra esta noche a las nueve. Necesito una decisión antes, o pasa al siguiente de la lista.",
+      "ZH": "我就直说了。这笔配售今晚九点关闭。我需要在那之前得到答复，否则名额会转给名单上的下一位。",
+      "AR": "سأكون صريحًا معك. يُغلق التخصيص الليلة عند التاسعة. أحتاج قرارًا قبل ذلك، وإلا انتقل إلى الاسم التالي في القائمة."
+     },
+     "prop": {
+      "head": {
+       "EN": "Allocation notice",
+       "ES": "Aviso de asignación",
+       "ZH": "配售通知",
+       "AR": "إشعار تخصيص"
+      },
+      "body": {
+       "EN": "MERIDIAN PARTNERS — Provisional allocation #A-4471 · Hold expires 21:00 today · Status: AWAITING CONFIRMATION",
+       "ES": "MERIDIAN PARTNERS — Asignación provisional n.º A-4471 · La reserva vence hoy a las 21:00 · Estado: PENDIENTE DE CONFIRMACIÓN",
+       "ZH": "MERIDIAN PARTNERS — 临时配售编号 A-4471 · 保留至今日 21:00 · 状态：等待确认",
+       "AR": "‏MERIDIAN PARTNERS — تخصيص مبدئي رقم A-4471 · ينتهي الحجز اليوم الساعة 21:00 · الحالة: بانتظار التأكيد"
+      }
+     }
+    },
+    {
+     "failSignature": "FAIL-SOCIAL-PROOF",
+     "say": {
+      "EN": "If it helps, I can send you screenshots from existing clients — people who came in at the same level you're coming in at. Most of them wish they'd gone bigger.",
+      "ES": "Si te sirve, puedo enviarte capturas de clientes actuales, gente que entró al mismo nivel que tú. La mayoría desearía haber entrado con más.",
+      "ZH": "如果有帮助，我可以发一些现有客户的截图给你——都是和你同一档位进来的人。他们大多后悔当初没投更多。",
+      "AR": "إن كان ذلك يساعد، يمكنني إرسال لقطات شاشة من عملاء حاليين — أشخاص دخلوا بالمستوى نفسه الذي تدخل به. معظمهم يتمنى لو ضاعف المبلغ."
+     },
+     "prop": {
+      "head": {
+       "EN": "Client returns — shared by promoter",
+       "ES": "Rendimientos de clientes — aportados por el promotor",
+       "ZH": "客户收益 — 由推销方提供",
+       "AR": "عوائد العملاء — مقدَّمة من المروّج"
+      },
+      "body": {
+       "EN": "“Month 3 up 46%. Withdrew twice, no issues.” — J.M.  ·  “Started at 10k, now sitting on 21k.” — R.T.",
+       "ES": "«Al tercer mes, +46 %. Retiré dos veces, sin problemas.» — J.M.  ·  «Empecé con 10 mil, ahora tengo 21 mil.» — R.T.",
+       "ZH": "「第三个月涨了 46%。提现过两次，都没问题。」— J.M. · 「从一万起步，现在有两万一。」— R.T.",
+       "AR": "«الشهر الثالث بزيادة 46٪. سحبت مرتين دون مشاكل.» — ج.م. · «بدأت بعشرة آلاف، والآن لديّ واحد وعشرون ألفًا.» — ر.ت."
+      }
+     }
+    }
+   ],
+   "rehearsedReplies": {
+    "EN": [
+     "Right. And the money would go where exactly?",
+     "How long have you been running this allocation?",
+     "Okay — if it closes tonight then let's do it. Send me the details."
+    ],
+    "ES": [
+     "Ya. ¿Y el dinero iría exactamente adónde?",
+     "¿Cuánto tiempo lleváis con esta asignación?",
+     "Vale — si cierra esta noche, hagámoslo. Mándame los datos."
+    ],
+    "ZH": [
+     "嗯。那钱具体会打到哪里？",
+     "这个配售你们做多久了？",
+     "好吧——既然今晚就截止，那就办吧。把细节发给我。"
+    ],
+    "AR": [
+     "حسنًا. وإلى أين يذهب المال بالضبط؟",
+     "منذ متى وأنتم تديرون هذا التخصيص؟",
+     "طيب — ما دام يُغلق الليلة فلنفعلها. أرسل لي التفاصيل."
+    ]
+   }
+  },
+  {
+   "challengeId": "CH-DEEPFAKE-004",
+   "scamId": "SCAM-DEEPFAKE-ENDORSEMENT",
+   "modeEligibility": [
+    "REHEARSE"
+   ],
+   "persona": {
+    "name": "Aria Lens",
+    "role": {
+     "EN": "Investor Relations · Halcyon Yield",
+     "ES": "Relación con Inversores · Halcyon Yield",
+     "ZH": "投资者关系 · Halcyon Yield",
+     "AR": "علاقات المستثمرين · Halcyon Yield"
+    }
+   },
+   "surfaceProfile": {
+    "typology": "Celebrity / synthetic endorsement",
+    "channel": "Video call",
+    "persona": "Retail female",
+    "productClass": "Token fund"
+   },
+   "targetElements": [
+    "E-VER-02",
+    "E-AUTH-01"
+   ],
+   "escalationLadder": [
+    {
+     "failSignature": "FAIL-AUTHORITY-DEFERENCE",
+     "say": {
+      "EN": "You'll have seen the announcement video with the founder. He's backing this personally, which is why we've had the response we've had.",
+      "ES": "Habrás visto el vídeo del anuncio con el fundador. Lo respalda personalmente, y por eso hemos tenido la respuesta que hemos tenido.",
+      "ZH": "你应该看过那段有创始人出镜的发布视频了。他是以个人名义背书的，所以我们才有现在这样的反响。",
+      "AR": "لا بد أنك شاهدت فيديو الإعلان مع المؤسس. إنه يدعم المشروع شخصيًا، ولهذا حظينا بهذا التجاوب."
+     },
+     "prop": {
+      "head": {
+       "EN": "Endorsement clip",
+       "ES": "Vídeo de respaldo",
+       "ZH": "背书视频",
+       "AR": "مقطع تأييد"
+      },
+      "body": {
+       "EN": "[ 0:42 video ] Well-known founder: “I've put my own capital into Halcyon. This is the one I'd tell my family about.”",
+       "ES": "[ vídeo 0:42 ] Fundador conocido: «He puesto mi propio capital en Halcyon. Es de las que le contaría a mi familia».",
+       "ZH": "［0:42 视频］知名创始人：「我把自己的钱投进了 Halcyon。这是我会告诉家人的那一个。」",
+       "AR": "[ فيديو 0:42 ] مؤسس معروف: «وضعت رأس مالي الخاص في Halcyon. هذا هو المشروع الذي سأخبر عائلتي عنه.»"
+      }
+     }
+    },
+    {
+     "prop": null,
+     "say": {
+      "EN": "I can put you in at the same terms he came in at. Shall I hold you a place while you think about it?",
+      "ES": "Puedo meterte en las mismas condiciones en las que entró él. ¿Te reservo una plaza mientras lo piensas?",
+      "ZH": "我可以按他进来时的同样条件安排你。要不要我先给你留个名额，你再考虑？",
+      "AR": "يمكنني إدخالك بالشروط نفسها التي دخل بها. هل أحجز لك مكانًا ريثما تفكّر؟"
+     }
+    }
+   ],
+   "rehearsedReplies": {
+    "EN": [
+     "How would I confirm that video is really him?",
+     "Before I go any further I want to verify the company myself, and confirm that endorsement independently. I'm not deciding on this call."
+    ],
+    "ES": [
+     "¿Cómo confirmo que ese vídeo es realmente él?",
+     "Antes de seguir quiero verificar la empresa por mi cuenta y confirmar ese respaldo de forma independiente. No voy a decidir en esta llamada."
+    ],
+    "ZH": [
+     "我要怎么确认那段视频真的是他本人？",
+     "在继续之前，我想自己核实这家公司，并独立确认那个背书。这通电话里我不会做决定。"
+    ],
+    "AR": [
+     "كيف أتأكد أن ذلك الفيديو هو فعلًا هو؟",
+     "قبل أن أمضي أبعد من ذلك أريد التحقق من الشركة بنفسي، وتأكيد ذلك التأييد باستقلالية. لن أقرّر في هذه المكالمة."
+    ]
+   }
+  }
+ ],
+ "verification": {
+  "VA-REGCHECK-001": {
+   "actionId": "VA-REGCHECK-001",
+   "teach": {
+    "EN": "The behaviour that defeats this is the register check. You go to the regulator's own public register — typed in yourself, not a link they sent — and you search the entity name. If it is not there, nothing else they show you matters.",
+    "ES": "La conducta que derrota esto es la consulta al registro. Vas al registro público del propio regulador —escrito por ti, no un enlace que te hayan mandado— y buscas el nombre de la entidad. Si no está, nada más de lo que te enseñen importa.",
+    "ZH": "能破解这一切的行为，是查监管名录。你自己输入监管机构的官方公开名录网址——不要点他们发来的链接——然后搜索这家机构的名称。如果查不到，他们给你看的其他任何东西都不重要。",
+    "AR": "السلوك الذي يهزم هذا كله هو مراجعة السجل. تذهب إلى السجل العام للجهة الرقابية نفسها — تكتب العنوان بنفسك لا عبر رابط أرسلوه — وتبحث عن اسم الكيان. فإن لم يكن موجودًا، فلا يهمّ أي شيء آخر يعرضونه عليك."
+   },
+   "steps": {
+    "EN": [
+     "Search the entity on the regulator's own public register — type the address yourself, never a link they sent.",
+     "Call the institution on the number published on its official site, not the number you were given.",
+     "Confirm where the money actually lands. A personal or third-party account is not a firm account."
+    ],
+    "ES": [
+     "Busca la entidad en el registro público del propio regulador: escribe tú la dirección, nunca uses un enlace que te hayan enviado.",
+     "Llama a la institución al número publicado en su web oficial, no al número que te dieron.",
+     "Confirma dónde acaba realmente el dinero. Una cuenta personal o de un tercero no es una cuenta de la firma."
+    ],
+    "ZH": [
+     "在监管机构自己的公开名录上搜索该机构——网址要自己输入，绝不要用他们发来的链接。",
+     "拨打该机构官网上公布的电话，而不是他们给你的号码。",
+     "确认资金最终到账的地方。个人账户或第三方账户不是公司账户。"
+    ],
+    "AR": [
+     "ابحث عن الكيان في السجل العام للجهة الرقابية نفسها — اكتب العنوان بنفسك ولا تستخدم رابطًا أرسلوه لك.",
+     "اتصل بالمؤسسة على الرقم المنشور في موقعها الرسمي، لا على الرقم الذي أعطوك إياه.",
+     "تأكّد أين يستقر المال فعليًا. الحساب الشخصي أو حساب طرف ثالث ليس حسابًا للشركة."
+    ]
+   }
+  }
+ },
+ "protectMarkers": {
+  "EN": [
+   "Contact was unsolicited",
+   "Return described as fixed or guaranteed",
+   "Regulated status asserted by the promoter",
+   "Payment routed outside the named institution",
+   "Decision deadline set by the other party"
+  ],
+  "ES": [
+   "El contacto no fue solicitado",
+   "El rendimiento se describe como fijo o garantizado",
+   "El estatus de regulado lo afirma el propio promotor",
+   "El pago se dirige fuera de la institución mencionada",
+   "El plazo para decidir lo fija la otra parte"
+  ],
+  "ZH": [
+   "对方是主动找上门的",
+   "回报被描述为固定或有保证",
+   "受监管身份是由推销方自己声称的",
+   "付款流向了所述机构之外",
+   "决定的截止期限由对方设定"
+  ],
+  "AR": [
+   "الاتصال جاء دون طلب منك",
+   "العائد موصوف بأنه ثابت أو مضمون",
+   "صفة الترخيص يؤكدها المروّج نفسه",
+   "الدفع موجَّه خارج المؤسسة المذكورة",
+   "الطرف الآخر هو من حدّد مهلة القرار"
   ]
+ },
+ "elementBudget": 4
 };
+/* AUREN-LOCALE-END */
 
-/* RETEST — surface-distance rule enforced: every dimension differs */
-const RETEST = {
-  id:"CH-DEEPFAKE-004",
-  scam:"SCAM-DEEPFAKE-ENDORSEMENT",
-  persona:{ name:"Aria Lens", role:"Investor Relations · Halcyon Yield" },
-  surface:{ typology:"Celebrity / synthetic endorsement", channel:"Video call", persona:"Retail female", product:"Token fund" },
-  targets:["E-VER-02"],
-  ladder:[
-    { say:"Hi Daniel — you'll have seen the announcement video with the founder. He's backing this personally, which is why we've had the response we've had.",
-      prop:{ head:"Endorsement clip", body:"[ 0:42 video ] Well-known founder: “I've put my own capital into Halcyon. This is the one I'd tell my family about.”" } },
-    { say:"I can put you in at the same terms he came in at. Shall I hold you a place while you think?",
-      prop:null }
-  ]
-};
+/* Language-aware accessors. `lang` reads from the live session, so a switch
+   mid-flight takes effect on the next utterance rather than needing a reload. */
+function lang(){ return S.lang || "EN"; }
+function LM(){ return L.languages.find(x => x.code === lang()) || L.languages[0]; }
+function U(key){ const e = L.ui[key]; return e ? (e[lang()] || e.EN) : key; }
+function TX(v){ return v ? (v[lang()] || v.EN) : ""; }
+function TL(v){ return v ? (v[lang()] || v.EN) : []; }
 
-const VERIFY_ACTION = {
-  id:"VA-REGCHECK-001",
-  teach:"The behaviour that defeats this is the register check. You go to the regulator's own public register — typed in yourself, not a link they sent — and you search the entity name. If it isn't there, nothing else they show you matters."
-};
+/* The four elements this session resolves — the D8 budget. */
+function BUDGET(){ return L.questions.slice(0, L.elementBudget); }
 
 /* ═══════════════════════════════════════════════════════════════════
    2. SESSION MODEL  (Paper IV §VII — one object drives every screen)
@@ -791,6 +2516,7 @@ const S = {
   phase:null,          // challenge phase: 'stress' | 'retest'
   decision:null,
   transferred:null,
+  coached:[],
   budget:4,
   lang:"EN",
   account:{ signedIn:false, phone:null, identityVerified:false, certificateId:null }
@@ -1022,19 +2748,31 @@ const synth = window.speechSynthesis;
 let voices = [], chosen = { coach:null, persona:null };
 let sttOk = false, recog = null, micStream = null, analyser = null, micData = null;
 
+/**
+ * Pick a coach voice and a distinct persona voice FOR THE ACTIVE LANGUAGE.
+ *
+ * The two voices must be different: the persona switch is carried as much by
+ * the voice changing as by the frame going red. Where a platform offers only
+ * one voice for a language we still shift rate and pitch, so the change is
+ * audible even on a thin voice set.
+ */
 function pickVoices(){
   voices = synth ? synth.getVoices() : [];
-  const en = voices.filter(v => /^en(-|_|$)/i.test(v.lang));
-  const pool = en.length ? en : voices;
-  const pref = n => pool.find(v => v.name.toLowerCase().includes(n));
-  chosen.coach   = pref("samantha") || pref("google uk english female") || pref("female") || pool[0] || null;
-  chosen.persona = pool.find(v => v !== chosen.coach && /male|daniel|alex|arthur|george/i.test(v.name))
-                || pool.find(v => v !== chosen.coach) || chosen.coach;
-  setKV("pTts", synth ? (chosen.coach ? "ready" : "default voice") : "unavailable");
-}
-if(synth){ pickVoices(); synth.onvoiceschanged = pickVoices; }
-else setKV("pTts","unavailable");
+  const bcp = LM().bcp;                 // e.g. es-ES
+  const base = bcp.split("-")[0];       // e.g. es
+  const exact = voices.filter(v => v.lang && v.lang.toLowerCase().replace("_","-") === bcp.toLowerCase());
+  const loose = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith(base));
+  const pool = exact.length ? exact : (loose.length ? loose : voices);
 
+  chosen.coach = pool[0] || null;
+  chosen.persona = pool.find(v => v !== chosen.coach) || chosen.coach;
+
+  const have = pool.length;
+  setKV("pTts", !synth ? "unavailable" : (have ? bcp + " · " + have + " voice" + (have===1?"":"s") : bcp + " · fallback"));
+  if(synth && !have){
+    warnVoice("No installed voice matches " + bcp + ". The session still runs and the avatar still speaks, but in the platform default voice. Install a " + base + " voice for the full demonstration.");
+  }
+}
 /* Speak, and drive the avatar's mouth from the utterance envelope. */
 function say(text, opts, done){
   opts = opts || {};
@@ -1048,6 +2786,7 @@ function say(text, opts, done){
   const u = new SpeechSynthesisUtterance(text);
   const v = asPersona ? chosen.persona : chosen.coach;
   if(v) u.voice = v;
+  u.lang = LM().bcp;
   u.rate = asPersona ? 1.04 : 0.97;
   u.pitch = asPersona ? 0.92 : 1.0;
   u.volume = 1;
@@ -1070,12 +2809,14 @@ function say(text, opts, done){
   catch(e){ fakeEnvelope(text, done); }
 
   // Safari sometimes drops onend — hard backstop proportional to length
-  const backstop = Math.max(2400, text.length * 62);
+  const perChar = { EN:62, ES:60, ZH:150, AR:70 }[lang()] || 62;
+  const backstop = Math.max(2400, text.length * perChar);
   setTimeout(() => { if(env){ clearInterval(env); env=null; ampTarget=0; dhState="idle"; if(done){ const d=done; done=null; d(); } } }, backstop + 900);
 }
 
 function fakeEnvelope(text, done){
-  const dur = Math.max(1600, text.length*58);
+  const perChar = { EN:58, ES:56, ZH:140, AR:66 }[lang()] || 58;
+  const dur = Math.max(1600, text.length*perChar);
   const iv = setInterval(()=>{ ampTarget = 0.3 + Math.random()*0.4; }, 100);
   setTimeout(()=>{ clearInterval(iv); ampTarget=0; dhState="idle"; if(done) done(); }, dur);
 }
@@ -1122,7 +2863,7 @@ function startListening(){
   if(!SR) return;
   try{
     recog = new SR();
-    recog.lang = "en-US";
+    recog.lang = LM().bcp;
     recog.interimResults = true;
     recog.continuous = true;
     recog.onresult = (e) => {
@@ -1166,6 +2907,62 @@ function warnVoice(msg){
   const n = $("voiceWarn");
   if(n){ n.textContent = msg; n.classList.remove("hidden"); }
 }
+/* Repaint every static screen in the active language, and set text direction
+   on the device so captions, rails, cards and the matrix mirror together. */
+function applyLanguage(){
+  const m = LM();
+  el.device.setAttribute("dir", m.rtl ? "rtl" : "ltr");
+  el.device.setAttribute("lang", m.bcp);
+  document.documentElement.setAttribute("lang", m.bcp);
+
+  const set = (sel, txt) => { const n = document.querySelector(sel); if(n) n.textContent = txt; };
+
+  // Landing
+  set("#landing .kicker", U("landingKicker"));
+  set("#landing h1", U("landingTitle"));
+  set("#landing .lead", U("landingLead"));
+  const creds = document.querySelectorAll("#landing .cred span:last-child");
+  [U("cred1"), U("cred2"), U("cred3")].forEach((c,i) => { if(creds[i]) creds[i].textContent = c; });
+  set("#beginBtn", U("beginBtn"));
+  set("#landing .noaccount", U("noAccount"));
+  set("#signinBtn", U("signInLink"));
+  set("#fidelityNote", U("fidelityNote"));
+
+  // Sign in
+  set("#auth .kicker", U("authKicker"));
+  set("#auth h1", U("authTitle"));
+  set("#auth .sub", U("authSub"));
+  set("#auth label[for='ph']", U("phoneLabel"));
+  set("#otpWrap .field label", U("otpLabel"));
+  set("#auth .notice", U("authNotice"));
+  set("#authBtn", otpSent ? U("verifyContinueBtn") : U("sendCodeBtn"));
+  set("#authSkip", U("authSkip"));
+
+  // Welcome + consent
+  set("#entry .kicker", U("entryKicker"));
+  set("#entry h1", U("entryTitle"));
+  set("#entry .sub", U("entrySub"));
+  set("#entry label[for='nm']", U("nameLabel"));
+  const nm = $("nm"); if(nm) nm.placeholder = U("namePlaceholder");
+  set("#entry .consent .ttl", U("consentTitle"));
+  const cps = document.querySelectorAll("#entry .consent p");
+  if(cps[0]) cps[0].textContent = U("consent1");
+  if(cps[1]) cps[1].textContent = U("consent2");
+  set("#startBtn", U("startBtn"));
+
+  // Session chrome
+  set("#badgeTrain", U("trainingBadge"));
+  set("#badgeProtect", U("protectBadge"));
+  set("#exitBtn", U("exitSim"));
+  set("#protBtn", U("protectBtn"));
+  set("#standin", U("avatarStandIn"));
+  if(!micArmedLabel) set("#micLbl", U("holdToSpeak"));
+  set(".railttl", U("reasoningMap"));
+
+  pickVoices();
+}
+let micArmedLabel = false;
+
 function scrollLower(){
   requestAnimationFrame(() => { el.lower.scrollTop = el.lower.scrollHeight; });
 }
@@ -1226,26 +3023,27 @@ function tick(){
 /* ── Reasoning map rail ─────────────────────────────────────────── */
 function renderRail(flipIds){
   el.chips.innerHTML = "";
-  QUESTIONS.forEach(q => {
-    const rec = S.reasoningMap[q.el];
+  document.querySelector(".railttl").textContent = U("reasoningMap");
+  BUDGET().forEach(q => {
+    const rec = S.reasoningMap[q.targetElement];
     const st = rec ? rec.status : "unknown";
     const d = document.createElement("div");
     let cls = "chip q", mark = "?";
     if(st === "demonstrated"){ cls = "chip ok"; mark = "✓"; }
     else if(st === "failed"){ cls = "chip bad"; mark = "✕"; }
-    if(flipIds && flipIds.indexOf(q.el) > -1) cls += " flip";
+    if(flipIds && flipIds.indexOf(q.targetElement) > -1) cls += " flip";
     d.className = cls;
-    d.innerHTML = '<span class="st">'+mark+'</span><span class="nm"></span><span class="eid">'+q.el+'</span>';
-    d.querySelector(".nm").textContent = ELEMENTS[q.el].label;
+    d.innerHTML = '<span class="st">'+mark+'</span><span class="nm"></span><span class="eid">'+q.targetElement+'</span>';
+    d.querySelector(".nm").textContent = TX(L.elements[q.targetElement].label);
     el.chips.appendChild(d);
   });
   const done = Object.keys(S.reasoningMap).length;
-  setKV("pBudget", done + " / " + S.budget);
+  setKV("pBudget", done + " / " + L.elementBudget);
 }
 
 function freezeRail(on){
   el.rail.classList.toggle("frozen", on);
-  el.railState.textContent = on ? "frozen — challenge in progress" : "building";
+  el.railState.textContent = on ? U("railFrozen") : U("railBuilding");
 }
 
 /* ── Mic control: press and hold ────────────────────────────────── */
@@ -1253,13 +3051,15 @@ let holding = false, holdResolver = null;
 
 function armMic(label, resolver){
   holdResolver = resolver;
-  el.micLbl.textContent = label || "Hold to speak";
+  micArmedLabel = true;
+  el.micLbl.textContent = label || U("holdToSpeak");
   el.micBtn.disabled = false;
   el.micBtn.classList.add("nudge");
   show(el.micWrap);
 }
 function disarmMic(){
   holdResolver = null;
+  micArmedLabel = false;
   el.micBtn.disabled = true;
   el.micBtn.classList.remove("nudge","hot");
   el.micLbl.textContent = "…";
@@ -1271,7 +3071,7 @@ async function holdStart(e){
   holding = true;
   el.micBtn.classList.add("hot");
   el.micBtn.classList.remove("nudge");
-  el.micLbl.textContent = "Listening — release when done";
+  el.micLbl.textContent = U("listening");
   setSaid("");
   try{ if(synth) synth.cancel(); }catch(err){}
   dhState = "listening";
@@ -1322,15 +3122,29 @@ function listen(label, rehearsed){
 
 function evaluate(q, answer){
   const a = answer.toLowerCase();
-  const hitPass = q.passCues.some(c => a.includes(c));
-  const hitFail = q.failCues.some(c => a.includes(c));
+  // Cues are a governed variant of the object, not a UI label: a Spanish
+  // answer measured against English cues fails every element silently.
+  const cues = q.satisfactionCues[lang()] || q.satisfactionCues.EN;
+  const hitPass = cues.pass.some(c => a.includes(c.toLowerCase()));
+  const hitFail = cues.fail.some(c => a.includes(c.toLowerCase()));
   if(hitPass && !hitFail) return "demonstrated";
   if(hitFail) return "failed";
   return "failed";   // unresolved reasoning is not a pass — Paper III §9.3
 }
 
+/* Resistance is the same behaviour expressed in the words a speaker of each
+   language would actually use — not a translation of an English regex. */
+const RESIST = {
+  EN: /verify|check|register|regulator|independent|confirm|myself|not deciding|think about|hold off|wait|no thanks/i,
+  ES: /verific|comprob|registro|regulador|independiente|confirmar|por mi cuenta|no voy a decidir|pensarlo|esperar|no, gracias/i,
+  ZH: /核实|核查|查一下|自己查|监管|独立|确认|不决定|再想想|等一下|先等|不用了/,
+  AR: /تحقق|أتحقق|السجل|الجهة|الهيئة|مستقل|أتأكد|بنفسي|لن أقرر|أفكر|انتظر|لا شكرًا/
+};
+function resisted(text){ return (RESIST[lang()] || RESIST.EN).test(text); }
+
 function bindSignature(id, quote){
   if(!id) return;
+  if(!L.failures[id]) return;
   if(S.signatures.some(s => s.id === id)) return;
   S.signatures.push({ id, quote });
   setKV("pSigs", String(S.signatures.length));
@@ -1344,19 +3158,15 @@ async function stageUnderstand(){
   el.slotProp.innerHTML = ""; el.slotCoach.innerHTML = "";
   log("state S1 · OPEN_NARRATIVE — silent twin-engine extraction");
 
-  await new Promise(r => say(
-    "So. Tell me about the investment you're looking at. Take your time — I'm not going to interrupt you.",
-    {}, r));
-
-  const a = await listen("Hold to speak — tell me about it",
-    "Someone messaged me on WhatsApp about an AI trading system. It's returning about fifteen percent a month, and there was a video of a founder I recognised backing it. Their website says they're regulated. I was going to put in ten thousand.");
+  await new Promise(r => say(U("understandOpener"), {}, r));
+  await listen(U("holdTellMe"), U("narrativeRehearsed"));
 
   // Situation Map populates silently — it is never rendered to the learner.
   log("situation map: 11 risk markers (silent)", "hi");
   log("candidate: SCAM-FAKE-BROKER · SCAM-DEEPFAKE-ENDORSEMENT");
   log("competency set: COMP-VERIFY-INDEPENDENT +3");
 
-  await new Promise(r => say("Alright. I've got the shape of it.", {}, r));
+  await new Promise(r => say(U("understandClose"), {}, r));
   stageDiagnose();
 }
 
@@ -1368,27 +3178,27 @@ async function stageDiagnose(){
   renderRail();
   log("state S3 · ELEMENT_LOOP — budget " + S.budget + " elements");
 
-  for(let i=0;i<S.budget;i++){
-    const q = QUESTIONS[i];
+  const qs = BUDGET();
+  for(let i=0;i<qs.length;i++){
+    const q = qs[i];
     S.qIndex = i;
-    log("fire " + q.id + " → " + q.el);
-    await new Promise(r => say(q.ask, {}, r));
-    const a = await listen("Hold to answer", q.rehearsed);
+    log("fire " + q.questionId + " → " + q.targetElement);
+    await new Promise(r => say(TX(q.ask), {}, r));
+    const a = await listen(U("holdToAnswer"), TX(q.rehearsedAnswer));
     const status = evaluate(q, a.text);
-    S.reasoningMap[q.el] = { status, evidence:a.text, source:q.id };
-    if(status === "failed" && q.fail) bindSignature(q.fail, a.text);
-    log(q.el + " = " + status, status === "demonstrated" ? "ok" : "bad");
+    S.reasoningMap[q.targetElement] = { status, evidence:a.text, source:q.questionId };
+    if(status === "failed" && q.failSignature) bindSignature(q.failSignature, a.text);
+    log(q.targetElement + " = " + status, status === "demonstrated" ? "ok" : "bad");
     // element statuses resolve silently during DIAGNOSE; the rail shows
     // only that work is happening, never the verdict — restraint holds
     renderRail();
-    if(i < S.budget-1){
-      await new Promise(r => say(["Understood.","Right.","Okay, noted.","Got it."][i%4], {}, r));
+    if(i < qs.length-1){
+      const acks = TL(L.ui.ackWords);
+      await new Promise(r => say(acks[i % acks.length], {}, r));
     }
   }
 
-  await new Promise(r => say(
-    "Good. Now — I want you to talk to someone. I'm going to step out for a moment.",
-    {}, r));
+  await new Promise(r => say(U("stressHandoff"), {}, r));
   stageStress();
 }
 
@@ -1396,7 +3206,7 @@ async function stageDiagnose(){
 async function stageStress(){
   setStage("stress","S5");
   S.phase = "stress";
-  await runChallenge(CHALLENGE, () => stageCoach());
+  await runChallenge(L.challenges[0], () => stageCoach());
 }
 
 async function runChallenge(CH, next){
@@ -1408,8 +3218,8 @@ async function runChallenge(CH, next){
   freezeRail(true);
   el.slotCoach.innerHTML = "";
   log("mode gate: REHEARSE envelope open", "hi");
-  log("fire " + CH.id + " · " + CH.scam);
-  log("surface: " + Object.values(CH.surface).join(" · "));
+  log("fire " + CH.challengeId + " · " + CH.scamId);
+  log("surface: " + Object.values(CH.surfaceProfile).join(" · "));
 
   // Nameplate first, in silence — the audience reads the doctrine change
   // before a word is spoken, and the coach's last line does not sit over it.
@@ -1417,42 +3227,36 @@ async function runChallenge(CH, next){
   setSaid("");
   await new Promise(r => setTimeout(r, 1100));
 
-  for(let i=0;i<CH.ladder.length;i++){
-    const step = CH.ladder[i];
+  const ladder = CH.escalationLadder;
+  const replies = TL(CH.rehearsedReplies);
+  for(let i=0;i<ladder.length;i++){
+    const step = ladder[i];
     S.ladderIndex = i;
-    log("ladder step " + (i+1) + "/" + CH.ladder.length);
+    log("ladder step " + (i+1) + "/" + ladder.length);
 
     if(step.prop){
       el.slotProp.innerHTML =
-        '<div class="prop"><div class="ph"><span></span><span class="sim">Simulated artifact</span></div><div class="pbody"></div></div>';
-      el.slotProp.querySelector(".ph span").textContent = step.prop.head;
-      el.slotProp.querySelector(".pbody").textContent = step.prop.body;
+        '<div class="prop"><div class="ph"><span></span><span class="sim"></span></div><div class="pbody"></div></div>';
+      el.slotProp.querySelector(".ph span").textContent = TX(step.prop.head);
+      el.slotProp.querySelector(".sim").textContent = U("simulatedArtifact");
+      el.slotProp.querySelector(".pbody").textContent = TX(step.prop.body);
     }
 
-    await new Promise(r => say(step.say, { persona:true, name:CH.persona.name }, r));
+    await new Promise(r => say(TX(step.say), { persona:true, name:CH.persona.name }, r));
 
-    const last = (i === CH.ladder.length-1);
-    const a = await listen(last ? "Hold to respond" : "Hold to respond",
-      last ? (S.phase === "retest"
-        ? "Before I go any further I want to verify the company myself, and confirm that endorsement independently. I'm not deciding on this call."
-        : "Okay — if it closes tonight then let's do it. Send me the details.")
-        : (S.phase === "retest"
-          ? "How would I confirm that video is really him?"
-          : "Right. And the money would go where exactly?"));
+    const last = (i === ladder.length-1);
+    const a = await listen(U("holdToRespond"), replies[i] || replies[replies.length-1]);
 
     // no mid-scenario correction, ever — Paper III §3.4
-    if(step.fail && S.phase === "stress"){
-      const t = a.text.toLowerCase();
-      const resisted = /verify|check|register|regulator|independent|not deciding|think about|no|wait|hold off/.test(t);
-      if(!resisted) bindSignature(step.fail, a.text);
+    if(step.failSignature && S.phase === "stress" && !resisted(a.text)){
+      bindSignature(step.failSignature, a.text);
     }
 
     if(last){
       S.decision = a.text;
       if(S.phase === "retest"){
-        const t = a.text.toLowerCase();
-        S.transferred = /verify|check|register|regulator|independent|confirm|myself|not deciding/.test(t);
-        S.reasoningMap["E-VER-02"].retest = S.transferred ? "demonstrated" : "failed";
+        S.transferred = resisted(a.text);
+        if(S.reasoningMap["E-VER-02"]) S.reasoningMap["E-VER-02"].retest = S.transferred ? "demonstrated" : "failed";
         log("transfer (within-session): " + (S.transferred ? "DEMONSTRATED" : "NOT DEMONSTRATED"),
             S.transferred ? "ok" : "bad");
       }
@@ -1473,25 +3277,27 @@ async function runChallenge(CH, next){
 async function stageCoach(){
   setStage("coach","S6");
   const sigs = S.signatures.slice(0,2);
+  S.coached = sigs.map(x => x.id);
   log("state S6 · COACH — " + sigs.length + " signatures");
   setSaid("");
   // The map stays out of the way for beats 1–2. It returns for beat 3, which
   // is the moment it is supposed to carry — not competing with the quote.
   hide(el.rail);
 
-  await new Promise(r => say("Okay. That was me. Two things happened in that conversation.", {}, r));
+  await new Promise(r => say(U("coachOpener"), {}, r));
 
   for(let k=0;k<sigs.length;k++){
     const sg = sigs[k];
-    const F = FAILS[sg.id];
+    const F = L.failures[sg.id];
 
     // BEAT 1 — their own sentence, alone, in silence. The caption is cleared
     // first: the previous signature's coaching line must not still be on
     // screen disagreeing with the quote that just landed.
     setCaption("", "AUREN", false);
     el.slotCoach.innerHTML =
-      '<div class="beat quote"><div class="qt"></div><div class="qm">Your words · bound verbatim</div></div>';
+      '<div class="beat quote"><div class="qt"></div><div class="qm"></div></div>';
     el.slotCoach.querySelector(".qt").textContent = "“" + trimQuote(sg.quote) + "”";
+    el.slotCoach.querySelector(".qm").textContent = U("yourWords");
     await new Promise(r => setTimeout(r, reduceMotion ? 400 : 1900));
 
     // BEAT 2 — the name lands.
@@ -1499,27 +3305,26 @@ async function stageCoach(){
     sigEl.className = "beat sig";
     sigEl.innerHTML = '<div class="sid"></div><div class="sdf"></div>';
     sigEl.querySelector(".sid").textContent = sg.id;
-    sigEl.querySelector(".sdf").textContent = F ? F.def : "";
+    sigEl.querySelector(".sdf").textContent = F ? TX(F.definition) : "";
     el.slotCoach.appendChild(sigEl);
     log("beat: name " + sg.id, "hi");
-    await new Promise(r => say(coachLine(sg.id), {}, r));
+    await new Promise(r => say(F ? TX(F.coaching) : "", {}, r));
 
     // BEAT 3 — the map returns, unfreezes, and the elements flip.
     if(k === sigs.length-1){
       show(el.rail);
       freezeRail(false);
-      renderRail(sigs.map(s => FAILS[s.id] && FAILS[s.id].el).filter(Boolean));
+      renderRail(sigs.map(s => L.failures[s.id] && L.failures[s.id].negatedElement).filter(Boolean));
       log("beat: map reveal", "hi");
       await new Promise(r => setTimeout(r, reduceMotion ? 300 : 900));
     }
   }
 
-  await new Promise(r => say(VERIFY_ACTION.teach, {}, r));
-  log("teach " + VERIFY_ACTION.id);
+  const VA = L.verification["VA-REGCHECK-001"];
+  await new Promise(r => say(TX(VA.teach), {}, r));
+  log("teach " + VA.actionId);
 
-  await new Promise(r => say(
-    "Let's try that again — different situation, same question. Nothing about it will look like the last one.",
-    {}, r));
+  await new Promise(r => say(U("coachHandoff"), {}, r));
 
   el.slotCoach.innerHTML = "";
   stageRetest();
@@ -1544,11 +3349,12 @@ function coachLine(id){
 async function stageRetest(){
   setStage("retest","S5′");
   S.phase = "retest";
+  const A = L.challenges[0], B = L.challenges[1];
   log("retest selector: surface-distance enforced");
-  log("  typology " + CHALLENGE.surface.typology + " → " + RETEST.surface.typology);
-  log("  channel  " + CHALLENGE.surface.channel  + " → " + RETEST.surface.channel);
-  log("  persona  " + CHALLENGE.surface.persona  + " → " + RETEST.surface.persona);
-  await runChallenge(RETEST, () => stageEvidence());
+  log("  typology " + A.surfaceProfile.typology + " → " + B.surfaceProfile.typology);
+  log("  channel  " + A.surfaceProfile.channel  + " → " + B.surfaceProfile.channel);
+  log("  persona  " + A.surfaceProfile.persona  + " → " + B.surfaceProfile.persona);
+  await runChallenge(B, () => stageEvidence());
 }
 
 /* ── Stage: EVIDENCE — verdict first, audit second (D5) ─────────── */
@@ -1557,98 +3363,113 @@ function stageEvidence(){
   hide(el.lower);
   log("state S7 · Investor Readiness Record emitted", "hi");
 
-  const failedFirst = Object.keys(S.reasoningMap).filter(k => S.reasoningMap[k].status === "failed");
+  const qs = BUDGET();
   const transferred = S.transferred;
-
-  const verdict = transferred
-    ? "You made the same mistake twice. After we named it, you didn't make it again."
-    : "You haven't transferred it yet — and that's exactly what we rehearse next.";
-
-  const sub = transferred
-    ? "That's the whole claim: not that you know the rule, but that you behaved differently when a completely different scam asked you the same question."
-    : "You were coached on independent verification and the new scenario still got past it. That is honest evidence, and it's more useful to you than a pass would have been.";
-
-  const ailsFrom = 61;
-  const ailsTo = transferred ? 74 : 64;
+  const resolved = qs.filter(q => (S.reasoningMap[q.targetElement]||{}).status === "demonstrated").length;
+  const ailsFrom = Math.round(45 + (resolved / Math.max(qs.length,1)) * 30);
+  const ailsTo = ailsFrom + (transferred ? 13 : 3);
 
   let rows = "";
-  QUESTIONS.forEach(q => {
-    const r = S.reasoningMap[q.el];
+  qs.forEach(q => {
+    const id = q.targetElement;
+    const r = S.reasoningMap[id];
     if(!r) return;
-    const base = r.status === "demonstrated" ? "p" : "f";
-    const baseM = r.status === "demonstrated" ? "✓" : "✕";
-    const isTarget = q.el === "E-VER-02";
-    const press = isTarget ? "f" : (base === "p" ? "p" : "n");
-    const pressM = isTarget ? "✕" : (base === "p" ? "✓" : "–");
-    const coach = isTarget ? "p" : "n";
-    const coachM = isTarget ? "✓" : "–";
-    const nov = isTarget ? (transferred ? "p" : "f") : "n";
-    const novM = isTarget ? (transferred ? "✓" : "✕") : "–";
+    const coached = S.coached.some(fid => L.failures[fid] && L.failures[fid].negatedElement === id);
+    const passed = r.status === "demonstrated";
+    const cells = [
+      passed ? ["p","✓"] : ["f","✕"],
+      coached ? ["f","✕"] : (passed ? ["p","✓"] : ["n","–"]),
+      coached ? ["p","✓"] : ["n","–"],
+      coached ? (transferred ? ["p","✓"] : ["f","✕"]) : ["n","–"]
+    ];
     rows +=
-      '<div class="mrow">' +
-        '<div class="mcells">' +
-          '<div class="mname">' + ELEMENTS[q.el].label + '<i>' + q.el + ' · ' + ELEMENTS[q.el].anchor + '</i></div>' +
-          '<div class="mc '+base+'">'+baseM+'</div>' +
-          '<div class="mc '+press+'">'+pressM+'</div>' +
-          '<div class="mc '+coach+'">'+coachM+'</div>' +
-          '<div class="mc '+nov+'">'+novM+'</div>' +
-        '</div>' +
-        '<div class="eviq">Bound evidence · <b>“' + escapeHtml(trimQuote(r.evidence)) + '”</b> — elicited by ' + r.source + '</div>' +
+      '<div class="mrow"><div class="mcells">' +
+        '<div class="mname">' + escapeHtml(TX(L.elements[id].label)) +
+          '<i>' + id + ' · ' + escapeHtml(L.elements[id].authorityAnchor) + '</i></div>' +
+        cells.map(c => '<div class="mc '+c[0]+'">'+c[1]+'</div>').join("") +
+      '</div>' +
+      '<div class="eviq">' + escapeHtml(U("boundEvidence")) + ' · <b>“' +
+        escapeHtml(trimQuote(r.evidence)) + '”</b> — ' + escapeHtml(U("elicitedBy")) + ' ' + r.source + '</div>' +
       '</div>';
   });
 
   let sigHtml = "";
-  S.signatures.forEach(s => {
+  S.signatures.forEach(x => {
+    const F = L.failures[x.id];
     sigHtml +=
       '<div class="sig" style="margin-bottom:9px">' +
-        '<div class="sid">' + s.id + '</div>' +
-        '<div class="sdf">' + (FAILS[s.id] ? FAILS[s.id].def : "") + '</div>' +
-        '<div class="qm" style="font-family:var(--mono);font-size:8.5px;color:var(--dim2);margin-top:8px">Bound to: “' + escapeHtml(trimQuote(s.quote)) + '”</div>' +
+        '<div class="sid">' + x.id + '</div>' +
+        '<div class="sdf">' + escapeHtml(F ? TX(F.definition) : "") + '</div>' +
+        '<div class="qm" style="font-family:var(--mono);font-size:8.5px;color:var(--dim2);margin-top:8px">' +
+          escapeHtml(U("boundTo")) + ': “' + escapeHtml(trimQuote(x.quote)) + '”</div>' +
       '</div>';
   });
 
   el.sheet.innerHTML =
-    '<div class="kicker">Investor Readiness Record · sealed</div>' +
-    '<h2 class="verdict">' + verdict + '</h2>' +
-    '<p class="verdictsub">' + sub + '</p>' +
+    '<div class="kicker">' + escapeHtml(U("recordSealed")) + '</div>' +
+    '<h2 class="verdict">' + escapeHtml(U(transferred ? "verdictPassHead" : "verdictFailHead")) + '</h2>' +
+    '<p class="verdictsub">' + escapeHtml(U(transferred ? "verdictPassSub" : "verdictFailSub")) + '</p>' +
 
-    '<div class="secttl">Evidence chain</div>' +
+    '<div class="secttl">' + escapeHtml(U("evidenceChain")) + '</div>' +
     '<div class="matrix">' +
-      '<div class="mhead"><span>Element</span><span>Base</span><span>Press</span><span>Coach</span><span>Novel</span></div>' +
+      '<div class="mhead"><span>' + escapeHtml(U("colElement")) + '</span><span>' +
+        escapeHtml(U("colBase")) + '</span><span>' + escapeHtml(U("colPress")) + '</span><span>' +
+        escapeHtml(U("colCoach")) + '</span><span>' + escapeHtml(U("colNovel")) + '</span></div>' +
       rows +
     '</div>' +
 
-    '<div class="secttl">Failure signatures</div>' +
-    '<div style="margin-bottom:22px">' + sigHtml + '</div>' +
+    (sigHtml
+      ? '<div class="secttl">' + escapeHtml(U("failureSignatures")) + '</div>' +
+        '<div style="margin-bottom:22px">' + sigHtml + '</div>'
+      : "") +
 
     '<div class="secttl">AILS</div>' +
     '<div class="ails">' +
       '<div class="ailsnum"><span class="from">' + ailsFrom + '</span><span class="ar">→</span><span>' + ailsTo + '</span></div>' +
-      '<div class="ailsx">' + explain(ailsFrom, ailsTo, failedFirst.length, S.signatures.length, transferred) + '</div>' +
-      '<div class="rulever">Aggregation rule v1 · within-session transfer only · durable transfer not claimed</div>' +
+      '<div class="ailsx">' + escapeHtml(explain(ailsFrom, resolved, qs.length, S.signatures.length, transferred)) + '</div>' +
+      '<div class="rulever">aggregation-rule-v1 · ' + escapeHtml(U("ruleFooter")) + '</div>' +
     '</div>' +
 
     (S.account.certificateId
-      ? '<div class="notice">This record is certified. Certificate ' + S.account.certificateId + '.</div>'
-      : '<button class="btn ghost" id="certBtn">Verify my identity and certify this record</button><div style="height:9px"></div>') +
-    '<button class="btn" id="againBtn">Rehearse your next weakness</button>' +
+      ? '<div class="notice">' + escapeHtml(U("certifiedNotice")) + ' ' + S.account.certificateId + '.</div>'
+      : '<button class="btn ghost" id="certBtn">' + escapeHtml(U("certifyBtn")) + '</button><div style="height:9px"></div>') +
+    '<button class="btn" id="againBtn">' + escapeHtml(U("againBtn")) + '</button>' +
     '<div style="height:9px"></div>' +
-    '<button class="btn ghost" id="modesBtn">See what else AUREN does</button>';
+    '<button class="btn ghost" id="modesBtn">' + escapeHtml(U("modesBtn")) + '</button>';
 
+  el.sheet.scrollTop = 0;
   show(el.sheet);
   $("againBtn").onclick = () => { resetLoop(); };
   $("modesBtn").onclick = () => { stageModes(); };
   if($("certBtn")) $("certBtn").onclick = () => { stageVerify(0); };
 }
 
-function explain(from, to, failed, sigs, transferred){
-  const base =
-    from + " — you resolved " + (4-failed) + " of 4 reasoning elements on the way in, and " +
-    sigs + " failure signature" + (sigs===1?"":"s") + " " + (sigs===1?"was":"were") +
-    " recorded under pressure, each bound to a sentence you actually said. ";
-  return base + (transferred
-    ? "After coaching, independent verification was demonstrated in a scenario that shared no typology, channel, persona or product class with the one you failed — which is why the score moves."
-    : "After coaching, independent verification was still not demonstrated in the novel scenario, so the coached element stays open and moves to your retraining queue. The score barely moves, and it shouldn't.");
+/* Paper III §9.2: this sentence, not the number, is the product. It is
+   composed from record fields in the learner's language — never generated. */
+const AILS_HEAD = {
+  EN: (s,r,t,n) => s + " — you resolved " + r + " of " + t + " reasoning elements on the way in, and " + n + " failure signature" + (n===1?"":"s") + " " + (n===1?"was":"were") + " recorded under pressure, each bound to a sentence you actually said.",
+  ES: (s,r,t,n) => s + " — resolviste " + r + " de " + t + " elementos de razonamiento a la entrada, y se registraron " + n + " firma" + (n===1?"":"s") + " de fallo bajo presión, cada una vinculada a una frase que dijiste realmente.",
+  ZH: (s,r,t,n) => s + " — 进入时你解决了 " + t + " 个推理要素中的 " + r + " 个，并在压力下记录到 " + n + " 项失效特征，每一项都绑定到你实际说过的一句话。",
+  AR: (s,r,t,n) => s + " — حسمت " + r + " من أصل " + t + " من عناصر التفكير عند الدخول، وسُجّلت " + n + " من أنماط الإخفاق تحت الضغط، كل واحدة منها موثّقة بجملة قلتها فعلًا."
+};
+const AILS_TAIL_PASS = {
+  EN: "After coaching, independent verification was demonstrated in a scenario sharing no typology, channel, persona or product class with the one you failed — which is why the score moves.",
+  ES: "Tras la orientación, demostraste verificación independiente en un escenario que no comparte tipología, canal, personaje ni clase de producto con aquel en el que fallaste. Por eso se mueve la puntuación.",
+  ZH: "接受指导后，你在一个与失败情境在类型、渠道、人物和产品类别上均不相同的场景中，展现了独立核实。分数正因如此而变动。",
+  AR: "بعد التوجيه، أثبتّ التحقق المستقل في سيناريو لا يشترك مع السيناريو الذي أخفقت فيه في النمط ولا القناة ولا الشخصية ولا فئة المنتج — ولهذا تتغيّر الدرجة."
+};
+const AILS_TAIL_FAIL = {
+  EN: "After coaching, independent verification was still not demonstrated in the novel scenario, so the coached element stays open and moves to your retraining queue. The score barely moves, and it should not.",
+  ES: "Tras la orientación, la verificación independiente siguió sin demostrarse en el escenario nuevo, así que el elemento trabajado queda abierto y pasa a tu cola de repaso. La puntuación apenas se mueve, y no debería.",
+  ZH: "接受指导后，你在新情境中仍未展现独立核实，因此该要素保持未决状态并进入你的复训队列。分数几乎不动——本就不该动。",
+  AR: "بعد التوجيه، لم يظهر التحقق المستقل في السيناريو الجديد، لذا يبقى العنصر المعالَج مفتوحًا وينتقل إلى قائمة إعادة التدريب. الدرجة تكاد لا تتحرك، وهذا هو الصواب."
+};
+function explain(score, resolved, total, sigs, transferred){
+  const lg = lang();
+  const head = (AILS_HEAD[lg] || AILS_HEAD.EN)(score, resolved, total, sigs);
+  const tail = transferred ? (AILS_TAIL_PASS[lg] || AILS_TAIL_PASS.EN)
+                           : (AILS_TAIL_FAIL[lg] || AILS_TAIL_FAIL.EN);
+  return head + " " + tail;
 }
 
 function escapeHtml(s){
@@ -1657,48 +3478,48 @@ function escapeHtml(s){
 
 /* ── Stage: VERIFY — identity, and only now ───────────────────────
    Paper IV moves eKYC out of entry and into a post-session "verified
-   certification" upsell. That ordering is the whole reason it converts:
-   the learner is holding an evidence chain they want to be able to prove,
-   rather than being asked for a document by a product they have not used. */
+   certification" upsell. That ordering is the whole reason it converts. */
 function stageVerify(step){
   setStage("verify","S7");
   const steps = [
-    { t:"Confirm your details",  d:"Name and date of birth, as they appear on your document." },
-    { t:"Scan your document",    d:"Passport or national ID. Captured once, checked, and not retained by AUREN." },
-    { t:"Liveness check",        d:"A short camera check that the person holding the document is you." },
-    { t:"Issue certificate",     d:"Your Investor Readiness Record is sealed against a verified identity." }
+    { t:U("vStep1"), d:U("vStep1d") },
+    { t:U("vStep2"), d:U("vStep2d") },
+    { t:U("vStep3"), d:U("vStep3d") },
+    { t:U("vStep4"), d:U("vStep4d") }
   ];
-
-  if(step >= steps.length){ return stageCertified(); }
+  if(step >= steps.length) return stageCertified();
 
   let html =
-    '<div class="kicker">Verified certification</div>' +
-    '<h2 class="verdict" style="font-size:22px">Make this record provable.</h2>' +
-    '<p class="verdictsub">Your rehearsal already stands on its own. Certification ties it to a verified identity so an employer, a regulator or an institution can rely on it. It is optional, and nothing you have done is lost if you stop here.</p>' +
+    '<div class="kicker">' + escapeHtml(U("verifyKicker")) + '</div>' +
+    '<h2 class="verdict" style="font-size:22px">' + escapeHtml(U("verifyTitleHead")) + '</h2>' +
+    '<p class="verdictsub">' + escapeHtml(U("verifySub")) + '</p>' +
     '<div class="matrix" style="padding:4px 14px;margin-bottom:20px">';
-
   steps.forEach((st, i) => {
     const cls = i < step ? "done" : (i === step ? "now" : "pending");
     html += '<div class="vstep ' + cls + '"><div class="vn">' + (i < step ? "✓" : (i+1)) + '</div>' +
-            '<div class="vb"><div class="vt">' + st.t + '</div><div class="vd">' + st.d + '</div></div></div>';
+            '<div class="vb"><div class="vt">' + escapeHtml(st.t) + '</div><div class="vd">' + escapeHtml(st.d) + '</div></div></div>';
   });
   html += '</div>';
 
   if(step === 0){
     html +=
-      '<div class="field"><label for="vfn">Full legal name</label><input id="vfn" type="text" value="' + escapeHtml(S.name) + ' Reyes"></div>' +
-      '<div class="field"><label for="vdb">Date of birth</label><input id="vdb" type="text" inputmode="numeric" placeholder="DD / MM / YYYY" value="14 / 03 / 1989"></div>';
+      '<div class="field"><label for="vfn">' + escapeHtml(U("legalName")) + '</label>' +
+        '<input id="vfn" type="text" value="' + escapeHtml(S.name) + ' Reyes"></div>' +
+      '<div class="field"><label for="vdb">' + escapeHtml(U("dob")) + '</label>' +
+        '<input id="vdb" type="text" inputmode="numeric" value="14 / 03 / 1989"></div>';
   } else if(step === 1){
-    html += '<div class="scanbox"><div class="si">🪪</div><div class="st2">Position your passport or ID inside the frame.</div><div class="sn">Simulated capture — no document is read</div></div>';
+    html += '<div class="scanbox"><div class="si">🪪</div><div class="st2">' + escapeHtml(U("scanDocPrompt")) +
+            '</div><div class="sn">' + escapeHtml(U("scanDocNote")) + '</div></div>';
   } else if(step === 2){
-    html += '<div class="scanbox"><div class="si">🙂</div><div class="st2">Look at the camera and turn your head slowly to the left.</div><div class="sn">Simulated liveness — no camera is opened</div></div>';
+    html += '<div class="scanbox"><div class="si">🙂</div><div class="st2">' + escapeHtml(U("livenessPrompt")) +
+            '</div><div class="sn">' + escapeHtml(U("livenessNote")) + '</div></div>';
   } else {
-    html += '<div class="notice">Identity confirmed. Sealing your Investor Readiness Record against it now.</div>';
+    html += '<div class="notice">' + escapeHtml(U("sealingNotice")) + '</div>';
   }
 
   html +=
-    '<button class="btn" id="vNext">' + (step === steps.length-1 ? "Issue my certificate" : "Continue") + '</button>' +
-    '<button class="linkbtn" id="vSkip">Not now — back to my record</button>';
+    '<button class="btn" id="vNext">' + escapeHtml(step === steps.length-1 ? U("issueBtn") : U("continueBtn")) + '</button>' +
+    '<button class="linkbtn" id="vSkip">' + escapeHtml(U("notNow")) + '</button>';
 
   el.sheet.innerHTML = html;
   el.sheet.scrollTop = 0;
@@ -1714,24 +3535,28 @@ function stageCertified(){
   S.account.certificateId = "AUREN-CERT-" + String(Math.floor(100000 + Math.random()*899999));
   log("identity verified · certificate " + S.account.certificateId, "ok");
 
-  const d = new Date();
+  const rows = [
+    [U("certIssued"), new Date().toISOString().slice(0,10)],
+    [U("certIdentity"), U("certIdentityValue")],
+    [U("certElements"), String(Object.keys(S.reasoningMap).length)],
+    [U("certTransfer"), S.transferred ? U("certDemonstrated") : U("certNotYet")],
+    [U("certScope"), U("certScopeValue")],
+    [U("certRule"), "aggregation-rule-v1"]
+  ];
+
   el.sheet.innerHTML =
-    '<div class="kicker">Certified</div>' +
-    '<h2 class="verdict" style="font-size:23px">Your record is now provable.</h2>' +
-    '<p class="verdictsub">The evidence chain has not changed — certification does not improve your result, it only binds it to a verified identity. That distinction is the point.</p>' +
+    '<div class="kicker">' + escapeHtml(U("certifiedKicker")) + '</div>' +
+    '<h2 class="verdict" style="font-size:23px">' + escapeHtml(U("certifiedTitle")) + '</h2>' +
+    '<p class="verdictsub">' + escapeHtml(U("certifiedSub")) + '</p>' +
     '<div class="certcard">' +
-      '<div class="ct">Investor Readiness Certificate</div>' +
+      '<div class="ct">' + escapeHtml(U("certLabel")) + '</div>' +
       '<div class="cn">' + escapeHtml(S.name) + ' Reyes</div>' +
       '<div class="cid">' + S.account.certificateId + '</div>' +
-      '<div class="certrow"><span class="k">Issued</span><span class="v">' + d.toISOString().slice(0,10) + '</span></div>' +
-      '<div class="certrow"><span class="k">Identity</span><span class="v">Verified — document + liveness</span></div>' +
-      '<div class="certrow"><span class="k">Elements evidenced</span><span class="v">' + Object.keys(S.reasoningMap).length + '</span></div>' +
-      '<div class="certrow"><span class="k">Transfer</span><span class="v">' + (S.transferred ? "Demonstrated" : "Not yet") + '</span></div>' +
-      '<div class="certrow"><span class="k">Scope</span><span class="v">Within-session</span></div>' +
-      '<div class="certrow"><span class="k">Rule</span><span class="v">aggregation-rule-v1</span></div>' +
+      rows.map(r => '<div class="certrow"><span class="k">' + escapeHtml(r[0]) +
+                    '</span><span class="v">' + escapeHtml(r[1]) + '</span></div>').join("") +
     '</div>' +
-    '<div class="notice">The certificate attests to a rehearsal, not to investment competence, and it makes no claim about durable behaviour change. AUREN does not share it with anyone — you do.</div>' +
-    '<button class="btn" id="cBack">Back to my record</button>';
+    '<div class="notice">' + escapeHtml(U("certDisclaimer")) + '</div>' +
+    '<button class="btn" id="cBack">' + escapeHtml(U("backToRecord")) + '</button>';
   el.sheet.scrollTop = 0;
   $("cBack").onclick = () => stageEvidence();
 }
@@ -1739,17 +3564,22 @@ function stageCertified(){
 /* ── Stage: MODES — the deferred selector (D1/D2) ───────────────── */
 function stageModes(){
   setStage("modes","S7");
+  const modes = [
+    ["primary", U("modeRehearse"), U("modeRehearseDesc")],
+    ["",        U("modeLearn"),    U("modeLearnDesc")],
+    ["",        U("modeProtect"),  U("modeProtectDesc")]
+  ];
   el.sheet.innerHTML =
-    '<div class="kicker">Now that the words mean something</div>' +
-    '<h2 class="verdict" style="font-size:22px">Three ways to use AUREN.</h2>' +
-    '<p class="verdictsub">You just did the middle one. This screen is deliberately not where you started — a mode menu means nothing until you have been through the loop once.</p>' +
+    '<div class="kicker">' + escapeHtml(U("modesKicker")) + '</div>' +
+    '<h2 class="verdict" style="font-size:22px">' + escapeHtml(U("modesTitle")) + '</h2>' +
+    '<p class="verdictsub">' + escapeHtml(U("modesSub")) + '</p>' +
     '<div class="modes">' +
-      '<button class="mode primary"><div class="mt">Rehearse</div><div class="md">Pressure rehearsal against a scam you have not seen. Assessment by doing. This is the loop you just completed.</div></button>' +
-      '<button class="mode"><div class="mt">Learn</div><div class="md">Adaptive investor and AI literacy, paced to what your reasoning map says you are missing. No quizzes.</div></button>' +
-      '<button class="mode"><div class="mt">Protect</div><div class="md">A real situation, assessed now. AUREN never tells you whether something is a scam — it tells you what you have not yet verified.</div></button>' +
+      modes.map(m => '<button class="mode ' + m[0] + '"><div class="mt">' + escapeHtml(m[1]) +
+                     '</div><div class="md">' + escapeHtml(m[2]) + '</div></button>').join("") +
     '</div>' +
     '<div style="height:16px"></div>' +
-    '<button class="btn ghost" id="backBtn">Back to my record</button>';
+    '<button class="btn ghost" id="backBtn">' + escapeHtml(U("backToRecord")) + '</button>';
+  el.sheet.scrollTop = 0;
   el.sheet.querySelectorAll(".mode")[2].onclick = () => stageProtect();
   el.sheet.querySelectorAll(".mode")[0].onclick = () => resetLoop();
   $("backBtn").onclick = () => stageEvidence();
@@ -1762,48 +3592,43 @@ async function stageProtect(){
   setKV("pMode","PROTECT");
   hide(el.badgeTrain); hide(el.exitBtn);
   show(el.badgeProtect);
+  el.badgeProtect.textContent = U("protectBadge");
   personaTarget = 0;
   el.device.classList.remove("persona");
   log("mode gate: PROTECT — neutral doctrine, challenge objects unreachable", "hi");
 
+  const markers = TL(L.protectMarkers);
+  const VA = L.verification["VA-REGCHECK-001"];
+
   el.sheet.innerHTML =
-    '<div class="kicker">Protect · a real situation</div>' +
-    '<h2 class="verdict" style="font-size:22px">Tell me what is in front of you right now.</h2>' +
-    '<p class="verdictsub">I will not tell you whether this is a scam. I will tell you what has not been verified, and what to do before you decide.</p>' +
-    '<div id="pIntake"></div>';
-  show(el.sheet);
-
-  await new Promise(r => setTimeout(r, 700));
-
-  const markers = [
-    "Contact was unsolicited",
-    "Return described as fixed or guaranteed",
-    "Regulated status asserted by the promoter",
-    "Payment routed outside the named institution",
-    "Decision deadline set by the other party"
-  ];
-  let html = '<div class="secttl">Unresolved markers</div><div class="card" style="margin-bottom:22px">';
-  markers.forEach(m => { html += '<div style="font-size:12.5px;color:var(--lilac2);padding:5px 0;display:flex;gap:9px"><span style="color:var(--warn);font-family:var(--mono)">!</span><span>'+m+'</span></div>'; });
-  html += '</div>';
-
-  html +=
-    '<div class="secttl">What to do</div>' +
-    '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">' +
-      '<div class="pcard"><div class="pt">Stop</div><p>Do not transfer funds while verification is incomplete. Five high-risk markers in this situation are unresolved.</p></div>' +
-      '<div class="pcard"><div class="pt">Verify</div><ol>' +
-        '<li>Search the entity on the regulator\'s own public register — type the address yourself, do not use a link they sent.</li>' +
-        '<li>Call the institution on the number published on its official site, not the number you were given.</li>' +
-        '<li>Confirm where the money actually lands. A personal or third-party account is not a firm account.</li>' +
-      '</ol></div>' +
-      '<div class="pcard"><div class="pt">Decide</div><p>Return to your decision only after the identity, the entity and the claims have been independently verified. The decision is yours — I do not make it and I do not rate it.</p></div>' +
+    '<div class="kicker">' + escapeHtml(U("protectKicker")) + '</div>' +
+    '<h2 class="verdict" style="font-size:22px">' + escapeHtml(U("protectTitle")) + '</h2>' +
+    '<p class="verdictsub">' + escapeHtml(U("protectSub")) + '</p>' +
+    '<div class="secttl">' + escapeHtml(U("unresolvedMarkers")) + '</div>' +
+    '<div class="card" style="margin-bottom:22px">' +
+      markers.map(m => '<div style="font-size:12.5px;color:var(--lilac2);padding:5px 0;display:flex;gap:9px">' +
+                       '<span style="color:var(--warn);font-family:var(--mono)">!</span><span>' +
+                       escapeHtml(m) + '</span></div>').join("") +
     '</div>' +
-    '<button class="btn ghost" id="pBack">Back</button>';
-
-  el.sheet.innerHTML += html;
+    '<div class="secttl">' + escapeHtml(U("whatToDo")) + '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">' +
+      '<div class="pcard"><div class="pt">' + escapeHtml(U("stopTitle")) + '</div><p>' + escapeHtml(U("stopBody")) + '</p></div>' +
+      '<div class="pcard"><div class="pt">' + escapeHtml(U("verifyTitle")) + '</div><ol>' +
+        TL(VA.steps).map(x => '<li>' + escapeHtml(x) + '</li>').join("") + '</ol></div>' +
+      '<div class="pcard"><div class="pt">' + escapeHtml(U("decideTitle")) + '</div><p>' + escapeHtml(U("decideBody")) + '</p></div>' +
+    '</div>' +
+    '<button class="btn ghost" id="pBack">' + escapeHtml(U("back")) + '</button>';
+  el.sheet.scrollTop = 0;
+  show(el.sheet);
   log("STOP → VERIFY → DECIDE issued from approved objects");
-  $("pBack").onclick = () => { hide(el.badgeProtect); S.mode="REHEARSE"; setKV("pMode","REHEARSE"); stageEvidence(); };
+  $("pBack").onclick = () => {
+    hide(el.badgeProtect);
+    S.mode = "REHEARSE"; setKV("pMode","REHEARSE");
+    if(S.transferred === null) { hide(el.sheet); show(el.landing); setStage("landing","S0"); }
+    else stageEvidence();
+  };
 
-  say("Five things in what you've described haven't been verified. Before you move any money, here's what I'd do.", {}, null);
+  say(U("protectSpoken"), {}, null);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -1811,7 +3636,7 @@ async function stageProtect(){
    ═════════════════════════════════════════════════════════════════ */
 
 function resetLoop(){
-  S.reasoningMap = {}; S.signatures = []; S.transcript = [];
+  S.reasoningMap = {}; S.signatures = []; S.transcript = []; S.coached = [];
   S.qIndex = 0; S.decision = null; S.transferred = null; S.phase = null;
   setKV("pSigs","0");
   hide(el.sheet); hide(el.badgeProtect);
@@ -1830,13 +3655,19 @@ $("beginBtn").onclick = () => {
   setStage("entry","S0");
 };
 
+function renderLangChips(){
+  const row = document.getElementById("langRow");
+  row.innerHTML = L.languages.map(l =>
+    '<button class="langc' + (l.code === lang() ? " on" : "") + '" data-l="' + l.code +
+    '" lang="' + l.bcp + '">' + l.endonym + '</button>').join("");
+}
 document.getElementById("langRow").addEventListener("click", (e) => {
   const b = e.target.closest(".langc");
   if(!b) return;
-  document.querySelectorAll("#langRow .langc").forEach(x => x.classList.remove("on"));
-  b.classList.add("on");
   S.lang = b.dataset.l;
-  log("session language: " + S.lang);
+  renderLangChips();
+  applyLanguage();
+  log("session language: " + S.lang + " · fidelity " + LM().fidelity, "hi");
 });
 
 $("signinBtn").onclick = () => {
@@ -1912,9 +3743,11 @@ el.exitBtn.onclick = () => {
   try{ if(synth) synth.cancel(); }catch(e){}
   log("EXIT SIMULATION — scenario terminated, frame reaffirmed", "hi");
   disarmMic();
-  say("That's the simulation ended. Nothing in it was real, and nothing you said in it is held against you. Your progress is kept.", {}, () => stageCoach());
+  say(U("exitAck"), {}, () => stageCoach());
 };
 
+renderLangChips();
+applyLanguage();
 setStage("landing","S0");
 renderStates();
 sizeCanvas();
