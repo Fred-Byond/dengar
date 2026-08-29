@@ -16,6 +16,7 @@ The product has **two halves**:
 | **Citizen experience** | `/experience` | Bookable, multilingual, 5-minute controlled session with the Minister&rsquo;s digital human. The political narrative and the source of the data. |
 | **Ministry intelligence** | `/dashboard` | DENGAR Intelligence — sentiment map, top issues, citizen suggestions, urgent review queue, action tracker. Two role views: **Minister** (the pulse) and **Secretary General** (assign, track, resolve). The enduring value and the recurring revenue. |
 | **Session Explorer** | `/sessions` | Dashboard view 5, **React-native**. Search/filter every session, open the CVIF Session Insight Record, read the transcript (original + English), work the urgent queue. PII masked by default; reveal is audit-logged. Wired to the real CVIF scorer. |
+| **Knowledge Authority** | `/console` | The internal governance console: object registry, eight-state lifecycle, publish gate and release ledger across AUREN, Project Pioneer and Beauty Intelligence. Reconciles three papers that independently specified the same architecture. See [`docs/KNOWLEDGE-AUTHORITY.md`](docs/KNOWLEDGE-AUTHORITY.md). |
 | **AUREN rehearsal** | `/auren` | Investor rehearsal loop for the AUREN programme — a second configuration of the same governed-interview method. Voice-first digital-human session in **English / Español / 中文 / العربية**: understand → diagnose → stress → coach → retest → evidence chain. See [`docs/AUREN-ORDERING.md`](docs/AUREN-ORDERING.md). |
 
 The **intelligence layer** — the moat — is the [Citizen Voice Intelligence Framework
@@ -34,10 +35,12 @@ dengar/
 │   │   ├── experience/         Citizen experience  → /experience
 │   │   ├── dashboard/          National Pulse       → /dashboard
 │   │   ├── sessions/           Session Explorer     → /sessions  (dashboard view 5)
-│   │   └── auren/              AUREN rehearsal loop → /auren
+│   │   ├── auren/              AUREN rehearsal loop → /auren
+│   │   └── console/            Knowledge Authority  → /console
 │   ├── components/
 │   │   ├── SessionExplorer.tsx React-native view over the CVIF scorer
-│   │   └── auren/              Stage router, Reasoning Map rail, coach beats, scorecard
+│   │   ├── auren/              Stage router, Reasoning Map rail, coach beats, scorecard
+│   │   └── console/            Governance console: registry, gate, release ledger
 │   └── lib/
 │       ├── types.ts            Domain model (Citizen, Slot, Booking, Session, Insight, AuditLog)
 │       ├── seed.ts             Deterministic session generator (feeds the Session Explorer)
@@ -47,6 +50,12 @@ dengar/
 │       │   ├── i18n.ts         EN/ES/ZH/AR variants + fidelity status (canonical)
 │       │   ├── objects.ts      Frozen inventory (elements, signatures, questions, challenges)
 │       │   └── session.ts      Session model, retest selector, mode gate, AILS rule
+│       ├── console/            ★ Unified object schema, vertical packs, publish gate
+│       │   ├── schema.ts       Three-axis eligibility, 8-state lifecycle, conflict resolutions
+│       │   ├── verticals.ts    AUREN · Pioneer · Beauty pack declarations
+│       │   ├── library.ts      Seeded libraries (AUREN migrated from the running one)
+│       │   ├── gate.ts         Nine tests, six blocking, no waive path
+│       │   └── release.ts      Content-addressed bundles + the named-approver ledger
 │       └── cvif/               ★ Citizen Voice Intelligence Framework (the intelligence layer)
 │           ├── types.ts        Session Insight Record + dimension types
 │           ├── dimensions.ts   The 7 dimension rubrics, excluded confounds, review triggers
@@ -59,7 +68,7 @@ dengar/
 │   └── auren-rehearsal.html    Voice-first AUREN loop, 4 languages (no SDK key needed)
 ├── scripts/
 │   └── build-prototype-locale.mjs  `npm run locale` — injects the canonical copy
-└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP · AUREN-ORDERING
+└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP · AUREN-ORDERING · KNOWLEDGE-AUTHORITY
 ```
 
 > **Team taking this over?** Start at [`docs/ENGINEERING-HANDOFF.md`](docs/ENGINEERING-HANDOFF.md) —
