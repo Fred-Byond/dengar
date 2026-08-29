@@ -2518,6 +2518,7 @@ const S = {
   transferred:null,
   coached:[],
   budget:4,
+  gen:0,
   lang:"EN",
   account:{ signedIn:false, phone:null, identityVerified:false, certificateId:null }
 };
@@ -3120,6 +3121,57 @@ function listen(label, rehearsed){
    6. THE LOOP
    ═════════════════════════════════════════════════════════════════ */
 
+/**
+ * Session generation — cancellation for the loop.
+ *
+ * The loop is a chain of awaited turns. Leaving it mid-flight (Exit
+ * Simulation, the PROTECT control, or starting over) does not unwind that
+ * chain: without a generation token the abandoned run keeps resolving, keeps
+ * writing captions and coach beats, and keeps binding signatures — in the
+ * language it started in. That is what surfaces as a Chinese quote under an
+ * Arabic coach panel. Every stage captures the generation it began in and
+ * stops touching the session the moment it is superseded.
+ */
+function stale(g){ return g !== S.gen; }
+
+/** Supersede the running loop and silence whatever it left mid-turn. */
+function bumpGen(){
+  S.gen++;
+  try{ if(synth) synth.cancel(); }catch(e){}
+  stopListening();
+  holding = false;
+  disarmMic();
+  ampTarget = 0;
+  dhState = "idle";
+  el.micBtn.classList.remove("hot");
+  return S.gen;
+}
+
+/** A fresh session. Name, language and account survive; evidence does not. */
+function newSession(){
+  const g = bumpGen();
+  S.reasoningMap = {};
+  S.signatures = [];
+  S.transcript = [];
+  S.coached = [];
+  S.qIndex = 0;
+  S.ladderIndex = 0;
+  S.decision = null;
+  S.transferred = null;
+  S.phase = null;
+  S.mode = "REHEARSE";
+  setKV("pSigs","0");
+  setKV("pBudget","0 / " + L.elementBudget);
+  el.slotProp.innerHTML = "";
+  el.slotCoach.innerHTML = "";
+  setCaption("…", "AUREN", false);
+  setSaid("");
+  personaTarget = 0;
+  el.device.classList.remove("persona");
+  hide(el.badgeTrain); hide(el.exitBtn); hide(el.badgeProtect);
+  return g;
+}
+
 function evaluate(q, answer){
   const a = answer.toLowerCase();
   // Cues are a governed variant of the object, not a UI label: a Spanish
@@ -3153,13 +3205,16 @@ function bindSignature(id, quote){
 
 /* ── Stage: UNDERSTAND ──────────────────────────────────────────── */
 async function stageUnderstand(){
+  const g = S.gen;
   setStage("understand","S1");
   hide(el.rail);
   el.slotProp.innerHTML = ""; el.slotCoach.innerHTML = "";
   log("state S1 · OPEN_NARRATIVE — silent twin-engine extraction");
 
   await new Promise(r => say(U("understandOpener"), {}, r));
+  if(stale(g)) return;
   await listen(U("holdTellMe"), U("narrativeRehearsed"));
+  if(stale(g)) return;
 
   // Situation Map populates silently — it is never rendered to the learner.
   log("situation map: 11 risk markers (silent)", "hi");
@@ -3167,11 +3222,13 @@ async function stageUnderstand(){
   log("competency set: COMP-VERIFY-INDEPENDENT +3");
 
   await new Promise(r => say(U("understandClose"), {}, r));
+  if(stale(g)) return;
   stageDiagnose();
 }
 
 /* ── Stage: DIAGNOSE ────────────────────────────────────────────── */
 async function stageDiagnose(){
+  const g = S.gen;
   setStage("diagnose","S3");
   show(el.rail);
   freezeRail(false);
@@ -3184,7 +3241,9 @@ async function stageDiagnose(){
     S.qIndex = i;
     log("fire " + q.questionId + " → " + q.targetElement);
     await new Promise(r => say(TX(q.ask), {}, r));
+    if(stale(g)) return;
     const a = await listen(U("holdToAnswer"), TX(q.rehearsedAnswer));
+    if(stale(g)) return;
     const status = evaluate(q, a.text);
     S.reasoningMap[q.targetElement] = { status, evidence:a.text, source:q.questionId };
     if(status === "failed" && q.failSignature) bindSignature(q.failSignature, a.text);
@@ -3195,10 +3254,12 @@ async function stageDiagnose(){
     if(i < qs.length-1){
       const acks = TL(L.ui.ackWords);
       await new Promise(r => say(acks[i % acks.length], {}, r));
+      if(stale(g)) return;
     }
   }
 
   await new Promise(r => say(U("stressHandoff"), {}, r));
+  if(stale(g)) return;
   stageStress();
 }
 
@@ -3210,6 +3271,7 @@ async function stageStress(){
 }
 
 async function runChallenge(CH, next){
+  const g = S.gen;
   // Persona switch treatment: badge and exit persist through it.
   show(el.badgeTrain);
   show(el.exitBtn);
@@ -3226,6 +3288,7 @@ async function runChallenge(CH, next){
   setCaption("", CH.persona.name, true);
   setSaid("");
   await new Promise(r => setTimeout(r, 1100));
+  if(stale(g)) return;
 
   const ladder = CH.escalationLadder;
   const replies = TL(CH.rehearsedReplies);
@@ -3243,9 +3306,11 @@ async function runChallenge(CH, next){
     }
 
     await new Promise(r => say(TX(step.say), { persona:true, name:CH.persona.name }, r));
+    if(stale(g)) return;
 
     const last = (i === ladder.length-1);
     const a = await listen(U("holdToRespond"), replies[i] || replies[replies.length-1]);
+    if(stale(g)) return;
 
     // no mid-scenario correction, ever — Paper III §3.4
     if(step.failSignature && S.phase === "stress" && !resisted(a.text)){
@@ -3270,11 +3335,13 @@ async function runChallenge(CH, next){
   el.slotProp.innerHTML = "";
   log("mode gate: REHEARSE envelope closed");
   await new Promise(r => setTimeout(r, 850));
+  if(stale(g)) return;
   next();
 }
 
 /* ── Stage: COACH — three staged beats (D4) ─────────────────────── */
 async function stageCoach(){
+  const g = S.gen;
   setStage("coach","S6");
   const sigs = S.signatures.slice(0,2);
   S.coached = sigs.map(x => x.id);
@@ -3285,6 +3352,7 @@ async function stageCoach(){
   hide(el.rail);
 
   await new Promise(r => say(U("coachOpener"), {}, r));
+  if(stale(g)) return;
 
   for(let k=0;k<sigs.length;k++){
     const sg = sigs[k];
@@ -3299,6 +3367,7 @@ async function stageCoach(){
     el.slotCoach.querySelector(".qt").textContent = "“" + trimQuote(sg.quote) + "”";
     el.slotCoach.querySelector(".qm").textContent = U("yourWords");
     await new Promise(r => setTimeout(r, reduceMotion ? 400 : 1900));
+    if(stale(g)) return;
 
     // BEAT 2 — the name lands.
     const sigEl = document.createElement("div");
@@ -3309,6 +3378,7 @@ async function stageCoach(){
     el.slotCoach.appendChild(sigEl);
     log("beat: name " + sg.id, "hi");
     await new Promise(r => say(F ? TX(F.coaching) : "", {}, r));
+    if(stale(g)) return;
 
     // BEAT 3 — the map returns, unfreezes, and the elements flip.
     if(k === sigs.length-1){
@@ -3317,14 +3387,17 @@ async function stageCoach(){
       renderRail(sigs.map(s => L.failures[s.id] && L.failures[s.id].negatedElement).filter(Boolean));
       log("beat: map reveal", "hi");
       await new Promise(r => setTimeout(r, reduceMotion ? 300 : 900));
+      if(stale(g)) return;
     }
   }
 
   const VA = L.verification["VA-REGCHECK-001"];
   await new Promise(r => say(TX(VA.teach), {}, r));
+  if(stale(g)) return;
   log("teach " + VA.actionId);
 
   await new Promise(r => say(U("coachHandoff"), {}, r));
+  if(stale(g)) return;
 
   el.slotCoach.innerHTML = "";
   stageRetest();
@@ -3623,9 +3696,17 @@ async function stageProtect(){
   log("STOP → VERIFY → DECIDE issued from approved objects");
   $("pBack").onclick = () => {
     hide(el.badgeProtect);
-    S.mode = "REHEARSE"; setKV("pMode","REHEARSE");
-    if(S.transferred === null) { hide(el.sheet); show(el.landing); setStage("landing","S0"); }
-    else stageEvidence();
+    setKV("pMode","REHEARSE");
+    if(S.transferred === null){
+      // Mid-loop PROTECT abandons the rehearsal. Clear it rather than
+      // leaving its evidence to reappear inside the next session.
+      newSession();
+      hide(el.sheet); hide(el.lower); show(el.landing);
+      setStage("landing","S0");
+    } else {
+      S.mode = "REHEARSE";
+      stageEvidence();
+    }
   };
 
   say(U("protectSpoken"), {}, null);
@@ -3636,15 +3717,13 @@ async function stageProtect(){
    ═════════════════════════════════════════════════════════════════ */
 
 function resetLoop(){
-  S.reasoningMap = {}; S.signatures = []; S.transcript = []; S.coached = [];
-  S.qIndex = 0; S.decision = null; S.transferred = null; S.phase = null;
-  setKV("pSigs","0");
-  hide(el.sheet); hide(el.badgeProtect);
+  newSession();
+  hide(el.sheet);
   show(el.lower);
-  S.mode = "REHEARSE"; setKV("pMode","REHEARSE");
+  setKV("pMode","REHEARSE");
   el.pLog.innerHTML = "";
   S.t0 = Date.now();
-  log("session start · mode REHEARSE");
+  log("session start · mode REHEARSE · " + S.lang);
   stageUnderstand();
 }
 
@@ -3665,6 +3744,7 @@ document.getElementById("langRow").addEventListener("click", (e) => {
   const b = e.target.closest(".langc");
   if(!b) return;
   S.lang = b.dataset.l;
+  bumpGen();
   renderLangChips();
   applyLanguage();
   log("session language: " + S.lang + " · fidelity " + LM().fidelity, "hi");
@@ -3716,8 +3796,12 @@ document.getElementById("otpRow").addEventListener("keydown", (e) => {
 
 $("startBtn").onclick = () => {
   S.name = ($("nm").value || "Daniel").trim().split(" ")[0];
-  S.mode = "REHEARSE";
+  // A fresh session every time, or evidence from an abandoned run — bound in
+  // the language it was captured in — survives into the new one.
+  newSession();
   S.t0 = Date.now();
+  el.pLog.innerHTML = "";
+  log("session start · mode REHEARSE · " + S.lang);
   hide(el.entry);
   hide(el.landing);
   hide(el.auth);
@@ -3733,16 +3817,17 @@ $("startBtn").onclick = () => {
   stageUnderstand();
 };
 
-el.protBtn.onclick = () => { stageProtect(); };
+el.protBtn.onclick = () => { bumpGen(); stageProtect(); };
 
 el.exitBtn.onclick = () => {
+  // Supersede the challenge chain first, then run the coach on the new
+  // generation — otherwise the abandoned ladder keeps escalating underneath.
+  bumpGen();
   personaTarget = 0;
   el.device.classList.remove("persona");
   hide(el.badgeTrain); hide(el.exitBtn);
   el.slotProp.innerHTML = "";
-  try{ if(synth) synth.cancel(); }catch(e){}
   log("EXIT SIMULATION — scenario terminated, frame reaffirmed", "hi");
-  disarmMic();
   say(U("exitAck"), {}, () => stageCoach());
 };
 

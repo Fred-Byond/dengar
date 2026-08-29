@@ -67,6 +67,19 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
   const [, bump] = useState(0);
 
   const sessionRef = useRef<AurenSession>(createSession("Daniel", "EN"));
+
+  /**
+   * Session generation — cancellation for the loop.
+   *
+   * The loop is a chain of awaited turns. Leaving it mid-flight (Exit
+   * Simulation, the PROTECT control, a language change, or starting over)
+   * does not unwind that chain: without a generation token the abandoned run
+   * keeps resolving, keeps writing captions and coach beats, and keeps
+   * binding signatures — in the language it started in. Every stage captures
+   * the generation it began in and stops the moment it is superseded.
+   */
+  const genRef = useRef(0);
+  const stale = useCallback((g: number) => g !== genRef.current, []);
   const rerender = useCallback(() => bump((n) => n + 1), []);
 
   const klleon = useKlleonAvatar({ sdkKey, langCode: lang, enabled: true });
@@ -161,6 +174,20 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
     }, 420);
   }, [holding, klleon]);
 
+  /** Supersede the running loop and silence whatever it left mid-turn. */
+  const bumpGen = useCallback(() => {
+    genRef.current += 1;
+    klleon.stopSpeech();
+    klleon.cancelStt();
+    resolverRef.current = null;
+    setHolding(false);
+    setMicArmed(false);
+    setProp(null);
+    setCoachSig(null);
+    setIsPersona(false);
+    return genRef.current;
+  }, [klleon]);
+
   const goStage = useCallback((next: Stage, engine: AurenSession["engineState"]) => {
     sessionRef.current.stage = next;
     sessionRef.current.engineState = engine;
@@ -172,13 +199,16 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
      Untainted free narrative. Nothing analytical renders — the twin
      engines extract in silence, and the Situation Map is never shown. */
   const runUnderstand = useCallback(async () => {
+    const g = genRef.current;
     goStage("understand", "S1");
     setProp(null);
     setCoachSig(null);
 
     const lg = sessionRef.current.lang;
     await say(ui("understandOpener", lg));
+    if (stale(g)) return;
     await listen(ui("holdTellMe", lg), ui("narrativeRehearsed", lg));
+    if (stale(g)) return;
 
     // Situation Map populates silently. It routes scenarios and PROTECT
     // markers; AILS never reads it, and REHEARSE never renders it.
@@ -191,6 +221,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
     ];
 
     await say(ui("understandClose", lg));
+    if (stale(g)) return;
     void runDiagnose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goStage, say, listen]);
@@ -198,6 +229,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
   /* ── Stage: DIAGNOSE [S3] ─────────────────────────────────────────
      One intelligent question at a time, capped by the element budget. */
   const runDiagnose = useCallback(async () => {
+    const g = genRef.current;
     goStage("diagnose", "S3");
     setRailState("building");
 
@@ -207,10 +239,12 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       const q = questions[i];
       sessionRef.current.questionIndex = i;
       await say(t(q.ask, lg));
+      if (stale(g)) return;
       const answer = await listen(
         ui("holdToAnswer", lg),
         t(q.rehearsedAnswer, lg)
       );
+      if (stale(g)) return;
       const status = evaluateAnswer(q, answer, lg);
       sessionRef.current.reasoningMap[q.targetElement] = {
         status,
@@ -222,10 +256,12 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       if (i < questions.length - 1) {
         const acks = tList(UI_ACKS, lg);
         await say(acks[i % acks.length]);
+        if (stale(g)) return;
       }
     }
 
     await say(ui("stressHandoff", lg));
+    if (stale(g)) return;
     void runChallenge(CHALLENGES[0], "stress");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goStage, say, listen, rerender]);
@@ -237,6 +273,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
   const runChallenge = useCallback(
     async (challenge: ChallengeObject, phase: "stress" | "retest") => {
       // Mode gate (Layer 6), enforced in code rather than by convention.
+      const g = genRef.current;
       if (!challengeMayFire(challenge, sessionRef.current.mode)) return;
 
       goStage(phase, phase === "stress" ? "S5" : "S5R");
@@ -253,6 +290,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       setCaptionWho(challenge.persona.name);
       setSaid("");
       await new Promise((r) => window.setTimeout(r, 1100));
+      if (stale(g)) return;
 
       const ladder = challenge.escalationLadder;
       for (let i = 0; i < ladder.length; i++) {
@@ -264,12 +302,14 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
             : null
         );
         await say(t(step.say, lg), { persona: challenge.persona.name });
+        if (stale(g)) return;
 
         const replies = tList(challenge.rehearsedReplies, lg);
         const answer = await listen(
           ui("holdToRespond", lg),
           replies[i] ?? replies[replies.length - 1]
         );
+        if (stale(g)) return;
 
         if (
           phase === "stress" &&
@@ -294,6 +334,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       setProp(null);
       setIsPersona(false);
       await new Promise((r) => window.setTimeout(r, 850));
+      if (stale(g)) return;
 
       if (phase === "stress") void runCoach();
       else void runEvidence();
@@ -304,6 +345,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
 
   /* ── Stage: COACH [S6] — three staged beats (ordering fix D4) ────── */
   const runCoach = useCallback(async () => {
+    const g = genRef.current;
     goStage("coach", "S6");
     setSaid("");
     const signatures = sessionRef.current.signatures.slice(0, 2);
@@ -311,6 +353,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
 
     const lg = sessionRef.current.lang;
     await say(ui("coachOpener", lg));
+    if (stale(g)) return;
 
     for (let k = 0; k < signatures.length; k++) {
       const sig = signatures[k];
@@ -324,11 +367,13 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       setCoachSig(sig);
       setCoachBeat(1);
       await new Promise((r) => window.setTimeout(r, BEAT_PAUSE));
+      if (stale(g)) return;
 
       // Beat 2 — the name lands.
       setCoachBeat(2);
       const coachLine = FAILURE_SIGNATURES[sig.failId]?.coaching;
       await say(coachLine ? t(coachLine, lg) : "");
+      if (stale(g)) return;
 
       // Beat 3 — the map unfreezes and the coached elements flip.
       if (k === signatures.length - 1) {
@@ -339,11 +384,14 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
             .filter((v): v is string => !!v)
         );
         await new Promise((r) => window.setTimeout(r, 900));
+        if (stale(g)) return;
       }
     }
 
     await say(t(VERIFICATION_ACTIONS["VA-REGCHECK-001"].teach, lg));
+    if (stale(g)) return;
     await say(ui("coachHandoff", lg));
+    if (stale(g)) return;
     setCoachSig(null);
     setFlipped([]);
 
@@ -366,34 +414,41 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
      challenge object can be reached. */
   const start = useCallback(async () => {
     const first = (name || "Daniel").trim().split(" ")[0] || "Daniel";
-    sessionRef.current = createSession(first);
+    // The session must be created WITH the chosen language: createSession
+    // defaults to English, so dropping the argument silently resets every
+    // learner to English no matter which chip they picked.
+    bumpGen();
+    sessionRef.current = createSession(first, lang);
     sessionRef.current.mode = "REHEARSE";
     sessionRef.current.startedAt = Date.now();
     klleon.unlockAudio();
     await klleon.waitUntilReady(3500);
     void runUnderstand();
-  }, [name, klleon, runUnderstand]);
+  }, [name, lang, klleon, bumpGen, runUnderstand]);
 
   const exitSimulation = useCallback(async () => {
-    klleon.stopSpeech();
-    setProp(null);
-    setIsPersona(false);
-    setMicArmed(false);
-    resolverRef.current = null;
+    // Supersede the challenge chain first, then run the coach on the new
+    // generation — otherwise the abandoned ladder keeps escalating underneath.
+    bumpGen();
     await say(ui("exitAck", sessionRef.current.lang));
     void runCoach();
-  }, [klleon, say, runCoach]);
+  }, [bumpGen, say, runCoach]);
 
   const restart = useCallback(() => {
     const first = sessionRef.current.learnerName;
-    sessionRef.current = createSession(first);
+    const lg = sessionRef.current.lang;
+    const account = sessionRef.current.account;
+    bumpGen();
+    sessionRef.current = createSession(first, lg);
+    // Certification survives a new rehearsal; evidence does not.
+    sessionRef.current.account = account;
     sessionRef.current.mode = "REHEARSE";
     sessionRef.current.startedAt = Date.now();
     setFlipped([]);
     setCoachSig(null);
     rerender();
     void runUnderstand();
-  }, [rerender, runUnderstand]);
+  }, [bumpGen, rerender, runUnderstand]);
 
   const session = sessionRef.current;
   const meta = languageMeta(lang);
@@ -458,7 +513,10 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
             <button
               type="button"
               className={`${styles.pill} ${styles.pillProtect}`}
-              onClick={() => goStage("protect", "P0")}
+              onClick={() => {
+                bumpGen();
+                goStage("protect", "P0");
+              }}
             >
               {ui("protectBtn", lang)}
             </button>
@@ -508,6 +566,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
                       lang === l.code ? styles.langOn : ""
                     }`}
                     onClick={() => {
+                      bumpGen();
                       setLang(l.code);
                       sessionRef.current.lang = l.code;
                     }}
