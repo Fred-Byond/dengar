@@ -65,9 +65,11 @@ dengar/
 ├── public/prototypes/          The APPROVED prototypes, served verbatim
 │   ├── dengar-citizen.html
 │   ├── national-pulse.html
-│   └── auren-rehearsal.html    Voice-first AUREN loop, 4 languages (no SDK key needed)
+│   ├── auren-rehearsal.html    Voice-first AUREN loop, 4 languages (no SDK key needed)
+│   └── knowledge-authority.html    Governance console, standalone (real gate, real libraries)
 ├── scripts/
-│   └── build-prototype-locale.mjs  `npm run locale` — injects the canonical copy
+│   ├── build-prototype-locale.mjs  `npm run locale`  — injects the canonical AUREN copy
+│   └── build-console-prototype.mjs `npm run console` — injects the console engine
 └── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP · AUREN-ORDERING · KNOWLEDGE-AUTHORITY
 ```
 
@@ -90,7 +92,8 @@ npm install
 npm run dev       # http://localhost:3000
 npm run build     # production build
 npm run typecheck # tsc --noEmit
-npm run locale    # regenerate the prototype's locale from src/lib/auren
+npm run locale    # regenerate the AUREN prototype's locale from src/lib/auren
+npm run console   # regenerate the console prototype's engine from src/lib/console
 ```
 
 Requires Node 18.17+.

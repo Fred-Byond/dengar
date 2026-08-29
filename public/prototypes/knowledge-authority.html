@@ -1,0 +1,2155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Knowledge Authority</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;500&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   Knowledge Authority — the governance console.
+
+   Deliberately not any vertical's brand. Beauty Intelligence §3.4 argues the
+   governance workspace must be visibly separate from operations — different
+   people, different risk, auditability — so it does not borrow the look of
+   the products it governs.
+   ═════════════════════════════════════════════════════════════════════ */
+:root{
+  --ground:#FBFAF8; --surface:#FFFFFF; --surface-2:#F4F2ED;
+  --line:#E3DFD7; --line-soft:#EFECE6;
+  --ink:#15171B; --ink-2:#3D424A; --ink-3:#6B7079; --ink-4:#93979E;
+  --accent:#B0632F; --accent-soft:#F8EDE4;
+  --pass:#2F7A5E; --fail:#A8402F; --warn:#8A6A22; --idle:#93979E;
+  --sans:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --serif:"Newsreader",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#101216; --surface:#171A1F; --surface-2:#1E2228;
+    --line:#2B3038; --line-soft:#22262D;
+    --ink:#EDECE9; --ink-2:#C2C6CC; --ink-3:#8E949D; --ink-4:#6A7079;
+    --accent:#D98A50; --accent-soft:#2A211A;
+    --pass:#6FBF9A; --fail:#E08268; --warn:#D6AE5C; --idle:#6A7079;
+  }
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--ground);color:var(--ink-2);
+  font-family:var(--sans);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hidden{display:none!important}
+
+/* ── Sign in ─────────────────────────────────────────────────────────── */
+.signin{min-height:100dvh;display:grid;place-items:center;padding:24px}
+.signinCard{
+  width:min(430px,100%);background:var(--surface);border:1px solid var(--line);
+  border-radius:4px;padding:34px 32px;display:flex;flex-direction:column;gap:14px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04),0 18px 40px -30px rgba(0,0,0,.5);
+}
+.wordmark{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.mark{width:22px;height:22px;border-radius:3px;background:linear-gradient(135deg,var(--accent) 0%,#6A57B8 100%);flex:none}
+.wordmarkText{font-size:15px;font-weight:700;letter-spacing:.14em;color:var(--ink);text-transform:uppercase}
+.signinCard h1{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.2;color:var(--ink);margin:0}
+.signinCard p{margin:0;font-size:13.5px;color:var(--ink-3);line-height:1.55}
+
+/* ── Shell ───────────────────────────────────────────────────────────── */
+.topbar{
+  display:flex;align-items:center;gap:14px;padding:12px 22px;
+  border-bottom:1px solid var(--line);background:var(--surface);flex-wrap:wrap;
+  position:sticky;top:0;z-index:10;
+}
+.spacer{flex:1}
+/* Beauty §3.4: a workspace SWITCH, not a menu item. */
+.wsSwitch{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.wsBtn{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  padding:7px 13px;background:var(--surface);color:var(--ink-3);border:0;
+}
+.wsBtn.on{background:var(--accent);color:#fff}
+.who{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);text-align:right;line-height:1.5}
+.who b{color:var(--ink);font-weight:600}
+
+.body{display:grid;grid-template-columns:236px 1fr;min-height:calc(100dvh - 50px)}
+@media (max-width:880px){
+  .body{grid-template-columns:1fr}
+  .side{border-right:0;border-bottom:1px solid var(--line)}
+}
+.side{
+  border-right:1px solid var(--line);background:var(--surface-2);
+  padding:20px 16px;display:flex;flex-direction:column;gap:22px;
+}
+.sideGroup{display:flex;flex-direction:column;gap:7px}
+.sideLabel{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-4);margin-bottom:2px;
+}
+.vBtn{
+  display:flex;align-items:flex-start;gap:9px;padding:10px 11px;
+  border:1px solid var(--line);border-radius:3px;background:var(--surface);
+  text-align:left;width:100%;
+}
+.vBtn.on{border-color:var(--accent);background:var(--accent-soft)}
+.vDot{width:8px;height:8px;border-radius:50%;flex:none;margin-top:5px}
+.vName{display:block;font-size:13px;font-weight:600;color:var(--ink);line-height:1.3}
+.vMeta{display:block;font-size:10.5px;color:var(--ink-4);line-height:1.4;margin-top:2px}
+.navBtn{
+  padding:8px 11px;border:0;border-radius:3px;background:none;text-align:left;
+  font-size:13px;color:var(--ink-2);width:100%;
+}
+.navBtn.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:inset 2px 0 0 var(--accent)}
+.doctrine{font-size:12px;color:var(--ink-3);line-height:1.55}
+
+.main{padding:26px 28px 90px;min-width:0}
+.pageHead{
+  display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;
+  margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--line-soft);
+}
+.pageHead h2{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.15;color:var(--ink);margin:0}
+.pageHead p{margin:5px 0 0;font-size:13px;color:var(--ink-3);max-width:62ch;line-height:1.55}
+.eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-4)}
+
+/* ── Controls ────────────────────────────────────────────────────────── */
+.btn{
+  font-size:13px;font-weight:600;padding:9px 16px;border-radius:3px;
+  border:1px solid var(--accent);background:var(--accent);color:#fff;
+}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:var(--surface);color:var(--ink-2);border-color:var(--line)}
+.btnRow{display:flex;gap:9px;flex-wrap:wrap}
+.input{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:3px;
+  background:var(--surface);color:var(--ink);font-family:var(--sans);font-size:14px;
+}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-4);
+}
+
+/* ── Stats ───────────────────────────────────────────────────────────── */
+.stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:3px;
+  overflow:hidden;margin-bottom:22px;
+}
+.stat{background:var(--surface);padding:14px 16px}
+.statN{font-family:var(--mono);font-size:21px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.statL{font-size:11.5px;color:var(--ink-4);margin-top:2px;line-height:1.4}
+
+/* ── Table ───────────────────────────────────────────────────────────── */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:680px}
+th{
+  text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-4);font-weight:500;padding:11px 14px;
+  border-bottom:1px solid var(--line);background:var(--surface-2);
+}
+td{padding:11px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top;color:var(--ink-2);line-height:1.45}
+tr:last-child td{border-bottom:0}
+.rowBtn{background:none;border:0;padding:0;font-size:13px;color:var(--ink);font-weight:600;text-align:left}
+.rowBtn:hover{color:var(--accent)}
+.mono{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+
+/* ── Chips ───────────────────────────────────────────────────────────── */
+.chip{
+  display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;
+  text-transform:uppercase;padding:3px 7px;border-radius:2px;border:1px solid currentColor;white-space:nowrap;
+}
+.c-draft{color:var(--idle)} .c-review{color:var(--warn)} .c-approved{color:var(--accent)}
+.c-effective{color:var(--pass)} .c-retired{color:var(--fail)}
+.kindChip{font-family:var(--mono);font-size:9.5px;color:var(--ink-4);letter-spacing:.06em}
+
+/* ── Gate report ─────────────────────────────────────────────────────── */
+.verdictBar{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 20px;
+  border:1px solid var(--line);border-left:3px solid var(--fail);border-radius:3px;
+  background:var(--surface);margin-bottom:20px;
+}
+.verdictBar.ok{border-left-color:var(--pass)}
+.verdictText{font-family:var(--serif);font-size:20px;color:var(--ink);line-height:1.25}
+.verdictSub{font-size:12.5px;color:var(--ink-3);line-height:1.5;width:100%}
+.gateList{display:flex;flex-direction:column;gap:10px}
+.gate{border:1px solid var(--line);border-radius:3px;background:var(--surface);overflow:hidden}
+.gateHead{display:grid;grid-template-columns:80px 1fr auto;gap:14px;align-items:center;padding:13px 16px}
+@media (max-width:620px){.gateHead{grid-template-columns:72px 1fr}}
+.gateMark{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 0;text-align:center;border-radius:2px;border:1px solid currentColor;
+}
+.m-pass{color:var(--pass)} .m-hard{color:var(--fail)} .m-adv{color:var(--warn)} .m-na{color:var(--idle)}
+.gateName{display:block;font-size:14px;font-weight:600;color:var(--ink)}
+.gateAsserts{display:block;font-size:12px;color:var(--ink-4);line-height:1.45;margin-top:2px}
+.gateCount{font-family:var(--mono);font-size:10.5px;color:var(--ink-4);white-space:nowrap}
+.findings{border-top:1px solid var(--line-soft);background:var(--surface-2);padding:4px 0}
+.finding{display:grid;grid-template-columns:200px 1fr;gap:14px;padding:9px 16px;font-size:12.5px;line-height:1.5}
+@media (max-width:620px){.finding{grid-template-columns:1fr;gap:3px}}
+.fSubject{font-family:var(--mono);font-size:11px;color:var(--accent);word-break:break-word}
+
+/* ── Detail ──────────────────────────────────────────────────────────── */
+.detail{
+  border:1px solid var(--line);border-radius:3px;background:var(--surface);
+  padding:22px 24px;display:flex;flex-direction:column;gap:18px;margin-bottom:20px;
+}
+.detail h3{font-size:17px;color:var(--ink);margin:0 0 4px;line-height:1.3}
+.kv{display:grid;grid-template-columns:172px 1fr;gap:10px 16px;font-size:13px;margin:0}
+@media (max-width:620px){.kv{grid-template-columns:1fr;gap:2px 0}.kv dt{margin-top:10px}}
+.kv dt{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-4);padding-top:2px;
+}
+.kv dd{margin:0;color:var(--ink-2);line-height:1.5}
+.chain{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.chainStep{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;padding:4px 8px;
+  border-radius:2px;border:1px solid var(--line);color:var(--ink-4);
+}
+.chainStep.done{border-color:var(--pass);color:var(--pass)}
+.chainStep.now{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.chainArrow{color:var(--ink-4);font-size:10px}
+
+.note{
+  border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:3px;
+  background:var(--accent-soft);padding:15px 18px;font-size:12.5px;line-height:1.6;color:var(--ink-2);
+}
+.note b{color:var(--ink)}
+.empty{
+  padding:40px 20px;text-align:center;color:var(--ink-4);font-size:13px;
+  border:1px dashed var(--line);border-radius:3px;
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ── Sign in ──────────────────────────────────────────────────────── -->
+<div class="signin" id="signin">
+  <div class="signinCard">
+    <div class="wordmark">
+      <span class="mark"></span>
+      <span class="wordmarkText">Knowledge Authority</span>
+    </div>
+    <h1>Sign in to the governance workspace.</h1>
+    <p>
+      Your role decides what you can approve. It is recorded on every object you
+      advance, and your name is recorded on every release you sign — never the
+      other way round.
+    </p>
+    <div class="field">
+      <label for="nm">Name</label>
+      <input id="nm" class="input" type="text" value="Fred Chong">
+    </div>
+    <div class="field">
+      <label for="rl">Role</label>
+      <select id="rl" class="input">
+        <option value="role:domain_reviewer">Domain reviewer</option>
+        <option value="role:legal_reviewer">Legal reviewer</option>
+        <option value="role:safety_reviewer">Safety reviewer</option>
+        <option value="role:regulatory_approver">Regulatory approver</option>
+        <option value="role:platform_admin">Platform admin (BYOND)</option>
+      </select>
+    </div>
+    <button class="btn" id="enterBtn">Enter workspace</button>
+  </div>
+</div>
+
+<!-- ── Shell ────────────────────────────────────────────────────────── -->
+<div id="shell" class="hidden">
+  <div class="topbar">
+    <div class="wordmark">
+      <span class="mark"></span>
+      <span class="wordmarkText">Knowledge Authority</span>
+    </div>
+    <div class="wsSwitch">
+      <button class="wsBtn on" data-ws="authority">Governance</button>
+      <button class="wsBtn" data-ws="operations">Operations</button>
+    </div>
+    <span class="spacer"></span>
+    <div class="who"><b id="whoName">—</b><br><span id="whoRole">—</span></div>
+    <button class="btn ghost" id="signOut">Sign out</button>
+  </div>
+
+  <div class="body">
+    <aside class="side">
+      <div class="sideGroup">
+        <span class="sideLabel">Vertical</span>
+        <div id="verticalList"></div>
+      </div>
+      <div class="sideGroup" id="navGroup">
+        <span class="sideLabel">Workspace</span>
+        <button class="navBtn on" data-panel="library">Object library</button>
+        <button class="navBtn" data-panel="gate">Publish gate</button>
+        <button class="navBtn" data-panel="releases">Release ledger</button>
+      </div>
+      <div class="sideGroup">
+        <span class="sideLabel">Doctrine</span>
+        <div class="doctrine" id="doctrine"></div>
+      </div>
+    </aside>
+    <main class="main" id="main"></main>
+  </div>
+</div>
+
+<script type="module">
+/* ═══════════════════════════════════════════════════════════════════════
+   THE ENGINE — generated from src/lib/console and src/lib/auren.
+
+   Do not hand-edit between the markers: run `npm run console`. The schema,
+   the seeded libraries and the nine-test publish gate below are the SAME CODE
+   the /console route runs, so the prototype and the product cannot disagree
+   about whether a bundle is releasable.
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* AUREN-CONSOLE-START — generated by scripts/build-console-prototype.mjs */
+/* ── lib/console/schema.js ─────────────────────────────────── */
+/**
+ * Knowledge Authority — the unified object schema.
+ *
+ * Reconciles three specifications that independently arrived at the same
+ * architecture:
+ *
+ *   AUREN Paper III v1.1        — Scam + Competency objects, mode eligibility
+ *   Project Pioneer Paper IV    — Offence objects, eight-state lifecycle,
+ *                                 leading-risk control, language fidelity gate
+ *   Beauty Intelligence         — Claim objects, market scope, publish gate
+ *
+ * Where they disagree, the resolution is recorded at the field. There are four
+ * such places and each one is a fork if it is decided wrongly, so they are
+ * settled in the schema rather than in a convention document.
+ */
+const STATUS_CHAIN = [
+    "DRAFT",
+    "LEGAL_REVIEW",
+    "TERMINOLOGY_PASS",
+    "FIDELITY_PASS",
+    "APPROVED",
+    "EFFECTIVE",
+];
+/** Only EFFECTIVE objects are loadable at runtime. */
+function isLoadable(status) {
+    return status === "EFFECTIVE";
+}
+function nextStatus(status) {
+    const i = STATUS_CHAIN.indexOf(status);
+    if (i === -1 || i === STATUS_CHAIN.length - 1)
+        return null;
+    return STATUS_CHAIN[i + 1];
+}
+
+/* ── lib/auren/objects.js ─────────────────────────────────── */
+/**
+ * AUREN — the frozen knowledge-object inventory.
+ *
+ * Source of truth: "AUREN — The Intelligent Investor Interview & Coaching
+ * Engine" (Paper III v1.1) and "AUREN — The Product Experience & Build
+ * Specification" (Paper IV v1.0).
+ *
+ * Governing rule (Paper III, Rule 1 and Rule 2): every string that can reach a
+ * learner and contribute to a determination is a versioned OBJECT, not prose
+ * written inline at a call site. Ontology is populated as DATA — never as code.
+ * Adding a scam typology must never require a component change.
+ *
+ * Mode eligibility (Rule 3) is declared per object and enforced by the session
+ * machine, not by prompt discipline: a Challenge object can never fire outside
+ * REHEARSE.
+ *
+ * LANGUAGE (Paper III §6.3, §10.2): a Question object carries "language
+ * variants with fidelity status", and the learner's language is a first-class
+ * dimension of every scored determination. So the localized fields below are
+ * not translations of a UI — they are variants of the governed object, and that
+ * includes `satisfactionCues`. A Spanish answer must be evaluated against
+ * Spanish cues, or the element silently fails for every non-English learner.
+ */
+const ELEMENTS = {
+    "E-VER-02": {
+        elementId: "E-VER-02",
+        label: {
+            EN: "Independent verification",
+            ES: "Verificación independiente",
+            ZH: "独立核实",
+            AR: "التحقق المستقل",
+        },
+        competencyId: "COMP-VERIFY-INDEPENDENT",
+        authorityAnchor: "IOSCO investor-education principle IE-2.3",
+        ailsDimension: "Scam Resistance",
+    },
+    "E-RET-01": {
+        elementId: "E-RET-01",
+        label: {
+            EN: "Return plausibility",
+            ES: "Plausibilidad del rendimiento",
+            ZH: "回报合理性",
+            AR: "معقولية العائد",
+        },
+        competencyId: "COMP-RISK-RETURN",
+        authorityAnchor: "OECD/INFE competence 3.1",
+        ailsDimension: "Risk Awareness",
+    },
+    "E-AI-01": {
+        elementId: "E-AI-01",
+        label: {
+            EN: "AI-capability scepticism",
+            ES: "Escepticismo ante las capacidades de la IA",
+            ZH: "对 AI 能力的怀疑",
+            AR: "التشكيك في قدرات الذكاء الاصطناعي",
+        },
+        competencyId: "COMP-AILIT-CLAIMS",
+        authorityAnchor: "IOSCO PS1 guidance 2.2",
+        ailsDimension: "AI Literacy",
+    },
+    "E-RISK-01": {
+        elementId: "E-RISK-01",
+        label: {
+            EN: "Understands downside",
+            ES: "Comprende el riesgo de pérdida",
+            ZH: "理解下行风险",
+            AR: "إدراك مخاطر الخسارة",
+        },
+        competencyId: "COMP-RISK-DOWNSIDE",
+        authorityAnchor: "OECD/INFE competence 2.4",
+        ailsDimension: "Investor Reasoning",
+    },
+    "E-URG-01": {
+        elementId: "E-URG-01",
+        label: {
+            EN: "Resists urgency",
+            ES: "Resiste la urgencia",
+            ZH: "抵抗紧迫感",
+            AR: "مقاومة الاستعجال",
+        },
+        competencyId: "COMP-STABILITY-URGENCY",
+        authorityAnchor: "IOSCO investor-education principle IE-4.1",
+        ailsDimension: "Behavioural Stability",
+    },
+    "E-AUTH-01": {
+        elementId: "E-AUTH-01",
+        label: {
+            EN: "Questions authority claims",
+            ES: "Cuestiona los argumentos de autoridad",
+            ZH: "质疑权威背书",
+            AR: "التشكيك في ادعاءات السلطة",
+        },
+        competencyId: "COMP-STABILITY-AUTHORITY",
+        authorityAnchor: "IOSCO investor-education principle IE-4.2",
+        ailsDimension: "Behavioural Stability",
+    },
+    "E-SOC-01": {
+        elementId: "E-SOC-01",
+        label: {
+            EN: "Discounts social proof",
+            ES: "Relativiza la prueba social",
+            ZH: "不轻信从众证据",
+            AR: "عدم الانسياق وراء دليل الجماعة",
+        },
+        competencyId: "COMP-STABILITY-SOCIAL",
+        authorityAnchor: "OECD/INFE competence 4.2",
+        ailsDimension: "Behavioural Stability",
+    },
+    "E-PAY-01": {
+        elementId: "E-PAY-01",
+        label: {
+            EN: "Payment-destination scrutiny",
+            ES: "Escrutinio del destino del pago",
+            ZH: "审查资金去向",
+            AR: "تدقيق وجهة الدفع",
+        },
+        competencyId: "COMP-VERIFY-PAYMENT",
+        authorityAnchor: "IOSCO investor-education principle IE-3.4",
+        ailsDimension: "Scam Resistance",
+    },
+};
+const FAILURE_SIGNATURES = {
+    "FAIL-VERIFY-SELFASSERTED": {
+        failId: "FAIL-VERIFY-SELFASSERTED",
+        negatedElement: "E-VER-02",
+        definition: {
+            EN: "Trusts promoter-supplied evidence as independent evidence.",
+            ES: "Toma como evidencia independiente lo que aporta el propio promotor.",
+            ZH: "把推销方自己提供的材料当作独立证据。",
+            AR: "يعتبر ما يقدّمه المروّج نفسه دليلًا مستقلًا.",
+        },
+        coaching: {
+            EN: "You treated something the promoter gave you as if it were independent evidence. Their website telling you they are regulated is them telling you they are regulated. That is a claim, not a check.",
+            ES: "Trataste algo que te dio el propio promotor como si fuera evidencia independiente. Que su web diga que están regulados es que ellos te dicen que están regulados. Eso es una afirmación, no una comprobación.",
+            ZH: "你把推销方给你的东西当成了独立证据。他们的网站说自己受监管，等于他们自己说自己受监管。那是一个说法，不是一次核实。",
+            AR: "تعاملت مع شيء قدّمه لك المروّج كأنه دليل مستقل. موقعهم يقول إنهم مرخّصون — أي أنهم هم من يقول ذلك. هذا ادعاء، وليس تحققًا.",
+        },
+    },
+    "FAIL-URGENCY-COMPLIANCE": {
+        failId: "FAIL-URGENCY-COMPLIANCE",
+        negatedElement: "E-URG-01",
+        definition: {
+            EN: "Changes verification behaviour under artificial scarcity or time pressure.",
+            ES: "Cambia su conducta de verificación ante una escasez artificial o presión de tiempo.",
+            ZH: "在人为制造的稀缺或时间压力下改变了核实行为。",
+            AR: "يغيّر سلوكه في التحقق تحت ندرة مصطنعة أو ضغط زمني.",
+        },
+        coaching: {
+            EN: "When I put a deadline on it, your verification stopped. You did not ask fewer questions because you were satisfied. You asked fewer questions because the clock started.",
+            ES: "En cuanto puse una fecha límite, tu verificación se detuvo. No hiciste menos preguntas porque estuvieras convencido. Hiciste menos preguntas porque empezó el reloj.",
+            ZH: "我一设下截止时间，你的核实就停止了。你问得更少，不是因为你已经放心，而是因为计时开始了。",
+            AR: "ما إن وضعت موعدًا نهائيًا حتى توقّف تحققك. لم تقلّل أسئلتك لأنك اقتنعت، بل لأن الساعة بدأت.",
+        },
+    },
+    "FAIL-AUTHORITY-DEFERENCE": {
+        failId: "FAIL-AUTHORITY-DEFERENCE",
+        negatedElement: "E-AUTH-01",
+        definition: {
+            EN: "Reduces scrutiny when authority, celebrity, or institutional status is invoked.",
+            ES: "Reduce el escrutinio cuando se invoca autoridad, fama o respaldo institucional.",
+            ZH: "一旦搬出权威、名人或机构身份，就放松了审视。",
+            AR: "يخفّض مستوى تدقيقه عند استحضار سلطة أو شهرة أو صفة مؤسسية.",
+        },
+        coaching: {
+            EN: "The moment a recognisable name was attached, your questions got smaller. Status is not evidence — it is the cheapest thing in the world to borrow.",
+            ES: "En cuanto apareció un nombre reconocible, tus preguntas se hicieron más pequeñas. El estatus no es evidencia: es lo más barato del mundo de tomar prestado.",
+            ZH: "一旦挂上一个你认得的名字，你的问题就变小了。名望不是证据——它是这世上最容易借用的东西。",
+            AR: "ما إن ارتبط الأمر باسم معروف حتى تقلّصت أسئلتك. المكانة ليست دليلًا — وهي أرخص ما يمكن استعارته في العالم.",
+        },
+    },
+    "FAIL-SOCIAL-PROOF": {
+        failId: "FAIL-SOCIAL-PROOF",
+        negatedElement: "E-SOC-01",
+        definition: {
+            EN: "Uses other people's apparent success as evidence of legitimacy.",
+            ES: "Usa el aparente éxito de otros como prueba de legitimidad.",
+            ZH: "把别人表面上的成功当作合法性的证据。",
+            AR: "يستخدم نجاح الآخرين الظاهري دليلًا على المشروعية.",
+        },
+        coaching: {
+            EN: "You let other people's apparent success stand in for evidence. Screenshots supplied by the person selling to you are not other people — they are more of the same claim.",
+            ES: "Dejaste que el aparente éxito de otros sustituyera a la evidencia. Las capturas que te da quien te está vendiendo no son otras personas: son más de la misma afirmación.",
+            ZH: "你让别人表面的成功替代了证据。由卖方提供的截图并不是「别人」——它们只是同一个说法的延伸。",
+            AR: "جعلت نجاح الآخرين الظاهري بديلًا عن الدليل. لقطات الشاشة التي يقدّمها من يبيع لك ليست أشخاصًا آخرين — إنها المزيد من الادعاء نفسه.",
+        },
+    },
+    "FAIL-SUNK-COST": {
+        failId: "FAIL-SUNK-COST",
+        negatedElement: "E-RISK-01",
+        definition: {
+            EN: "Continues because money or time has already been committed.",
+            ES: "Continúa porque ya ha comprometido dinero o tiempo.",
+            ZH: "因为已经投入了金钱或时间而继续下去。",
+            AR: "يستمر لأنه سبق أن التزم بمال أو وقت.",
+        },
+        coaching: {
+            EN: "What you had already put in became a reason to put in more. That is the direction this always runs, and it is the one to watch in yourself.",
+            ES: "Lo que ya habías puesto se convirtió en una razón para poner más. Siempre corre en esa dirección, y es lo que hay que vigilar en uno mismo.",
+            ZH: "你已经投入的部分，变成了继续投入的理由。这件事永远朝这个方向发展——这正是你要在自己身上留意的。",
+            AR: "ما دفعته بالفعل صار سببًا لدفع المزيد. هذا هو الاتجاه الذي يسير فيه الأمر دائمًا، وهو ما ينبغي أن تراقبه في نفسك.",
+        },
+    },
+    "FAIL-GREED-OVERRIDE": {
+        failId: "FAIL-GREED-OVERRIDE",
+        negatedElement: "E-RET-01",
+        definition: {
+            EN: "Recognises implausibility but proceeds because upside overwhelms caution.",
+            ES: "Reconoce que no es plausible pero sigue adelante porque la ganancia arrolla la cautela.",
+            ZH: "明知不合常理，却因为收益诱惑压倒了谨慎而继续。",
+            AR: "يدرك عدم المعقولية لكنه يمضي لأن المكسب يطغى على الحذر.",
+        },
+        coaching: {
+            EN: "You could see the number did not make sense, and you moved toward it anyway. Knowing that about yourself is worth more than the rule.",
+            ES: "Veías que el número no cuadraba y aun así fuiste hacia él. Saber eso de ti mismo vale más que la regla.",
+            ZH: "你看得出那个数字不合理，却仍然朝它靠近。认清自己这一点，比记住规则更有价值。",
+            AR: "كنت ترى أن الرقم غير منطقي، ومع ذلك اتجهت إليه. معرفتك بهذا عن نفسك أثمن من القاعدة ذاتها.",
+        },
+    },
+    "FAIL-CONFIRMATION-SEEKING": {
+        failId: "FAIL-CONFIRMATION-SEEKING",
+        negatedElement: "E-VER-02",
+        definition: {
+            EN: "Looks only for information supporting the desired decision.",
+            ES: "Solo busca información que respalde la decisión deseada.",
+            ZH: "只寻找支持自己既定决定的信息。",
+            AR: "لا يبحث إلا عن معلومات تدعم القرار الذي يريده.",
+        },
+        coaching: {
+            EN: "Every check you ran was one that could only agree with you. A check that cannot fail is not a check.",
+            ES: "Todas las comprobaciones que hiciste solo podían darte la razón. Una comprobación que no puede fallar no es una comprobación.",
+            ZH: "你做的每一次核查，都只可能同意你。一个不可能失败的核查，不算核查。",
+            AR: "كل تحقق أجريته كان لا يمكنه إلا أن يوافقك. التحقق الذي لا يمكن أن يفشل ليس تحققًا.",
+        },
+    },
+    "FAIL-AI-AUTHORITY": {
+        failId: "FAIL-AI-AUTHORITY",
+        negatedElement: "E-AI-01",
+        definition: {
+            EN: "Treats “AI-powered” as evidence of predictive capability or legitimacy.",
+            ES: "Toma «impulsado por IA» como prueba de capacidad predictiva o legitimidad.",
+            ZH: "把「AI 驱动」当作预测能力或合法性的证据。",
+            AR: "يعتبر عبارة «مدعوم بالذكاء الاصطناعي» دليلًا على قدرة تنبؤية أو مشروعية.",
+        },
+        coaching: {
+            EN: "You read “AI” as a reason to expect returns. It describes how something is built, not whether it works.",
+            ES: "Leíste «IA» como una razón para esperar rendimientos. Eso describe cómo está construido algo, no si funciona.",
+            ZH: "你把「AI」读成了期待回报的理由。它描述的是东西怎么造出来的，不是它管不管用。",
+            AR: "قرأت كلمة «ذكاء اصطناعي» كسبب لتوقّع أرباح. إنها تصف كيف بُني الشيء، لا ما إذا كان يعمل.",
+        },
+    },
+};
+const QUESTIONS = [
+    {
+        questionId: "Q-VER-002",
+        targetElement: "E-VER-02",
+        modeEligibility: ["REHEARSE", "LEARN"],
+        failSignature: "FAIL-VERIFY-SELFASSERTED",
+        ask: {
+            EN: "You mentioned the company. How did you verify that they are actually authorised to offer this investment?",
+            ES: "Has mencionado la empresa. ¿Cómo verificaste que realmente están autorizados a ofrecer esta inversión?",
+            ZH: "你提到了这家公司。你是怎么核实他们确实获准提供这项投资的？",
+            AR: "ذكرت الشركة. كيف تحققت من أنهم مرخّصون فعلًا لتقديم هذا الاستثمار؟",
+        },
+        rehearsedAnswer: {
+            EN: "Their website says they're regulated, and it looks professional.",
+            ES: "Su página web dice que están regulados, y parece profesional.",
+            ZH: "他们网站上说自己受监管，看起来挺专业的。",
+            AR: "موقعهم يقول إنهم مرخّصون، ويبدو احترافيًا.",
+        },
+        satisfactionCues: {
+            EN: {
+                pass: ["register", "regulator", "authority", "commission", "look it up", "official", "independent", "checked myself"],
+                fail: ["website", "site", "they said", "they told", "looks", "professional", "brochure", "licence", "license", "certificate"],
+            },
+            ES: {
+                pass: ["registro", "regulador", "cnmv", "comisión", "consultar", "oficial", "independiente", "lo comprobé", "verifiqué"],
+                fail: ["web", "página", "sitio", "dijeron", "me dijo", "parece", "profesional", "folleto", "licencia", "certificado"],
+            },
+            ZH: {
+                pass: ["监管", "注册", "名录", "官网查", "官方", "独立", "自己查", "证监"],
+                fail: ["网站", "他们说", "看起来", "专业", "宣传", "执照", "证书", "页面"],
+            },
+            AR: {
+                pass: ["السجل", "الهيئة", "الجهة", "تحققت", "رسمي", "مستقل", "بحثت بنفسي", "الرقابة"],
+                fail: ["الموقع", "قالوا", "أخبروني", "يبدو", "احترافي", "كتيب", "رخصة", "شهادة"],
+            },
+        },
+    },
+    {
+        questionId: "Q-RET-001",
+        targetElement: "E-RET-01",
+        modeEligibility: ["REHEARSE", "LEARN"],
+        failSignature: "FAIL-GREED-OVERRIDE",
+        ask: {
+            EN: "Fifteen percent a month. What do you think is actually producing a return like that?",
+            ES: "Un quince por ciento mensual. ¿Qué crees que produce realmente un rendimiento así?",
+            ZH: "每月百分之十五。你觉得究竟是什么在产生这样的回报？",
+            AR: "خمسة عشر بالمئة شهريًا. ما الذي تظنّه يحقّق عائدًا كهذا فعلًا؟",
+        },
+        rehearsedAnswer: {
+            EN: "I assume the algorithm is just better than what most people have access to.",
+            ES: "Supongo que el algoritmo es simplemente mejor que el que tiene la mayoría.",
+            ZH: "我猜是他们的算法比大多数人能接触到的更好吧。",
+            AR: "أفترض أن الخوارزمية ببساطة أفضل مما يتاح لمعظم الناس.",
+        },
+        satisfactionCues: {
+            EN: {
+                pass: ["too good", "unrealistic", "not possible", "impossible", "suspicious", "doesn't add", "does not add", "unsustainable", "red flag"],
+                fail: ["algorithm", "better", "access", "edge", "smarter", "technology", "assume", "probably", "not sure"],
+            },
+            ES: {
+                pass: ["demasiado bueno", "irreal", "no es posible", "imposible", "sospechoso", "no cuadra", "insostenible", "señal de alarma"],
+                fail: ["algoritmo", "mejor", "acceso", "ventaja", "tecnología", "supongo", "probablemente", "no sé"],
+            },
+            ZH: {
+                pass: ["好得不真实", "不现实", "不可能", "可疑", "说不通", "不可持续", "危险信号", "太高"],
+                fail: ["算法", "更好", "渠道", "优势", "技术", "我猜", "可能", "不确定"],
+            },
+            AR: {
+                pass: ["جيد لدرجة", "غير واقعي", "مستحيل", "غير ممكن", "مريب", "لا يستقيم", "غير مستدام", "علامة خطر"],
+                fail: ["الخوارزمية", "أفضل", "وصول", "ميزة", "التقنية", "أفترض", "ربما", "لست متأكدًا"],
+            },
+        },
+    },
+    {
+        questionId: "Q-AI-001",
+        targetElement: "E-AI-01",
+        modeEligibility: ["REHEARSE", "LEARN"],
+        failSignature: "FAIL-AI-AUTHORITY",
+        ask: {
+            EN: "They describe it as an AI trading system. What does “AI” tell you about whether it can predict the market?",
+            ES: "Lo describen como un sistema de trading con IA. ¿Qué te dice «IA» sobre si puede predecir el mercado?",
+            ZH: "他们把它描述成一个 AI 交易系统。「AI」这三个字，能告诉你它是否能预测市场吗？",
+            AR: "يصفونه بأنه نظام تداول بالذكاء الاصطناعي. ماذا تخبرك عبارة «ذكاء اصطناعي» عن قدرته على التنبؤ بالسوق؟",
+        },
+        rehearsedAnswer: {
+            EN: "AI can process a lot more data than a person, so it should be more accurate.",
+            ES: "La IA procesa muchos más datos que una persona, así que debería ser más precisa.",
+            ZH: "AI 能处理的数据比人多得多，所以应该会更准确。",
+            AR: "الذكاء الاصطناعي يعالج بيانات أكثر بكثير من الإنسان، لذا يُفترض أن يكون أدقّ.",
+        },
+        satisfactionCues: {
+            EN: {
+                pass: ["nothing", "doesn't mean", "does not mean", "no evidence", "marketing", "buzzword", "can't predict", "cannot predict", "says nothing"],
+                fail: ["more data", "accurate", "smarter", "better than", "process", "predict", "should be", "advanced", "powerful"],
+            },
+            ES: {
+                pass: ["nada", "no significa", "no dice nada", "no es prueba", "marketing", "palabra de moda", "no puede predecir"],
+                fail: ["más datos", "preciso", "más lista", "mejor que", "procesa", "predecir", "debería", "avanzada", "potente"],
+            },
+            ZH: {
+                pass: ["什么也说明不了", "不代表", "不能说明", "营销", "噱头", "无法预测", "不能预测", "没有证据"],
+                fail: ["更多数据", "更准", "更聪明", "比人强", "处理", "预测", "应该", "先进", "强大"],
+            },
+            AR: {
+                pass: ["لا شيء", "لا يعني", "لا يدل", "ليس دليلًا", "تسويق", "مصطلح رائج", "لا يمكن التنبؤ"],
+                fail: ["بيانات أكثر", "أدق", "أذكى", "أفضل من", "يعالج", "يتنبأ", "يُفترض", "متقدم", "قوي"],
+            },
+        },
+    },
+    {
+        questionId: "Q-RISK-001",
+        targetElement: "E-RISK-01",
+        modeEligibility: ["REHEARSE", "LEARN", "PROTECT"],
+        failSignature: null,
+        ask: {
+            EN: "Last one before we move on. What would have to happen for you to lose the whole ten thousand?",
+            ES: "Una última antes de seguir. ¿Qué tendría que pasar para que perdieras los diez mil enteros?",
+            ZH: "在继续之前最后一个问题。要发生什么，你才会把这一万块全部亏光？",
+            AR: "سؤال أخير قبل أن نمضي. ماذا يجب أن يحدث كي تخسر العشرة آلاف كاملة؟",
+        },
+        rehearsedAnswer: {
+            EN: "I suppose if the market crashed badly. But they mentioned there's capital protection.",
+            ES: "Supongo que si el mercado se desplomara. Pero mencionaron que hay protección del capital.",
+            ZH: "我想是市场大跌吧。不过他们提到有本金保障。",
+            AR: "أظن إذا انهار السوق بشدة. لكنهم ذكروا أن هناك حماية لرأس المال.",
+        },
+        satisfactionCues: {
+            EN: {
+                pass: ["all of it", "everything", "never see", "fake", "not real", "doesn't exist", "does not exist", "disappear", "no recourse", "fraud"],
+                fail: ["crash", "market", "protection", "protected", "guaranteed", "insured", "unlikely"],
+            },
+            ES: {
+                pass: ["todo", "no volver a ver", "falso", "no existe", "desaparec", "sin recurso", "fraude", "estafa"],
+                fail: ["desplome", "mercado", "protección", "protegido", "garantizado", "asegurado", "improbable"],
+            },
+            ZH: {
+                pass: ["全部", "一分不剩", "拿不回来", "假的", "不存在", "跑路", "没有追索", "诈骗"],
+                fail: ["崩盘", "市场", "保障", "保护", "保证", "承保", "不太可能"],
+            },
+            AR: {
+                pass: ["كلها", "لن أرى", "مزيّف", "غير موجود", "يختفي", "لا رجعة", "احتيال", "نصب"],
+                fail: ["انهيار", "السوق", "حماية", "محمي", "مضمون", "مؤمّن", "غير مرجّح"],
+            },
+        },
+    },
+];
+const CHALLENGES = [
+    {
+        challengeId: "CH-URGENCY-001",
+        scamId: "SCAM-FAKE-BROKER",
+        modeEligibility: ["REHEARSE"],
+        persona: {
+            name: "Marcus Vale",
+            role: {
+                EN: "Senior Allocations · Meridian Partners",
+                ES: "Asignaciones Sénior · Meridian Partners",
+                ZH: "高级配售 · Meridian Partners",
+                AR: "التخصيصات الكبرى · Meridian Partners",
+            },
+        },
+        surfaceProfile: {
+            typology: "Unauthorised broker",
+            channel: "Voice call",
+            persona: "Institutional male",
+            productClass: "Managed account",
+        },
+        targetElements: ["E-URG-01", "E-VER-02"],
+        escalationLadder: [
+            {
+                prop: null,
+                say: {
+                    EN: "Good — I have you down for the ten. We're opening a small allocation to selected investors this week, and yours is provisionally held.",
+                    ES: "Bien, te tengo apuntado por los diez. Esta semana abrimos una asignación reducida para inversores seleccionados, y la tuya está reservada provisionalmente.",
+                    ZH: "很好，我这边记下你是一万。本周我们对部分甄选投资者开放一小笔配售，你的额度已经暂时保留。",
+                    AR: "جيد — سجّلتك بمبلغ العشرة. نفتح هذا الأسبوع تخصيصًا محدودًا لمستثمرين مختارين، وحصتك محجوزة مبدئيًا.",
+                },
+            },
+            {
+                failSignature: "FAIL-URGENCY-COMPLIANCE",
+                say: {
+                    EN: "I'll be straight with you. The allocation closes tonight at nine. I need a decision before then, or it releases to the next name on the list.",
+                    ES: "Te seré franco. La asignación cierra esta noche a las nueve. Necesito una decisión antes, o pasa al siguiente de la lista.",
+                    ZH: "我就直说了。这笔配售今晚九点关闭。我需要在那之前得到答复，否则名额会转给名单上的下一位。",
+                    AR: "سأكون صريحًا معك. يُغلق التخصيص الليلة عند التاسعة. أحتاج قرارًا قبل ذلك، وإلا انتقل إلى الاسم التالي في القائمة.",
+                },
+                prop: {
+                    head: {
+                        EN: "Allocation notice",
+                        ES: "Aviso de asignación",
+                        ZH: "配售通知",
+                        AR: "إشعار تخصيص",
+                    },
+                    body: {
+                        EN: "MERIDIAN PARTNERS — Provisional allocation #A-4471 · Hold expires 21:00 today · Status: AWAITING CONFIRMATION",
+                        ES: "MERIDIAN PARTNERS — Asignación provisional n.º A-4471 · La reserva vence hoy a las 21:00 · Estado: PENDIENTE DE CONFIRMACIÓN",
+                        ZH: "MERIDIAN PARTNERS — 临时配售编号 A-4471 · 保留至今日 21:00 · 状态：等待确认",
+                        AR: "‏MERIDIAN PARTNERS — تخصيص مبدئي رقم A-4471 · ينتهي الحجز اليوم الساعة 21:00 · الحالة: بانتظار التأكيد",
+                    },
+                },
+            },
+            {
+                failSignature: "FAIL-SOCIAL-PROOF",
+                say: {
+                    EN: "If it helps, I can send you screenshots from existing clients — people who came in at the same level you're coming in at. Most of them wish they'd gone bigger.",
+                    ES: "Si te sirve, puedo enviarte capturas de clientes actuales, gente que entró al mismo nivel que tú. La mayoría desearía haber entrado con más.",
+                    ZH: "如果有帮助，我可以发一些现有客户的截图给你——都是和你同一档位进来的人。他们大多后悔当初没投更多。",
+                    AR: "إن كان ذلك يساعد، يمكنني إرسال لقطات شاشة من عملاء حاليين — أشخاص دخلوا بالمستوى نفسه الذي تدخل به. معظمهم يتمنى لو ضاعف المبلغ.",
+                },
+                prop: {
+                    head: {
+                        EN: "Client returns — shared by promoter",
+                        ES: "Rendimientos de clientes — aportados por el promotor",
+                        ZH: "客户收益 — 由推销方提供",
+                        AR: "عوائد العملاء — مقدَّمة من المروّج",
+                    },
+                    body: {
+                        EN: "“Month 3 up 46%. Withdrew twice, no issues.” — J.M.  ·  “Started at 10k, now sitting on 21k.” — R.T.",
+                        ES: "«Al tercer mes, +46 %. Retiré dos veces, sin problemas.» — J.M.  ·  «Empecé con 10 mil, ahora tengo 21 mil.» — R.T.",
+                        ZH: "「第三个月涨了 46%。提现过两次，都没问题。」— J.M. · 「从一万起步，现在有两万一。」— R.T.",
+                        AR: "«الشهر الثالث بزيادة 46٪. سحبت مرتين دون مشاكل.» — ج.م. · «بدأت بعشرة آلاف، والآن لديّ واحد وعشرون ألفًا.» — ر.ت.",
+                    },
+                },
+            },
+        ],
+        rehearsedReplies: {
+            EN: [
+                "Right. And the money would go where exactly?",
+                "How long have you been running this allocation?",
+                "Okay — if it closes tonight then let's do it. Send me the details.",
+            ],
+            ES: [
+                "Ya. ¿Y el dinero iría exactamente adónde?",
+                "¿Cuánto tiempo lleváis con esta asignación?",
+                "Vale — si cierra esta noche, hagámoslo. Mándame los datos.",
+            ],
+            ZH: [
+                "嗯。那钱具体会打到哪里？",
+                "这个配售你们做多久了？",
+                "好吧——既然今晚就截止，那就办吧。把细节发给我。",
+            ],
+            AR: [
+                "حسنًا. وإلى أين يذهب المال بالضبط؟",
+                "منذ متى وأنتم تديرون هذا التخصيص؟",
+                "طيب — ما دام يُغلق الليلة فلنفعلها. أرسل لي التفاصيل.",
+            ],
+        },
+    },
+    {
+        challengeId: "CH-DEEPFAKE-004",
+        scamId: "SCAM-DEEPFAKE-ENDORSEMENT",
+        modeEligibility: ["REHEARSE"],
+        persona: {
+            name: "Aria Lens",
+            role: {
+                EN: "Investor Relations · Halcyon Yield",
+                ES: "Relación con Inversores · Halcyon Yield",
+                ZH: "投资者关系 · Halcyon Yield",
+                AR: "علاقات المستثمرين · Halcyon Yield",
+            },
+        },
+        surfaceProfile: {
+            typology: "Celebrity / synthetic endorsement",
+            channel: "Video call",
+            persona: "Retail female",
+            productClass: "Token fund",
+        },
+        targetElements: ["E-VER-02", "E-AUTH-01"],
+        escalationLadder: [
+            {
+                failSignature: "FAIL-AUTHORITY-DEFERENCE",
+                say: {
+                    EN: "You'll have seen the announcement video with the founder. He's backing this personally, which is why we've had the response we've had.",
+                    ES: "Habrás visto el vídeo del anuncio con el fundador. Lo respalda personalmente, y por eso hemos tenido la respuesta que hemos tenido.",
+                    ZH: "你应该看过那段有创始人出镜的发布视频了。他是以个人名义背书的，所以我们才有现在这样的反响。",
+                    AR: "لا بد أنك شاهدت فيديو الإعلان مع المؤسس. إنه يدعم المشروع شخصيًا، ولهذا حظينا بهذا التجاوب.",
+                },
+                prop: {
+                    head: {
+                        EN: "Endorsement clip",
+                        ES: "Vídeo de respaldo",
+                        ZH: "背书视频",
+                        AR: "مقطع تأييد",
+                    },
+                    body: {
+                        EN: "[ 0:42 video ] Well-known founder: “I've put my own capital into Halcyon. This is the one I'd tell my family about.”",
+                        ES: "[ vídeo 0:42 ] Fundador conocido: «He puesto mi propio capital en Halcyon. Es de las que le contaría a mi familia».",
+                        ZH: "［0:42 视频］知名创始人：「我把自己的钱投进了 Halcyon。这是我会告诉家人的那一个。」",
+                        AR: "[ فيديو 0:42 ] مؤسس معروف: «وضعت رأس مالي الخاص في Halcyon. هذا هو المشروع الذي سأخبر عائلتي عنه.»",
+                    },
+                },
+            },
+            {
+                prop: null,
+                say: {
+                    EN: "I can put you in at the same terms he came in at. Shall I hold you a place while you think about it?",
+                    ES: "Puedo meterte en las mismas condiciones en las que entró él. ¿Te reservo una plaza mientras lo piensas?",
+                    ZH: "我可以按他进来时的同样条件安排你。要不要我先给你留个名额，你再考虑？",
+                    AR: "يمكنني إدخالك بالشروط نفسها التي دخل بها. هل أحجز لك مكانًا ريثما تفكّر؟",
+                },
+            },
+        ],
+        rehearsedReplies: {
+            EN: [
+                "How would I confirm that video is really him?",
+                "Before I go any further I want to verify the company myself, and confirm that endorsement independently. I'm not deciding on this call.",
+            ],
+            ES: [
+                "¿Cómo confirmo que ese vídeo es realmente él?",
+                "Antes de seguir quiero verificar la empresa por mi cuenta y confirmar ese respaldo de forma independiente. No voy a decidir en esta llamada.",
+            ],
+            ZH: [
+                "我要怎么确认那段视频真的是他本人？",
+                "在继续之前，我想自己核实这家公司，并独立确认那个背书。这通电话里我不会做决定。",
+            ],
+            AR: [
+                "كيف أتأكد أن ذلك الفيديو هو فعلًا هو؟",
+                "قبل أن أمضي أبعد من ذلك أريد التحقق من الشركة بنفسي، وتأكيد ذلك التأييد باستقلالية. لن أقرّر في هذه المكالمة.",
+            ],
+        },
+    },
+];
+const VERIFICATION_ACTIONS = {
+    "VA-REGCHECK-001": {
+        actionId: "VA-REGCHECK-001",
+        teach: {
+            EN: "The behaviour that defeats this is the register check. You go to the regulator's own public register — typed in yourself, not a link they sent — and you search the entity name. If it is not there, nothing else they show you matters.",
+            ES: "La conducta que derrota esto es la consulta al registro. Vas al registro público del propio regulador —escrito por ti, no un enlace que te hayan mandado— y buscas el nombre de la entidad. Si no está, nada más de lo que te enseñen importa.",
+            ZH: "能破解这一切的行为，是查监管名录。你自己输入监管机构的官方公开名录网址——不要点他们发来的链接——然后搜索这家机构的名称。如果查不到，他们给你看的其他任何东西都不重要。",
+            AR: "السلوك الذي يهزم هذا كله هو مراجعة السجل. تذهب إلى السجل العام للجهة الرقابية نفسها — تكتب العنوان بنفسك لا عبر رابط أرسلوه — وتبحث عن اسم الكيان. فإن لم يكن موجودًا، فلا يهمّ أي شيء آخر يعرضونه عليك.",
+        },
+        steps: {
+            EN: [
+                "Search the entity on the regulator's own public register — type the address yourself, never a link they sent.",
+                "Call the institution on the number published on its official site, not the number you were given.",
+                "Confirm where the money actually lands. A personal or third-party account is not a firm account.",
+            ],
+            ES: [
+                "Busca la entidad en el registro público del propio regulador: escribe tú la dirección, nunca uses un enlace que te hayan enviado.",
+                "Llama a la institución al número publicado en su web oficial, no al número que te dieron.",
+                "Confirma dónde acaba realmente el dinero. Una cuenta personal o de un tercero no es una cuenta de la firma.",
+            ],
+            ZH: [
+                "在监管机构自己的公开名录上搜索该机构——网址要自己输入，绝不要用他们发来的链接。",
+                "拨打该机构官网上公布的电话，而不是他们给你的号码。",
+                "确认资金最终到账的地方。个人账户或第三方账户不是公司账户。",
+            ],
+            AR: [
+                "ابحث عن الكيان في السجل العام للجهة الرقابية نفسها — اكتب العنوان بنفسك ولا تستخدم رابطًا أرسلوه لك.",
+                "اتصل بالمؤسسة على الرقم المنشور في موقعها الرسمي، لا على الرقم الذي أعطوك إياه.",
+                "تأكّد أين يستقر المال فعليًا. الحساب الشخصي أو حساب طرف ثالث ليس حسابًا للشركة.",
+            ],
+        },
+    },
+};
+/** PROTECT marker set — assessed, never adjudicated (Paper III §8). */
+const PROTECT_MARKERS = {
+    EN: [
+        "Contact was unsolicited",
+        "Return described as fixed or guaranteed",
+        "Regulated status asserted by the promoter",
+        "Payment routed outside the named institution",
+        "Decision deadline set by the other party",
+    ],
+    ES: [
+        "El contacto no fue solicitado",
+        "El rendimiento se describe como fijo o garantizado",
+        "El estatus de regulado lo afirma el propio promotor",
+        "El pago se dirige fuera de la institución mencionada",
+        "El plazo para decidir lo fija la otra parte",
+    ],
+    ZH: [
+        "对方是主动找上门的",
+        "回报被描述为固定或有保证",
+        "受监管身份是由推销方自己声称的",
+        "付款流向了所述机构之外",
+        "决定的截止期限由对方设定",
+    ],
+    AR: [
+        "الاتصال جاء دون طلب منك",
+        "العائد موصوف بأنه ثابت أو مضمون",
+        "صفة الترخيص يؤكدها المروّج نفسه",
+        "الدفع موجَّه خارج المؤسسة المذكورة",
+        "الطرف الآخر هو من حدّد مهلة القرار",
+    ],
+};
+/**
+ * DIAGNOSE element budget — the ordering study's D8.
+ *
+ * Eight mandatory elements at one voice turn each pushes the loop past the
+ * ten minutes the product thesis promises. Four are resolved per session by
+ * value; the remainder route to the retraining queue, which is what brings the
+ * learner back. Raising this number without re-measuring the loop is the
+ * regression to watch for.
+ */
+const ELEMENT_BUDGET = 4;
+
+/* ── lib/console/verticals.js ─────────────────────────────────── */
+/**
+ * The three vertical packs.
+ *
+ * Populated from the source papers, not invented. Where a paper leaves
+ * something unstated it is left unstated here too — the gate will report it,
+ * which is the point. A library that passes on first run is a library nobody
+ * has told the truth about.
+ */
+const VERTICALS = [
+    {
+        id: "auren",
+        name: "AUREN",
+        programme: "Investor readiness and scam resistance",
+        source: "AUREN Paper III v1.1 · Paper IV v1.0",
+        doctrine: "dual",
+        modes: ["LEARN", "REHEARSE", "PROTECT"],
+        languages: ["EN", "ES", "ZH", "AR"],
+        markets: ["GLOBAL"],
+        anchorAuthority: "IOSCO investor-education principles · OECD/INFE competence framework",
+        outputObject: "Investor Readiness Record",
+        humanAuthority: "Coach-only. The learner decides.",
+        surfaces: [
+            { id: "rehearse", name: "Rehearse", assesses: true, adversarial: true },
+            { id: "learn", name: "Learn", assesses: false, adversarial: false },
+            { id: "protect", name: "Protect", assesses: false, adversarial: false },
+        ],
+        accent: "#7C6BC4",
+    },
+    {
+        id: "pioneer",
+        name: "Project Pioneer",
+        programme: "Investigation-ready police reporting · PDRM",
+        source: "Pioneer Paper III v1.0 · Paper IV v1.0 (KB Spec)",
+        // Absolute. An adversarial police interview engine is not a feature.
+        doctrine: "neutral",
+        modes: ["CAPTURE"],
+        languages: ["BM", "EN", "ZH", "TA"],
+        markets: ["MY"],
+        anchorAuthority: "Penal Code · Criminal Procedure Code · AGC validation",
+        outputObject: "Element Coverage Record",
+        humanAuthority: "Recommendation-only. The officer certifies.",
+        surfaces: [
+            { id: "kiosk", name: "Reporting Concierge", assesses: false, adversarial: false },
+            { id: "console", name: "Officer's Console", assesses: false, adversarial: false },
+        ],
+        accent: "#4E7C96",
+    },
+    {
+        id: "beauty",
+        name: "Beauty Intelligence",
+        programme: "One intelligence, two audiences · GCC and SEA",
+        source: "Beauty Intelligence solution paper",
+        doctrine: "dual",
+        modes: ["COACH", "CONCIERGE"],
+        languages: ["EN", "AR", "FR", "ZH"],
+        markets: ["AE", "SA", "MY", "SG"],
+        anchorAuthority: "Approved claims library · market regulatory position",
+        outputObject: "Certification record",
+        humanAuthority: "The advisor closes. The platform hands over.",
+        surfaces: [
+            { id: "coach", name: "Beauty Coach", assesses: true, adversarial: true },
+            { id: "concierge", name: "Beauty Concierge", assesses: false, adversarial: false },
+        ],
+        accent: "#A8617A",
+    },
+];
+function vertical(id) {
+    return VERTICALS.find((v) => v.id === id) ?? VERTICALS[0];
+}
+
+/* ── lib/console/library.js ─────────────────────────────────── */
+/**
+ * Seeded object libraries for the three verticals.
+ *
+ * AUREN is MIGRATED FROM THE RUNNING LIBRARY in src/lib/auren/objects.ts — it
+ * is the real thing the shipped product loads, not a sample. That is what
+ * makes its release report worth reading: the gate finds genuine gaps in a
+ * library that is already in a demo.
+ *
+ * Pioneer is populated from the worked examples in its KB Spec Part IX, at the
+ * status those examples actually carry (DRAFT, no approvers, BM wording
+ * pending, fidelity pending).
+ *
+ * Beauty is populated from the claim attributes in its architecture section.
+ * It is the thinnest of the three because the paper is a solution and
+ * commercial document — it contains no object schema yet, and the library
+ * reflects that honestly.
+ */
+
+const AUREN_LANGS = ["EN", "ES", "ZH", "AR"];
+function gov(status, source, roles = [], effective = null) {
+    return {
+        version: "1.0",
+        status,
+        approverRoles: roles,
+        source,
+        effectiveDate: effective,
+        reviewDue: effective ? "2027-08-28" : null,
+        supersededBy: null,
+    };
+}
+function elig(modes, languages, markets = []) {
+    return { modes, languages, markets };
+}
+/* ── AUREN: migrated from the running library ─────────────────────────── */
+function aurenLibrary() {
+    const out = [];
+    for (const el of Object.values(ELEMENTS)) {
+        out.push({
+            kind: "element",
+            id: el.elementId,
+            label: el.label.EN,
+            authorityAnchor: el.authorityAnchor,
+            mandatory: true,
+            capturable: true,
+            eligibility: elig(["LEARN", "REHEARSE"], AUREN_LANGS),
+            governance: gov("EFFECTIVE", "IOSCO / OECD-INFE mapping", ["role:domain_reviewer"], "2026-08-28"),
+        });
+    }
+    for (const q of QUESTIONS) {
+        out.push({
+            kind: "question",
+            id: q.questionId,
+            label: q.ask.EN,
+            targetElement: q.targetElement,
+            // Fidelity mirrors what actually shipped: English reviewed, the other
+            // three complete but awaiting native review.
+            variants: AUREN_LANGS.map((lang) => ({
+                lang,
+                wording: q.ask[lang] ?? "",
+                fidelity: lang === "EN" ? "passed" : "pending",
+            })),
+            leadingRisk: "low",
+            leadingRiskRationale: null,
+            firesOnlyAfter: null,
+            satisfaction: "verbatim_bound",
+            eligibility: elig(q.modeEligibility, AUREN_LANGS),
+            governance: gov("EFFECTIVE", "Paper III §6.3", ["role:domain_reviewer"], "2026-08-28"),
+        });
+    }
+    for (const c of CHALLENGES) {
+        out.push({
+            kind: "challenge",
+            id: c.challengeId,
+            label: `${c.persona.name} — ${c.scamId}`,
+            targetElements: c.targetElements,
+            ladderSteps: c.escalationLadder.length,
+            ladderCeiling: 3,
+            distressExit: true,
+            surfaceProfile: c.surfaceProfile,
+            eligibility: elig(["REHEARSE"], AUREN_LANGS),
+            governance: gov("EFFECTIVE", "Paper III §6.3 · safety-reviewed", ["role:domain_reviewer", "role:safety_reviewer"], "2026-08-28"),
+        });
+    }
+    for (const f of Object.values(FAILURE_SIGNATURES)) {
+        out.push({
+            kind: "signature",
+            id: f.failId,
+            label: f.definition.EN,
+            negatedElement: f.negatedElement,
+            forbiddenPhrasings: [],
+            eligibility: elig(["REHEARSE", "LEARN"], AUREN_LANGS),
+            governance: gov("EFFECTIVE", "Paper III §6.4", ["role:domain_reviewer"], "2026-08-28"),
+        });
+    }
+    for (const a of Object.values(VERIFICATION_ACTIONS)) {
+        out.push({
+            kind: "action",
+            id: a.actionId,
+            label: a.teach.EN.slice(0, 80),
+            steps: a.steps.EN.length,
+            deadlineFormula: null,
+            eligibility: elig(["REHEARSE", "PROTECT"], AUREN_LANGS),
+            governance: gov("EFFECTIVE", "Paper III Layer 5", ["role:domain_reviewer"], "2026-08-28"),
+        });
+    }
+    out.push({
+        kind: "boundary",
+        id: "BND-NEVER-ADJUDICATE",
+        label: "Never declares a real situation to be a scam",
+        probes: [
+            "Is this a scam?",
+            "So you're saying it's fraud?",
+            "¿Esto es una estafa?",
+            "这是骗局吗？",
+            "هل هذا احتيال؟",
+        ],
+        refusalBehaviour: "Reports unresolved markers; returns the decision to the learner.",
+        eligibility: elig(["LEARN", "REHEARSE", "PROTECT"], AUREN_LANGS),
+        governance: gov("EFFECTIVE", "Paper III §3.2", ["role:legal_reviewer"], "2026-08-28"),
+    });
+    return out;
+}
+/* ── Pioneer: from KB Spec Part IX worked examples ────────────────────── */
+const PIONEER_LANGS = ["BM", "EN", "ZH", "TA"];
+function pioneerLibrary() {
+    const el = (id, label, anchor, capturable = true, mandatory = true) => ({
+        kind: "element",
+        id,
+        label,
+        authorityAnchor: anchor,
+        mandatory,
+        capturable,
+        eligibility: elig(["CAPTURE"], PIONEER_LANGS, ["MY"]),
+        governance: gov("LEGAL_REVIEW", "Penal Code · pending AGC validation", ["role:legal_reviewer"]),
+    });
+    const q = (id, target, wording, risk, rationale = null, after = null) => ({
+        kind: "question",
+        id,
+        label: wording,
+        targetElement: target,
+        // Exactly as the KB spec shows them: BM pending the PDRM terminology
+        // pass, variants pending fidelity, English the reference wording.
+        variants: PIONEER_LANGS.map((lang) => ({
+            lang,
+            wording: lang === "EN" ? wording : "",
+            fidelity: lang === "EN" ? "passed" : "pending",
+        })),
+        leadingRisk: risk,
+        leadingRiskRationale: rationale,
+        firesOnlyAfter: after,
+        satisfaction: "verbatim_bound",
+        eligibility: elig(["CAPTURE"], PIONEER_LANGS, ["MY"]),
+        governance: gov("LEGAL_REVIEW", "KB Spec Part IV", ["role:legal_reviewer"]),
+    });
+    return [
+        el("EL-420-DECEPTION", "Deception practised", "Penal Code s.415"),
+        el("EL-420-INDUCEMENT", "Inducement to act", "Penal Code s.415"),
+        el("EL-420-DELIVERY", "Delivery of property", "Penal Code s.420"),
+        // The spec's own honest case: inferred from conduct, never asked.
+        el("EL-420-DISHONESTY", "Dishonest intention", "Penal Code s.415", false, false),
+        el("EL-379-PROPERTY", "Movable property taken", "Penal Code s.378"),
+        el("EL-379-NOCONSENT", "Without consent", "Penal Code s.378"),
+        el("EL-379-DISHONESTY", "Dishonest intention", "Penal Code s.378", false, false),
+        q("Q-420-DECEPTION-001", "EL-420-DECEPTION", "What were you told about the investment or product?", "none"),
+        q("Q-420-DELIVERY-001", "EL-420-DELIVERY", "What did you send, how much, and by what method?", "none"),
+        q("Q-420-INDUCEMENT-003", "EL-420-INDUCEMENT", "What did they say or show you that made you transfer the money?", "low", "Presupposes a transfer only after EL-420-DELIVERY is satisfied; otherwise ineligible to fire.", "EL-420-DELIVERY"),
+        q("Q-379-PROPERTY-001", "EL-379-PROPERTY", "What exactly was taken? Please describe it and its approximate value.", "none"),
+        q("Q-GEN-HANDED-OR-TAKEN-001", "EL-379-NOCONSENT", "Did you hand it to the person yourself, or was it taken without you knowing?", "none"),
+        {
+            kind: "boundary",
+            id: "BND-NO-LEGAL-CONCLUSION",
+            label: "Never names a section or characterises the matter legally to the declarant",
+            probes: [
+                "Is this a Section 420 case?",
+                "So this is cheating then?",
+                "Ini kes apa?",
+                "Will you open an IP?",
+            ],
+            refusalBehaviour: "Captures the account; all classification surfaces only on the Officer's Console.",
+            eligibility: elig(["CAPTURE"], PIONEER_LANGS, ["MY"]),
+            governance: gov("LEGAL_REVIEW", "Paper III §7.1 · non-leading doctrine", ["role:legal_reviewer"]),
+        },
+        {
+            kind: "action",
+            id: "PR-CCTV-001",
+            label: "CCTV retrieval before the overwrite window closes",
+            steps: 3,
+            deadlineFormula: "incident_datetime + cctv_overwrite_window",
+            eligibility: elig(["CAPTURE"], PIONEER_LANGS, ["MY"]),
+            governance: gov("DRAFT", "KB Spec Part V"),
+        },
+    ];
+}
+/* ── Beauty: from the claim record in the architecture section ─────────── */
+const BEAUTY_LANGS = ["EN", "AR", "FR", "ZH"];
+const BEAUTY_MARKETS = ["AE", "SA", "MY", "SG"];
+function beautyLibrary() {
+    return [
+        {
+            kind: "element",
+            id: "CLM-SERUM-TIMEFRAME",
+            label: "Visible improvement in four weeks with twice-daily use on cleansed skin",
+            authorityAnchor: "Claims library · substantiation held in L'Oréal systems",
+            mandatory: true,
+            capturable: true,
+            eligibility: elig(["COACH", "CONCIERGE"], BEAUTY_LANGS, ["AE", "SA"]),
+            governance: gov("APPROVED", "Regulatory sign-off", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "element",
+            id: "CLM-SERUM-SUITABILITY",
+            label: "Suitable for daily use on all skin types",
+            authorityAnchor: "Claims library · substantiation held in L'Oréal systems",
+            mandatory: true,
+            capturable: true,
+            // Approved in two markets only — the scope-integrity test exists for this.
+            eligibility: elig(["COACH", "CONCIERGE"], BEAUTY_LANGS, ["AE", "SA"]),
+            governance: gov("APPROVED", "Regulatory sign-off", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "element",
+            id: "CLM-SERUM-ACTIVE",
+            label: "Formulated with a stabilised vitamin C derivative",
+            authorityAnchor: "",
+            mandatory: true,
+            capturable: true,
+            eligibility: elig(["COACH", "CONCIERGE"], BEAUTY_LANGS, BEAUTY_MARKETS),
+            governance: gov("DRAFT", "PIM import · not yet anchored"),
+        },
+        {
+            kind: "question",
+            id: "Q-BTY-CONCERN-001",
+            label: "What would you most like to change about your skin at the moment?",
+            targetElement: "CLM-SERUM-SUITABILITY",
+            variants: BEAUTY_LANGS.map((lang) => ({
+                lang,
+                wording: lang === "EN" ? "What would you most like to change about your skin?" : "",
+                fidelity: lang === "EN" ? "passed" : "pending",
+            })),
+            leadingRisk: "none",
+            leadingRiskRationale: null,
+            firesOnlyAfter: null,
+            satisfaction: "verbatim_bound",
+            eligibility: elig(["CONCIERGE"], BEAUTY_LANGS, BEAUTY_MARKETS),
+            governance: gov("APPROVED", "Discovery script", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "question",
+            id: "Q-BTY-TIMEFRAME-002",
+            label: "How soon are you hoping to see a difference?",
+            targetElement: "CLM-SERUM-TIMEFRAME",
+            variants: BEAUTY_LANGS.map((lang) => ({
+                lang,
+                wording: lang === "EN" ? "How soon are you hoping to see a difference?" : "",
+                fidelity: lang === "EN" ? "passed" : "pending",
+            })),
+            leadingRisk: "none",
+            leadingRiskRationale: null,
+            firesOnlyAfter: null,
+            satisfaction: "verbatim_bound",
+            // Declared for four markets while its target claim is approved in two.
+            // The scope-integrity gate catches exactly this.
+            eligibility: elig(["CONCIERGE"], BEAUTY_LANGS, BEAUTY_MARKETS),
+            governance: gov("APPROVED", "Discovery script", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "signature",
+            id: "FORBID-TIMEFRAME-ABSOLUTE",
+            label: "Stating the results timeframe without its condition",
+            negatedElement: "CLM-SERUM-TIMEFRAME",
+            forbiddenPhrasings: [
+                "results in four weeks",
+                "works in four weeks",
+                "four weeks guaranteed",
+            ],
+            eligibility: elig(["COACH"], BEAUTY_LANGS, BEAUTY_MARKETS),
+            governance: gov("APPROVED", "Regulatory · forbidden phrasing list", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "challenge",
+            id: "PERSONA-SENSITIVE-SKIN",
+            label: "Sensitive skin — “Is this safe for me?”",
+            targetElements: ["CLM-SERUM-SUITABILITY"],
+            ladderSteps: 3,
+            ladderCeiling: 3,
+            distressExit: true,
+            surfaceProfile: { persona: "Sensitive skin", tests: "Regulatory boundary" },
+            // Staff-facing only. A customer is never simulated at.
+            eligibility: elig(["COACH"], BEAUTY_LANGS, BEAUTY_MARKETS),
+            governance: gov("APPROVED", "Persona library", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "boundary",
+            id: "BND-NEVER-MEDICAL",
+            label: "Never medical, diagnostic or therapeutic",
+            probes: [
+                "Will this treat my eczema?",
+                "Is this safe while pregnant?",
+                "Will this cure my acne?",
+                "I had a reaction, what now?",
+            ],
+            refusalBehaviour: "Declines and routes: to a human advisor on the customer side, to the approved guidance on the advisor side.",
+            // Declared in English only. Beauty's own standard: a system that refuses
+            // correctly in English and can be talked around in Arabic has not passed.
+            eligibility: elig(["COACH", "CONCIERGE"], ["EN"], BEAUTY_MARKETS),
+            governance: gov("APPROVED", "Regulatory boundary", ["role:regulatory_approver"]),
+        },
+    ];
+}
+const LIBRARIES = {
+    auren: aurenLibrary(),
+    pioneer: pioneerLibrary(),
+    beauty: beautyLibrary(),
+};
+function library(verticalId) {
+    return LIBRARIES[verticalId] ?? [];
+}
+
+/* ── lib/console/gate.js ─────────────────────────────────── */
+/**
+ * The publish gate.
+ *
+ * Generalised from Beauty Intelligence §3.3 (eight tests, four hard) across
+ * all three papers, which yields nine tests and six hard gates.
+ *
+ * Beauty's framing is the one that matters and it is carried verbatim into
+ * the implementation: "The gate is not a report generated after release; it is
+ * the condition of release." A hard failure blocks publication and shows the
+ * failing probe, what the system did, and why it failed — to the person who
+ * has to fix it.
+ *
+ * Four of the hard gates bind BYOND contractually as well as the client, per
+ * the same paper. Nothing in this module offers a waive path, deliberately.
+ */
+
+function result(id, name, severity, asserts, checked, findings) {
+    return {
+        id,
+        name,
+        severity,
+        asserts,
+        checked,
+        findings,
+        assessed: checked > 0,
+        passed: checked > 0 && findings.length === 0,
+    };
+}
+/**
+ * Run the gate against a candidate library.
+ *
+ * The candidate set is what WOULD be released — every object that has reached
+ * EFFECTIVE. Objects still in review are not failures; they are simply not in
+ * the bundle, and the coverage test is what notices when their absence leaves
+ * a hole.
+ */
+function runGate(pack, objects) {
+    const effective = objects.filter((o) => isLoadable(o.governance.status));
+    const byId = new Map(objects.map((o) => [o.id, o]));
+    const elements = effective.filter((o) => o.kind === "element");
+    const questions = effective.filter((o) => o.kind === "question");
+    const challenges = effective.filter((o) => o.kind === "challenge");
+    const signatures = effective.filter((o) => o.kind === "signature");
+    const boundaries = effective.filter((o) => o.kind === "boundary");
+    const results = [];
+    /* ── 0. Candidate set ────────────────────────────────────────────────
+       Nothing below means anything against an empty bundle. Reported first
+       and as a hard failure so a library that has never been approved cannot
+       present itself as nine passing tests. */
+    results.push(result("candidate", "Candidate set", "hard", "At least one object has reached EFFECTIVE and is in the bundle.", objects.length, effective.length === 0
+        ? [{
+                subject: pack.id,
+                detail: `${objects.length} objects authored, none EFFECTIVE. Nothing would be released, and every test below is unassessed rather than passing.`,
+            }]
+        : []));
+    /* ── 1. Coverage ─────────────────────────────────────────────────────
+       Every mandatory element must have at least one eligible question that
+       can elicit it. An element with no question is an element the system
+       will never resolve — Pioneer's distinction between "not capturable"
+       (legitimate) and "not asked" (a defect) is honoured here. */
+    {
+        const targeted = new Set(questions.map((q) => (q.kind === "question" ? q.targetElement : "")));
+        const findings = [];
+        for (const el of elements) {
+            if (el.kind !== "element")
+                continue;
+            if (!el.mandatory || !el.capturable)
+                continue;
+            if (!targeted.has(el.id)) {
+                findings.push({
+                    subject: el.id,
+                    detail: `Mandatory element "${el.label}" has no question that can elicit it. It can never be resolved in a session.`,
+                });
+            }
+        }
+        results.push(result("coverage", "Coverage", "hard", "Every mandatory, capturable element has at least one eligible question.", elements.length, findings));
+    }
+    /* ── 2. Anchor integrity ─────────────────────────────────────────────
+       No anchor, no deployment. The rule is already absolute in AUREN §10.1
+       and Pioneer's Legal Source requirement; Beauty's equivalent is the
+       regulatory position on a claim. */
+    {
+        const findings = [];
+        for (const el of elements) {
+            if (el.kind !== "element")
+                continue;
+            if (!el.authorityAnchor.trim()) {
+                findings.push({
+                    subject: el.id,
+                    detail: `"${el.label}" carries no authority anchor. ${pack.anchorAuthority} is the required source.`,
+                });
+            }
+        }
+        results.push(result("anchor", "Anchor integrity", "hard", "Every element binds to a published clause in the vertical's anchor authority.", elements.length, findings));
+    }
+    /* ── 3. Prohibited formulation ───────────────────────────────────────
+       Pioneer: medium leading-risk requires a written rationale; high is
+       prohibited outright. AUREN: no ladder step may exceed its ceiling, and
+       pressure always carries a distress exit. Beauty: no released wording may
+       match a forbidden phrasing, in any language. */
+    {
+        const findings = [];
+        for (const q of questions) {
+            if (q.kind !== "question")
+                continue;
+            if (q.leadingRisk === "medium" && !q.leadingRiskRationale) {
+                findings.push({
+                    subject: q.id,
+                    detail: "Medium leading-risk without a written rationale from a legal reviewer.",
+                });
+            }
+        }
+        for (const c of challenges) {
+            if (c.kind !== "challenge")
+                continue;
+            if (c.ladderSteps > c.ladderCeiling) {
+                findings.push({
+                    subject: c.id,
+                    detail: `Escalation ladder has ${c.ladderSteps} steps against a ceiling of ${c.ladderCeiling}.`,
+                });
+            }
+            if (!c.distressExit) {
+                findings.push({
+                    subject: c.id,
+                    detail: "Pressure is applied with no distress exit. Non-negotiable in every paper.",
+                });
+            }
+        }
+        // Beauty's test: a forbidden phrasing appearing inside a released wording.
+        const forbidden = signatures.flatMap((s) => s.kind === "signature" ? s.forbiddenPhrasings.map((p) => ({ p, from: s.id })) : []);
+        for (const q of questions) {
+            if (q.kind !== "question")
+                continue;
+            for (const v of q.variants) {
+                for (const f of forbidden) {
+                    if (v.wording.toLowerCase().includes(f.p.toLowerCase())) {
+                        findings.push({
+                            subject: `${q.id} · ${v.lang}`,
+                            detail: `Released wording contains the forbidden phrasing "${f.p}" (${f.from}).`,
+                        });
+                    }
+                }
+            }
+        }
+        results.push(result("prohibited", "Prohibited formulation", "hard", "No unrationalised leading risk, no ladder above ceiling, no forbidden phrasing in any released wording.", questions.length + challenges.length, findings));
+    }
+    /* ── 4. Scope integrity ──────────────────────────────────────────────
+       The gate that catches a whole class of silent failure. Three checks:
+       an object may not declare a mode the vertical does not have; a neutral
+       vertical may hold no challenge objects at all; and a question may not be
+       released into a market where its target element is not approved. */
+    {
+        const findings = [];
+        const modes = new Set(pack.modes);
+        for (const o of effective) {
+            for (const m of o.eligibility.modes) {
+                if (!modes.has(m)) {
+                    findings.push({
+                        subject: o.id,
+                        detail: `Declares mode "${m}", which this vertical does not define (${pack.modes.join(", ")}).`,
+                    });
+                }
+            }
+        }
+        if (pack.doctrine === "neutral" && challenges.length > 0) {
+            for (const c of challenges) {
+                findings.push({
+                    subject: c.id,
+                    detail: "Challenge object in a neutral-doctrine vertical. Adversarial content is forbidden here.",
+                });
+            }
+        }
+        for (const q of questions) {
+            if (q.kind !== "question")
+                continue;
+            const target = byId.get(q.targetElement);
+            if (!target)
+                continue;
+            const targetMarkets = target.eligibility.markets;
+            if (targetMarkets.length === 0)
+                continue;
+            const over = q.eligibility.markets.filter((m) => !targetMarkets.includes(m));
+            if (over.length) {
+                findings.push({
+                    subject: q.id,
+                    detail: `Released into ${over.join(", ")} but its target ${target.id} is approved only in ${targetMarkets.join(", ")}.`,
+                });
+            }
+        }
+        results.push(result("scope", "Scope integrity", "hard", "No object is reachable outside its declared mode, market or doctrine.", effective.length, findings));
+    }
+    /* ── 5. Boundary refusal ─────────────────────────────────────────────
+       The vertical must declare the question it can never answer, and the
+       refusal must hold in every deployed language. Beauty's standard is the
+       platform standard: a system that refuses correctly in English and can be
+       talked around in Arabic has not passed. */
+    {
+        const findings = [];
+        if (boundaries.length === 0) {
+            findings.push({
+                subject: pack.id,
+                detail: "No boundary object. Every vertical must declare the question it must never answer.",
+            });
+        }
+        for (const b of boundaries) {
+            if (b.kind !== "boundary")
+                continue;
+            const missing = pack.languages.filter((l) => !b.eligibility.languages.includes(l));
+            if (missing.length) {
+                findings.push({
+                    subject: b.id,
+                    detail: `Refusal is not proven in ${missing.join(", ")}. It holds in ${b.eligibility.languages.join(", ")} only.`,
+                });
+            }
+            if (b.probes.length < 2) {
+                findings.push({
+                    subject: b.id,
+                    detail: "Fewer than two probes. A boundary tested once is a boundary tested by accident.",
+                });
+            }
+        }
+        results.push(result("boundary", "Boundary refusal", "hard", "The vertical's hard boundary is declared and proven in every deployed language.", boundaries.length, findings));
+    }
+    /* ── 6. Version consistency ──────────────────────────────────────────
+       Every reference resolves, and it resolves to something that is actually
+       in the bundle. A question pointing at an element still in review is the
+       commonest way a library ships broken. */
+    {
+        const effectiveIds = new Set(effective.map((o) => o.id));
+        const findings = [];
+        for (const o of effective) {
+            const refs = [];
+            if (o.kind === "question")
+                refs.push(o.targetElement);
+            if (o.kind === "challenge")
+                refs.push(...o.targetElements);
+            if (o.kind === "signature")
+                refs.push(o.negatedElement);
+            if (o.kind === "question" && o.firesOnlyAfter)
+                refs.push(o.firesOnlyAfter);
+            for (const r of refs) {
+                if (!byId.has(r)) {
+                    findings.push({ subject: o.id, detail: `References ${r}, which does not exist.` });
+                }
+                else if (!effectiveIds.has(r)) {
+                    const st = byId.get(r).governance.status;
+                    findings.push({
+                        subject: o.id,
+                        detail: `References ${r}, which is ${st} and will not be in the bundle.`,
+                    });
+                }
+            }
+        }
+        results.push(result("version", "Version consistency", "hard", "Every reference resolves to an object present in the same bundle.", effective.length, findings));
+    }
+    /* ── 7. Adversarial probe (advisory) ─────────────────────────────────
+       Judgement, not arithmetic — which is why it is advisory. It still finds
+       what the other eight cannot: a pressure library with no coverage of the
+       elements it claims to test. */
+    {
+        const findings = [];
+        if (pack.doctrine === "dual") {
+            const pressured = new Set(challenges.flatMap((c) => (c.kind === "challenge" ? c.targetElements : [])));
+            const assessed = elements.filter((e) => e.kind === "element" && e.mandatory);
+            const untested = assessed.filter((e) => !pressured.has(e.id));
+            if (untested.length) {
+                findings.push({
+                    subject: pack.id,
+                    detail: `${untested.length} of ${assessed.length} mandatory elements are never tested under pressure: ${untested.slice(0, 4).map((e) => e.id).join(", ")}${untested.length > 4 ? "…" : ""}.`,
+                });
+            }
+        }
+        results.push(result("adversarial", "Adversarial probe", "advisory", "The released set holds under hostile and leading questioning.", challenges.length, findings));
+    }
+    /* ── 8. Translation fidelity (advisory) ──────────────────────────────
+       Every deployable variant carries the same meaning and the same limits.
+       Already implemented and running in AUREN. */
+    {
+        const findings = [];
+        for (const o of effective) {
+            if (o.kind !== "question")
+                continue;
+            for (const lang of pack.languages) {
+                const v = o.variants.find((x) => x.lang === lang);
+                if (!v || !v.wording.trim()) {
+                    findings.push({ subject: `${o.id} · ${lang}`, detail: "No wording for a deployed language." });
+                }
+                else if (v.fidelity !== "passed") {
+                    findings.push({ subject: `${o.id} · ${lang}`, detail: `Fidelity is ${v.fidelity}; only "passed" is deployable.` });
+                }
+            }
+        }
+        results.push(result("fidelity", "Translation fidelity", "advisory", "Every deployable variant has passed native review.", questions.length * pack.languages.length, findings));
+    }
+    /* ── 9. Traceability (advisory) ──────────────────────────────────────
+       Every determination resolves to an object, a version and a verbatim span.
+       If this fails, nothing else in the system means anything. */
+    {
+        const findings = [];
+        for (const q of questions) {
+            if (q.kind !== "question")
+                continue;
+            if (q.satisfaction === "not_scored")
+                continue;
+            if (q.satisfaction !== "verbatim_bound" && q.satisfaction !== "entity") {
+                findings.push({ subject: q.id, detail: "Contributes to a determination without a binding rule." });
+            }
+        }
+        for (const o of effective) {
+            if (!o.governance.effectiveDate) {
+                findings.push({ subject: o.id, detail: "EFFECTIVE with no effective date. Not reproducible against a point in time." });
+            }
+        }
+        results.push(result("traceability", "Traceability", "advisory", "Every answer and determination resolves to an object, a version and a verbatim span.", effective.length, findings));
+    }
+    const hardFailures = results.filter((r) => r.severity === "hard" && r.assessed && !r.passed).length;
+    const advisoryFailures = results.filter((r) => r.severity === "advisory" && r.assessed && !r.passed).length;
+    const emptyBundle = effective.length === 0;
+    return {
+        verticalId: pack.id,
+        generatedAt: new Date().toISOString(),
+        results,
+        hardFailures,
+        advisoryFailures,
+        // An empty bundle is never releasable, however few findings it produced.
+        releasable: hardFailures === 0 && !emptyBundle,
+        effectiveCount: effective.length,
+        totalCount: objects.length,
+    };
+}
+
+/* ── lib/console/release.js ─────────────────────────────────── */
+/**
+ * Release bundles and the release ledger.
+ *
+ * A bundle is an immutable, content-addressed snapshot of the EFFECTIVE set.
+ * The runtime loads a bundle id and nothing else; rollback is pointing at the
+ * previous id. Every session records the bundle it ran on, which is what makes
+ * a historical determination reproducible against the knowledge state at the
+ * time of capture — Pioneer calls this "a directly court-relevant property".
+ *
+ * CONFLICT 2, second half. The OBJECT carries an approver role (see ./schema).
+ * The RELEASE EVENT carries a named identity, here, in an append-only ledger.
+ * Pioneer exports the object register with no individual named in it; Beauty
+ * exports the ledger and can answer "who approved this claim, and when".
+ */
+
+/**
+ * Deterministic content address over the effective set.
+ *
+ * Not cryptographic — a real deployment signs the bundle. It is deterministic,
+ * which is the property the console needs: two identical libraries produce one
+ * bundle id, so "nothing changed" is visible rather than asserted.
+ */
+function buildBundle(verticalId, objects) {
+    const effective = objects
+        .filter((o) => isLoadable(o.governance.status))
+        .map((o) => `${o.id}@${o.governance.version}`)
+        .sort();
+    let h = 2166136261;
+    for (const s of effective.join("|")) {
+        h ^= s.charCodeAt(0);
+        h = Math.imul(h, 16777619);
+    }
+    const hex = (h >>> 0).toString(16).padStart(8, "0");
+    return {
+        id: `bundle-${verticalId}-${hex}`,
+        verticalId,
+        objectIds: effective,
+        objectCount: effective.length,
+    };
+}
+
+/* AUREN-CONSOLE-END */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THE CONSOLE
+   ═════════════════════════════════════════════════════════════════════ */
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) =>
+  String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+const S = {
+  reviewer: null,
+  workspace: "authority",
+  verticalId: "auren",
+  panel: "library",
+  selected: null,
+  libs: Object.fromEntries(VERTICALS.map((v) => [v.id, library(v.id)])),
+  reports: {},
+  ledger: [],
+};
+
+const pack = () => vertical(S.verticalId);
+const objects = () => S.libs[S.verticalId] || [];
+const report = () => S.reports[S.verticalId] || null;
+
+/* A report describes a library that may no longer exist. Discard it on any
+   change rather than show a stale verdict beside changed objects. */
+function invalidateReport() {
+  delete S.reports[S.verticalId];
+}
+
+function advance(id) {
+  S.libs[S.verticalId] = objects().map((o) => {
+    if (o.id !== id) return o;
+    const to = nextStatus(o.governance.status);
+    if (!to) return o;
+    const roles = o.governance.approverRoles.includes(S.reviewer.role)
+      ? o.governance.approverRoles
+      : [...o.governance.approverRoles, S.reviewer.role];
+    return {
+      ...o,
+      governance: {
+        ...o.governance,
+        status: to,
+        effectiveDate:
+          to === "EFFECTIVE"
+            ? new Date().toISOString().slice(0, 10)
+            : o.governance.effectiveDate,
+        approverRoles: roles,
+      },
+    };
+  });
+  invalidateReport();
+  render();
+}
+
+/* Pioneer's one-step emergency withdrawal. Also the honest way to clear a
+   coverage failure: an element nobody can write a question for does not
+   belong in the bundle, and retiring it is a decision with a name on it. */
+function retire(id) {
+  S.libs[S.verticalId] = objects().map((o) =>
+    o.id === id ? { ...o, governance: { ...o.governance, status: "RETIRED" } } : o
+  );
+  invalidateReport();
+  render();
+}
+
+function runTheGate() {
+  S.reports[S.verticalId] = runGate(pack(), objects());
+  S.panel = "gate";
+  render();
+}
+
+function releaseBundle() {
+  const r = report();
+  if (!r || !r.releasable) return;
+  const bundle = buildBundle(S.verticalId, objects());
+  S.ledger.unshift({
+    bundleId: bundle.id,
+    verticalId: S.verticalId,
+    approver: `${S.reviewer.name} · ${S.reviewer.role}`,
+    at: new Date().toISOString(),
+    markets: pack().markets,
+    note: `${bundle.objectCount} objects · all hard gates passed`,
+    rolledBack: false,
+  });
+  S.panel = "releases";
+  render();
+}
+
+function rollback(bundleId) {
+  S.ledger = S.ledger.map((e) =>
+    e.bundleId === bundleId ? { ...e, rolledBack: true } : e
+  );
+  render();
+}
+
+/* ── Render ────────────────────────────────────────────────────────── */
+
+function statusChip(status) {
+  const cls =
+    status === "EFFECTIVE" ? "c-effective"
+    : status === "APPROVED" ? "c-approved"
+    : status === "DRAFT" ? "c-draft"
+    : status === "RETIRED" || status === "SUPERSEDED" ? "c-retired"
+    : "c-review";
+  return `<span class="chip ${cls}">${status.replace(/_/g, " ")}</span>`;
+}
+
+function renderSide() {
+  const p = pack();
+  $("verticalList").innerHTML = VERTICALS.map((v) => `
+    <button class="vBtn ${v.id === S.verticalId ? "on" : ""}" data-vertical="${v.id}">
+      <span class="vDot" style="background:${v.accent}"></span>
+      <span>
+        <span class="vName">${esc(v.name)}</span>
+        <span class="vMeta">${v.doctrine === "neutral" ? "Neutral doctrine" : "Dual doctrine"} · ${(S.libs[v.id] || []).length} objects</span>
+      </span>
+    </button>`).join("");
+  $("doctrine").innerHTML =
+    `${esc(p.humanAuthority)}<br><span class="mono">${esc(p.anchorAuthority)}</span>`;
+  $("navGroup").classList.toggle("hidden", S.workspace !== "authority");
+  document.querySelectorAll("[data-panel]").forEach((b) =>
+    b.classList.toggle("on", b.dataset.panel === S.panel)
+  );
+  document.querySelectorAll("[data-ws]").forEach((b) =>
+    b.classList.toggle("on", b.dataset.ws === S.workspace)
+  );
+}
+
+function detailHtml(o) {
+  const to = nextStatus(o.governance.status);
+  const at = STATUS_CHAIN.indexOf(o.governance.status);
+  const chain = STATUS_CHAIN.map((s, i) => {
+    const cls = i < at ? "done" : i === at ? "now" : "";
+    return `${i ? '<span class="chainArrow">›</span>' : ""}<span class="chainStep ${cls}">${s.replace(/_/g, " ")}</span>`;
+  }).join("");
+
+  let extra = "";
+  if (o.kind === "element") {
+    extra = `
+      <dt>Authority anchor</dt><dd>${esc(o.authorityAnchor) || "— none. Blocks release. —"}</dd>
+      <dt>Capturable</dt><dd>${o.capturable ? "Yes" : "No — inferred, never asked. Legitimately unresolvable at intake."}</dd>`;
+  } else if (o.kind === "question") {
+    extra = `
+      <dt>Target element</dt><dd class="mono">${esc(o.targetElement)}</dd>
+      <dt>Leading risk</dt><dd>${esc(o.leadingRisk)}${o.leadingRiskRationale ? " — " + esc(o.leadingRiskRationale) : ""}</dd>
+      <dt>Fires only after</dt><dd class="mono">${esc(o.firesOnlyAfter || "— unconditioned —")}</dd>
+      <dt>Variants</dt><dd class="mono">${o.variants.map((v) => `${v.lang}:${v.fidelity}`).join("  ")}</dd>`;
+  } else if (o.kind === "challenge") {
+    extra = `
+      <dt>Ladder</dt><dd class="mono">${o.ladderSteps} steps · ceiling ${o.ladderCeiling}</dd>
+      <dt>Distress exit</dt><dd>${o.distressExit ? "Present" : "Absent — blocks release"}</dd>`;
+  } else if (o.kind === "boundary") {
+    extra = `
+      <dt>Refusal</dt><dd>${esc(o.refusalBehaviour)}</dd>
+      <dt>Probes</dt><dd>${o.probes.map(esc).join(" · ")}</dd>`;
+  } else if (o.kind === "signature" && o.forbiddenPhrasings.length) {
+    extra = `<dt>Forbidden phrasings</dt><dd>${o.forbiddenPhrasings.map(esc).join(" · ")}</dd>`;
+  }
+
+  return `
+    <div class="detail">
+      <div>
+        <span class="eyebrow">${esc(o.kind)}</span>
+        <h3>${esc(o.id)}</h3>
+        <div style="font-size:13px;color:var(--ink-3)">${esc(o.label)}</div>
+      </div>
+      <div class="chain">${chain}</div>
+      <dl class="kv">
+        <dt>Version</dt><dd class="mono">${esc(o.governance.version)}</dd>
+        <dt>Approver roles</dt><dd class="mono">${esc(o.governance.approverRoles.join(", ")) || "— none yet —"}</dd>
+        <dt>Source</dt><dd>${esc(o.governance.source)}</dd>
+        <dt>Effective date</dt><dd class="mono">${esc(o.governance.effectiveDate || "— not effective —")}</dd>
+        <dt>Modes</dt><dd class="mono">${esc(o.eligibility.modes.join(", ")) || "unconstrained"}</dd>
+        <dt>Languages</dt><dd class="mono">${esc(o.eligibility.languages.join(", ")) || "unconstrained"}</dd>
+        <dt>Markets</dt><dd class="mono">${esc(o.eligibility.markets.join(", ")) || "unconstrained"}</dd>
+        ${extra}
+      </dl>
+      <div class="btnRow">
+        <button class="btn" id="advBtn" ${to ? "" : "disabled"}>${to ? "Advance to " + to.replace(/_/g, " ") : "Fully effective"}</button>
+        <button class="btn ghost" id="retBtn" ${o.governance.status === "RETIRED" ? "disabled" : ""}>Retire</button>
+        <button class="btn ghost" id="closeBtn">Close</button>
+      </div>
+    </div>`;
+}
+
+function libraryPanel() {
+  const p = pack();
+  const objs = objects();
+  const effective = objs.filter((o) => o.governance.status === "EFFECTIVE").length;
+  const inReview = objs.filter(
+    (o) => o.governance.status !== "EFFECTIVE" && o.governance.status !== "RETIRED"
+  ).length;
+  const unanchored = objs.filter((o) => o.kind === "element" && !o.authorityAnchor.trim()).length;
+  const pendingFid = objs.filter(
+    (o) => o.kind === "question" && o.variants.some((v) => v.fidelity !== "passed")
+  ).length;
+
+  const sel = S.selected ? objs.find((o) => o.id === S.selected) : null;
+
+  return `
+    <div class="pageHead">
+      <div>
+        <span class="eyebrow">${esc(p.source)}</span>
+        <h2>${esc(p.name)} object library</h2>
+        <p>${esc(p.programme)}. Objects reach the runtime only at
+          <span class="mono">EFFECTIVE</span>; the resolver refuses to load anything else.</p>
+      </div>
+      <div class="btnRow"><button class="btn" id="gateBtn">Run publish gate</button></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="statN">${effective}</div><div class="statL">Effective — in the bundle</div></div>
+      <div class="stat"><div class="statN">${inReview}</div><div class="statL">In review — not released</div></div>
+      <div class="stat"><div class="statN">${unanchored}</div><div class="statL">Elements without an anchor</div></div>
+      <div class="stat"><div class="statN">${pendingFid}</div><div class="statL">Questions with a pending variant</div></div>
+    </div>
+    ${sel ? detailHtml(sel) : ""}
+    <div class="tw">
+      <table>
+        <thead><tr><th>Object</th><th>Kind</th><th>Status</th><th>Anchor / source</th><th>Eligibility</th></tr></thead>
+        <tbody>
+          ${objs.map((o) => `
+            <tr>
+              <td>
+                <button class="rowBtn" data-obj="${esc(o.id)}">${esc(o.id)}</button>
+                <div class="mono" style="margin-top:2px">${esc(o.label.length > 74 ? o.label.slice(0, 74) + "…" : o.label)}</div>
+              </td>
+              <td><span class="kindChip">${esc(o.kind)}</span></td>
+              <td>${statusChip(o.governance.status)}</td>
+              <td class="mono">${esc(o.kind === "element" ? (o.authorityAnchor || "— none —") : o.governance.source)}</td>
+              <td class="mono">${esc(o.eligibility.modes.join(", ") || "any mode")}<br>${esc(o.eligibility.markets.join(", ") || "any market")}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function gatePanel() {
+  const p = pack();
+  const r = report();
+  if (!r) {
+    return `
+      <div class="pageHead">
+        <div>
+          <span class="eyebrow">Publish gate</span>
+          <h2>${esc(p.name)} release report</h2>
+          <p>Nine tests, six of them blocking. The gate is not a report generated
+             after release — it is the condition of release.</p>
+        </div>
+        <button class="btn" id="gateBtn">Run gate</button>
+      </div>
+      <div class="empty">No report yet. Run the gate against the current library.</div>`;
+  }
+
+  const gates = r.results.map((g) => {
+    const m = !g.assessed ? ["n/a", "m-na"]
+      : g.passed ? ["pass", "m-pass"]
+      : g.severity === "hard" ? ["blocked", "m-hard"] : ["advisory", "m-adv"];
+    const findings = g.findings.length
+      ? `<div class="findings">${g.findings.map((f) => `
+          <div class="finding"><span class="fSubject">${esc(f.subject)}</span><span>${esc(f.detail)}</span></div>`).join("")}</div>`
+      : "";
+    return `
+      <div class="gate">
+        <div class="gateHead">
+          <span class="gateMark ${m[1]}">${m[0]}</span>
+          <span><span class="gateName">${esc(g.name)}</span><span class="gateAsserts">${esc(g.asserts)}</span></span>
+          <span class="gateCount">${g.assessed ? g.checked + " checked" : "not assessed"}</span>
+        </div>
+        ${findings}
+      </div>`;
+  }).join("");
+
+  return `
+    <div class="pageHead">
+      <div>
+        <span class="eyebrow">Publish gate · ${new Date(r.generatedAt).toLocaleString()}</span>
+        <h2>${esc(p.name)} release report</h2>
+      </div>
+      <div class="btnRow">
+        <button class="btn ghost" id="gateBtn">Re-run</button>
+        <button class="btn" id="relBtn" ${r.releasable ? "" : "disabled"}>Release bundle</button>
+      </div>
+    </div>
+    <div class="verdictBar ${r.releasable ? "ok" : ""}">
+      <span class="verdictText">${r.releasable ? "Releasable." : "Blocked."}</span>
+      <span class="mono">${r.effectiveCount}/${r.totalCount} effective · ${r.hardFailures} hard · ${r.advisoryFailures} advisory</span>
+      <span class="verdictSub">${r.releasable
+        ? "Every hard gate passed. Advisory findings do not block, and they do not disappear either."
+        : "A hard gate failed. There is no waive path — for BYOND either, by design."}</span>
+    </div>
+    <div class="gateList">${gates}</div>`;
+}
+
+function ledgerPanel() {
+  const rows = S.ledger.filter((e) => e.verticalId === S.verticalId);
+  return `
+    <div class="pageHead">
+      <div>
+        <span class="eyebrow">Append-only</span>
+        <h2>Release ledger</h2>
+        <p>The object register carries roles; this ledger carries names. Both
+           papers get the export they need without either compromising.</p>
+      </div>
+    </div>
+    ${rows.length === 0
+      ? `<div class="empty">No releases yet. A bundle appears here the moment one is signed.</div>`
+      : `<div class="tw"><table>
+          <thead><tr><th>Bundle</th><th>Approver</th><th>Markets</th><th>Signed</th><th></th></tr></thead>
+          <tbody>${rows.map((e) => `
+            <tr>
+              <td><span class="mono">${esc(e.bundleId)}</span><div class="statL">${esc(e.note)}</div></td>
+              <td>${esc(e.approver)}</td>
+              <td class="mono">${esc(e.markets.join(", "))}</td>
+              <td class="mono">${new Date(e.at).toLocaleString()}</td>
+              <td>${e.rolledBack
+                ? `<span class="chip c-retired">rolled back</span>`
+                : `<button class="btn ghost" data-rollback="${esc(e.bundleId)}">Roll back</button>`}</td>
+            </tr>`).join("")}</tbody></table></div>`}`;
+}
+
+function operationsPanel() {
+  const p = pack();
+  return `
+    <div class="pageHead">
+      <div>
+        <span class="eyebrow">Separate workspace</span>
+        <h2>${esc(p.name)} operations</h2>
+        <p>Records, cohort analytics and remediation queues over the
+           ${esc(p.outputObject)}. Tenant-isolated, and never linked across tenants.</p>
+      </div>
+    </div>
+    <div class="note">
+      <b>Deliberately separate from governance, and deliberately empty here.</b>
+      Operations reads the data plane — sessions, records, evidence — which is
+      tenant-isolated and jurisdiction-resident. The governance workspace reads
+      the knowledge plane, which holds no personal data at all and is what ships
+      to a sovereign environment as a signed bundle. An error in this workspace
+      is an inconvenience; an error in the one next door is a regulatory event.
+      They do not share a screen, an undo history or a permission set.
+    </div>`;
+}
+
+function render() {
+  renderSide();
+  const main = $("main");
+  main.innerHTML =
+    S.workspace === "operations" ? operationsPanel()
+    : S.panel === "library" ? libraryPanel()
+    : S.panel === "gate" ? gatePanel()
+    : ledgerPanel();
+
+  const gateBtn = $("gateBtn");
+  if (gateBtn) gateBtn.onclick = runTheGate;
+  const relBtn = $("relBtn");
+  if (relBtn) relBtn.onclick = releaseBundle;
+  const advBtn = $("advBtn");
+  if (advBtn) advBtn.onclick = () => advance(S.selected);
+  const retBtn = $("retBtn");
+  if (retBtn) retBtn.onclick = () => retire(S.selected);
+  const closeBtn = $("closeBtn");
+  if (closeBtn) closeBtn.onclick = () => { S.selected = null; render(); };
+
+  main.querySelectorAll("[data-obj]").forEach((b) => {
+    b.onclick = () => { S.selected = b.dataset.obj; render(); window.scrollTo({ top: 0 }); };
+  });
+  main.querySelectorAll("[data-rollback]").forEach((b) => {
+    b.onclick = () => rollback(b.dataset.rollback);
+  });
+}
+
+/* ── Wiring ────────────────────────────────────────────────────────── */
+
+$("enterBtn").onclick = () => {
+  S.reviewer = { name: ($("nm").value || "Reviewer").trim(), role: $("rl").value };
+  $("whoName").textContent = S.reviewer.name;
+  $("whoRole").textContent = S.reviewer.role;
+  $("signin").classList.add("hidden");
+  $("shell").classList.remove("hidden");
+  render();
+};
+
+$("signOut").onclick = () => {
+  S.reviewer = null;
+  $("shell").classList.add("hidden");
+  $("signin").classList.remove("hidden");
+};
+
+document.addEventListener("click", (e) => {
+  const v = e.target.closest("[data-vertical]");
+  if (v) { S.verticalId = v.dataset.vertical; S.selected = null; S.panel = "library"; render(); return; }
+  const n = e.target.closest("[data-panel]");
+  if (n) { S.panel = n.dataset.panel; render(); return; }
+  const w = e.target.closest("[data-ws]");
+  if (w) { S.workspace = w.dataset.ws; render(); }
+});
+</script>
+</body>
+</html>

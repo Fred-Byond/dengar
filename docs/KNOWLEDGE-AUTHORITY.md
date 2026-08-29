@@ -4,7 +4,21 @@
 > architecture: **AUREN** Paper III v1.1 / IV v1.0, **Project Pioneer** Paper
 > III v1.0 / IV v1.0 (KB Spec), and **Beauty Intelligence**.
 
-Route: `/console`. Source: `src/lib/console/`, `src/components/console/`.
+**Two builds, one engine.**
+
+| | |
+|---|---|
+| `/console` | The React build inside the app. |
+| `/prototypes/knowledge-authority.html` | Self-contained, opens from a file, nothing to run. |
+
+The prototype does **not** get its own copy of the schema, the libraries or the
+gate. `npm run console` compiles `src/lib/console/*` and `src/lib/auren/objects.ts`
+and injects them between markers in the HTML, so the two cannot disagree about
+whether a bundle is releasable. Both produce the same bundle hash from the same
+library — `bundle-auren-e6362ee3` — which is the cheapest possible proof they
+have not drifted.
+
+Source: `src/lib/console/`, `src/components/console/`, `scripts/build-console-prototype.mjs`.
 
 ---
 
