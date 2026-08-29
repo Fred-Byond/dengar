@@ -78,9 +78,9 @@ button:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
 .dh{position:absolute;inset:0;z-index:0}
 .dh canvas{width:100%;height:100%;display:block}
 .standin{
-  position:absolute;right:14px;bottom:11px;z-index:6;
-  font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
-  color:#5A4C86;pointer-events:none;
+  position:absolute;left:16px;top:52px;z-index:3;
+  font-family:var(--mono);font-size:8px;letter-spacing:.13em;text-transform:uppercase;
+  color:#463A6B;pointer-events:none;
 }
 
 /* top chrome */
@@ -108,9 +108,10 @@ button:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
 /* ── Overlay zone: everything analytical lives below the face ──────── */
 .lower{
   position:absolute;left:0;right:0;bottom:0;z-index:4;
-  min-height:41%;max-height:64%;
+  min-height:41%;max-height:62%;
   display:flex;flex-direction:column;justify-content:flex-end;gap:11px;
-  padding:0 15px 18px;
+  padding:22px 15px 18px;
+  scroll-behavior:smooth;
   background:linear-gradient(to top,#140E31 0%,#140E31 52%,rgba(20,14,49,.86) 74%,rgba(20,14,49,0) 100%);
   pointer-events:none;
   overflow-y:auto;
@@ -186,6 +187,20 @@ button:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
 .chip.flip{animation:flip .55s ease}
 @keyframes flip{0%{transform:translateX(-7px);opacity:.3}100%{transform:none;opacity:1}}
 
+@media (max-height:820px){
+  .lower{gap:9px;padding:18px 14px 14px;max-height:66%}
+  .cap{font-size:14.5px}
+  .quote .qt{font-size:17px;line-height:1.32}
+  .prop .pbody{font-size:12px}
+  .sig{padding:10px 12px}
+  .micbtn{width:64px;height:64px}
+  .micbtn svg{width:25px;height:25px}
+  /* Frozen rail collapses to its badge: the freeze is still visible
+     governance, without four chips of dimmed noise on a phone. */
+  .rail.frozen .chips{display:none}
+  .rail.frozen .railhd{margin-bottom:0}
+}
+
 /* ── Cards / buttons ───────────────────────────────────────────────── */
 .card{
   border:1px solid var(--line);border-radius:8px;background:#1D1546;padding:15px 16px;
@@ -239,6 +254,93 @@ button:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
 .consent p{margin:0 0 10px;font-size:12.5px;line-height:1.55;color:var(--lilac2)}
 .consent p:last-of-type{margin-bottom:0}
 .consent .no{color:var(--dim);font-size:11.5px}
+
+/* ── Landing: the front door ───────────────────────────────────────── */
+.landing{justify-content:space-between;padding-top:34px}
+.wordmark{display:flex;align-items:center;gap:10px}
+.wordmark .mk{
+  width:26px;height:26px;border-radius:50%;flex:none;
+  background:radial-gradient(circle at 32% 30%, #EBA98C 0%, #A87BD8 45%, #3D2E6E 100%);
+}
+.wordmark .wt{
+  font-size:19px;font-weight:800;letter-spacing:.20em;color:var(--paper);
+}
+.landing h1{
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-size:30px;line-height:1.22;color:var(--paper);margin:0 0 14px;
+}
+.landing .lead{font-size:13.5px;color:var(--dim);line-height:1.6;margin:0 0 20px}
+.creds{display:flex;flex-direction:column;gap:7px;margin-bottom:22px}
+.cred{
+  display:flex;gap:9px;align-items:flex-start;font-size:11.5px;color:var(--lilac2);line-height:1.5;
+}
+.cred .cd{color:var(--peach);font-family:var(--mono);font-size:10px;flex:none;padding-top:1px}
+.langrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.langc{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;padding:6px 10px;border-radius:20px;
+  border:1px solid var(--line);background:#1E1642;color:var(--dim);cursor:pointer;
+}
+.langc.on{border-color:var(--peach);color:var(--peach);background:#2C1F4E}
+.noaccount{
+  font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--dim2);text-align:center;margin-top:11px;
+}
+.linkbtn{
+  display:block;width:100%;text-align:center;margin-top:13px;padding:11px;
+  font-size:12.5px;color:var(--lilac);background:none;border:0;cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;text-decoration-color:#4A3A78;
+}
+
+/* ── Auth: optional, never a wall ──────────────────────────────────── */
+.otprow{display:flex;gap:7px;margin-bottom:16px}
+.otprow input{
+  flex:1;min-width:0;text-align:center;padding:14px 0;border-radius:8px;background:#241B52;
+  border:1px solid var(--line);color:var(--paper);font-family:var(--mono);font-size:18px;
+}
+.otprow input:focus{outline:0;border-color:var(--peach);background:#2A2060}
+.notice{
+  border:1px solid var(--line);border-radius:8px;background:#1E1642;padding:12px 13px;
+  font-size:11.5px;color:var(--dim);line-height:1.55;margin-bottom:16px;
+}
+
+/* ── Verified certification ────────────────────────────────────────── */
+.vstep{
+  display:flex;gap:12px;align-items:flex-start;padding:13px 0;
+  border-top:1px solid var(--line);
+}
+.vstep:first-of-type{border-top:0}
+.vstep .vn{
+  width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font-family:var(--mono);font-size:10px;border:1px solid var(--line);color:var(--dim2);
+}
+.vstep.done .vn{border-color:var(--ok);color:var(--ok)}
+.vstep.now .vn{border-color:var(--peach);color:var(--peach);background:#2C1F4E}
+.vstep .vb{flex:1;min-width:0}
+.vstep .vt{font-size:13px;font-weight:600;color:var(--paper);margin-bottom:2px}
+.vstep.pending .vt{color:var(--dim)}
+.vstep .vd{font-size:11.5px;color:var(--dim);line-height:1.5}
+.scanbox{
+  border:1px dashed #5C4382;border-radius:10px;background:#1E1642;
+  padding:26px 18px;text-align:center;margin:14px 0 16px;
+}
+.scanbox .si{font-size:26px;margin-bottom:9px}
+.scanbox .st2{font-size:12.5px;color:var(--lilac2);line-height:1.5}
+.scanbox .sn{font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim2);margin-top:8px}
+.certcard{
+  border:1px solid var(--peach);border-radius:10px;background:#2C1F4E;padding:18px;margin-bottom:20px;
+}
+.certcard .ct{
+  font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--peach);margin-bottom:10px;
+}
+.certcard .cn{font-size:16px;font-weight:700;color:var(--paper);margin-bottom:3px}
+.certcard .cid{font-family:var(--mono);font-size:10.5px;color:var(--lilac);margin-bottom:12px}
+.certrow{
+  display:flex;justify-content:space-between;gap:10px;font-size:11.5px;
+  padding:5px 0;border-top:1px solid #4A3A78;
+}
+.certrow .k{color:var(--dim)}
+.certrow .v{color:var(--lilac2);font-family:var(--mono);font-size:10.5px;text-align:right}
 
 /* ── Prop overlays (STRESS) ────────────────────────────────────────── */
 .prop{
@@ -426,19 +528,69 @@ button:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
 
       <!-- Digital human: the hero. Face zone is the upper viewport, always clear. -->
       <div class="dh"><canvas id="dh"></canvas></div>
-      <div class="standin">Avatar stand-in</div>
+      <div class="standin hidden" id="standin">Avatar stand-in</div>
 
       <!-- Top chrome -->
       <div class="topbar" id="topbar">
         <span class="badge train hidden" id="badgeTrain">Investment Simulation — Training Mode</span>
         <span class="badge protect hidden" id="badgeProtect">Protect — real situation</span>
         <span class="spacer"></span>
-        <button class="protbtn" id="protBtn">Protect</button>
+        <button class="protbtn hidden" id="protBtn">Protect</button>
         <button class="exitbtn hidden" id="exitBtn">Exit simulation</button>
       </div>
 
-      <!-- Entry -->
-      <div class="entry" id="entry">
+      <!-- Landing: the front door. Brand, thesis, and the way in. -->
+      <div class="entry landing" id="landing">
+        <div class="wordmark">
+          <span class="mk"></span>
+          <span class="wt">AUREN</span>
+        </div>
+        <div>
+          <div class="kicker">Investor readiness · rehearsal</div>
+          <h1>Everyone knows the rules. Almost nobody follows them when someone is pushing.</h1>
+          <p class="lead">AUREN is not a course. It is a five-minute rehearsal with an AI coach who listens, finds where your reasoning breaks, then puts you under the exact pressure a real scam would.</p>
+          <div class="creds">
+            <div class="cred"><span class="cd">01</span><span>You speak. There are no quizzes and nothing to type.</span></div>
+            <div class="cred"><span class="cd">02</span><span>Everything you are told about yourself is quoted back from your own words.</span></div>
+            <div class="cred"><span class="cd">03</span><span>Nothing here is real, and AUREN never advises you on a real investment.</span></div>
+          </div>
+          <div class="langrow" id="langRow">
+            <button class="langc on" data-l="EN">English</button>
+            <button class="langc" data-l="MS">Bahasa Melayu</button>
+            <button class="langc" data-l="ZH">中文</button>
+            <button class="langc" data-l="AR">العربية</button>
+          </div>
+        </div>
+        <div>
+          <button class="btn" id="beginBtn">Begin my first rehearsal</button>
+          <div class="noaccount">No account needed</div>
+          <button class="linkbtn" id="signinBtn">I already have a record — sign in</button>
+        </div>
+      </div>
+
+      <!-- Sign in: optional, and never a wall in front of the loop. -->
+      <div class="entry hidden" id="auth">
+        <div class="kicker">Sign in</div>
+        <h1 style="font-size:25px">Pick up where your last rehearsal left off.</h1>
+        <p class="sub">Your record is tied to a number, not a password. We send a six-digit code.</p>
+        <div class="field">
+          <label for="ph">Mobile number</label>
+          <input id="ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="+60 12 345 6789" value="+60 12 345 6789">
+        </div>
+        <div id="otpWrap" class="hidden">
+          <div class="field"><label>Six-digit code</label></div>
+          <div class="otprow" id="otpRow">
+            <input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
+            <input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
+          </div>
+        </div>
+        <div class="notice">Signing in stores your reasoning map and your retraining queue. It does not verify who you are — identity verification happens later, only if you want your record certified.</div>
+        <button class="btn" id="authBtn">Send me a code</button>
+        <button class="linkbtn" id="authSkip">Skip — start without an account</button>
+      </div>
+
+      <!-- Welcome + consent -->
+      <div class="entry hidden" id="entry">
         <div class="kicker">AUREN · Investor rehearsal</div>
         <h1>I'm going to show you how you think when someone wants your money.</h1>
         <p class="sub">Five minutes. You talk, I listen, then I push. Nothing here is real and nothing you say is scored against you as a person.</p>
@@ -639,7 +791,9 @@ const S = {
   phase:null,          // challenge phase: 'stress' | 'retest'
   decision:null,
   transferred:null,
-  budget:4
+  budget:4,
+  lang:"EN",
+  account:{ signedIn:false, phone:null, identityVerified:false, certificateId:null }
 };
 
 const STATES = [
@@ -653,6 +807,9 @@ const STATES = [
 ];
 
 const DEFECTS = {
+  landing:  ["—","The front door. Brand, thesis, language and the way in — with the primary path explicitly account-free. Paper IV Stage 0 keeps the first session behind no account wall, and this screen has to make that a selling point rather than an omission."],
+  auth:     ["—","Optional, and never a wall. Signing in stores the reasoning map and the retraining queue. It deliberately does NOT verify identity — conflating the two is what turns a five-minute rehearsal into an onboarding funnel."],
+  verify:   ["—","eKYC where Paper IV puts it: a post-session certification upsell, not an entry gate. The learner has the evidence chain in hand before being asked for a document, so verification is something they want rather than something they endure."],
   entry:    ["D1","Consent act replaces the mode menu. A brand-new user cannot meaningfully choose between LEARN, REHEARSE and PROTECT — so they consent to being pressured instead, and the mode selector is deferred until after the loop."],
   understand:["D3","Restraint with a tell. Nothing analytical renders, per doctrine — but the silence carries a non-analytical signal that a mind is working, not just a microphone."],
   diagnose: ["D8","Four-element budget, not eight. Eight voice turns pushes the loop past ten minutes. The unresolved elements route to the retraining queue, which is what brings the learner back."],
@@ -725,7 +882,7 @@ function draw(t){
   ctx.fillStyle = bg; ctx.fillRect(0,0,w,h);
 
   // ── key light behind the figure
-  const cx = w/2 + sway, cy = h*0.335;
+  const cx = w/2 + sway, cy = h*0.27;
   const halo = ctx.createRadialGradient(cx, cy, 10, cx, cy, h*0.44);
   halo.addColorStop(0, P.glow);
   halo.addColorStop(0.42, mixHex("#241A52","#3A1A2A",personaMix));
@@ -752,27 +909,39 @@ function draw(t){
 
   // ── the figure: head, neck, shoulders. Reads as a person in the room,
   //    lit from behind-left, without attempting a face it cannot deliver.
-  const hr = h*0.098 * (1 + breathe*0.006);
-  const hx = cx, hy = cy - h*0.015;
-  const sy = hy + hr*2.25;
-  const floor = h*0.90;
+  // Proportions come from a figure box, not from height alone: sizing off h
+  // on a tall narrow phone throws the shoulders past both edges and the
+  // figure stops reading as a person.
+  const base = Math.min(w, h*0.74);
+  const hr = base*0.132 * (1 + breathe*0.006);
+  const hx = cx, hy = cy;
+  const sy = hy + hr*1.78;
+  const shW = base*0.44;
+  const shIn = base*0.155;
+  const shDrop = base*0.17;
+  const floor = h*0.95;
 
   ctx.save();
   ctx.translate(0, Math.sin(time*0.7)*1.8);   // breathing rise/fall
 
   // contact shadow so the figure sits on the ground plane rather than floating
   ctx.beginPath();
-  ctx.ellipse(cx, floor, h*0.30, h*0.05, 0, 0, Math.PI*2);
+  ctx.ellipse(cx, sy + shDrop*1.2, shW*1.06, base*0.05, 0, 0, Math.PI*2);
   ctx.fillStyle = "#0B0720"; ctx.globalAlpha = 0.55; ctx.fill();
   ctx.globalAlpha = 1;
 
   // shoulders
   ctx.beginPath();
-  ctx.moveTo(cx - h*0.315, floor);
-  ctx.bezierCurveTo(cx - h*0.245, sy + h*0.030, cx - h*0.112, sy - h*0.010, cx, sy - h*0.014);
-  ctx.bezierCurveTo(cx + h*0.112, sy - h*0.010, cx + h*0.245, sy + h*0.030, cx + h*0.315, floor);
+  // Shoulder slope resolves within shDrop, then the torso runs straight down
+  // and out of frame. Curving all the way to the floor makes a dome, not a
+  // person — the giveaway on a tall viewport.
+  ctx.moveTo(cx - shW, floor);
+  ctx.lineTo(cx - shW, sy + shDrop);
+  ctx.bezierCurveTo(cx - shW*0.94, sy + shDrop*0.34, cx - shIn, sy - base*0.012, cx, sy - base*0.017);
+  ctx.bezierCurveTo(cx + shIn, sy - base*0.012, cx + shW*0.94, sy + shDrop*0.34, cx + shW, sy + shDrop);
+  ctx.lineTo(cx + shW, floor);
   ctx.closePath();
-  const bodyG = ctx.createLinearGradient(cx - h*0.2, sy - h*0.04, cx + h*0.16, floor);
+  const bodyG = ctx.createLinearGradient(cx - shW*0.6, sy - base*0.05, cx + shW*0.5, floor);
   bodyG.addColorStop(0, P.body);
   bodyG.addColorStop(0.55, mixHex("#33246A","#4A1B2A",personaMix));
   bodyG.addColorStop(1, mixHex("#181040","#26101C",personaMix));
@@ -782,18 +951,18 @@ function draw(t){
   ctx.save();
   ctx.clip();
   ctx.beginPath();
-  ctx.moveTo(cx - h*0.300, floor);
-  ctx.bezierCurveTo(cx - h*0.232, sy + h*0.034, cx - h*0.104, sy - h*0.004, cx + h*0.006, sy - h*0.008);
+  ctx.moveTo(cx - shW*0.985, sy + shDrop*1.5);
+  ctx.bezierCurveTo(cx - shW*0.92, sy + shDrop*0.38, cx - shIn*0.92, sy - base*0.004, cx + base*0.006, sy - base*0.009);
   ctx.strokeStyle = P.rim; ctx.globalAlpha = 0.42 + amp*0.18; ctx.lineWidth = 2.6; ctx.stroke();
   ctx.restore();
   ctx.globalAlpha = 1;
 
   // neck
   ctx.beginPath();
-  ctx.moveTo(hx - hr*0.42, hy + hr*0.74);
-  ctx.lineTo(hx - hr*0.46, sy);
-  ctx.lineTo(hx + hr*0.46, sy);
-  ctx.lineTo(hx + hr*0.42, hy + hr*0.74);
+  ctx.moveTo(hx - hr*0.34, hy + hr*0.72);
+  ctx.lineTo(hx - hr*0.50, sy + base*0.004);
+  ctx.lineTo(hx + hr*0.50, sy + base*0.004);
+  ctx.lineTo(hx + hr*0.34, hy + hr*0.72);
   ctx.closePath();
   ctx.fillStyle = mixHex("#241865","#3C1622",personaMix); ctx.fill();
 
@@ -986,6 +1155,8 @@ const el = {
   micWrap:$("micWrap"), micBtn:$("micBtn"), micLbl:$("micLbl"),
   slotProp:$("slotProp"), slotCoach:$("slotCoach"), slotAction:$("slotAction"),
   badgeTrain:$("badgeTrain"), badgeProtect:$("badgeProtect"),
+  landing:$("landing"), auth:$("auth"), entry:$("entry"),
+  standin:$("standin"),
   exitBtn:$("exitBtn"), protBtn:$("protBtn"),
   pLog:$("pLog"), pStates:$("pStates")
 };
@@ -995,10 +1166,14 @@ function warnVoice(msg){
   const n = $("voiceWarn");
   if(n){ n.textContent = msg; n.classList.remove("hidden"); }
 }
+function scrollLower(){
+  requestAnimationFrame(() => { el.lower.scrollTop = el.lower.scrollHeight; });
+}
 function setCaption(text, who, persona){
   el.capWho.textContent = who;
   el.capTxt.textContent = text;
   el.cap.classList.toggle("persona", !!persona);
+  scrollLower();
 }
 function setSaid(t){ el.said.textContent = t || ""; }
 function show(n){ n.classList.remove("hidden"); }
@@ -1453,6 +1628,9 @@ function stageEvidence(){
       '<div class="rulever">Aggregation rule v1 · within-session transfer only · durable transfer not claimed</div>' +
     '</div>' +
 
+    (S.account.certificateId
+      ? '<div class="notice">This record is certified. Certificate ' + S.account.certificateId + '.</div>'
+      : '<button class="btn ghost" id="certBtn">Verify my identity and certify this record</button><div style="height:9px"></div>') +
     '<button class="btn" id="againBtn">Rehearse your next weakness</button>' +
     '<div style="height:9px"></div>' +
     '<button class="btn ghost" id="modesBtn">See what else AUREN does</button>';
@@ -1460,6 +1638,7 @@ function stageEvidence(){
   show(el.sheet);
   $("againBtn").onclick = () => { resetLoop(); };
   $("modesBtn").onclick = () => { stageModes(); };
+  if($("certBtn")) $("certBtn").onclick = () => { stageVerify(0); };
 }
 
 function explain(from, to, failed, sigs, transferred){
@@ -1474,6 +1653,87 @@ function explain(from, to, failed, sigs, transferred){
 
 function escapeHtml(s){
   return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+}
+
+/* ── Stage: VERIFY — identity, and only now ───────────────────────
+   Paper IV moves eKYC out of entry and into a post-session "verified
+   certification" upsell. That ordering is the whole reason it converts:
+   the learner is holding an evidence chain they want to be able to prove,
+   rather than being asked for a document by a product they have not used. */
+function stageVerify(step){
+  setStage("verify","S7");
+  const steps = [
+    { t:"Confirm your details",  d:"Name and date of birth, as they appear on your document." },
+    { t:"Scan your document",    d:"Passport or national ID. Captured once, checked, and not retained by AUREN." },
+    { t:"Liveness check",        d:"A short camera check that the person holding the document is you." },
+    { t:"Issue certificate",     d:"Your Investor Readiness Record is sealed against a verified identity." }
+  ];
+
+  if(step >= steps.length){ return stageCertified(); }
+
+  let html =
+    '<div class="kicker">Verified certification</div>' +
+    '<h2 class="verdict" style="font-size:22px">Make this record provable.</h2>' +
+    '<p class="verdictsub">Your rehearsal already stands on its own. Certification ties it to a verified identity so an employer, a regulator or an institution can rely on it. It is optional, and nothing you have done is lost if you stop here.</p>' +
+    '<div class="matrix" style="padding:4px 14px;margin-bottom:20px">';
+
+  steps.forEach((st, i) => {
+    const cls = i < step ? "done" : (i === step ? "now" : "pending");
+    html += '<div class="vstep ' + cls + '"><div class="vn">' + (i < step ? "✓" : (i+1)) + '</div>' +
+            '<div class="vb"><div class="vt">' + st.t + '</div><div class="vd">' + st.d + '</div></div></div>';
+  });
+  html += '</div>';
+
+  if(step === 0){
+    html +=
+      '<div class="field"><label for="vfn">Full legal name</label><input id="vfn" type="text" value="' + escapeHtml(S.name) + ' Reyes"></div>' +
+      '<div class="field"><label for="vdb">Date of birth</label><input id="vdb" type="text" inputmode="numeric" placeholder="DD / MM / YYYY" value="14 / 03 / 1989"></div>';
+  } else if(step === 1){
+    html += '<div class="scanbox"><div class="si">🪪</div><div class="st2">Position your passport or ID inside the frame.</div><div class="sn">Simulated capture — no document is read</div></div>';
+  } else if(step === 2){
+    html += '<div class="scanbox"><div class="si">🙂</div><div class="st2">Look at the camera and turn your head slowly to the left.</div><div class="sn">Simulated liveness — no camera is opened</div></div>';
+  } else {
+    html += '<div class="notice">Identity confirmed. Sealing your Investor Readiness Record against it now.</div>';
+  }
+
+  html +=
+    '<button class="btn" id="vNext">' + (step === steps.length-1 ? "Issue my certificate" : "Continue") + '</button>' +
+    '<button class="linkbtn" id="vSkip">Not now — back to my record</button>';
+
+  el.sheet.innerHTML = html;
+  el.sheet.scrollTop = 0;
+  show(el.sheet);
+  $("vNext").onclick = () => stageVerify(step + 1);
+  $("vSkip").onclick = () => stageEvidence();
+  log("eKYC step " + (step+1) + "/" + steps.length);
+}
+
+function stageCertified(){
+  setStage("verify","S7");
+  S.account.identityVerified = true;
+  S.account.certificateId = "AUREN-CERT-" + String(Math.floor(100000 + Math.random()*899999));
+  log("identity verified · certificate " + S.account.certificateId, "ok");
+
+  const d = new Date();
+  el.sheet.innerHTML =
+    '<div class="kicker">Certified</div>' +
+    '<h2 class="verdict" style="font-size:23px">Your record is now provable.</h2>' +
+    '<p class="verdictsub">The evidence chain has not changed — certification does not improve your result, it only binds it to a verified identity. That distinction is the point.</p>' +
+    '<div class="certcard">' +
+      '<div class="ct">Investor Readiness Certificate</div>' +
+      '<div class="cn">' + escapeHtml(S.name) + ' Reyes</div>' +
+      '<div class="cid">' + S.account.certificateId + '</div>' +
+      '<div class="certrow"><span class="k">Issued</span><span class="v">' + d.toISOString().slice(0,10) + '</span></div>' +
+      '<div class="certrow"><span class="k">Identity</span><span class="v">Verified — document + liveness</span></div>' +
+      '<div class="certrow"><span class="k">Elements evidenced</span><span class="v">' + Object.keys(S.reasoningMap).length + '</span></div>' +
+      '<div class="certrow"><span class="k">Transfer</span><span class="v">' + (S.transferred ? "Demonstrated" : "Not yet") + '</span></div>' +
+      '<div class="certrow"><span class="k">Scope</span><span class="v">Within-session</span></div>' +
+      '<div class="certrow"><span class="k">Rule</span><span class="v">aggregation-rule-v1</span></div>' +
+    '</div>' +
+    '<div class="notice">The certificate attests to a rehearsal, not to investment competence, and it makes no claim about durable behaviour change. AUREN does not share it with anyone — you do.</div>' +
+    '<button class="btn" id="cBack">Back to my record</button>';
+  el.sheet.scrollTop = 0;
+  $("cBack").onclick = () => stageEvidence();
 }
 
 /* ── Stage: MODES — the deferred selector (D1/D2) ───────────────── */
@@ -1563,12 +1823,76 @@ function resetLoop(){
   stageUnderstand();
 }
 
+/* Landing → welcome. The primary path never touches an account. */
+$("beginBtn").onclick = () => {
+  hide(el.landing);
+  show(el.entry);
+  setStage("entry","S0");
+};
+
+document.getElementById("langRow").addEventListener("click", (e) => {
+  const b = e.target.closest(".langc");
+  if(!b) return;
+  document.querySelectorAll("#langRow .langc").forEach(x => x.classList.remove("on"));
+  b.classList.add("on");
+  S.lang = b.dataset.l;
+  log("session language: " + S.lang);
+});
+
+$("signinBtn").onclick = () => {
+  hide(el.landing);
+  show(el.auth);
+  setStage("auth","S0");
+};
+
+$("authSkip").onclick = () => {
+  hide(el.auth);
+  show(el.entry);
+  setStage("entry","S0");
+};
+
+let otpSent = false;
+$("authBtn").onclick = () => {
+  if(!otpSent){
+    otpSent = true;
+    S.account.phone = $("ph").value;
+    show($("otpWrap"));
+    $("authBtn").textContent = "Verify and continue";
+    log("sign-in code sent (simulated)");
+    const first = document.querySelector("#otpRow input");
+    if(first) first.focus();
+    return;
+  }
+  S.account.signedIn = true;
+  log("signed in · record restored", "ok");
+  hide(el.auth);
+  show(el.entry);
+  setStage("entry","S0");
+};
+
+/* Six-digit code: advance on entry, retreat on backspace. */
+document.getElementById("otpRow").addEventListener("input", (e) => {
+  const inputs = [...document.querySelectorAll("#otpRow input")];
+  const i = inputs.indexOf(e.target);
+  if(e.target.value && i < inputs.length-1) inputs[i+1].focus();
+});
+document.getElementById("otpRow").addEventListener("keydown", (e) => {
+  if(e.key !== "Backspace" || e.target.value) return;
+  const inputs = [...document.querySelectorAll("#otpRow input")];
+  const i = inputs.indexOf(e.target);
+  if(i > 0) inputs[i-1].focus();
+});
+
 $("startBtn").onclick = () => {
   S.name = ($("nm").value || "Daniel").trim().split(" ")[0];
   S.mode = "REHEARSE";
   S.t0 = Date.now();
   hide(el.entry);
+  hide(el.landing);
+  hide(el.auth);
   show(el.lower);
+  show(el.standin);
+  show(el.protBtn);
   setKV("pMode","REHEARSE");
   log("consent recorded — adversarial envelope permitted");
   log("mode selector deferred (D1)");
@@ -1591,7 +1915,7 @@ el.exitBtn.onclick = () => {
   say("That's the simulation ended. Nothing in it was real, and nothing you said in it is held against you. Your progress is kept.", {}, () => stageCoach());
 };
 
-setStage("entry","S0");
+setStage("landing","S0");
 renderStates();
 sizeCanvas();
 requestAnimationFrame(draw);

@@ -28,10 +28,12 @@ export function Scorecard({
   session,
   onAgain,
   onModes,
+  onCertify,
 }: {
   session: AurenSession;
   onAgain: () => void;
   onModes: () => void;
+  onCertify: () => void;
 }) {
   const [open, setOpen] = useState<string | null>(null);
   const verdict = verdictFor(session);
@@ -142,6 +144,25 @@ export function Scorecard({
           not claimed
         </div>
       </div>
+
+      {/* eKYC lands here, not at entry: the learner is holding an evidence
+          chain they want to be able to prove. */}
+      {session.account.certificateId ? (
+        <div className={styles.notice}>
+          This record is certified. Certificate {session.account.certificateId}.
+        </div>
+      ) : (
+        <>
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnGhost}`}
+            onClick={onCertify}
+          >
+            Verify my identity and certify this record
+          </button>
+          <div style={{ height: 9 }} />
+        </>
+      )}
 
       {/* The retention loop: the next weakness, named, one tap away. */}
       <button type="button" className={styles.btn} onClick={onAgain}>

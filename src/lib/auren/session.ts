@@ -44,6 +44,8 @@ export type EngineState =
  * something. The object-level mode gate is unchanged; only the screen order is.
  */
 export type Stage =
+  | "landing"
+  | "auth"
   | "entry"
   | "understand"
   | "diagnose"
@@ -52,6 +54,8 @@ export type Stage =
   | "retest"
   | "evidence"
   | "modes"
+  | "verify"
+  | "certified"
   | "protect";
 
 export interface ElementRecord {
@@ -105,6 +109,23 @@ export interface AurenSession {
   transferred: boolean | null;
 
   questionIndex: number;
+
+  /**
+   * Account and identity are deliberately separate concerns.
+   *
+   * Signing in stores the reasoning map and the retraining queue, and is
+   * never a wall in front of the first session (Paper IV Stage 0: no account
+   * wall). Identity verification is a different act entirely, and it happens
+   * AFTER the evidence chain as the certification upsell Paper IV specifies —
+   * the learner is holding something they want to be able to prove, rather
+   * than being asked for a document by a product they have not used.
+   */
+  account: {
+    signedIn: boolean;
+    phone: string | null;
+    identityVerified: boolean;
+    certificateId: string | null;
+  };
 }
 
 export function createSession(learnerName: string): AurenSession {
@@ -112,7 +133,7 @@ export function createSession(learnerName: string): AurenSession {
     learnerName,
     mode: null,
     engineState: "S0",
-    stage: "entry",
+    stage: "landing",
     startedAt: null,
     reasoningMap: {},
     situationMarkers: [],
@@ -122,7 +143,39 @@ export function createSession(learnerName: string): AurenSession {
     ladderIndex: 0,
     transferred: null,
     questionIndex: 0,
+    account: {
+      signedIn: false,
+      phone: null,
+      identityVerified: false,
+      certificateId: null,
+    },
   };
+}
+
+/** The four eKYC steps, in order. Certification never alters the result. */
+export const VERIFICATION_STEPS: Array<{ title: string; detail: string }> = [
+  {
+    title: "Confirm your details",
+    detail: "Name and date of birth, as they appear on your document.",
+  },
+  {
+    title: "Scan your document",
+    detail:
+      "Passport or national ID. Captured once, checked, and not retained by AUREN.",
+  },
+  {
+    title: "Liveness check",
+    detail: "A short camera check that the person holding the document is you.",
+  },
+  {
+    title: "Issue certificate",
+    detail:
+      "Your Investor Readiness Record is sealed against a verified identity.",
+  },
+];
+
+export function issueCertificateId(): string {
+  return `AUREN-CERT-${Math.floor(100000 + Math.random() * 899999)}`;
 }
 
 /** The elements this session will resolve, capped by the budget (D8). */

@@ -16,6 +16,8 @@ import {
   challengeMayFire,
   createSession,
   evaluateAnswer,
+  issueCertificateId,
+  VERIFICATION_STEPS,
   resistedPressure,
   selectRetest,
   type AurenSession,
@@ -32,7 +34,11 @@ export type AurenAppProps = { sdkKey: string };
 const BEAT_PAUSE = 1900;
 
 export function AurenApp({ sdkKey }: AurenAppProps) {
-  const [stage, setStage] = useState<Stage>("entry");
+  const [stage, setStage] = useState<Stage>("landing");
+  const [lang, setLang] = useState("EN");
+  const [phone, setPhone] = useState("+60 12 345 6789");
+  const [codeSent, setCodeSent] = useState(false);
+  const [verifyStep, setVerifyStep] = useState(0);
   const [name, setName] = useState("Daniel");
   const [caption, setCaption] = useState("…");
   const [captionWho, setCaptionWho] = useState("AUREN");
@@ -61,6 +67,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
      advances using the authored rehearsed line — the loop is never
      rescued by introducing a text input, which would make typing the
      default affordance and change what is being measured. */
+  const lowerRef = useRef<HTMLDivElement | null>(null);
   const heardRef = useRef("");
   const resolverRef = useRef<((text: string) => void) | null>(null);
 
@@ -73,6 +80,13 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       }
     });
   }, [klleon]);
+
+  /* Keep the newest overlay content in view. Without this, a card is clipped
+     mid-sentence on a phone and reads as a layout bug rather than a scroll. */
+  useEffect(() => {
+    const n = lowerRef.current;
+    if (n) n.scrollTop = n.scrollHeight;
+  }, [caption, coachSig, coachBeat, prop, railState, stage]);
 
   const say = useCallback(
     (text: string, opts?: { persona?: string }) =>
@@ -363,6 +377,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
 
   const session = sessionRef.current;
   const inChallenge = stage === "stress" || stage === "retest";
+  const started = stage !== "landing" && stage !== "auth" && stage !== "entry";
   const inLoop =
     stage === "understand" ||
     stage === "diagnose" ||
@@ -414,7 +429,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
           <span className={styles.spacer} />
           {/* PROTECT is always one tap from cold (ordering fix D7) — the
               habit "ask AUREN before I transfer" cannot form behind a menu. */}
-          {stage !== "protect" && stage !== "entry" ? (
+          {started && stage !== "protect" ? (
             <button
               type="button"
               className={`${styles.pill} ${styles.pillProtect}`}
@@ -436,6 +451,136 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
 
         {klleon.error && stage !== "entry" ? (
           <div className={styles.error}>{klleon.error}</div>
+        ) : null}
+
+        {stage === "landing" ? (
+          <div className={`${styles.entry} ${styles.landing}`}>
+            <div className={styles.wordmark}>
+              <span className={styles.mark} />
+              <span className={styles.wordmarkText}>AUREN</span>
+            </div>
+            <div>
+              <div className={styles.kicker}>Investor readiness · rehearsal</div>
+              <h1 className={styles.landingTitle}>
+                Everyone knows the rules. Almost nobody follows them when
+                someone is pushing.
+              </h1>
+              <p className={styles.entrySub}>
+                AUREN is not a course. It is a five-minute rehearsal with an AI
+                coach who listens, finds where your reasoning breaks, then puts
+                you under the exact pressure a real scam would.
+              </p>
+              <div className={styles.creds}>
+                {[
+                  "You speak. There are no quizzes and nothing to type.",
+                  "Everything you are told about yourself is quoted back from your own words.",
+                  "Nothing here is real, and AUREN never advises you on a real investment.",
+                ].map((c, i) => (
+                  <div className={styles.cred} key={c}>
+                    <span className={styles.credNum}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span>{c}</span>
+                  </div>
+                ))}
+              </div>
+              <div className={styles.langRow}>
+                {["EN", "MS", "ZH", "AR"].map((l) => (
+                  <button
+                    type="button"
+                    key={l}
+                    className={`${styles.langChip} ${lang === l ? styles.langOn : ""}`}
+                    onClick={() => setLang(l)}
+                  >
+                    {{ EN: "English", MS: "Bahasa Melayu", ZH: "中文", AR: "العربية" }[l]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              {/* The primary path never touches an account — Paper IV keeps
+                  the first session behind no wall, and this screen has to
+                  make that a selling point rather than an omission. */}
+              <button
+                type="button"
+                className={styles.btn}
+                onClick={() => goStage("entry", "S0")}
+              >
+                Begin my first rehearsal
+              </button>
+              <div className={styles.noAccount}>No account needed</div>
+              <button
+                type="button"
+                className={styles.linkBtn}
+                onClick={() => goStage("auth", "S0")}
+              >
+                I already have a record — sign in
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {stage === "auth" ? (
+          <div className={styles.entry}>
+            <div className={styles.kicker}>Sign in</div>
+            <h2 className={styles.entryTitle} style={{ fontSize: 25 }}>
+              Pick up where your last rehearsal left off.
+            </h2>
+            <p className={styles.entrySub}>
+              Your record is tied to a number, not a password. We send a
+              six-digit code.
+            </p>
+            <div className={styles.field}>
+              <label htmlFor="auren-phone">Mobile number</label>
+              <input
+                id="auren-phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
+            {codeSent ? (
+              <div className={styles.field}>
+                <label htmlFor="auren-otp">Six-digit code</label>
+                <input
+                  id="auren-otp"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="······"
+                />
+              </div>
+            ) : null}
+            <div className={styles.notice}>
+              Signing in stores your reasoning map and your retraining queue. It
+              does not verify who you are — identity verification happens later,
+              only if you want your record certified.
+            </div>
+            <button
+              type="button"
+              className={styles.btn}
+              onClick={() => {
+                if (!codeSent) {
+                  setCodeSent(true);
+                  sessionRef.current.account.phone = phone;
+                  return;
+                }
+                sessionRef.current.account.signedIn = true;
+                goStage("entry", "S0");
+              }}
+            >
+              {codeSent ? "Verify and continue" : "Send me a code"}
+            </button>
+            <button
+              type="button"
+              className={styles.linkBtn}
+              onClick={() => goStage("entry", "S0")}
+            >
+              Skip — start without an account
+            </button>
+          </div>
         ) : null}
 
         {stage === "entry" ? (
@@ -483,7 +628,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
         ) : null}
 
         {inLoop ? (
-          <div className={styles.lower}>
+          <div className={styles.lower} ref={lowerRef}>
             {prop ? (
               <div className={styles.prop}>
                 <div className={styles.propHead}>
@@ -546,7 +691,163 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
             session={session}
             onAgain={restart}
             onModes={() => goStage("modes", "S7")}
+            onCertify={() => {
+              setVerifyStep(0);
+              goStage("verify", "S7");
+            }}
           />
+        ) : null}
+
+        {stage === "verify" ? (
+          <div className={styles.sheet}>
+            <div className={styles.kicker}>Verified certification</div>
+            <h2 className={styles.verdict} style={{ fontSize: 22 }}>
+              Make this record provable.
+            </h2>
+            <p className={styles.verdictSub}>
+              Your rehearsal already stands on its own. Certification ties it to
+              a verified identity so an employer, a regulator or an institution
+              can rely on it. It is optional, and nothing you have done is lost
+              if you stop here.
+            </p>
+
+            <div className={styles.matrix} style={{ padding: "4px 14px" }}>
+              {VERIFICATION_STEPS.map((st, i) => (
+                <div
+                  key={st.title}
+                  className={`${styles.vStep} ${
+                    i < verifyStep
+                      ? styles.vDone
+                      : i === verifyStep
+                        ? styles.vNow
+                        : styles.vPending
+                  }`}
+                >
+                  <div className={styles.vNum}>{i < verifyStep ? "✓" : i + 1}</div>
+                  <div>
+                    <div className={styles.vTitle}>{st.title}</div>
+                    <div className={styles.vDetail}>{st.detail}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {verifyStep === 0 ? (
+              <>
+                <div className={styles.field}>
+                  <label htmlFor="v-name">Full legal name</label>
+                  <input id="v-name" type="text" defaultValue={`${session.learnerName} Reyes`} />
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="v-dob">Date of birth</label>
+                  <input id="v-dob" type="text" inputMode="numeric" defaultValue="14 / 03 / 1989" />
+                </div>
+              </>
+            ) : null}
+            {verifyStep === 1 ? (
+              <div className={styles.scanBox}>
+                <div className={styles.scanIcon}>🪪</div>
+                <div className={styles.scanText}>
+                  Position your passport or ID inside the frame.
+                </div>
+                <div className={styles.scanNote}>
+                  Simulated capture — no document is read
+                </div>
+              </div>
+            ) : null}
+            {verifyStep === 2 ? (
+              <div className={styles.scanBox}>
+                <div className={styles.scanIcon}>🙂</div>
+                <div className={styles.scanText}>
+                  Look at the camera and turn your head slowly to the left.
+                </div>
+                <div className={styles.scanNote}>
+                  Simulated liveness — no camera is opened
+                </div>
+              </div>
+            ) : null}
+            {verifyStep === 3 ? (
+              <div className={styles.notice}>
+                Identity confirmed. Sealing your Investor Readiness Record
+                against it now.
+              </div>
+            ) : null}
+
+            <button
+              type="button"
+              className={styles.btn}
+              onClick={() => {
+                if (verifyStep < VERIFICATION_STEPS.length - 1) {
+                  setVerifyStep(verifyStep + 1);
+                  return;
+                }
+                sessionRef.current.account.identityVerified = true;
+                sessionRef.current.account.certificateId = issueCertificateId();
+                goStage("certified", "S7");
+              }}
+            >
+              {verifyStep === VERIFICATION_STEPS.length - 1
+                ? "Issue my certificate"
+                : "Continue"}
+            </button>
+            <button
+              type="button"
+              className={styles.linkBtn}
+              onClick={() => goStage("evidence", "S7")}
+            >
+              Not now — back to my record
+            </button>
+          </div>
+        ) : null}
+
+        {stage === "certified" ? (
+          <div className={styles.sheet}>
+            <div className={styles.kicker}>Certified</div>
+            <h2 className={styles.verdict} style={{ fontSize: 23 }}>
+              Your record is now provable.
+            </h2>
+            {/* Certification binds the result to an identity. It never
+                improves the result, and saying so is the point. */}
+            <p className={styles.verdictSub}>
+              The evidence chain has not changed — certification does not
+              improve your result, it only binds it to a verified identity.
+              That distinction is the point.
+            </p>
+            <div className={styles.certCard}>
+              <div className={styles.certLabel}>
+                Investor Readiness Certificate
+              </div>
+              <div className={styles.certName}>{session.learnerName} Reyes</div>
+              <div className={styles.certId}>
+                {session.account.certificateId}
+              </div>
+              {[
+                ["Issued", new Date().toISOString().slice(0, 10)],
+                ["Identity", "Verified — document + liveness"],
+                ["Elements evidenced", String(Object.keys(session.reasoningMap).length)],
+                ["Transfer", session.transferred ? "Demonstrated" : "Not yet"],
+                ["Scope", "Within-session"],
+                ["Rule", "aggregation-rule-v1"],
+              ].map(([k, v]) => (
+                <div className={styles.certRow} key={k}>
+                  <span className={styles.certKey}>{k}</span>
+                  <span className={styles.certVal}>{v}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles.notice}>
+              The certificate attests to a rehearsal, not to investment
+              competence, and it makes no claim about durable behaviour change.
+              AUREN does not share it with anyone — you do.
+            </div>
+            <button
+              type="button"
+              className={styles.btn}
+              onClick={() => goStage("evidence", "S7")}
+            >
+              Back to my record
+            </button>
+          </div>
         ) : null}
 
         {stage === "modes" ? (

@@ -112,6 +112,31 @@ and the face-zone/overlay-zone layout law.
 
 ---
 
+## The front door
+
+Paper IV's Stage 0 is thirty seconds and explicitly account-free, and it moves
+eKYC out of entry into a post-session "verified certification" upsell. Both
+builds now carry the full journey around that constraint rather than through it:
+
+| Screen | Position | Why there |
+|---|---|---|
+| **Landing** | Before everything | Brand, thesis, language, and the way in. The primary button is account-free and says so — the absence of a wall is a selling point, not an omission. |
+| **Sign in** | Optional, off the landing | Number plus a six-digit code. Restores the reasoning map and the retraining queue. Skippable from the screen itself, and never on the primary path. |
+| **Welcome + consent** | Immediately before the loop | The framing line, the name, and the consent-to-be-pressured act that replaces the mode menu (D1). |
+| **Verified certification** | After the evidence chain | Four eKYC steps — details, document, liveness, issue. The learner is holding a record they want to be able to prove. |
+
+**Account and identity are separate concerns, and the separation is the design.**
+Signing in stores a record. Verification asserts who you are. Conflating them is
+what turns a five-minute rehearsal into an onboarding funnel, and it is the exact
+failure mode Paper IV deletes when it removes the legacy assessment interview.
+
+The certificate states plainly that it attests to a rehearsal, not to investment
+competence, and makes no durable-behaviour claim — the same restraint the AILS
+block carries. Certification binds the result to an identity; it never improves
+the result.
+
+---
+
 ## Invariants a future change must not break
 
 These are doctrine from Paper III, not preferences. Each is enforced in code at the
@@ -139,6 +164,16 @@ place named, so a component change cannot quietly undo it.
    durable transfer is not claimed. Restraint delivered as credibility.
 9. **Ontology is data.** Adding a scam typology, element or signature is an edit to
    `objects.ts`, never a component change.
+10. **No account wall before the first session.** The landing's primary path
+    reaches the loop without an account, and identity verification never
+    appears before the evidence chain exists.
+11. **The overlay zone scrolls, it does not squeeze.** `.lower` children carry
+    `flex: none` and the container scrolls to its newest content. A shrunk flex
+    item overflows its own box and collides with the next one — the mobile
+    defect this rule exists to prevent.
+12. **The figure is sized from a figure box, not the viewport.** Deriving the
+    digital-human proportions from height alone throws the shoulders past both
+    edges on a phone and it stops reading as a person.
 
 ---
 
