@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L'Oréal Beauty Coach — Prototypes</title>
+<style>
+  :root{--page:#F6F2EA;--surface:#fff;--ink:#1A1611;--body:#463F35;--mute:#736A5C;
+    --line:#E2DACB;--gold:#8A6A18;--goldL:#C9A44C}
+  @media (prefers-color-scheme:dark){:root{--page:#17140F;--surface:#211C15;--ink:#F5F1E8;
+    --body:#D3CABA;--mute:#A09684;--line:#332C21;--gold:#D8B968}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--body);font:15px/1.6 ui-sans-serif,
+    -apple-system,"Segoe UI",Roboto,sans-serif;padding:48px 22px 80px}
+  .wrap{max-width:760px;margin:0 auto}
+  .wm{letter-spacing:.3em;font-weight:800;color:var(--ink);font-size:15px}
+  .sub{letter-spacing:.2em;text-transform:uppercase;font-size:9.5px;color:var(--gold);margin-top:4px}
+  h1{font:400 34px/1.15 Didot,"Bodoni MT",Georgia,serif;color:var(--ink);margin:26px 0 8px}
+  .lead{color:var(--mute);margin:0 0 30px;max-width:56ch}
+  a.card{display:block;background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px;margin-bottom:12px;text-decoration:none;color:inherit}
+  a.card:hover{border-color:var(--goldL)}
+  .t{font-weight:700;color:var(--ink);font-size:15.5px}
+  .d{font-size:13px;color:var(--mute);margin-top:3px}
+  .tag{display:inline-block;font:700 9px/1 ui-monospace,Menlo,monospace;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--gold);border:1px solid var(--line);border-radius:99px;
+    padding:4px 9px;margin-bottom:8px}
+  footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:11px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+</style></head><body><div class="wrap">
+  <div class="wm">L'ORÉAL</div><div class="sub">Beauty Coach · powered by HoloMe</div>
+  <h1>Prototypes</h1>
+  <p class="lead">Clickable walkthroughs of the advisor experience and the console behind it.
+    Open in Safari or Chrome directly — in-app browsers mute speech and block the microphone.</p>
+
+  <a class="card" href="./coach-voice.html">
+    <span class="tag">Advisor · voice first</span>
+    <div class="t">Beauty Coach — Voice Edition</div>
+    <div class="d">The digital human is the medium: Julien speaks and listens in six languages,
+      and captions, typing and cards are backups. Cycle the ◐ backdrop pill to compare scrims.</div></a>
+
+  <a class="card" href="./coach-journey.html">
+    <span class="tag">Advisor · full journey</span>
+    <div class="t">Beauty Coach — Full Journey</div>
+    <div class="d">Sign-in, booking, session and readiness debrief across five brands,
+      four divisions and six languages.</div></a>
+
+  <a class="card" href="./coach-console.html">
+    <span class="tag">HQ · operator console</span>
+    <div class="t">Beauty Coach Console</div>
+    <div class="d">Launch readiness, session transcripts with scored evidence, advisor
+      certification, per-language pack governance and claim fidelity.</div></a>
+
+  <a class="card" href="./product-nexus.html">
+    <span class="tag">Product team</span>
+    <div class="t">Product Nexus</div>
+    <div class="d">Where a launch enters the system: packs, versions and approvals.</div></a>
+
+  <a class="card" href="./product-overview.html">
+    <span class="tag">Document</span>
+    <div class="t">Product Overview</div>
+    <div class="d">What the product is, how the governed loop works, and what each part
+      of L'Oréal gets from it.</div></a>
+
+  <a class="card" href="./ecosystem-deep-dive.html">
+    <span class="tag">Document</span>
+    <div class="t">Distribution Ecosystem Deep Dive</div>
+    <div class="d">Four divisions, ~37 brands, five zones, and the six-language
+      claim-governance architecture.</div></a>
+
+  <footer>Demonstration content — illustrative, not client-approved L'Oréal wording.</footer>
+</div></body></html>

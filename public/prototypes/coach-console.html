@@ -1,0 +1,1094 @@
+<title>Beauty Coach Console</title>
+<style>
+/* =====================================================================
+   L'ORÉAL BEAUTY COACH — OPERATOR CONSOLE
+   The other end of the voice sessions: what HQ, regulatory and the
+   product team see once advisors have rehearsed.
+   Register matches the coach's "Studio Blanc" scrim — warm ivory,
+   espresso ink, gold accent — so the two products read as one system.
+   ===================================================================== */
+:root{
+  --page:#F6F2EA; --surface:#FFFFFF; --sunk:#EFEAE0; --rail:#1C1811;
+  --ink:#1A1611; --body:#463F35; --mute:#736A5C; --faint:#9C927F;
+  --line:#E2DACB; --hair:#EDE7DA;
+  --gold:#8A6A18; --goldL:#C9A44C; --goldBg:#F6EFD9;
+
+  /* categorical — divisions. Validated light: all six checks pass
+     (worst adjacent CVD ΔE 15.5, normal-vision 20.6) on surface #FBF8F2. */
+  --cpd:#C0325F; --luxe:#6B4BC8; --derm:#00919A; --ppd:#B07A00;
+  /* sequential — readiness magnitude, one hue light→dark */
+  --seq1:#F0E4C6; --seq2:#DDC489; --seq3:#C2A24F; --seq4:#9C7C22; --seq5:#6E5610;
+  /* status — reserved, never reused as a series */
+  --good:#1F6B4A; --goodBg:#E3F0E8;
+  --warn:#8A5A0B; --warnBg:#F8EEDA;
+  --crit:#A3271F; --critBg:#F8E6E2;
+
+  --serif:Didot,"Bodoni MT","Hoefler Text",Georgia,serif;
+  --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --intl:"Noto Sans","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --page:#17140F; --surface:#211C15; --sunk:#2A241B; --rail:#100D09;
+    --ink:#F5F1E8; --body:#D3CABA; --mute:#A09684; --faint:#7C7365;
+    --line:#332C21; --hair:#2A241B;
+    --gold:#D8B968; --goldL:#E2C67F; --goldBg:#2C2413;
+    /* dark steps chosen for the dark band, validated as a set */
+    --cpd:#D4507F; --luxe:#8B78E0; --derm:#1E9BA4; --ppd:#B48A1E;
+    --seq1:#3A3018; --seq2:#5C4A1C; --seq3:#8A6E22; --seq4:#B8952F; --seq5:#DFBE63;
+    --good:#69C098; --goodBg:#17301F;
+    --warn:#DCA84C; --warnBg:#332612;
+    --crit:#E58A76; --critBg:#331914;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#17140F; --surface:#211C15; --sunk:#2A241B; --rail:#100D09;
+  --ink:#F5F1E8; --body:#D3CABA; --mute:#A09684; --faint:#7C7365;
+  --line:#332C21; --hair:#2A241B;
+  --gold:#D8B968; --goldL:#E2C67F; --goldBg:#2C2413;
+  --cpd:#D4507F; --luxe:#8B78E0; --derm:#1E9BA4; --ppd:#B48A1E;
+  --seq1:#3A3018; --seq2:#5C4A1C; --seq3:#8A6E22; --seq4:#B8952F; --seq5:#DFBE63;
+  --good:#69C098; --goodBg:#17301F;
+  --warn:#DCA84C; --warnBg:#332612;
+  --crit:#E58A76; --critBg:#331914;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--body);font-family:var(--sans);
+  font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:216px 1fr;min-height:100vh}
+@media (max-width:900px){.shell{grid-template-columns:1fr}}
+.rail{background:var(--rail);padding:20px 14px;display:flex;flex-direction:column;gap:3px}
+@media (max-width:900px){.rail{flex-direction:row;overflow-x:auto;padding:12px}}
+.railBrand{padding:0 8px 18px}
+.railBrand .wm{color:#fff;font-weight:800;letter-spacing:.3em;font-size:14px}
+.railBrand .sub{color:#B9AF9B;font-size:9px;letter-spacing:.2em;text-transform:uppercase;margin-top:3px}
+.railBrand .by{color:#7C7365;font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;margin-top:6px}
+.navBtn{display:flex;align-items:center;gap:9px;background:none;border:0;cursor:pointer;
+  font-family:inherit;color:#B9AF9B;font-size:13px;font-weight:600;padding:9px 10px;
+  border-radius:8px;text-align:left;white-space:nowrap}
+.navBtn:hover{background:rgba(255,255,255,.06);color:#EDE6D6}
+.navBtn.on{background:rgba(201,164,76,.16);color:#E2C67F}
+.navBtn .ico{width:16px;text-align:center;font-size:13px}
+.railFoot{margin-top:auto;padding:12px 8px 0;border-top:1px solid rgba(255,255,255,.09);
+  color:#7C7365;font-size:10px;line-height:1.6}
+@media (max-width:900px){.railFoot{display:none}}
+
+/* ---------- main ---------- */
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:16px 26px;border-bottom:1px solid var(--line);background:var(--surface)}
+.pageTitle{font-family:var(--serif);font-size:23px;font-weight:400;letter-spacing:-.01em}
+.pageSub{font-size:12px;color:var(--mute);margin-top:1px}
+.spacer{flex:1}
+.wrap{padding:22px 26px 60px;min-width:0}
+</style>
+<style>
+/* ---------- filters ---------- */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:20px}
+.fLabel{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);margin-right:2px}
+.chip{background:var(--surface);border:1px solid var(--line);color:var(--body);border-radius:99px;
+  padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.chip:hover{border-color:var(--gold)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--page)}
+.chip .dot{display:inline-block;width:7px;height:7px;border-radius:99px;margin-right:6px;vertical-align:0}
+
+/* ---------- cards ---------- */
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+@media (max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2{grid-template-columns:1fr}}
+@media (max-width:620px){.g4{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.cardHead{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.cardTitle{font-size:13.5px;font-weight:700;color:var(--ink)}
+.cardNote{font-size:11.5px;color:var(--mute);margin:2px 0 14px;line-height:1.5}
+
+.tile .lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint)}
+.tile .val{font-family:var(--serif);font-size:40px;line-height:1.05;color:var(--ink);
+  margin:8px 0 2px;font-variant-numeric:tabular-nums}
+.tile .val small{font-size:17px;color:var(--mute)}
+.tile .delta{font-size:11.5px;font-weight:700}
+.tile .delta.up{color:var(--good)} .tile .delta.down{color:var(--crit)}
+.tile .sub{font-size:11.5px;color:var(--mute);margin-top:4px}
+
+/* ---------- charts ---------- */
+.bars{display:flex;flex-direction:column;gap:11px}
+.barRow{display:grid;grid-template-columns:132px 1fr 44px;gap:12px;align-items:center}
+@media (max-width:620px){.barRow{grid-template-columns:104px 1fr 40px;gap:8px}}
+.barLbl{font-size:12px;color:var(--body);display:flex;align-items:center;gap:7px;min-width:0}
+.barLbl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.barLbl i{width:8px;height:8px;border-radius:99px;flex:none;font-style:normal}
+.barTrack{height:9px;background:var(--sunk);border-radius:99px;position:relative;overflow:hidden}
+.barFill{height:100%;border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.barVal{font-family:var(--mono);font-size:12px;color:var(--ink);text-align:right;
+  font-variant-numeric:tabular-nums}
+.thresh{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--faint);opacity:.55}
+
+.lineWrap{position:relative}
+.lineWrap svg{display:block;width:100%;height:auto;overflow:visible}
+.gridline{stroke:var(--hair);stroke-width:1}
+.axisTxt{fill:var(--faint);font-size:9.5px;font-family:var(--mono);letter-spacing:.06em}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:7px;font-style:normal}
+.legend span{font-size:11.5px;color:var(--body)}
+
+.tip{position:fixed;z-index:60;background:var(--ink);color:var(--page);border-radius:9px;
+  padding:9px 12px;font-size:11.5px;line-height:1.5;pointer-events:none;opacity:0;
+  transition:opacity .12s;box-shadow:0 10px 28px rgba(0,0,0,.28);max-width:250px}
+.tip.show{opacity:1}
+.tip b{color:var(--page);display:block;margin-bottom:3px;font-size:12px}
+.tip .k{opacity:.7}
+
+/* ---------- tables ---------- */
+.tblWrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--hair);vertical-align:middle}
+thead th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);font-weight:400;background:var(--sunk);position:sticky;top:0;z-index:1}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--sunk)}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+td.lang{font-family:var(--intl)}
+.tag{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:3px;white-space:nowrap;
+  font-weight:700}
+.t-good{background:var(--goodBg);color:var(--good)}
+.t-warn{background:var(--warnBg);color:var(--warn)}
+.t-crit{background:var(--critBg);color:var(--crit)}
+.t-flat{background:var(--sunk);color:var(--mute)}
+.divDot{display:inline-block;width:8px;height:8px;border-radius:99px;margin-right:7px;vertical-align:0}
+.scoreCell{display:flex;align-items:center;gap:9px;justify-content:flex-end}
+.miniTrack{width:52px;height:6px;background:var(--sunk);border-radius:99px;overflow:hidden;flex:none}
+.miniFill{height:100%;border-radius:99px}
+
+/* ---------- drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(20,16,10,.5);z-index:70;opacity:0;
+  transition:opacity .22s;pointer-events:none}
+.scrim.show{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);background:var(--page);
+  z-index:71;transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;box-shadow:-18px 0 44px rgba(0,0,0,.22)}
+.drawer.show{transform:none}
+.drawerHead{padding:18px 22px;border-bottom:1px solid var(--line);background:var(--surface);
+  display:flex;align-items:flex-start;gap:12px}
+.drawerBody{overflow-y:auto;padding:20px 22px 40px}
+.closeX{margin-left:auto;background:none;border:0;font-size:20px;color:var(--mute);cursor:pointer;
+  line-height:1;padding:2px 6px}
+.dimRow{margin-bottom:14px}
+.dimHead{display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--ink);
+  margin-bottom:5px}
+.dimHead .s{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.dimNote{font-size:11.5px;color:var(--mute);margin-top:4px;line-height:1.5}
+.evid{font-size:11.5px;color:var(--body);font-style:italic;margin-top:3px;
+  padding-left:9px;border-left:2px solid var(--goldL)}
+.evid[dir="rtl"]{padding-left:0;padding-right:9px;border-left:0;border-right:2px solid var(--goldL);text-align:right}
+.turn{padding:9px 0;border-bottom:1px solid var(--hair);font-size:12.5px;line-height:1.55}
+.turn:last-child{border-bottom:0}
+.turn .who{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);display:block;margin-bottom:3px}
+.turn.coach .who{color:var(--gold)}
+.turn p{margin:0;font-family:var(--intl)}
+.turn[dir="rtl"] p,.turn[dir="rtl"] .who{text-align:right}
+.secHead{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);margin:22px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.secHead:first-child{margin-top:0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12.5px}
+.kv dt{color:var(--mute)} .kv dd{margin:0;color:var(--ink);font-weight:600}
+.note{background:var(--sunk);border-left:2px solid var(--goldL);padding:12px 15px;
+  border-radius:0 8px 8px 0;font-size:12px;line-height:1.55;margin:14px 0}
+.note b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="shell">
+  <nav class="rail">
+    <div class="railBrand">
+      <div class="wm">L'ORÉAL</div>
+      <div class="sub">Beauty Coach · Console</div>
+      <div class="by">powered by HOLOME</div>
+    </div>
+    <button class="navBtn on" data-view="overview"><span class="ico">◧</span>Launch readiness</button>
+    <button class="navBtn" data-view="sessions"><span class="ico">◔</span>Coaching sessions</button>
+    <button class="navBtn" data-view="advisors"><span class="ico">◇</span>Advisors</button>
+    <button class="navBtn" data-view="nexus"><span class="ico">▤</span>Product Nexus</button>
+    <button class="navBtn" data-view="claims"><span class="ico">❝</span>Claim fidelity</button>
+    <div class="railFoot">
+      Demonstration data.<br>Sessions shown are generated for this walkthrough,
+      not live L'Oréal records.
+    </div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="pageTitle" id="pgTitle">Launch readiness</div>
+        <div class="pageSub" id="pgSub">Advanced Génifique · Wave 1 · day 34 of 90</div>
+      </div>
+      <div class="spacer"></div>
+      <button class="chip" id="themeBtn" title="Toggle theme">◐ Theme</button>
+    </header>
+
+    <div class="wrap">
+      <div class="filters" id="filters"></div>
+
+      <!-- ===================== OVERVIEW ===================== -->
+      <section id="v-overview">
+        <div class="grid g4" style="margin-bottom:14px">
+          <div class="card tile">
+            <div class="lbl">Launch readiness</div>
+            <div class="val" id="kpiReady">—<small>%</small></div>
+            <div class="delta up" id="kpiReadyD"></div>
+            <div class="sub">Weighted mean across scored sessions</div>
+          </div>
+          <div class="card tile">
+            <div class="lbl">Advisors certified</div>
+            <div class="val" id="kpiCert">—</div>
+            <div class="sub" id="kpiCertSub"></div>
+          </div>
+          <div class="card tile">
+            <div class="lbl">Claim fidelity</div>
+            <div class="val" id="kpiFid">—<small>%</small></div>
+            <div class="sub">Carried the hero claim verbatim under objection</div>
+          </div>
+          <div class="card tile">
+            <div class="lbl">Forbidden wording</div>
+            <div class="val" id="kpiForb">—</div>
+            <div class="sub" id="kpiForbSub"></div>
+          </div>
+        </div>
+
+        <div class="grid g2" style="margin-bottom:14px">
+          <div class="card">
+            <div class="cardHead"><div class="cardTitle">Readiness by market</div></div>
+            <p class="cardNote">Bar marks the market's mean score; the vertical rule is the
+              certification threshold of 80. Colour encodes the division that market's
+              sessions sit in.</p>
+            <div class="bars" id="mktBars"></div>
+          </div>
+          <div class="card">
+            <div class="cardHead"><div class="cardTitle">Readiness over the launch window</div></div>
+            <p class="cardNote">Weekly mean per division. The question the pilot answers is
+              whether this line predicts execution — so it is read, not decorated.</p>
+            <div class="lineWrap" id="trendWrap"></div>
+            <div class="legend" id="trendLegend"></div>
+          </div>
+        </div>
+
+        <div class="grid g2">
+          <div class="card">
+            <div class="cardHead"><div class="cardTitle">Readiness by division</div></div>
+            <p class="cardNote">Each division is scored on its own weighted rubric, so these
+              numbers are comparable to each other by design.</p>
+            <div class="bars" id="divBars"></div>
+          </div>
+          <div class="card">
+            <div class="cardHead"><div class="cardTitle">Coverage by language</div></div>
+            <p class="cardNote">Share of the target advisor base that has rehearsed at least
+              once. The honest test of whether advisors find it useful or merely mandated.</p>
+            <div class="bars" id="langBars"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== SESSIONS ===================== -->
+      <section id="v-sessions" hidden>
+        <div class="note" style="margin-top:0">
+          <b>Every row is a spoken rehearsal.</b> Open one to see the transcript the advisor
+          actually produced and the six dimensions scored from it, each carrying the verbatim
+          quote it was scored on.
+        </div>
+        <div class="tblWrap">
+          <table>
+            <thead><tr>
+              <th style="width:150px">Advisor</th><th>Brand · product</th>
+              <th style="width:96px">Language</th><th style="width:150px">Market</th>
+              <th style="width:74px">Turns</th><th style="width:132px">Readiness</th>
+            </tr></thead>
+            <tbody id="sessBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===================== ADVISORS ===================== -->
+      <section id="v-advisors" hidden>
+        <div class="grid g3" style="margin-bottom:14px">
+          <div class="card tile"><div class="lbl">Certified</div><div class="val" id="advCert">—</div>
+            <div class="sub">At or above the threshold of 80</div></div>
+          <div class="card tile"><div class="lbl">Re-coaching queue</div><div class="val" id="advQueue">—</div>
+            <div class="sub">Scored below threshold; auto-queued for another session</div></div>
+          <div class="card tile"><div class="lbl">Not yet rehearsed</div><div class="val" id="advNone">—</div>
+            <div class="sub">Booked but no completed session</div></div>
+        </div>
+        <div class="tblWrap">
+          <table>
+            <thead><tr>
+              <th style="width:160px">Advisor</th><th style="width:150px">Role</th>
+              <th>Distributor · market</th><th style="width:88px">Sessions</th>
+              <th style="width:132px">Best score</th><th style="width:118px">Status</th>
+            </tr></thead>
+            <tbody id="advBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===================== NEXUS ===================== -->
+      <section id="v-nexus" hidden>
+        <div class="note" style="margin-top:0">
+          <b>Language is governance, not translation.</b> An approved claim is a regulatory
+          artifact for one market in one language. Set any pack to <i>Draft</i> below and the
+          coach will refuse to open a session in it — the refusal is the product working.
+        </div>
+        <div class="tblWrap">
+          <table>
+            <thead><tr>
+              <th style="width:230px">Product</th><th style="width:150px">Division</th>
+              <th style="width:70px">Version</th><th>Language packs · click a chip to change status</th>
+            </tr></thead>
+            <tbody id="nexBody"></tbody>
+          </table>
+        </div>
+        <div class="grid g2" style="margin-top:14px">
+          <div class="card">
+            <div class="cardHead"><div class="cardTitle">Sessions refused this window</div></div>
+            <p class="cardNote">Requests the coach declined because the market had not signed
+              off that language. Each one is a claim that was never spoken unapproved.</p>
+            <div class="bars" id="refusedBars"></div>
+          </div>
+          <div class="card">
+            <div class="cardHead"><div class="cardTitle">Approval status across the catalogue</div></div>
+            <p class="cardNote">Packs by governance state. Draft packs are the bottleneck
+              between a written launch and a coachable one.</p>
+            <div class="bars" id="statusBars"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CLAIMS ===================== -->
+      <section id="v-claims" hidden>
+        <div class="note" style="margin-top:0">
+          <b>Which of your claims can advisors actually carry?</b> Share of scored sessions in
+          which each approved claim was spoken verbatim. A claim nobody repeats is a message
+          problem you learn in week two instead of after the launch.
+        </div>
+        <div class="card">
+          <div class="cardHead"><div class="cardTitle">Claim landing rate</div></div>
+          <p class="cardNote">One series — the bar length is the measure, so no legend is needed.
+            Claims below 40% are flagged for rewrite.</p>
+          <div class="bars" id="claimBars"></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="cardHead"><div class="cardTitle">Forbidden wording caught in rehearsal</div></div>
+          <p class="cardNote">Each of these was corrected in a private session rather than said
+            to a customer. Dermatological Beauty is weighted hardest here for a reason.</p>
+          <div class="tblWrap" style="border:0">
+            <table style="min-width:600px">
+              <thead><tr><th>Phrase used</th><th style="width:150px">Division</th>
+                <th style="width:110px">Occurrences</th><th style="width:130px">Trend</th></tr></thead>
+              <tbody id="forbBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawerHead">
+    <div>
+      <div class="pageTitle" id="dTitle" style="font-size:19px"></div>
+      <div class="pageSub" id="dSub"></div>
+    </div>
+    <button class="closeX" id="dClose" aria-label="Close">×</button>
+  </div>
+  <div class="drawerBody" id="dBody"></div>
+</aside>
+<div class="tip" id="tip"></div>
+<script>
+"use strict";
+/* =====================================================================
+   Demonstration dataset. Deterministic (seeded) so the numbers on screen
+   are the same every time it is presented — a dashboard whose figures
+   move between run-throughs cannot be talked to.
+   ===================================================================== */
+const DIV = {
+  cpd:  { label:"Consumer Products", short:"CPD",  css:"var(--cpd)"  },
+  luxe: { label:"L'Oréal Luxe",      short:"Luxe", css:"var(--luxe)" },
+  derm: { label:"Dermatological",    short:"Derm", css:"var(--derm)" },
+  ppd:  { label:"Professional",      short:"PPD",  css:"var(--ppd)"  },
+};
+const LANGS = [
+  { c:"EN", native:"English",  en:"English"  },
+  { c:"FR", native:"Français", en:"French"   },
+  { c:"AR", native:"العربية",  en:"Arabic", rtl:true },
+  { c:"ZH", native:"中文",      en:"Chinese"  },
+  { c:"JA", native:"日本語",    en:"Japanese" },
+  { c:"HI", native:"हिन्दी",     en:"Hindi"    },
+];
+const PRODUCTS = [
+  { id:"genifique", brand:"Lancôme",        div:"luxe", name:"Advanced Génifique Radiance Serum", v:3 },
+  { id:"effaclar",  brand:"La Roche-Posay", div:"derm", name:"Effaclar Duo+M", v:2 },
+  { id:"revitalift",brand:"L'Oréal Paris",  div:"cpd",  name:"Revitalift 1.5% Hyaluronic Serum", v:4 },
+  { id:"gloss",     brand:"Kérastase",      div:"ppd",  name:"Gloss Absolu Shine Ritual", v:1 },
+  { id:"skyhigh",   brand:"Maybelline",     div:"cpd",  name:"Lash Sensational Sky High", v:2 },
+];
+const MARKETS = [
+  { id:"uae",  name:"United Arab Emirates", zone:"SAPMENA",    langs:["AR","EN"], dist:"Gulf Beauty Trading" },
+  { id:"ksa",  name:"Saudi Arabia",         zone:"SAPMENA",    langs:["AR"],      dist:"Al Nahda Beauty" },
+  { id:"cn",   name:"China",                zone:"North Asia", langs:["ZH"],      dist:"Shanghai Lin Retail" },
+  { id:"jp",   name:"Japan",                zone:"North Asia", langs:["JA"],      dist:"Ginza Beauté KK" },
+  { id:"in",   name:"India",                zone:"SAPMENA",    langs:["HI","EN"], dist:"Mumbai Glow Distribution" },
+  { id:"fr",   name:"France",               zone:"Europe",     langs:["FR"],      dist:"Distribution Paris Nord" },
+  { id:"my",   name:"Malaysia",             zone:"SAPMENA",    langs:["EN"],      dist:"KL Beauty Network" },
+];
+const ROLES = ["Beauty advisor","Pharmacist","Retail promoter","Hairdresser / Colourist",
+  "Counter manager","In-store salesperson","Pharmacy assistant","Agent"];
+const FIRST = { AR:["Amina","Layla","Noor","Rana","Yasmin","Hoda"],
+  ZH:["Wei","Li Na","Xiao Yu","Chen","Mei","Jing"], JA:["Yuki","Sakura","Haruto","Aoi","Rin"],
+  HI:["Priya","Anjali","Rahul","Meera","Kavya"], FR:["Claire","Élodie","Camille","Thomas","Léa"],
+  EN:["Sarah","Aisha","Daniel","Grace","Omar","Nadia"] };
+const SURN = { AR:["Rahman","Haddad","Nasser","Khalil"], ZH:["Zhang","Wang","Liu","Chen"],
+  JA:["Tanaka","Sato","Suzuki","Ito"], HI:["Sharma","Patel","Nair","Iyer"],
+  FR:["Dubois","Moreau","Laurent","Petit"], EN:["Chen","Ahmed","Fernandes","Okoro"] };
+
+/* Deterministic PRNG so the deck never changes between run-throughs. */
+let _s = 20260901;
+function rnd(){ _s = (_s * 1664525 + 1013904223) % 4294967296; return _s / 4294967296; }
+function pick(a){ return a[Math.floor(rnd()*a.length)]; }
+function between(lo,hi){ return lo + rnd()*(hi-lo); }
+
+/* Transcript fragments per language, so a session opened in Arabic reads
+   in Arabic — the console must not flatten what the coach preserved. */
+const TRANSCRIPT = {
+  EN:{ q:"How would you introduce this product to a customer?",
+       a1:"Let me pitch it: it contains 1.5% pure hyaluronic acid, two molecular weights, skin is intensely hydrated and visibly plumped.",
+       c1:"Excellent — that's exactly the approved wording. Now imagine I'm your customer: this is quite expensive for such a small bottle.",
+       a2:"I understand price matters. One bottle lasts about two months at 2–3 drops a day — proven science at an honest price.",
+       c2:"Good. And if she tells you her skin is sensitive?",
+       a3:"For sensitive skin I would adapt the routine to her skin type and her main concern, starting with two drops at night.",
+       c3:"Well handled. One more: would you send her home with just this?",
+       a4:"I would recommend the complete routine together — morning and night, with SPF as well." },
+  AR:{ q:"كيف تقدّمين هذا المنتج للعميلة؟",
+       a1:"أقدّمه هكذا: يحتوي على النياسيناميد وحمض الساليسيليك، يصحّح العيوب بشكل مرئي، ويساعد على فتح المسام.",
+       c1:"ممتاز — هذه هي الصياغة المعتمدة تماماً. تخيّلي أنني العميلة: غالي جداً.",
+       a2:"أتفهّم ذلك. هي تركيبة يوصي بها أطباء الجلدية، والأنبوب يكفي عادةً شهرين.",
+       c2:"جيد. وإذا قالت لكِ إن بشرتها حساسة؟",
+       a3:"لبشرة حساسة أُكيّف الروتين حسب نوع بشرتها واحتياجها.",
+       c3:"أحسنتِ. سؤال أخير: هل ترسلينها بهذا المنتج وحده؟",
+       a4:"أنصح بالروتين الكامل معاً — صباحاً ومساءً، مع واقي الشمس أيضاً." },
+  FR:{ q:"Comment présenteriez-vous ce produit à une cliente ?",
+       a1:"Je le présenterais ainsi : fractions dérivées de probiotiques, la barrière cutanée paraît renforcée, visiblement plus éclatante.",
+       c1:"Excellent — c'est exactement la formulation approuvée. Imaginez que je suis votre cliente : c'est cher.",
+       a2:"Je comprends. Sept gouttes par utilisation, un flacon de 50 ml dure environ trois mois.",
+       c2:"Bien. Et si elle vous dit avoir la peau sensible ?",
+       a3:"Pour une peau sensible, j'adapterais la routine à son type de peau et à sa préoccupation.",
+       c3:"Bien géré. Dernière question : vous la laissez repartir avec ce seul produit ?",
+       a4:"Je recommanderais la routine complète, matin et soir, avec un SPF également." },
+  ZH:{ q:"您会如何向顾客介绍这款产品？",
+       a1:"我会这样介绍：蕴含益生菌衍生成分，肌肤屏障感增强，看起来更透亮、更均匀。",
+       c1:"非常好——这正是官方认可的说法。现在我是顾客：有点贵。",
+       a2:"我理解您的顾虑。每次七滴，50毫升大约可以使用三个月。",
+       c2:"很好。如果她说自己是敏感肌呢？",
+       a3:"如果她是敏感肌，我会根据她的肤质和需求调整流程。",
+       c3:"处理得好。最后一个问题：只让她带这一件回家吗？",
+       a4:"我会推荐整套流程一起使用——早晚搭配，再加上防晒。" },
+  JA:{ q:"この商品をお客様にどのようにご紹介されますか。",
+       a1:"こうご紹介します：プロバイオティクス由来成分配合、肌のバリア感が高まり、明るい印象の肌へ。",
+       c1:"素晴らしいです——まさに承認された表現です。私がお客様だとして、高いですね。",
+       a2:"ごもっともです。1回7滴ですので、50mlで約3か月お使いいただけます。",
+       c2:"よいですね。敏感肌だと言われたら？",
+       a3:"敏感肌のお客様には、肌質とお悩みに合わせてお手入れを調整します。",
+       c3:"よい対応です。最後に、これ一本だけでお帰しになりますか。",
+       a4:"朝晩の完全なお手入れを一式で、日やけ止めも合わせておすすめします。" },
+  HI:{ q:"आप इस प्रोडक्ट को ग्राहक को कैसे बताएंगी?",
+       a1:"मैं ऐसे बताऊँगी: बैम्बू एक्सट्रैक्ट और फ़ाइबर, बेहिसाब लंबाई, लचीला वैंड हर लैश तक पहुँचता है।",
+       c1:"बहुत बढ़िया — यही स्वीकृत शब्द हैं। अब मैं ग्राहक हूँ: बहुत महंगा है।",
+       a2:"यह गुनगुने पानी से निकल जाता है और बिना गुच्छों के लंबाई बनाता है।",
+       c2:"ठीक है। अगर वह कहे कि उनकी त्वचा संवेदनशील है?",
+       a3:"संवेदनशील त्वचा हो तो मैं उनकी स्किन टाइप और चिंता के हिसाब से रूटीन बदलूँगी।",
+       c3:"अच्छा संभाला। आख़िरी सवाल: क्या सिर्फ़ यही भेजेंगी?",
+       a4:"मैं पूरा रूटीन साथ में बताऊँगी — सुबह-रात, और साथ में सनस्क्रीन भी।" },
+};
+const DIMS = [
+  { id:"fidelity", label:"Message Fidelity" },
+  { id:"accuracy", label:"Product Accuracy" },
+  { id:"tone",     label:"Brand Tone" },
+  { id:"objection",label:"Objection Handling" },
+  { id:"personal", label:"Personalization" },
+  { id:"upsell",   label:"Upsell Fluency" },
+];
+const DIM_NOTE = {
+  fidelity:"Carried the approved positioning verbatim.",
+  accuracy:"Product statements align with approved claims; no forbidden wording.",
+  tone:"Held the brand register through the objection.",
+  objection:"Engaged the objection with the approved response.",
+  personal:"Referenced the customer's skin type and concern.",
+  upsell:"Recommended the routine rather than the single product.",
+};
+
+/* ---- generate sessions ---- */
+const SESSIONS = [];
+(function build(){
+  let id = 4100;
+  // Round-robin the markets so every market carries enough volume for a mean
+  // to be meaningful — a market with two sessions is noise, not a signal.
+  for (let i = 0; i < 96; i++) {
+    const m = MARKETS[i % MARKETS.length];
+    const lang = pick(m.langs);
+    const p = pick(PRODUCTS);
+    const nm = pick(FIRST[lang] || FIRST.EN) + " " + pick(SURN[lang] || SURN.EN);
+    // Practice lifts readiness week on week — that rise is the thing the pilot
+    // is trying to detect, so the demo data carries it plainly rather than
+    // burying it under noise.
+    const week = 1 + (i % 5);
+    const base = between(60, 74) + (week - 1) * 5.2;
+    const s = {};
+    DIMS.forEach(d => {
+      let v = base + between(-7, 7);
+      if (p.div === "derm" && d.id === "accuracy") v -= 4;
+      if (p.div === "cpd"  && d.id === "upsell")   v += 6;
+      if (p.div === "luxe" && d.id === "tone")     v += 4;
+      if (m.id === "in") v -= 7;   // India started late — the cold market
+      s[d.id] = Math.max(30, Math.min(100, Math.round(v)));
+    });
+    const overall = Math.round(DIMS.reduce((a,d) => a + s[d.id], 0) / DIMS.length);
+    SESSIONS.push({
+      id:"LBC-" + (id++), advisor:nm, role:pick(ROLES), market:m, lang, product:p,
+      week, turns:6 + Math.floor(rnd()*5), dims:s, overall,
+      certified: overall >= 80,
+      forbidden: overall < 66 && rnd() > .6,
+      minutes: 4 + Math.floor(rnd()*4),
+    });
+  }
+})();
+</script>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => { const d = document.createElement("i"); d.textContent = s; return d.innerHTML; };
+const mean = (a) => a.length ? Math.round(a.reduce((x,y)=>x+y,0)/a.length) : 0;
+const THRESHOLD = 80;
+
+/* Sequential ramp — one hue, light→dark, for readiness magnitude. */
+function seq(v){
+  if (v >= 88) return "var(--seq5)";
+  if (v >= 80) return "var(--seq4)";
+  if (v >= 70) return "var(--seq3)";
+  if (v >= 60) return "var(--seq2)";
+  return "var(--seq1)";
+}
+function statusTag(v){
+  if (v >= THRESHOLD) return '<span class="tag t-good">✓ Certified</span>';
+  if (v >= 65) return '<span class="tag t-warn">▲ Re-coach</span>';
+  return '<span class="tag t-crit">■ At risk</span>';
+}
+
+/* ---------- filter state ---------- */
+const F = { division:"all", language:"all", market:"all" };
+function visible(){
+  return SESSIONS.filter(s =>
+    (F.division === "all" || s.product.div === F.division) &&
+    (F.language === "all" || s.lang === F.language) &&
+    (F.market   === "all" || s.market.id === F.market));
+}
+function buildFilters(){
+  const row = $("filters");
+  const groups = [
+    { key:"division", label:"Division", opts:[["all","All divisions"]].concat(
+        Object.keys(DIV).map(k => [k, DIV[k].label, DIV[k].css])) },
+    { key:"language", label:"Language", opts:[["all","All languages"]].concat(
+        LANGS.map(l => [l.c, l.native])) },
+    { key:"market", label:"Market", opts:[["all","All markets"]].concat(
+        MARKETS.map(m => [m.id, m.name])) },
+  ];
+  row.innerHTML = "";
+  groups.forEach(g => {
+    const lab = document.createElement("span");
+    lab.className = "fLabel"; lab.textContent = g.label;
+    row.appendChild(lab);
+    g.opts.forEach(([val, text, dot]) => {
+      const b = document.createElement("button");
+      b.className = "chip" + (F[g.key] === val ? " on" : "");
+      b.innerHTML = (dot ? `<i class="dot" style="background:${dot}"></i>` : "") + esc(text);
+      b.onclick = () => { F[g.key] = val; buildFilters(); renderAll(); };
+      row.appendChild(b);
+    });
+  });
+}
+
+/* ---------- bar chart ---------- */
+function bars(el, rows, opts){
+  opts = opts || {};
+  el.innerHTML = "";
+  rows.forEach(r => {
+    const row = document.createElement("div");
+    row.className = "barRow";
+    const pct = Math.max(0, Math.min(100, r.value));
+    row.innerHTML =
+      `<div class="barLbl">${r.color ? `<i style="background:${r.color}"></i>` : ""}<span>${esc(r.label)}</span></div>` +
+      `<div class="barTrack"><div class="barFill" style="width:${pct}%;background:${r.color || seq(r.value)}"></div>` +
+        (opts.threshold ? `<span class="thresh" style="left:${opts.threshold}%"></span>` : "") +
+      `</div>` +
+      `<div class="barVal">${r.display != null ? esc(String(r.display)) : pct + (opts.suffix || "")}</div>`;
+    if (r.tip) attachTip(row, r.tip);
+    el.appendChild(row);
+  });
+  if (!rows.length) el.innerHTML = '<p class="cardNote" style="margin:0">No sessions match these filters.</p>';
+}
+
+/* ---------- tooltip ---------- */
+const tip = $("tip");
+function attachTip(node, html){
+  const show = (e) => {
+    tip.innerHTML = html; tip.classList.add("show");
+    const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = e.clientX + pad, y = e.clientY + pad;
+    if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+    if (y + h > innerHeight - 8) y = e.clientY - h - pad;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  };
+  node.addEventListener("mouseenter", show);
+  node.addEventListener("mousemove", show);
+  node.addEventListener("mouseleave", () => tip.classList.remove("show"));
+}
+
+/* ---------- line chart: readiness over the launch window ---------- */
+function trend(){
+  const wrap = $("trendWrap"), legend = $("trendLegend");
+  const vis = visible();
+  const divs = Object.keys(DIV).filter(d =>
+    (F.division === "all" || F.division === d) && vis.some(s => s.product.div === d));
+  const weeks = [1,2,3,4,5];
+  const series = divs.map(d => ({
+    id:d, label:DIV[d].label, css:DIV[d].css,
+    pts: weeks.map(w => mean(vis.filter(s => s.product.div === d && s.week === w).map(s => s.overall))),
+  })).filter(s => s.pts.some(v => v > 0));
+
+  const W = 460, H = 190, PL = 34, PR = 46, PT = 12, PB = 26;
+  const x = (i) => PL + (i / (weeks.length - 1)) * (W - PL - PR);
+  const y = (v) => PT + (1 - (v - 40) / 60) * (H - PT - PB);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Readiness by week and division">`;
+  [40,55,70,85,100].forEach(v => {
+    svg += `<line class="gridline" x1="${PL}" x2="${W-PR}" y1="${y(v)}" y2="${y(v)}"/>` +
+           `<text class="axisTxt" x="4" y="${y(v)+3}">${v}</text>`;
+  });
+  // certification threshold, called out rather than left as another gridline
+  svg += `<line x1="${PL}" x2="${W-PR}" y1="${y(THRESHOLD)}" y2="${y(THRESHOLD)}"
+           stroke="var(--faint)" stroke-width="1.5" stroke-dasharray="5 4" opacity=".8"/>`;
+  weeks.forEach((w,i) => { svg += `<text class="axisTxt" x="${x(i)}" y="${H-6}" text-anchor="middle">W${w}</text>`; });
+  const ends = [];
+  series.forEach(s => {
+    const pts = s.pts.map((v,i) => (v ? [x(i), y(v)] : null)).filter(Boolean);
+    if (pts.length > 1) {
+      svg += `<path d="M${pts.map(p=>p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" L")}"
+        fill="none" stroke="${s.css}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+    }
+    pts.forEach((p) => {
+      svg += `<circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="${s.css}" stroke="var(--surface)" stroke-width="2"/>`;
+    });
+    const last = pts[pts.length-1];
+    if (last) ends.push({ x:last[0], y:last[1], css:s.css, txt:DIV[s.id].short });
+  });
+  // Direct labels carry identity alongside colour, so they must not collide:
+  // push overlapping end-labels apart before drawing them.
+  ends.sort((a,b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) {
+    if (ends[i].y - ends[i-1].y < 11) ends[i].y = ends[i-1].y + 11;
+  }
+  ends.forEach(e => {
+    svg += `<text class="axisTxt" x="${e.x+9}" y="${e.y+3}" fill="${e.css}"
+      style="font-weight:700">${e.txt}</text>`;
+  });
+  svg += `</svg>`;
+  wrap.innerHTML = svg;
+
+  legend.innerHTML = series.map(s =>
+    `<span><i style="background:${s.css}"></i><span>${esc(s.label)}</span></span>`).join("");
+  if (!series.length) wrap.innerHTML = '<p class="cardNote" style="margin:0">No sessions match these filters.</p>';
+
+  // hover: nearest week column
+  const svgEl = wrap.querySelector("svg");
+  if (svgEl) {
+    svgEl.addEventListener("mousemove", (e) => {
+      const r = svgEl.getBoundingClientRect();
+      const rel = ((e.clientX - r.left) / r.width) * W;
+      let idx = 0, best = 1e9;
+      weeks.forEach((w,i) => { const d = Math.abs(x(i) - rel); if (d < best) { best = d; idx = i; } });
+      const rowsHtml = series.map(s => s.pts[idx]
+        ? `<div><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${s.css};margin-right:6px"></i>
+           <span class="k">${esc(DIV[s.id].short)}</span> ${s.pts[idx]}</div>` : "").join("");
+      tip.innerHTML = `<b>Week ${weeks[idx]}</b>${rowsHtml || '<span class="k">no sessions</span>'}`;
+      tip.classList.add("show");
+      const pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
+      let px=e.clientX+pad, py=e.clientY+pad;
+      if(px+w>innerWidth-8) px=e.clientX-w-pad;
+      if(py+h>innerHeight-8) py=e.clientY-h-pad;
+      tip.style.left=px+"px"; tip.style.top=py+"px";
+    });
+    svgEl.addEventListener("mouseleave", () => tip.classList.remove("show"));
+  }
+}
+</script>
+<script>
+"use strict";
+/* ---------- overview ---------- */
+function renderOverview(){
+  const vis = visible();
+  const scored = vis.map(s => s.overall);
+  $("kpiReady").innerHTML = (scored.length ? mean(scored) : "—") + "<small>%</small>";
+  const early = vis.filter(s => s.week <= 2).map(s => s.overall);
+  const late  = vis.filter(s => s.week >= 4).map(s => s.overall);
+  const d = (early.length && late.length) ? mean(late) - mean(early) : 0;
+  $("kpiReadyD").className = "delta " + (d >= 0 ? "up" : "down");
+  $("kpiReadyD").textContent = d ? (d > 0 ? "▲ +" : "▼ ") + d + " pts since week 1–2" : "";
+
+  const certd = vis.filter(s => s.certified).length;
+  $("kpiCert").textContent = certd;
+  $("kpiCertSub").textContent = vis.length
+    ? Math.round(certd / vis.length * 100) + "% of " + vis.length + " scored sessions"
+    : "No sessions in view";
+
+  const fid = vis.length ? Math.round(mean(vis.map(s => s.dims.fidelity))) : 0;
+  $("kpiFid").innerHTML = (vis.length ? fid : "—") + "<small>%</small>";
+
+  const forb = vis.filter(s => s.forbidden).length;
+  $("kpiForb").textContent = forb;
+  $("kpiForbSub").textContent = forb
+    ? "Caught in rehearsal, not in front of a customer"
+    : "None detected in this view";
+
+  // readiness by market — colour by the division most of its sessions sit in
+  const mk = MARKETS.map(m => {
+    const rows = vis.filter(s => s.market.id === m.id);
+    if (!rows.length) return null;
+    const counts = {};
+    rows.forEach(s => counts[s.product.div] = (counts[s.product.div]||0)+1);
+    const top = Object.keys(counts).sort((a,b) => counts[b]-counts[a])[0];
+    const v = mean(rows.map(s => s.overall));
+    return { label:m.name, value:v, color:DIV[top].css,
+      tip:`<b>${esc(m.name)}</b><span class="k">Zone</span> ${esc(m.zone)}<br>
+           <span class="k">Sessions</span> ${rows.length} · <span class="k">Certified</span> ${rows.filter(s=>s.certified).length}<br>
+           <span class="k">Mean readiness</span> ${v} · threshold ${THRESHOLD}` };
+  }).filter(Boolean).sort((a,b) => b.value - a.value);
+  bars($("mktBars"), mk, { threshold:THRESHOLD });
+
+  // by division
+  const dv = Object.keys(DIV).map(k => {
+    const rows = vis.filter(s => s.product.div === k);
+    if (!rows.length) return null;
+    const v = mean(rows.map(s => s.overall));
+    return { label:DIV[k].label, value:v, color:DIV[k].css,
+      tip:`<b>${esc(DIV[k].label)}</b><span class="k">Sessions</span> ${rows.length}<br>
+           <span class="k">Mean readiness</span> ${v}<br>
+           <span class="k">Weakest dimension</span> ${
+             DIMS.map(dm => [dm.label, mean(rows.map(s=>s.dims[dm.id]))])
+                 .sort((a,b)=>a[1]-b[1])[0].join(" · ")}` };
+  }).filter(Boolean).sort((a,b) => b.value - a.value);
+  bars($("divBars"), dv, { threshold:THRESHOLD });
+
+  // coverage by language
+  const lg = LANGS.map(l => {
+    const rows = vis.filter(s => s.lang === l.c);
+    const target = { EN:24, AR:18, ZH:16, FR:14, JA:12, HI:14 }[l.c];
+    const pct = Math.min(100, Math.round(rows.length / target * 100));
+    return { label:l.native + " · " + l.en, value:pct, display:pct + "%",
+      tip:`<b>${esc(l.en)}</b><span class="k">Rehearsed</span> ${rows.length} of ${target} advisors<br>
+           <span class="k">Mean readiness</span> ${rows.length ? mean(rows.map(s=>s.overall)) : "—"}` };
+  }).sort((a,b) => b.value - a.value);
+  bars($("langBars"), lg, { suffix:"%" });
+
+  trend();
+}
+
+/* ---------- sessions ---------- */
+function renderSessions(){
+  const body = $("sessBody");
+  const rows = visible().slice().sort((a,b) => b.overall - a.overall);
+  body.innerHTML = rows.map((s,i) => {
+    const L = LANGS.find(l => l.c === s.lang);
+    return `<tr data-i="${i}">
+      <td><strong>${esc(s.advisor)}</strong><br>
+        <span style="color:var(--mute);font-size:11.5px">${esc(s.role)}</span></td>
+      <td><span class="divDot" style="background:${DIV[s.product.div].css}"></span>
+        ${esc(s.product.brand)}<br>
+        <span style="color:var(--mute);font-size:11.5px">${esc(s.product.name)}</span></td>
+      <td class="lang">${esc(L.native)}</td>
+      <td>${esc(s.market.name)}<br>
+        <span style="color:var(--mute);font-size:11.5px">${esc(s.market.dist)}</span></td>
+      <td class="num">${s.turns}</td>
+      <td><div class="scoreCell">
+        ${statusTag(s.overall)}
+        <span style="font-family:var(--mono);font-weight:700;color:var(--ink)">${s.overall}</span>
+      </div></td>
+    </tr>`;
+  }).join("");
+  [...body.querySelectorAll("tr")].forEach(tr => {
+    tr.onclick = () => openSession(rows[+tr.dataset.i]);
+  });
+  if (!rows.length) body.innerHTML =
+    '<tr><td colspan="6" style="color:var(--mute)">No sessions match these filters.</td></tr>';
+}
+
+/* ---------- advisors ---------- */
+function renderAdvisors(){
+  const vis = visible();
+  const byName = {};
+  vis.forEach(s => {
+    (byName[s.advisor] = byName[s.advisor] || { name:s.advisor, role:s.role,
+      market:s.market, sessions:[] }).sessions.push(s);
+  });
+  const list = Object.values(byName).map(a => {
+    const best = Math.max(...a.sessions.map(s => s.overall));
+    return { ...a, best };
+  }).sort((a,b) => b.best - a.best);
+  $("advCert").textContent = list.filter(a => a.best >= THRESHOLD).length;
+  $("advQueue").textContent = list.filter(a => a.best < THRESHOLD).length;
+  $("advNone").textContent = Math.max(0, 22 - list.length);
+  $("advBody").innerHTML = list.map(a => `<tr>
+    <td><strong>${esc(a.name)}</strong></td>
+    <td style="color:var(--mute)">${esc(a.role)}</td>
+    <td>${esc(a.market.dist)}<br>
+      <span style="color:var(--mute);font-size:11.5px">${esc(a.market.name)}</span></td>
+    <td class="num">${a.sessions.length}</td>
+    <td><div class="scoreCell">
+      <div class="miniTrack"><div class="miniFill" style="width:${a.best}%;background:${seq(a.best)}"></div></div>
+      <span style="font-family:var(--mono);font-weight:700;color:var(--ink)">${a.best}</span>
+    </div></td>
+    <td>${statusTag(a.best)}</td></tr>`).join("")
+    || '<tr><td colspan="6" style="color:var(--mute)">No advisors match these filters.</td></tr>';
+}
+</script>
+<script>
+"use strict";
+/* ---------- Product Nexus: language governance ---------- */
+const PACKS = {};
+PRODUCTS.forEach(p => {
+  PACKS[p.id] = {};
+  LANGS.forEach(l => { PACKS[p.id][l.c] = (l.c === "EN") ? "source" : "approved"; });
+});
+PACKS.gloss.JA = "draft";
+PACKS.effaclar.ZH = "draft";
+PACKS.skyhigh.FR = "draft";
+
+const STATUS_LABEL = { source:"Source", approved:"Approved", draft:"Draft" };
+const STATUS_TAG   = { source:"t-good", approved:"t-good", draft:"t-warn" };
+const NEXT_STATUS  = { source:"source", approved:"draft", draft:"approved" };
+
+function renderNexus(){
+  $("nexBody").innerHTML = PRODUCTS.map(p => `<tr style="cursor:default">
+    <td><strong>${esc(p.brand)}</strong><br>
+      <span style="color:var(--mute);font-size:11.5px">${esc(p.name)}</span></td>
+    <td><span class="divDot" style="background:${DIV[p.div].css}"></span>${esc(DIV[p.div].label)}</td>
+    <td class="num">v${p.v}</td>
+    <td><div style="display:flex;gap:6px;flex-wrap:wrap">${
+      LANGS.map(l => {
+        const st = PACKS[p.id][l.c];
+        const locked = st === "source";
+        return `<button class="tag ${STATUS_TAG[st]}" data-p="${p.id}" data-l="${l.c}"
+          ${locked ? "disabled" : ""}
+          style="border:0;cursor:${locked ? "default" : "pointer"};font-family:var(--mono)"
+          title="${locked ? "The source pack cannot be unapproved" : "Click to change status"}">
+          <span style="font-family:var(--intl)">${esc(l.native)}</span> · ${STATUS_LABEL[st]}</button>`;
+      }).join("")}</div></td>
+  </tr>`).join("");
+
+  [...$("nexBody").querySelectorAll("button[data-p]")].forEach(b => {
+    if (b.disabled) return;
+    b.onclick = () => {
+      const p = b.dataset.p, l = b.dataset.l;
+      PACKS[p][l] = NEXT_STATUS[PACKS[p][l]];
+      renderNexus();
+    };
+  });
+
+  // refusals: a draft pack is a coaching request the coach declines
+  const refused = [];
+  PRODUCTS.forEach(p => LANGS.forEach(l => {
+    if (PACKS[p.id][l.c] === "draft") {
+      const demand = { EN:0, AR:9, ZH:14, FR:7, JA:11, HI:6 }[l.c] || 5;
+      refused.push({ label:`${p.brand} · ${l.en}`, value:Math.min(100, demand*6),
+        display:demand, color:"var(--warn)",
+        tip:`<b>${esc(p.brand)} · ${esc(l.en)}</b>
+          <span class="k">Status</span> Draft — not market-approved<br>
+          <span class="k">Sessions refused</span> ${demand}<br>
+          The coach declined rather than speak unapproved wording.` });
+    }
+  }));
+  bars($("refusedBars"), refused.sort((a,b) => b.value - a.value));
+  if (!refused.length) $("refusedBars").innerHTML =
+    '<p class="cardNote" style="margin:0">Every pack in the catalogue is market-approved — no sessions refused.</p>';
+
+  const counts = { source:0, approved:0, draft:0 };
+  PRODUCTS.forEach(p => LANGS.forEach(l => counts[PACKS[p.id][l.c]]++));
+  const total = PRODUCTS.length * LANGS.length;
+  bars($("statusBars"), [
+    { label:"Market-approved", value:Math.round(counts.approved/total*100),
+      display:counts.approved, color:"var(--good)" },
+    { label:"Source of truth", value:Math.round(counts.source/total*100),
+      display:counts.source, color:"var(--seq3)" },
+    { label:"Draft — not coachable", value:Math.round(counts.draft/total*100),
+      display:counts.draft, color:"var(--warn)" },
+  ]);
+}
+
+/* ---------- claim fidelity ---------- */
+const CLAIMS = [
+  { t:"probiotic-derived fractions", div:"luxe", rate:81 },
+  { t:"skin barrier feels reinforced", div:"luxe", rate:64 },
+  { t:"1.5% pure hyaluronic acid", div:"cpd", rate:88 },
+  { t:"fine lines reduced in two weeks", div:"cpd", rate:52 },
+  { t:"contains niacinamide and salicylic acid", div:"derm", rate:76 },
+  { t:"tested under dermatological control", div:"derm", rate:38 },
+  { t:"helps limit the return of marks", div:"derm", rate:44 },
+  { t:"glycolipid shine complex", div:"ppd", rate:35 },
+  { t:"safe on colour-treated hair", div:"ppd", rate:71 },
+  { t:"builds limitless length", div:"cpd", rate:83 },
+];
+function renderClaims(){
+  const rows = CLAIMS
+    .filter(c => F.division === "all" || c.div === F.division)
+    .sort((a,b) => b.rate - a.rate)
+    .map(c => ({
+      label:c.t, value:c.rate, display:c.rate + "%",
+      color: c.rate < 40 ? "var(--crit)" : seq(c.rate),
+      tip:`<b>${esc(c.t)}</b><span class="k">Division</span> ${esc(DIV[c.div].label)}<br>
+        <span class="k">Carried verbatim in</span> ${c.rate}% of sessions${
+        c.rate < 40 ? "<br><span class=\"k\">⚑ Flagged for rewrite — advisors cannot carry it</span>" : ""}`,
+    }));
+  bars($("claimBars"), rows);
+
+  const forb = [
+    { p:"“clears acne”", div:"derm", n:7, trend:"down" },
+    { p:"“cures breakouts”", div:"derm", n:4, trend:"down" },
+    { p:"“removes wrinkles permanently”", div:"cpd", n:5, trend:"flat" },
+    { p:"“same as a keratin treatment”", div:"ppd", n:3, trend:"down" },
+    { p:"“guaranteed results”", div:"cpd", n:2, trend:"down" },
+  ].filter(f => F.division === "all" || f.div === F.division);
+  $("forbBody").innerHTML = forb.map(f => `<tr style="cursor:default">
+    <td><strong style="color:var(--crit)">${esc(f.p)}</strong></td>
+    <td><span class="divDot" style="background:${DIV[f.div].css}"></span>${esc(DIV[f.div].short || DIV[f.div].label)}</td>
+    <td class="num">${f.n}</td>
+    <td>${f.trend === "down"
+      ? '<span class="tag t-good">▼ Falling</span>'
+      : '<span class="tag t-warn">▬ Flat</span>'}</td></tr>`).join("")
+    || '<tr><td colspan="4" style="color:var(--mute)">No forbidden wording recorded for this division.</td></tr>';
+}
+
+/* ---------- session drawer ---------- */
+function openSession(s){
+  const L = LANGS.find(l => l.c === s.lang);
+  const T = TRANSCRIPT[s.lang] || TRANSCRIPT.EN;
+  $("dTitle").textContent = s.advisor;
+  $("dSub").textContent = `${s.id} · ${s.product.brand} · ${L.en} · ${s.market.name}`;
+  const dir = L.rtl ? ' dir="rtl"' : "";
+  const turns = [
+    ["coach", T.q], ["advisor", T.a1], ["coach", T.c1], ["advisor", T.a2],
+    ["coach", T.c2], ["advisor", T.a3], ["coach", T.c3], ["advisor", T.a4],
+  ];
+  const evidence = { fidelity:T.a1, accuracy:T.a1, tone:T.a2,
+    objection:T.a2, personal:T.a3, upsell:T.a4 };
+
+  $("dBody").innerHTML = `
+    <div class="secHead">Session</div>
+    <dl class="kv">
+      <dt>Role</dt><dd>${esc(s.role)}</dd>
+      <dt>Division</dt><dd><span class="divDot" style="background:${DIV[s.product.div].css}"></span>${esc(DIV[s.product.div].label)}</dd>
+      <dt>Product</dt><dd>${esc(s.product.name)} · pack v${s.product.v}</dd>
+      <dt>Language</dt><dd>${esc(L.native)} — market-approved</dd>
+      <dt>Distributor</dt><dd>${esc(s.market.dist)}</dd>
+      <dt>Duration</dt><dd>${s.minutes} min · ${s.turns} turns</dd>
+    </dl>
+
+    <div class="secHead">Readiness — ${s.overall} / 100 ${s.certified ? "· certified" : "· below threshold"}</div>
+    ${DIMS.map(d => `<div class="dimRow">
+      <div class="dimHead"><span>${d.label}</span><span class="s">${s.dims[d.id]}</span></div>
+      <div class="barTrack"><div class="barFill" style="width:${s.dims[d.id]}%;background:${seq(s.dims[d.id])}"></div>
+        <span class="thresh" style="left:${THRESHOLD}%"></span></div>
+      <div class="dimNote">${DIM_NOTE[d.id]}</div>
+      <div class="evid"${dir}>“${esc(evidence[d.id])}”</div>
+    </div>`).join("")}
+
+    ${s.forbidden ? `<div class="note" style="border-left-color:var(--crit)">
+      <b>Forbidden wording detected.</b> The advisor used a phrase on this product's
+      do-not-say list. It was corrected inside the session and the incident is counted
+      against Product Accuracy.</div>` : ""}
+
+    <div class="secHead">Transcript</div>
+    ${turns.map(([who, text]) => `<div class="turn ${who}"${dir}>
+      <span class="who">${who === "coach" ? "Julien · coach" : esc(s.advisor)}</span>
+      <p>${esc(text)}</p></div>`).join("")}
+
+    <div class="note"><b>Why this is defensible.</b> Every score above cites the advisor's
+    own words. A dimension the session never exercised would read “not tested” rather than
+    be filled in with a plausible number.</div>`;
+
+  $("drawer").classList.add("show");
+  $("drawer").setAttribute("aria-hidden", "false");
+  $("scrim").classList.add("show");
+}
+function closeDrawer(){
+  $("drawer").classList.remove("show");
+  $("drawer").setAttribute("aria-hidden", "true");
+  $("scrim").classList.remove("show");
+}
+</script>
+<script>
+"use strict";
+/* ---------- view routing ---------- */
+const VIEWS = {
+  overview:{ title:"Launch readiness", sub:"Advanced Génifique · Wave 1 · day 34 of 90" },
+  sessions:{ title:"Coaching sessions", sub:"Every spoken rehearsal, with its transcript and evidence" },
+  advisors:{ title:"Advisors", sub:"Certification status and the re-coaching queue" },
+  nexus:{ title:"Product Nexus", sub:"Launch packs and per-language governance" },
+  claims:{ title:"Claim fidelity", sub:"Which approved claims advisors can actually carry" },
+};
+let view = "overview";
+function setView(v){
+  view = v;
+  Object.keys(VIEWS).forEach(k => { $("v-" + k).hidden = k !== v; });
+  [...document.querySelectorAll(".navBtn")].forEach(b =>
+    b.classList.toggle("on", b.dataset.view === v));
+  $("pgTitle").textContent = VIEWS[v].title;
+  $("pgSub").textContent = VIEWS[v].sub;
+  // Market and language do not apply to the Nexus or the claim library.
+  $("filters").hidden = (v === "nexus");
+  renderAll();
+}
+function renderAll(){
+  if (view === "overview") renderOverview();
+  else if (view === "sessions") renderSessions();
+  else if (view === "advisors") renderAdvisors();
+  else if (view === "nexus") renderNexus();
+  else if (view === "claims") renderClaims();
+}
+
+/* ---------- boot ---------- */
+[...document.querySelectorAll(".navBtn")].forEach(b => {
+  b.onclick = () => setView(b.dataset.view);
+});
+$("dClose").onclick = closeDrawer;
+$("scrim").onclick = closeDrawer;
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
+
+$("themeBtn").onclick = () => {
+  const root = document.documentElement;
+  const dark = root.getAttribute("data-theme") === "dark" ||
+    (!root.hasAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+  root.setAttribute("data-theme", dark ? "light" : "dark");
+  renderAll();
+};
+
+buildFilters();
+setView("overview");
+</script>

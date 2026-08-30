@@ -83,3 +83,23 @@ the product knowledge library the coach trains on.
 Routes: `/api/nexus/auth`, `/api/nexus/products` (GET list / POST publish),
 `/api/nexus/products/[id]` (detail). Access codes now carry a `role`
 (`advisor` | `product-team`); each app rejects the other's codes.
+
+## Prototypes
+
+Static walkthroughs live in `public/prototypes/` and are served at `/prototypes/`.
+Open `/prototypes/` for the index, or go direct:
+
+| Prototype | Path | Audience |
+| --- | --- | --- |
+| Beauty Coach — Voice Edition | `/prototypes/coach-voice.html` | Advisor. Voice is the medium; captions, typing and cards are backups. |
+| Beauty Coach — Full Journey | `/prototypes/coach-journey.html` | Advisor. Sign-in through readiness debrief. |
+| Beauty Coach Console | `/prototypes/coach-console.html` | HQ, regulatory, L&D. Readiness, transcripts, governance, claim fidelity. |
+| Product Nexus | `/prototypes/product-nexus.html` | Product team. |
+| Product Overview | `/prototypes/product-overview.html` | Client-facing document. |
+| Ecosystem Deep Dive | `/prototypes/ecosystem-deep-dive.html` | Strategy document. |
+
+Speech only works in a real browser — in-app webviews mute audio and block the
+microphone.
+
+The project paper is `docs/LOreal-Beauty-Coach-Project-Paper.docx`; regenerate it
+with `node docs/paper/build.js <output>.docx` (requires the `docx` npm package).

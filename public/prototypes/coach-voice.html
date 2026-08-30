@@ -1,0 +1,2390 @@
+<title>Beauty Coach Voice Edition</title>
+<style>
+  :root {
+    --gold: #c9a44c; --gold-l: #d8b968; --gold-d: #9a7b2d;
+    --dark: #0c0b09; --paper: #faf7f2;
+    --txt: #f4efe6; --mut: #b3ab9a; --dim: #857d6d;
+    --line: rgba(201,164,76,.35); --ok: #8fd6ab;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(120% 90% at 50% 0%, #2b2620 0%, #121110 70%) fixed, #121110;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--txt);
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .phone {
+    position: relative; width: 100%; max-width: 430px;
+    height: 100vh; height: 100dvh; max-height: 940px;
+    background: var(--dark); overflow: hidden; display: flex; flex-direction: column;
+  }
+  @media (min-width: 480px) {
+    .phone { height: 92vh; border-radius: 38px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.65), 0 0 0 10px #26231d; }
+  }
+  .screen {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    padding: 26px 22px; overflow-y: auto; opacity: 0; pointer-events: none;
+    transform: translateY(8px); transition: opacity .35s ease, transform .35s ease;
+  }
+  .screen.active { opacity: 1; pointer-events: auto; transform: none; }
+  .brand { text-align: center; letter-spacing: .34em; font-weight: 700; font-size: 17px; color: #fff; }
+  .brandSub { text-align: center; letter-spacing: .42em; font-size: 9px; color: var(--gold);
+    text-transform: uppercase; margin: 2px 0 20px; }
+  h1 { font-family: Didot, "Bodoni MT", Georgia, serif; font-size: 23px; line-height: 1.22;
+    font-weight: 500; color: #fff; margin: 0 0 10px; }
+  h1 em { color: var(--gold); font-style: italic; }
+  .lead { font-size: 13.5px; line-height: 1.55; color: #c9c2b4; margin: 0 0 16px; }
+  .label { display: block; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--gold); font-weight: 700; margin: 14px 0 6px; }
+  .input, .select {
+    width: 100%; background: rgba(255,255,255,.06); border: 1px solid var(--line);
+    border-radius: 12px; color: #fff; font-size: 15px; padding: 13px 14px; outline: none;
+    font-family: inherit;
+  }
+  .input:focus, .select:focus { border-color: var(--gold); }
+  .select option { color: #111; }
+  .btn {
+    display: block; width: 100%; border: 0; border-radius: 14px; cursor: pointer;
+    background: linear-gradient(120deg, var(--gold-l), var(--gold) 55%, #a8853a);
+    color: #171310; font-size: 15px; font-weight: 700; letter-spacing: .04em;
+    padding: 15px; margin-top: 20px; font-family: inherit;
+  }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btnGhost {
+    display: block; width: 100%; background: transparent; color: #cfc7b8;
+    border: 1px solid rgba(255,255,255,.22); border-radius: 14px; font-size: 14px;
+    font-weight: 600; padding: 13px; margin-top: 10px; cursor: pointer; font-family: inherit;
+  }
+  .err { background: rgba(160,60,40,.25); border: 1px solid rgba(220,120,90,.5); color: #ffd9cc;
+    border-radius: 10px; font-size: 12.5px; padding: 9px 12px; margin-top: 12px; display: none; }
+  .hintChips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+  .hintChip { background: rgba(201,164,76,.12); border: 1px dashed var(--line); color: var(--gold-l);
+    border-radius: 99px; padding: 6px 12px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+  .orgCard { background: rgba(201,164,76,.12); border: 1px solid var(--line); border-radius: 14px;
+    padding: 12px 15px; font-size: 12.5px; line-height: 1.6; color: #e8e0cf; margin-bottom: 8px; }
+  .orgCard b { color: #fff; }
+  .spacer { flex: 1; }
+  .footNote { font-size: 10.5px; color: var(--dim); text-align: center; margin-top: 16px; line-height: 1.5; }
+
+  /* ============ the digital-human stage (hero) ============
+     HARD RULE: the coach owns her band. No card, bubble, control or
+     gradient may enter it — all interface lives in bands above/below. */
+  .topBar {
+    flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center;
+    gap: 10px; padding: 10px 18px 8px; background: var(--dark); z-index: 2;
+  }
+  .topBrand { letter-spacing: .3em; font-weight: 700; font-size: 13px; color: #fff; }
+  .topSub { font-size: 9.5px; color: var(--mut); margin-top: 1px; letter-spacing: .04em; }
+  .stageBand {
+    position: relative; flex: 0 0 auto; overflow: hidden;
+    background:
+      radial-gradient(80% 62% at 50% 30%, rgba(201,164,76,.17), transparent 66%),
+      radial-gradient(130% 110% at 50% 0%, #262019 0%, #0e0d0a 80%);
+  }
+  .coachWrap {
+    position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+    width: 100%; max-width: 400px; height: 96%;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .coachWrap svg { width: auto; height: 100%; }
+  .speaking .stageBand { animation: glow 2.4s ease-in-out infinite; }
+  @keyframes glow { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.09); } }
+  .nameRow {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 10px;
+    padding: 6px 18px; background: var(--dark);
+    border-top: 1px solid rgba(201,164,76,.18); z-index: 2;
+  }
+  .nameRow .nm { font-family: Didot, "Bodoni MT", Georgia, serif; font-size: 18px; color: #fff; }
+  .nameRow .rl { font-size: 11px; color: var(--mut); letter-spacing: .04em; }
+  .liveTag { display: inline-flex; gap: 6px; align-items: center; background: rgba(201,164,76,.1);
+    border: 1px solid var(--line); border-radius: 99px; padding: 5px 11px; font-size: 9px;
+    font-weight: 800; letter-spacing: .12em; color: var(--gold-l); text-transform: uppercase; }
+  .liveDot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold);
+    animation: blink 1.6s ease-in-out infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+  .waveRow { display: flex; gap: 3px; height: 14px; align-items: flex-end;
+    margin-left: auto; opacity: 0; transition: opacity .3s; }
+  .speaking .waveRow { opacity: 1; }
+  .waveRow i { width: 3px; background: var(--gold); border-radius: 2px; animation: wv .9s ease-in-out infinite; }
+  .waveRow i:nth-child(2) { animation-delay: .12s; } .waveRow i:nth-child(3) { animation-delay: .24s; }
+  .waveRow i:nth-child(4) { animation-delay: .36s; } .waveRow i:nth-child(5) { animation-delay: .48s; }
+  @keyframes wv { 0%,100% { height: 4px; } 50% { height: 14px; } }
+  .vendorNote { position: absolute; left: 0; right: 0; bottom: 3px; z-index: 1; text-align: center;
+    font-size: 8.5px; letter-spacing: .08em; color: rgba(255,255,255,.28); text-transform: uppercase;
+    pointer-events: none; }
+  .landContent { flex: 0 0 auto; max-height: 44%; display: flex; flex-direction: column;
+    padding: 12px 22px 18px; background: var(--dark); overflow-y: auto; }
+
+  /* ============ session — banded layout, zero overlap ============ */
+  #scr-session { padding: 0; display: flex; flex-direction: column; }
+  #scr-session.active { display: flex; }
+  .timer { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; font-weight: 700;
+    color: #fff; background: rgba(201,164,76,.1); border: 1px solid var(--line); border-radius: 99px;
+    padding: 5px 12px; font-variant-numeric: tabular-nums; }
+  /* The coach takes ALL remaining height — she is the hero.
+     The whole interface below is hard-capped under half the screen. */
+  .sessStage { flex: 1 1 auto; min-height: 0; }
+  .panel { flex: 0 0 auto; max-height: 46%; display: flex; flex-direction: column;
+    min-height: 0; overflow: hidden; background: var(--dark); z-index: 2; }
+
+  /* product info card — docked in the panel, never over the coach */
+  /* One scroll column: the info card and the conversation flow together and
+     scroll as a single stack, so neither can squeeze the other into clipping. */
+  .panelScroll {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+    display: flex; flex-direction: column; gap: 8px; padding: 10px 14px 2px;
+  }
+  .infoCard {
+    position: relative; flex: 0 0 auto;
+    background: var(--paper); color: #1c1917; border-radius: 14px;
+    padding: 11px 34px 12px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.45);
+    display: none;
+  }
+  .infoCard.show { display: block; animation: cardIn .35s ease; }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .infoCard .icTag { font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--gold-d); }
+  .infoCard .icTitle { font-family: Didot, "Bodoni MT", Georgia, serif; font-size: 15px;
+    line-height: 1.25; margin: 3px 0 5px; }
+  .infoCard .icBody { font-size: 11.5px; line-height: 1.6; color: #4b463d;
+    white-space: pre-line; }
+  .infoCard .icX { position: absolute; top: 7px; right: 10px; border: 0; background: none;
+    font-size: 14px; color: #9a938a; cursor: pointer; }
+  .infoCard.compact { padding-top: 9px; padding-bottom: 10px; }
+  .infoCard.compact .icTitle { margin-bottom: 0; }
+  .infoCard .icBar { height: 3px; width: 44px; border-radius: 2px; margin-top: 8px;
+    background: linear-gradient(90deg, var(--gold-l), var(--gold-d)); }
+
+  .chatArea { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; }
+  .bub { font-size: 13px; padding: 9px 12px; }
+  .bub { max-width: 88%; border-radius: 15px; padding: 10px 13px; font-size: 13.5px; line-height: 1.5; }
+  .bubCoach { align-self: flex-start; background: rgba(250,247,242,.96); color: #1c1917;
+    border-bottom-left-radius: 5px; }
+  .bubYou { align-self: flex-end; background: rgba(201,164,76,.2); border: 1px solid var(--line);
+    color: #f2ecdf; border-bottom-right-radius: 5px; }
+  .bubThinking { align-self: flex-start; color: var(--gold-l); font-style: italic; font-size: 12.5px; }
+  .sessBottom { flex: 0 0 auto; padding: 6px 14px 12px; background: var(--dark); }
+  .iconRow { display: flex; gap: 2px; justify-content: space-between; padding: 2px 0 8px; }
+  .icoBtn { flex: 1 1 0; min-width: 0; background: none; border: 0; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: inherit;
+    padding: 0; }
+  .icoRing { width: 38px; height: 38px; flex: none; border-radius: 50%; border: 1.5px solid var(--line);
+    background: rgba(201,164,76,.07); display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: background .15s, border-color .15s; }
+  .icoBtn:hover .icoRing, .icoBtn.on .icoRing { background: rgba(201,164,76,.28); border-color: var(--gold); }
+  .icoLbl { font-size: 8.5px; letter-spacing: .02em; color: var(--mut); font-weight: 600;
+    text-transform: uppercase; text-align: center; line-height: 1.2; white-space: normal; }
+  .icoBtn.on .icoLbl { color: var(--gold-l); }
+  .suggRow { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 8px;
+    scrollbar-width: none; scroll-snap-type: x proximity;
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 88%, transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0, #000 88%, transparent 100%); }
+  .suggRow::-webkit-scrollbar { display: none; }
+  .sugg { scroll-snap-align: start; }
+  .iconRow { scrollbar-width: none; }
+  .iconRow::-webkit-scrollbar { display: none; }
+  .sugg { flex: 0 0 auto; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.2);
+    color: #ded7c8; border-radius: 99px; padding: 7px 12px; font-size: 11.5px; font-weight: 600;
+    cursor: pointer; font-family: inherit; }
+  .inputRow { display: flex; gap: 8px; align-items: center; }
+  .inputRow .input { flex: 1; padding: 12px 14px; font-size: 14px; border-radius: 99px; }
+  .sendBtn { flex: 0 0 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;
+    background: linear-gradient(120deg, var(--gold-l), var(--gold-d)); color: #171310;
+    font-size: 18px; font-weight: 700; }
+  .micBtn { flex: 0 0 46px; height: 46px; border-radius: 50%; cursor: pointer;
+    background: rgba(20,17,12,.75); border: 1.5px solid var(--gold); color: var(--gold); font-size: 18px; }
+  .micBtn.listening { background: var(--gold); color: #171310; box-shadow: 0 0 0 8px rgba(201,164,76,.25); }
+  .sessMeta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .vMeta .endBtn { padding: 6px 12px; font-size: 11px; }
+  .endBtn { background: transparent; border: 1px solid rgba(255,255,255,.35); color: #e8e0cf;
+    border-radius: 99px; font-size: 11.5px; font-weight: 700; padding: 8px 14px; cursor: pointer; }
+  .muteBtn { background: transparent; border: 0; color: var(--mut); font-size: 11.5px; cursor: pointer;
+    text-decoration: underline; }
+
+  /* slots / setup / otp / confirmed / lobby / debrief (unchanged core) */
+  .dayRow { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; }
+  .dayChip { flex: 0 0 auto; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.18);
+    color: #ded7c8; border-radius: 12px; padding: 9px 13px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; text-align: center; min-width: 64px; font-family: inherit; }
+  .dayChip.sel { background: rgba(201,164,76,.22); border-color: var(--gold); color: #fff; }
+  .slotGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .slot { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.18); color: #e8e0cf;
+    border-radius: 11px; padding: 11px 4px; font-size: 13px; font-weight: 600; cursor: pointer;
+    text-align: center; font-family: inherit; }
+  .slot.sel { background: rgba(201,164,76,.25); border-color: var(--gold); color: #fff; }
+  .slot.full { opacity: .32; cursor: default; text-decoration: line-through; }
+  .slotCap { display: block; font-size: 9.5px; font-weight: 500; color: #a89f8d; margin-top: 2px; }
+  .prodCard { display: block; width: 100%; text-align: left; background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.16); border-radius: 14px; padding: 13px 15px;
+    margin-bottom: 9px; cursor: pointer; color: #efe9dc; font-family: inherit; }
+  .prodCard.sel { background: rgba(201,164,76,.16); border-color: var(--gold); }
+  .prodName { font-size: 14px; font-weight: 700; color: #fff; }
+  .prodTag { font-size: 12px; color: var(--mut); margin-top: 2px; }
+  .launchBadge { display: inline-block; background: var(--gold); color: #171310; font-size: 9.5px;
+    font-weight: 800; letter-spacing: .08em; text-transform: uppercase; border-radius: 99px;
+    padding: 2px 8px; margin-bottom: 5px; }
+  .chipRow { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.2); color: #ded7c8;
+    border-radius: 99px; padding: 8px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    font-family: inherit; }
+  .chip.sel { background: rgba(201,164,76,.22); border-color: var(--gold); color: #fff; }
+  .chip:disabled { opacity: .4; }
+  .prodBrandRow { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+  .divDot { width: 7px; height: 7px; border-radius: 99px; flex: none; }
+  .prodBrand { font-size: 11.5px; font-weight: 800; letter-spacing: .05em;
+    text-transform: uppercase; color: #f0e6d2; }
+  .divTag { font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--mut); border: 1px solid rgba(255,255,255,.18); border-radius: 99px; padding: 1px 7px; }
+  .langChip { display: inline-flex; flex-direction: column; align-items: center;
+    gap: 1px; line-height: 1.25; padding: 6px 14px; }
+  .langNative { font-size: 13.5px; font-weight: 700; }
+  .langMeta { font-size: 8.5px; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--mut); font-weight: 700; }
+  .langChip.sel .langMeta { color: rgba(255,255,255,.75); }
+  .langChip.blocked { opacity: .42; border-style: dashed; }
+  .langChip.blocked .langMeta { color: #e0a08c; }
+  .langNote { font-size: 11.5px; line-height: 1.5; color: var(--mut); margin: 9px 0 4px; }
+  .langNote.bad { color: #f0b3a0; }
+  #scr-session.rtl .bub { text-align: right; }
+  .otpRow { display: flex; gap: 8px; justify-content: center; margin: 18px 0 6px; }
+  .otpBox { width: 44px; height: 54px; text-align: center; font-size: 22px; font-weight: 700;
+    background: rgba(255,255,255,.06); border: 1px solid var(--line); border-radius: 12px;
+    color: #fff; outline: none; }
+  .otpBox:focus { border-color: var(--gold); }
+  .otpHint { text-align: center; font-size: 12px; color: var(--mut); }
+  .otpHint b { color: var(--gold); letter-spacing: .2em; }
+  .refBox { text-align: center; background: rgba(201,164,76,.12); border: 1px dashed var(--gold);
+    border-radius: 16px; padding: 18px; margin: 14px 0; }
+  .refCode { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 22px;
+    letter-spacing: .1em; color: var(--gold); font-weight: 700; }
+  .sumList { font-size: 13px; line-height: 1.9; color: #d8d0c0; }
+  .sumList b { color: #fff; }
+  .waCard { background: #10231c; border: 1px solid #1d4a3a; border-radius: 16px; padding: 13px 15px;
+    margin: 14px 0; }
+  .waHead { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700;
+    color: #7fd8a8; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; }
+  .waDot { width: 8px; height: 8px; border-radius: 50%; background: #35c46e; }
+  .waBody { font-size: 13px; line-height: 1.6; color: #d9efe3; }
+  .waBody b { color: #fff; }
+  .lobbyCount { font-family: Didot, "Bodoni MT", Georgia, serif; font-size: 64px; color: var(--gold);
+    text-align: center; margin: 14px 0 6px; }
+  .checkItem { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #d8d0c0; padding: 7px 0; }
+  .checkDot { width: 20px; height: 20px; border-radius: 50%; background: rgba(201,164,76,.2);
+    border: 1px solid var(--gold); color: var(--gold); font-size: 11px; display: flex;
+    align-items: center; justify-content: center; flex: 0 0 20px; }
+  .scoreHero { text-align: center; margin: 6px 0 12px; }
+  .scoreBig { font-family: Didot, "Bodoni MT", Georgia, serif; font-size: 54px; color: var(--gold); line-height: 1; }
+  .scoreCert { display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 800;
+    letter-spacing: .12em; text-transform: uppercase; border-radius: 99px; padding: 5px 14px; }
+  .certYes { background: rgba(80,160,110,.2); border: 1px solid #5aa87a; color: var(--ok); }
+  .certNo { background: rgba(201,164,76,.15); border: 1px solid var(--gold); color: var(--gold); }
+  .dimRow { margin-bottom: 11px; }
+  .dimHead { display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700;
+    color: #efe9dc; margin-bottom: 4px; }
+  .dimScore { color: var(--gold); font-variant-numeric: tabular-nums; }
+  .dimBar { height: 6px; background: rgba(255,255,255,.1); border-radius: 99px; overflow: hidden; }
+  .dimFill { height: 100%; width: 0; background: linear-gradient(90deg, #a8853a, var(--gold));
+    border-radius: 99px; transition: width .9s ease; }
+  .dimNote { font-size: 11px; color: #a89f8d; margin-top: 3px; line-height: 1.45; }
+  .evid { font-size: 11px; color: #cfc7b8; font-style: italic; margin-top: 2px; }
+  .practiceBox { background: rgba(201,164,76,.1); border: 1px solid var(--line); border-radius: 14px;
+    padding: 12px 15px; margin-top: 12px; font-size: 12.5px; line-height: 1.7; color: #e8e0cf; }
+  .practiceBox b { color: var(--gold); }
+  .stars { display: flex; gap: 8px; justify-content: center; margin: 10px 0 2px; }
+  .star { font-size: 26px; cursor: pointer; filter: grayscale(1) opacity(.45); transition: filter .15s; }
+  .star.on { filter: none; }
+</style>
+
+<div class="phone">
+
+  <!-- LANDING — the coach IS the hero: her band stays untouched -->
+  <section class="screen active" id="scr-landing" style="padding:0;display:flex;flex-direction:column">
+    <div class="topBar">
+      <div>
+        <div class="topBrand">L'ORÉAL</div>
+        <div class="topSub">Beauty Coach</div><div class="poweredTop">powered by HOLOME</div>
+      </div>
+      <span class="liveTag"><span class="liveDot"></span> Voice Edition</span>
+    </div>
+    <div class="stageBand" style="flex:1 1 auto;min-height:0">
+      <div class="coachWrap"><svg viewBox="30 40 340 440" aria-label="Beauty coach digital human"></svg></div>
+    </div>
+    <div class="nameRow">
+      <span class="nm">Julien</span>
+      <span class="rl">L'Oréal Beauty Coach · Launch-readiness consultant</span>
+    </div>
+    <div class="landContent">
+      <h1 style="font-size:23px">She speaks. <em>You speak back.</em></h1>
+      <p class="lead">A real spoken rehearsal with Julien, your L'Oréal Beauty Coach — approved claims,
+        objections and routines, out loud, in your own language. No typing unless you want to.</p>
+      <div class="spacer"></div>
+      <button class="btn" style="margin-top:8px" onclick="go('access')">Book a coaching session</button>
+      <p class="footNote" style="margin-top:10px">For L'Oréal distributors, agents and beauty advisors · sample content<br>
+        In production Julien is a live HoloMe digital human — voice confirmed in all six languages — and hears you through Whisper.</p>
+    </div>
+  </section>
+
+  <!-- ACCESS -->
+  <section class="screen" id="scr-access">
+    <div class="brand">L'ORÉAL</div><div class="brandSub">Beauty Coach</div><div class="poweredBy">powered by HOLOME</div>
+    <h1>Sign in</h1>
+    <p class="lead">Use the access code issued by your distributor — it identifies your country,
+      territory and distributor automatically.</p>
+    <label class="label">Distributor access code</label>
+    <input class="input" id="in-code" placeholder="e.g. GULF-DXB-2026" autocapitalize="characters">
+    <div class="hintChips">
+      <button class="hintChip" onclick="fillCode('GULF-DXB-2026')">GULF-DXB-2026 · Dubai</button>
+      <button class="hintChip" onclick="fillCode('EMERALD-AUH-2026')">EMERALD-AUH-2026 · Abu Dhabi</button>
+      <button class="hintChip" onclick="fillCode('KL-BEAUTY-2026')">KL-BEAUTY-2026 · Kuala Lumpur</button>
+    </div>
+    <label class="label">Your name</label>
+    <input class="input" id="in-name" placeholder="Full name">
+    <label class="label">Your role</label>
+    <select class="select" id="in-role">
+      <optgroup label="Field &amp; distribution">
+        <option value="Distributor staff">Distributor staff</option>
+        <option value="Agent" selected>Agent</option>
+        <option value="Retail promoter">Retail promoter</option>
+        <option value="In-store salesperson">In-store salesperson</option>
+      </optgroup>
+      <optgroup label="Counter &amp; boutique">
+        <option value="Beauty advisor">Beauty advisor</option>
+        <option value="Counter manager">Counter manager</option>
+      </optgroup>
+      <optgroup label="Pharmacy">
+        <option value="Pharmacist">Pharmacist</option>
+        <option value="Pharmacy assistant">Pharmacy assistant</option>
+      </optgroup>
+      <optgroup label="Salon">
+        <option value="Hairdresser / Colourist">Hairdresser / Colourist</option>
+      </optgroup>
+      <optgroup label="Training">
+        <option value="Trainer / L&amp;D">Trainer / L&amp;D</option>
+      </optgroup>
+    </select>
+    <div class="err" id="err-access"></div>
+    <button class="btn" onclick="doSignIn()">Continue</button>
+    <button class="btnGhost" onclick="go('landing')">Back</button>
+  </section>
+
+  <!-- SLOTS -->
+  <section class="screen" id="scr-slots">
+    <div class="brand">L'ORÉAL</div><div class="brandSub">Beauty Coach</div><div class="poweredBy">powered by HOLOME</div>
+    <div class="orgCard" id="org-card"></div>
+    <h1>Choose a time</h1>
+    <div class="dayRow" id="day-row"></div>
+    <div class="slotGrid" id="slot-grid"></div>
+    <div class="spacer"></div>
+    <button class="btn" id="btn-slots" disabled onclick="go('setup')">Next: session focus</button>
+  </section>
+
+  <!-- SETUP -->
+  <section class="screen" id="scr-setup">
+    <div class="brand">L'ORÉAL</div><div class="brandSub">Beauty Coach</div><div class="poweredBy">powered by HOLOME</div>
+    <h1>What shall we work on?</h1>
+    <label class="label">Product / launch</label>
+    <div id="prod-list"></div>
+    <label class="label">Coaching focus</label>
+    <div class="chipRow" id="focus-row"></div>
+    <label class="label">Session language</label>
+    <div class="chipRow" id="lang-row"></div>
+    <div class="langNote" id="lang-note"></div>
+    <button class="btn" id="btn-setup" disabled onclick="go('otp')">Confirm appointment</button>
+    <button class="btnGhost" onclick="go('slots')">Back</button>
+  </section>
+
+  <!-- OTP -->
+  <section class="screen" id="scr-otp">
+    <div class="brand">L'ORÉAL</div><div class="brandSub">Beauty Coach</div><div class="poweredBy">powered by HOLOME</div>
+    <h1>Verify it's you</h1>
+    <p class="lead">We sent a 6-digit code to your registered mobile number.</p>
+    <div class="otpRow" id="otp-row"></div>
+    <p class="otpHint">Demo code: <b id="otp-demo"></b> — <a href="#" style="color:var(--gold)"
+      onclick="autofillOtp(); return false;">tap to autofill</a></p>
+    <div class="err" id="err-otp"></div>
+    <button class="btn" onclick="checkOtp()">Verify</button>
+  </section>
+
+  <!-- CONFIRMED -->
+  <section class="screen" id="scr-confirmed">
+    <div class="brand">L'ORÉAL</div><div class="brandSub">Beauty Coach</div><div class="poweredBy">powered by HOLOME</div>
+    <h1 id="conf-title">You're booked.</h1>
+    <div class="refBox">
+      <div class="label" style="margin:0">Booking reference</div>
+      <div class="refCode" id="ref-code"></div>
+    </div>
+    <div class="sumList" id="conf-summary"></div>
+    <div class="waCard">
+      <div class="waHead"><span class="waDot"></span> WhatsApp · reminder preview</div>
+      <div class="waBody" id="wa-body"></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" onclick="enterLobby()">Join session now</button>
+    <p class="footNote">In production the reminder arrives 15 minutes before your slot.
+      For this demo, join directly.</p>
+  </section>
+
+  <!-- LOBBY -->
+  <section class="screen" id="scr-lobby">
+    <div class="brand">L'ORÉAL</div><div class="brandSub">Beauty Coach</div><div class="poweredBy">powered by HOLOME</div>
+    <h1>Julien is getting ready</h1>
+    <div class="lobbyCount" id="lobby-count">5</div>
+    <div class="checkItem"><span class="checkDot">✓</span> <span id="lobby-voice"></span></div>
+    <div class="checkItem"><span class="checkDot">✓</span> <span id="lobby-pack"></span></div>
+    <div class="checkItem"><span class="checkDot">◐</span> Tap the <b>◐ backdrop</b> pill in the top bar to preview Noir / Blanc / Atelier</div>
+    <div class="checkItem"><span class="checkDot">✓</span> Session is private — practise freely, retry any time</div>
+  </section>
+
+  <!-- SESSION · VOICE — the digital human is the hero and voice is the medium.
+       Typing and cards exist, but as backup: hidden until asked for. -->
+  <section class="screen" id="scr-session">
+    <div class="topBar">
+      <div>
+        <div class="topBrand">L'ORÉAL</div>
+        <div class="topSub">Beauty Coach · Voice</div>
+      </div>
+      <button class="scrimBtn" id="scrim-btn" title="Preview backdrop" aria-label="Preview backdrop">◐</button>
+      <span class="timer" id="timer">5:00</span>
+    </div>
+    <div class="stageBand sessStage" id="stage-session">
+      <div class="coachWrap"><svg viewBox="80 46 240 330" aria-hidden="true"></svg></div>
+    </div>
+    <div class="nameRow" id="name-row">
+      <span class="nm">Julien</span>
+      <span class="rl" id="coach-role">Beauty Coach</span>
+      <div class="waveRow"><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="voiceBand" id="voice-band">
+      <!-- TALK state: caption + mic. The only state most sessions ever see. -->
+      <div class="vState" id="vs-talk">
+        <div class="capBox" id="cap-box">
+          <p class="cap" id="cap"></p>
+        </div>
+        <p class="youEcho" id="you-echo"></p>
+        <button class="guidePill" id="guide-pill" hidden>
+          <span class="gLbl" id="guide-lbl"></span>
+          <span class="gTxt" id="guide-txt"></span>
+        </button>
+        <div class="vControls">
+          <button class="vSide" id="info-btn" aria-label="Launch pack info">
+            <span class="vGlyph">ⓘ</span><span class="vLbl" id="info-lbl">Info</span></button>
+          <button class="vMic" id="mic-btn" aria-label="Talk to your coach">🎙</button>
+          <button class="vSide" id="kbd-btn" aria-label="Type instead">
+            <span class="vGlyph">⌨</span><span class="vLbl" id="kbd-lbl">Type</span></button>
+        </div>
+        <p class="vHint" id="v-hint"></p>
+        <div class="typeRow" id="type-row" hidden>
+          <input class="input" id="chat-input" placeholder="Type your answer…"
+            onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="sendBtn" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+      <!-- INFO state: the pack sheet replaces the talk controls entirely,
+           so the two can never stack or overlap. -->
+      <div class="vSheet" id="drawer" hidden>
+        <div class="drawTop">
+          <span class="icTag" id="ic-tag"></span>
+          <button class="icX" onclick="hideCard()" aria-label="Close">×</button>
+        </div>
+        <div class="drawTopics" id="draw-topics"></div>
+        <div class="sheetScroll">
+          <div class="icTitle" id="ic-title"></div>
+          <div class="icBody" id="ic-body"></div>
+        </div>
+      </div>
+      <div class="vMeta">
+        <button class="endBtn" onclick="endSession()">End session</button>
+        <button class="muteBtn" id="mute-btn" onclick="toggleMute()">🔊 voice on</button>
+      </div>
+    </div>
+    </section>
+
+  <!-- DEBRIEF -->
+  <section class="screen" id="scr-debrief">
+    <div class="brand">L'ORÉAL</div><div class="brandSub">Beauty Coach</div><div class="poweredBy">powered by HOLOME</div>
+    <h1>Launch readiness</h1>
+    <div class="scoreHero">
+      <div class="scoreBig" id="score-big">—</div>
+      <span class="scoreCert" id="score-cert"></span>
+    </div>
+    <div id="dims"></div>
+    <div class="practiceBox" id="practice-box"></div>
+    <div class="label" style="text-align:center">Rate this session</div>
+    <div class="stars" id="stars"></div>
+    <div class="spacer"></div>
+    <button class="btn" onclick="restart()">Book another session</button>
+    <p class="footNote">Scores carry verbatim evidence from what you actually said.
+      Dimensions not exercised are marked “Not tested”, never invented.<br>
+      HQ sees these roll up by market → territory → distributor → advisor.<br>L'Oréal Beauty Coach · powered by HOLOME</p>
+  </section>
+</div>
+
+<script>
+"use strict";
+/* ============ the coach figure (vector stand-in for the HoloMe stream — male coach) ============ */
+const COACH_SVG = `
+<defs>
+  <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#e0b190"/><stop offset="1" stop-color="#c6997a"/>
+  </linearGradient>
+  <linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2e2018"/><stop offset="1" stop-color="#140e0a"/>
+  </linearGradient>
+  <linearGradient id="blazer" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#221e18"/><stop offset="1" stop-color="#0e0c0a"/>
+  </linearGradient>
+  <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#3c352c"/><stop offset="1" stop-color="#26211b"/>
+  </linearGradient>
+</defs>
+<!-- shoulders / jacket -->
+<path d="M200 310 C 146 310 100 336 82 382 C 62 434 54 512 50 640 L 350 640 C 346 512 338 434 318 382 C 300 336 254 310 200 310 Z" fill="url(#blazer)"/>
+<path d="M178 318 C 187 350 213 350 222 318 L 226 438 L 200 468 L 174 438 Z" fill="url(#shirt)"/>
+<path d="M200 332 L 200 456" stroke="#1b1712" stroke-width="1.6"/>
+<path d="M180 316 L 200 358 L 178 382 L 168 330 Z" fill="#4a4237"/>
+<path d="M220 316 L 200 358 L 222 382 L 232 330 Z" fill="#4a4237"/>
+<path d="M170 318 L 200 384 L 174 426 C 152 394 148 350 154 322 Z" fill="#191510"/>
+<path d="M230 318 L 200 384 L 226 426 C 248 394 252 350 246 322 Z" fill="#191510"/>
+<!-- neck -->
+<path d="M180 262 C 180 292 174 304 165 312 C 182 330 218 330 235 312 C 226 304 220 292 220 262 Z" fill="url(#skin)"/>
+<path d="M180 270 C 193 286 207 286 220 270 L 220 262 L 180 262 Z" fill="#b5876a" opacity=".5"/>
+<!-- ears sit behind the face so they read as attached -->
+<ellipse cx="151" cy="192" rx="8" ry="13" fill="url(#skin)"/>
+<ellipse cx="249" cy="192" rx="8" ry="13" fill="url(#skin)"/>
+<path d="M151 186 C 155 189 155 196 151 199" fill="none" stroke="#b5876a" stroke-width="1.4"/>
+<path d="M249 186 C 245 189 245 196 249 199" fill="none" stroke="#b5876a" stroke-width="1.4"/>
+<!-- face: square jaw -->
+<path d="M200 104 C 166 104 152 130 152 168 C 152 200 160 226 174 240 C 182 249 192 254 200 254 C 208 254 218 249 226 240 C 240 226 248 200 248 168 C 248 130 234 104 200 104 Z" fill="url(#skin)"/>
+<!-- hair: short crop, hairline at the brow-plus-a-third line -->
+<path d="M140 180 C 133 140 146 84 200 84 C 254 84 267 140 260 180 C 257 166 255 156 251 147 C 245 133 229 125 200 125 C 171 125 155 133 149 147 C 145 156 143 166 140 180 Z" fill="url(#hair)"/>
+<path d="M143 172 L 151 174 L 151 208 L 144 202 Z" fill="url(#hair)"/>
+<path d="M257 172 L 249 174 L 249 208 L 256 202 Z" fill="url(#hair)"/>
+<path d="M172 128 C 182 112 196 102 214 98" fill="none" stroke="#150f0b" stroke-width="2" opacity=".55"/>
+<!-- brows -->
+<path d="M164 165 C 175 159 189 159 195 163" fill="none" stroke="#2c1f16" stroke-width="4.6" stroke-linecap="round"/>
+<path d="M205 163 C 211 159 225 159 236 165" fill="none" stroke="#2c1f16" stroke-width="4.6" stroke-linecap="round"/>
+<!-- eyes -->
+<ellipse cx="178" cy="183" rx="8.6" ry="4.8" fill="#fff"/>
+<ellipse cx="222" cy="183" rx="8.6" ry="4.8" fill="#fff"/>
+<circle cx="178" cy="183.5" r="3.9" fill="#2f2118"/>
+<circle cx="222" cy="183.5" r="3.9" fill="#2f2118"/>
+<circle cx="179.4" cy="182" r="1.2" fill="#fff"/>
+<circle cx="223.4" cy="182" r="1.2" fill="#fff"/>
+<path d="M169 180 C 174 176 183 176 187 179" fill="none" stroke="#1f1610" stroke-width="1.7"/>
+<path d="M213 179 C 217 176 226 176 231 180" fill="none" stroke="#1f1610" stroke-width="1.7"/>
+<!-- nose -->
+<path d="M199 192 C 197 204 194 212 191 216 C 195 220 205 220 209 216 C 206 212 203 204 201 192" fill="#b5876a" opacity=".55"/>
+<!-- mouth -->
+<path d="M185 230 C 193 227 207 227 215 230 C 208 236 192 236 185 230 Z" fill="#9a6a56"/>
+<path d="M186 230 C 194 228 206 228 214 230" fill="none" stroke="#7d4f3e" stroke-width="1"/>
+<!-- jaw shading -->
+<path d="M170 226 C 176 246 188 254 200 254 C 212 254 224 246 230 226 C 226 248 214 260 200 260 C 186 260 174 248 170 226 Z" fill="#a87c60" opacity=".22"/>
+`;
+document.querySelectorAll(".coachWrap svg").forEach((s) => { s.innerHTML = COACH_SVG; });
+
+/* ============ data — mirrors the real app's seed ============ */
+const CODES = {
+  "GULF-DXB-2026":    { distributor: "Gulf Beauty Trading",  territory: "Dubai",        market: "United Arab Emirates" },
+  "EMERALD-AUH-2026": { distributor: "Emerald Distribution", territory: "Abu Dhabi",    market: "United Arab Emirates" },
+  "KL-BEAUTY-2026":   { distributor: "KL Beauty Network",    territory: "Kuala Lumpur", market: "Malaysia" },
+  "DEMO-2026":        { distributor: "Gulf Beauty Trading",  territory: "Dubai",        market: "United Arab Emirates" },
+};
+const FOCUSES = [
+  { id: "product-knowledge",  label: "Product knowledge" },
+  { id: "objection-handling", label: "Objection handling" },
+  { id: "routine-building",   label: "Routine building" },
+  { id: "price-positioning",  label: "Price positioning" },
+];
+const FILL = {};
+/* revitalift: + FR, JA */
+FILL.revitalift = {
+  FR:{ status:"approved", name:"Revitalift Sérum Acide Hyaluronique Pur 1,5 %", tagline:"Peau visiblement repulpée et hydratée",
+    claims:["1,5 % d'acide hyaluronique pur","deux poids moléculaires","intensément hydratée","visiblement repulpée","rides fines réduites en deux semaines","validé par les dermatologues","sans parfum"],
+    doNotSay:["guérit","efface les rides définitivement","résultats garantis"],
+    sections:[
+      {title:"Positionnement",k:["positionnement","message","présenter","c'est quoi","produit","parlez"],t:"Le message en une phrase : une hydratation intense qui repulpe visiblement la peau et réduit les rides fines en deux semaines. Positionnez-le comme le choix dermatologique accessible — des actifs validés à un prix juste."},
+      {title:"Allégations approuvées",k:["allégation","résultats","preuve","hyaluronique","efficace"],t:"Il contient 1,5 % d'acide hyaluronique pur à deux poids moléculaires. La peau est intensément hydratée et visiblement repulpée ; les rides fines sont réduites en deux semaines. Validé par les dermatologues, sans parfum."},
+      {title:"Place dans la routine",k:["routine","appliquer","utiliser","comment","quand","crème","matin","soir"],t:"Appliquez 2 à 3 gouttes sur peau propre matin et soir, avant la crème hydratante. Associez à une protection solaire le matin — une peau hydratée a toujours besoin d'UV."},
+      {title:"Positionnement prix",k:["prix","coût","valeur","cher","comparer"],t:"Positionnement masstige : des actifs de niveau dermatologique à un prix accessible. La concentration de 1,5 % égale ou dépasse des sérums trois fois plus chers."},
+    ],
+    objections:[
+      {title:"« Trop cher »",k:["cher","prix","coût","budget"],t:"Je comprends que le prix compte. Ce sérum contient 1,5 % d'acide hyaluronique pur — une concentration que l'on trouve normalement à trois fois ce prix. Un flacon dure environ deux mois à 2 ou 3 gouttes par jour."},
+      {title:"« J'ai la peau sensible »",k:["sensible","irrite","réaction","allergie"],t:"Cette formule a été validée par des dermatologues pour tous les types de peau, y compris sensibles. Sans parfum, sans paraben. Commencez par 2 gouttes le soir la première semaine."},
+    ],
+    prompts:["Imaginez que je suis votre cliente : « C'est bien cher pour un si petit flacon. » Que répondez-vous ?","Votre cliente dit : « J'ai la peau sensible, les sérums m'irritent toujours. » Comment répondez-vous ?"] },
+  JA:{ status:"approved", name:"レビタリフト ピュアヒアルロン酸 1.5% セラム", tagline:"ふっくらと潤いに満ちた肌へ",
+    claims:["ピュアヒアルロン酸1.5%配合","2種の分子量","高保湿","ふっくらとした印象の肌","2週間で小じわの目立ちにくい肌へ","皮膚科医監修","無香料"],
+    doNotSay:["治す","しわを永久に消す","効果を保証"],
+    sections:[
+      {title:"ポジショニング",k:["紹介","メッセージ","どんな","製品","説明"],t:"一言でお伝えするなら：高保湿で肌をふっくら見せ、2週間で小じわを目立ちにくくします。手の届く皮膚科発想の選択肢として、確かな成分を適正価格でとお伝えください。"},
+      {title:"承認訴求",k:["訴求","効果","結果","ヒアルロン酸","証拠"],t:"2種の分子量のピュアヒアルロン酸を1.5%配合。肌は高く保湿され、ふっくらとした印象に。2週間で小じわの目立ちにくい肌へ。皮膚科医監修、無香料です。"},
+      {title:"使用手順",k:["手順","使い方","いつ","保湿","朝","夜"],t:"洗顔後の清潔な肌に朝晩2〜3滴、乳液・クリームの前に。朝は日やけ止めと合わせてください。潤った肌にも日々のUVケアは必要です。"},
+      {title:"価格ポジション",k:["価格","値段","高い","価値","比較"],t:"マステージのポジション：皮膚科発想の有効成分を手に取りやすい価格で。1.5%という濃度は、3倍の価格帯の美容液に匹敵、あるいは上回ります。"},
+    ],
+    objections:[
+      {title:"「高いですね」",k:["高い","値段","価格","予算"],t:"価格が大切なのはごもっともです。この美容液はピュアヒアルロン酸を1.5%配合しており、通常は3倍の価格帯で見られる濃度です。1日2〜3滴で1本およそ2か月お使いいただけます。"},
+      {title:"「敏感肌なんです」",k:["敏感","刺激","アレルギー","赤み"],t:"この処方は敏感肌を含むすべての肌質を対象に皮膚科医監修で確認されています。無香料・パラベンフリーです。最初の1週間は夜に2滴から始めてみてください。"},
+    ],
+    prompts:["私をお客様だと思ってください。「この小ささでこのお値段は高いですね」——どうお答えになりますか。","お客様が「敏感肌で、美容液はいつもしみるんです」とおっしゃいました。どう返しますか。"] },
+};
+
+/* effaclar: + ZH, JA, HI */
+FILL.effaclar = {
+  ZH:{ status:"approved", name:"理肤泉 特安清痘净肤双效精华乳", tagline:"改善瑕疵，减少反复",
+    claims:["含烟酰胺与水杨酸","可见改善瑕疵","帮助疏通毛孔","帮助减少痘印反复","经敏感肌皮肤科监测测试","不致痘"],
+    doNotSay:["治疗痤疮","治愈痘痘","医疗级","可以代替处方药"],
+    sections:[
+      {title:"产品定位",k:["定位","介绍","是什么","产品","讲讲"],t:"药房定位：皮肤科推荐的日常护理，适合易长瑕疵的肌肤。它可见改善瑕疵并帮助减少反复——它是化妆品护理，不是药品。"},
+      {title:"核心宣称",k:["宣称","功效","效果","烟酰胺","水杨酸","证据"],t:"认可宣称：含烟酰胺与水杨酸。可见改善瑕疵。帮助疏通毛孔。帮助减少痘印反复。经敏感肌皮肤科监测测试。不致痘。"},
+      {title:"使用流程",k:["流程","怎么用","使用","什么时候","洁面","早晚"],t:"早晚洁面后在干爽肌肤上使用，用于特安洁面啫喱之后。早晨务必搭配不致痘的防晒——水杨酸会增加光敏感。"},
+      {title:"价格定位",k:["价格","多少钱","价值","贵","对比"],t:"药房定位：皮肤科推荐的配方，一支按每日两次使用通常可用两个月。"},
+    ],
+    objections:[
+      {title:"「这个能治好我的痘痘吗？」",k:["痘","痤疮","治好","治疗","药","处方"],t:"这是一款化妆品护理，可见改善瑕疵并帮助减少反复。如果是需要治疗的痤疮，正确的做法是看皮肤科医生或咨询药师——这款产品可以配合他们的建议一起使用。"},
+      {title:"「太贵了」",k:["贵","价格","多少钱","便宜"],t:"我理解。这是皮肤科推荐的配方，并经敏感肌皮肤科监测测试，一支按每日两次使用通常可用两个月。"},
+    ],
+    prompts:["顾客问：「这个能治好我的痘痘吗？」注意——回答时不要越界到治疗用语。","顾客觉得药房产品这个价格太贵了。您怎么回应？"] },
+  JA:{ status:"approved", name:"エファクラ デュオ+M", tagline:"気になる部分をケアし、繰り返しにアプローチ",
+    claims:["ナイアシンアミドとサリチル酸配合","肌の気になる部分を目立ちにくく","毛穴の詰まりにアプローチ","繰り返しにくい肌へ","敏感肌で皮膚科医監修のもとテスト済み","ノンコメドジェニックテスト済み"],
+    doNotSay:["ニキビを治療する","肌荒れを治す","医療グレード","処方薬の代わりになる"],
+    sections:[
+      {title:"ポジショニング",k:["紹介","メッセージ","どんな","製品","説明"],t:"薬局でのポジション：皮膚科医が推奨する、気になりやすい肌のための毎日のお手入れです。気になる部分を目立ちにくくし、繰り返しにアプローチします——化粧品であり、医薬品ではありません。"},
+      {title:"承認訴求",k:["訴求","効果","結果","ナイアシンアミド","サリチル酸","証拠"],t:"承認訴求：ナイアシンアミドとサリチル酸配合。肌の気になる部分を目立ちにくくします。毛穴の詰まりにアプローチします。繰り返しにくい肌へ。敏感肌で皮膚科医監修のもとテスト済み。ノンコメドジェニックテスト済み。"},
+      {title:"使用手順",k:["手順","使い方","いつ","洗顔","朝","夜"],t:"エファクラ クレンジングジェルのあと、清潔で乾いた肌に朝晩お使いください。朝はノンコメドジェニックの日やけ止めを必ず併用してください——サリチル酸は紫外線への感受性を高めます。"},
+      {title:"価格ポジション",k:["価格","値段","高い","価値","比較"],t:"薬局でのポジション：皮膚科医が推奨する処方で、1日2回の使用で1本およそ2か月お使いいただけます。"},
+    ],
+    objections:[
+      {title:"「これでニキビは治りますか」",k:["ニキビ","治る","治療","薬","処方"],t:"こちらは化粧品で、気になる部分を目立ちにくくし、繰り返しにアプローチするお手入れです。治療が必要なニキビについては、皮膚科の受診または薬剤師へのご相談が正しい一歩です。そのうえで、このお手入れを併用いただけます。"},
+      {title:"「高いですね」",k:["高い","値段","価格","予算"],t:"ごもっともです。皮膚科医が推奨する処方で、敏感肌で皮膚科医監修のもとテスト済みです。1日2回の使用で1本およそ2か月お使いいただけます。"},
+    ],
+    prompts:["お客様に「これでニキビは治りますか」と聞かれました。注意して——治療の言葉に踏み込まずにお答えください。","薬局の商品としては高いと言われました。どうお答えしますか。"] },
+  HI:{ status:"approved", name:"एफ़ाक्लार डुओ+M एंटी-इम्परफ़ेक्शन केयर", tagline:"दाग-धब्बे कम करे, लौटने से रोके",
+    claims:["नियासिनामाइड और सैलिसिलिक एसिड युक्त","दिखने में धब्बे कम करता है","रोमछिद्र खोलने में मदद","निशानों की वापसी सीमित करने में मदद","संवेदनशील त्वचा पर डर्मेटोलॉजिकल निगरानी में परीक्षित","नॉन-कॉमेडोजेनिक"],
+    doNotSay:["मुँहासे का इलाज करता है","पिंपल ठीक करता है","मेडिकल ग्रेड","आपकी दवा की जगह लेता है"],
+    sections:[
+      {title:"पोज़िशनिंग",k:["पोज़िशन","बताइए","क्या है","प्रोडक्ट","परिचय"],t:"फ़ार्मेसी पोज़िशनिंग: धब्बों की संभावना वाली त्वचा के लिए डर्मेटोलॉजिस्ट द्वारा सुझाई गई रोज़ाना की देखभाल। यह दिखने वाले धब्बे कम करता है और उनकी वापसी सीमित करने में मदद करता है — यह कॉस्मेटिक केयर है, दवा नहीं।"},
+      {title:"मुख्य दावे",k:["दावा","नतीजे","नियासिनामाइड","सैलिसिलिक","सबूत"],t:"स्वीकृत दावे: नियासिनामाइड और सैलिसिलिक एसिड युक्त। दिखने में धब्बे कम करता है। रोमछिद्र खोलने में मदद करता है। निशानों की वापसी सीमित करने में मदद करता है। संवेदनशील त्वचा पर डर्मेटोलॉजिकल निगरानी में परीक्षित। नॉन-कॉमेडोजेनिक।"},
+      {title:"रूटीन में जगह",k:["रूटीन","कैसे","इस्तेमाल","कब","क्लेंज़र","सुबह","रात"],t:"एफ़ाक्लार जेल क्लेंज़र के बाद साफ़, सूखी त्वचा पर सुबह और रात लगाएँ। सुबह हमेशा नॉन-कॉमेडोजेनिक सनस्क्रीन के साथ इस्तेमाल करें — सैलिसिलिक एसिड धूप के प्रति संवेदनशीलता बढ़ाता है।"},
+      {title:"कीमत की स्थिति",k:["कीमत","दाम","वैल्यू","महंगा","तुलना"],t:"फ़ार्मेसी पोज़िशनिंग: डर्मेटोलॉजिस्ट द्वारा सुझाया गया फ़ॉर्मूला, और दिन में दो बार इस्तेमाल पर एक ट्यूब आमतौर पर दो महीने चलती है।"},
+    ],
+    objections:[
+      {title:"“क्या इससे मुँहासे ठीक होंगे?”",k:["मुँहासे","पिंपल","ठीक","इलाज","दवा"],t:"यह एक कॉस्मेटिक केयर है जो दिखने वाले धब्बे कम करती है और उनकी वापसी सीमित करने में मदद करती है। जिस मुँहासे को इलाज चाहिए, उसके लिए सही कदम है डर्मेटोलॉजिस्ट से मिलना या फ़ार्मासिस्ट से बात करना — यह उनके सुझाव के साथ इस्तेमाल हो सकता है।"},
+      {title:"“बहुत महंगा है”",k:["महंगा","कीमत","दाम","सस्ता"],t:"समझती हूँ। यह डर्मेटोलॉजिस्ट द्वारा सुझाया गया फ़ॉर्मूला है, संवेदनशील त्वचा पर डर्मेटोलॉजिकल निगरानी में परीक्षित, और दिन में दो बार इस्तेमाल पर एक ट्यूब लगभग दो महीने चलती है।"},
+    ],
+    prompts:["ग्राहक पूछती हैं: “क्या इससे मेरे मुँहासे ठीक हो जाएंगे?” ध्यान रखें — इलाज की भाषा में मत जाइए।","ग्राहक को फ़ार्मेसी प्रोडक्ट के लिए यह महंगा लगता है। आपका जवाब?"] },
+};
+/* genifique: + FR, AR, HI */
+FILL.genifique = {
+  FR:{ status:"approved", name:"Advanced Génifique Sérum Radiance", tagline:"Une peau visiblement éclatante et unifiée",
+    claims:["fractions dérivées de probiotiques","la barrière cutanée paraît renforcée","visiblement plus éclatante","teint plus unifié","convient à tous les types de peau","7 gouttes par application"],
+    doNotSay:["répare l'ADN","cure anti-âge","cliniquement prouvé pour inverser"],
+    sections:[
+      {title:"Positionnement",k:["positionnement","message","présenter","c'est quoi","produit","parlez"],t:"Le rituel Luxe : Génifique est la première étape après le nettoyage, celle qui fait mieux travailler tout ce qui suit. Entrez par le rituel et la sensorialité, jamais par la remise."},
+      {title:"Allégations approuvées",k:["allégation","résultats","preuve","probiotique","éclat","efficace"],t:"Formulé avec des fractions dérivées de probiotiques. La barrière cutanée paraît renforcée ; la peau est visiblement plus éclatante et le teint plus unifié. Convient à tous les types de peau."},
+      {title:"Place dans la routine",k:["routine","appliquer","utiliser","comment","gouttes","étapes"],t:"Sept gouttes matin et soir sur peau nettoyée, avant tout autre soin. Déposez au compte-gouttes dans la paume, réchauffez brièvement, puis pressez sur la peau — le geste fait partie du rituel."},
+      {title:"Positionnement prix",k:["prix","coût","valeur","cher","comparer"],t:"Sept gouttes par application : un flacon de 50 ml dure environ trois mois. Présentez-le comme l'étape qui fait mieux travailler toute sa routine, pas comme une dépense supplémentaire."},
+    ],
+    objections:[
+      {title:"« C'est cher »",k:["cher","prix","coût","budget"],t:"Je comprends. Ce sont sept gouttes par utilisation, donc un flacon de 50 ml dure environ trois mois — et c'est l'étape qui aide tout ce que vous appliquez ensuite à mieux agir. Puis-je vous le faire ressentir sur la peau maintenant ?"},
+      {title:"« J'utilise déjà un sérum »",k:["déjà","autre","sérum","besoin","pourquoi"],t:"Génifique se place avant votre sérum actuel plutôt que de le remplacer — c'est l'étape de préparation qui aide la suite à pénétrer et à agir. Essayons-le sur une moitié du visage pour que vous puissiez comparer ?"},
+    ],
+    prompts:["Jeu de rôle : votre cliente dit « C'est magnifique, mais c'est cher. » Répondez dans le registre Lancôme — sans remise.","Votre cliente utilise déjà un sérum d'une autre maison. Comment positionnez-vous Génifique ?"] },
+  AR:{ status:"approved", name:"أدفانسد جينيفيك سيروم الإشراق", tagline:"بشرة تبدو أكثر إشراقاً وتوحّداً",
+    claims:["مكوّنات مشتقة من البروبيوتيك","حاجز البشرة يبدو أقوى","إشراق مرئي أكبر","لون بشرة أكثر توحّداً","مناسب لجميع أنواع البشرة","سبع قطرات في كل استخدام"],
+    doNotSay:["يصلح الحمض النووي","علاج لمكافحة الشيخوخة","مثبت سريرياً أنه يعكس"],
+    sections:[
+      {title:"الموضع التسويقي",k:["تقديم","الرسالة","ما هو","عرّفي","المنتج"],t:"طقس الفخامة: جينيفيك هو الخطوة الأولى بعد التنظيف، وهو ما يجعل كل منتج بعده يعمل بشكل أفضل. ابدئي من الطقس والإحساس، لا من الخصم."},
+      {title:"الادعاءات المعتمدة",k:["ادعاء","نتائج","بروبيوتيك","إشراق","دليل"],t:"تركيبة بمكوّنات مشتقة من البروبيوتيك. حاجز البشرة يبدو أقوى، والبشرة تبدو أكثر إشراقاً وتوحّداً. مناسب لجميع أنواع البشرة."},
+      {title:"مكانه في الروتين",k:["روتين","استخدام","كيف","قطرات","خطوات"],t:"سبع قطرات صباحاً ومساءً على بشرة نظيفة قبل أي عناية أخرى. ضعيها بالقطارة في راحة اليد، دفّئيها قليلاً، ثم اضغطيها على البشرة — الحركة نفسها جزء من الطقس."},
+      {title:"موضع السعر",k:["سعر","تكلفة","قيمة","غالي","مقارنة"],t:"سبع قطرات لكل استخدام تعني أن عبوة 50 مل تكفي حوالي ثلاثة أشهر. قدّميه كالخطوة التي تجعل بقية روتينها تعمل بشكل أفضل، لا كمصروف إضافي."},
+    ],
+    objections:[
+      {title:"«إنه غالٍ»",k:["غالي","سعر","تكلفة","كثير"],t:"أتفهّم ذلك. سبع قطرات في كل استخدام، أي أن عبوة 50 مل تكفي حوالي ثلاثة أشهر — وهو الخطوة التي تساعد كل ما تضعينه بعده على العمل بشكل أفضل. هل أجرّبه لكِ على البشرة الآن؟"},
+      {title:"«أستخدم سيروم بالفعل»",k:["بالفعل","سيروم","آخر","لماذا","أحتاج"],t:"جينيفيك يأتي قبل السيروم الحالي ولا يحلّ محلّه — فهو خطوة التحضير التي تساعد ما يليه على الامتصاص والعمل. هل نجرّبه على نصف الوجه لتقارني بنفسكِ؟"},
+    ],
+    prompts:["تمثيل أدوار: العميلة تقول «جميل، لكنه غالٍ». أجيبي بلغة لانكوم — دون خصم.","العميلة تستخدم سيروم من دار أخرى. كيف تقدّمين جينيفيك؟"] },
+  HI:{ status:"approved", name:"एडवांस्ड जेनिफ़िक रेडिएंस सीरम", tagline:"त्वचा दिखे और निखरी और एकसमान",
+    claims:["प्रोबायोटिक-व्युत्पन्न अंश","त्वचा की बैरियर मज़बूत महसूस होती है","दिखने में अधिक निखार","अधिक एकसमान रंगत","हर स्किन टाइप के लिए उपयुक्त","हर बार सात बूँदें"],
+    doNotSay:["डीएनए ठीक करता है","एंटी-एजिंग इलाज","उलटने के लिए क्लिनिकली प्रमाणित"],
+    sections:[
+      {title:"पोज़िशनिंग",k:["पोज़िशन","बताइए","क्या है","प्रोडक्ट","परिचय"],t:"लक्ज़री रिचुअल: जेनिफ़िक क्लेंज़िंग के बाद पहला कदम है, जो उसके बाद लगने वाली हर चीज़ को बेहतर काम करने देता है। डिस्काउंट से नहीं, रिचुअल और अनुभव से शुरुआत करें।"},
+      {title:"मुख्य दावे",k:["दावा","नतीजे","प्रोबायोटिक","निखार","सबूत"],t:"प्रोबायोटिक-व्युत्पन्न अंशों से बना। त्वचा की बैरियर मज़बूत महसूस होती है; त्वचा दिखने में अधिक निखरी और एकसमान लगती है। हर स्किन टाइप के लिए उपयुक्त।"},
+      {title:"रूटीन में जगह",k:["रूटीन","कैसे","इस्तेमाल","बूँद","स्टेप"],t:"साफ़ त्वचा पर, किसी और ट्रीटमेंट से पहले, सुबह-शाम सात बूँदें। ड्रॉपर से हथेली पर लें, हल्का गर्म करें, फिर त्वचा पर दबाकर लगाएँ — यह क्रिया भी रिचुअल का हिस्सा है।"},
+      {title:"कीमत की स्थिति",k:["कीमत","दाम","महंगा","वैल्यू","तुलना"],t:"हर बार सात बूँदें, यानी 50ml की बोतल लगभग तीन महीने चलती है। इसे अतिरिक्त खर्च नहीं, बल्कि पूरे रूटीन को बेहतर बनाने वाला कदम बताएँ।"},
+    ],
+    objections:[
+      {title:"“यह महंगा है”",k:["महंगा","कीमत","दाम","बजट"],t:"समझती हूँ। हर बार सात बूँदें, तो 50ml की बोतल लगभग तीन महीने चलती है — और यही वह कदम है जो बाद में लगने वाली हर चीज़ को बेहतर काम करने देता है। क्या मैं अभी आपकी त्वचा पर लगाकर दिखाऊँ?"},
+      {title:"“मैं पहले से सीरम इस्तेमाल करती हूँ”",k:["पहले से","सीरम","ज़रूरत","क्यों","दूसरा"],t:"जेनिफ़िक आपके मौजूदा सीरम की जगह नहीं लेता, उससे पहले आता है — यह तैयारी का कदम है जो आगे लगने वाली चीज़ों को बेहतर समाने और काम करने में मदद करता है। आधे चेहरे पर लगाकर तुलना कर लें?"},
+    ],
+    prompts:["रोल-प्ले: ग्राहक कहती हैं “बहुत अच्छा है, पर महंगा है।” लैंकोम की भाषा में जवाब दें — बिना छूट दिए।","ग्राहक दूसरी कंपनी का सीरम इस्तेमाल करती हैं। जेनिफ़िक को कैसे रखेंगी?"] },
+};
+/* gloss (Kérastase / PPD): + AR, ZH, JA, HI */
+FILL.gloss = {
+  AR:{ status:"approved", name:"غلوس أبسولو طقس اللمعان", tagline:"لمعان الصالون، مثبّت أثناء الخدمة",
+    claims:["مركّب اللمعان الغليكوليبيدي","يغلق طبقة الكيوتيكل","يمنح لمعاناً كالمرآة من الخدمة الأولى","آمن على الشعر المصبوغ","استخدام احترافي: ضغطتان من المنتصف إلى الأطراف"],
+    doNotSay:["لمعان دائم","يصلح الشعر نهائياً","مثل علاج الكيراتين"],
+    sections:[
+      {title:"الموضع التسويقي",k:["تقديم","الرسالة","ما هو","عرّفي","المنتج"],t:"هذه خدمة أولاً ومنتج للبيع ثانياً. ضعيها في الكرسي: طقس اللمعان الذي تنفّذينه عند الحوض، ثم تحافظ عليه العميلة في المنزل."},
+      {title:"الادعاءات المعتمدة",k:["ادعاء","نتائج","لمعان","دليل","فعالية"],t:"مركّب اللمعان الغليكوليبيدي يغلق طبقة الكيوتيكل ويمنح لمعاناً كالمرآة من الخدمة الأولى. آمن على الشعر المصبوغ."},
+      {title:"بروتوكول الخدمة",k:["بروتوكول","روتين","تطبيق","كيف","خدمة","ضغطات","حوض"],t:"ضغطتان من منتصف الطول إلى الأطراف على شعر منشّف بالمنشفة، استحلبي لمدة 30 ثانية، اتركيه 3 دقائق عند الحوض، ثم اشطفي. لا تضعيه على الجذور — الثقل عند الجذر يبدو دهنياً لا لامعاً."},
+      {title:"موضع السعر",k:["سعر","تكلفة","قيمة","غالي","مقارنة"],t:"سعّري الخدمة لا العبوة. المنتج المنزلي يمدّ نتيجة الصالون بين المواعيد — وهذا هو سبب أخذه إلى المنزل."},
+    ],
+    objections:[
+      {title:"«عميلتي لن تدفع مقابل إضافة»",k:["غالي","سعر","تدفع","إضافة","بيع"],t:"لا تبيعيها كإضافة — نفّذيها مرة عند الحوض ضمن الخدمة ودعيها ترى اللمعان في المرآة. حديث البيع يأتي بعد أن ترى النتيجة، لا قبلها."},
+      {title:"«هل هو مثل علاج الكيراتين؟»",k:["كيراتين","علاج","دائم","فرد","تنعيم"],t:"لا — هذا طقس لمعان يغلق طبقة الكيوتيكل، وليس خدمة فرد أو تنعيم. يمنح لمعاناً كالمرآة من الخدمة الأولى وهو آمن على الشعر المصبوغ."},
+    ],
+    prompts:["العميلة تسأل إن كان هذا مثل علاج الكيراتين الذي تستخدمه. أجيبي كمحترفة، دون مبالغة في الادعاء.","كيف تقدّمين طقس اللمعان عند الحوض دون أن يبدو محاولة بيع؟"] },
+  ZH:{ status:"approved", name:"卡诗 极光焕亮护理", tagline:"沙龙级光泽，在服务中锁定",
+    claims:["糖脂光泽复合物","封闭毛鳞片","首次服务即带来镜面光泽","染后发质可安全使用","专业用量：中段至发尾两泵"],
+    doNotSay:["永久光泽","永久修复头发","等同角蛋白拉直"],
+    sections:[
+      {title:"产品定位",k:["定位","介绍","是什么","产品","讲讲"],t:"这首先是一项服务，其次才是零售产品。请在椅子上做定位：您在洗头台完成的光泽仪式，顾客回家后延续。"},
+      {title:"核心宣称",k:["宣称","功效","效果","光泽","证据"],t:"糖脂光泽复合物封闭毛鳞片，首次服务即带来镜面光泽。染后发质可安全使用。"},
+      {title:"服务流程",k:["流程","protocol","怎么用","服务","泵","洗头台"],t:"毛巾擦干后，中段至发尾取两泵，乳化30秒，在洗头台停留3分钟后冲洗。不要涂抹发根——发根有重量会显得油腻，而不是有光泽。"},
+      {title:"价格定位",k:["价格","多少钱","价值","贵","对比"],t:"为服务定价，不是为瓶子定价。居家产品在两次预约之间延长沙龙效果——这才是带回家的理由。"},
+    ],
+    objections:[
+      {title:"「我的顾客不会为加项买单」",k:["贵","价格","买单","加项","推销"],t:"不要当作加项来卖——在服务中于洗头台做一次，让她在镜子里看到光泽。零售的对话发生在她看到效果之后，而不是之前。"},
+      {title:"「这跟角蛋白护理一样吗？」",k:["角蛋白","护理","永久","拉直","顺滑"],t:"不一样——这是封闭毛鳞片的光泽仪式，不是拉直或顺滑服务。首次服务即带来镜面光泽，染后发质也可安全使用。"},
+    ],
+    prompts:["顾客问这是否和她做的角蛋白护理一样。请以专业人士的口吻回答，不要过度宣称。","您会如何在洗头台介绍这项光泽仪式，而不让它听起来像推销？"] },
+  JA:{ status:"approved", name:"グロス アブソリュ シャイン リチュアル", tagline:"サロンの艶を、施術の中で閉じ込める",
+    claims:["グリコリピッド シャインコンプレックス","キューティクルを密着させます","初回の施術から鏡のような艶","カラー毛にもお使いいただけます","プロ用量：中間から毛先に2プッシュ"],
+    doNotSay:["永久的な艶","髪を永久に修復する","縮毛矯正と同じ"],
+    sections:[
+      {title:"ポジショニング",k:["紹介","メッセージ","どんな","製品","説明"],t:"まず施術、そのあとに店販です。チェアの上で位置づけてください：シャンプー台で行う艶のリチュアルを、お客様がご自宅で維持されます。"},
+      {title:"承認訴求",k:["訴求","効果","結果","艶","証拠"],t:"グリコリピッド シャインコンプレックスがキューティクルを密着させ、初回の施術から鏡のような艶を与えます。カラー毛にもお使いいただけます。"},
+      {title:"施術手順",k:["手順","使い方","施術","プッシュ","シャンプー台"],t:"タオルドライ後、中間から毛先に2プッシュ。30秒乳化し、シャンプー台で3分置いてから流します。根元にはつけないでください——根元の重さは艶ではなくベタつきに見えます。"},
+      {title:"価格ポジション",k:["価格","値段","高い","価値","比較"],t:"ボトルではなく施術に値付けしてください。ホームケアは次のご来店までサロンの仕上がりを保ちます——それが持ち帰る理由です。"},
+    ],
+    objections:[
+      {title:"「追加メニューにはお金を出さないのでは」",k:["高い","値段","追加","メニュー","販売"],t:"追加メニューとして売らないでください——施術の中でシャンプー台で一度行い、鏡で艶をご覧いただきます。店販のお話は結果をご覧いただいたあとで、前ではありません。"},
+      {title:"「縮毛矯正と同じですか」",k:["縮毛","矯正","ストレート","永久","トリートメント"],t:"いいえ——これはキューティクルを密着させる艶のリチュアルで、ストレートや矯正の施術ではありません。初回の施術から鏡のような艶を与え、カラー毛にもお使いいただけます。"},
+    ],
+    prompts:["お客様に「これは縮毛矯正と同じですか」と聞かれました。プロとして、過剰な訴求をせずにお答えください。","シャンプー台で艶のリチュアルを、売り込みに聞こえないようにどうご案内しますか。"] },
+  HI:{ status:"approved", name:"ग्लॉस एब्सोलु शाइन रिचुअल", tagline:"सैलून जैसी चमक, सर्विस में ही सील",
+    claims:["ग्लाइकोलिपिड शाइन कॉम्प्लेक्स","क्यूटिकल को सील करता है","पहली ही सर्विस से आईने जैसी चमक","कलर किए बालों पर सुरक्षित","प्रोफ़ेशनल मात्रा: मध्य से सिरों तक 2 पंप"],
+    doNotSay:["स्थायी चमक","बाल हमेशा के लिए ठीक करता है","केराटिन ट्रीटमेंट जैसा"],
+    sections:[
+      {title:"पोज़िशनिंग",k:["पोज़िशन","बताइए","क्या है","प्रोडक्ट","परिचय"],t:"यह पहले एक सर्विस है, बाद में रिटेल प्रोडक्ट। इसे कुर्सी पर रखिए: बेसिन पर किया जाने वाला शाइन रिचुअल, जिसे ग्राहक घर पर बनाए रखती हैं।"},
+      {title:"मुख्य दावे",k:["दावा","नतीजे","चमक","सबूत"],t:"ग्लाइकोलिपिड शाइन कॉम्प्लेक्स क्यूटिकल को सील करता है और पहली ही सर्विस से आईने जैसी चमक देता है। कलर किए बालों पर सुरक्षित।"},
+      {title:"सर्विस प्रोटोकॉल",k:["प्रोटोकॉल","रूटीन","कैसे","सर्विस","पंप","बेसिन"],t:"तौलिये से सुखाए बालों पर मध्य से सिरों तक दो पंप, 30 सेकंड इमल्सिफ़ाई करें, बेसिन पर 3 मिनट छोड़ें, फिर धो लें। जड़ों पर न लगाएँ — जड़ पर भारीपन चमक नहीं, चिपचिपाहट दिखता है।"},
+      {title:"कीमत की स्थिति",k:["कीमत","दाम","वैल्यू","महंगा","तुलना"],t:"बोतल की नहीं, सर्विस की कीमत रखें। घर का प्रोडक्ट दो अपॉइंटमेंट के बीच सैलून का नतीजा बनाए रखता है — घर ले जाने की वजह यही है।"},
+    ],
+    objections:[
+      {title:"“मेरी ग्राहक एड-ऑन के पैसे नहीं देंगी”",k:["महंगा","कीमत","पैसे","एड-ऑन","बेचना"],t:"इसे एड-ऑन की तरह मत बेचिए — सर्विस के भीतर बेसिन पर एक बार कीजिए और उन्हें आईने में चमक देखने दीजिए। रिटेल की बात नतीजा देखने के बाद होती है, पहले नहीं।"},
+      {title:"“क्या यह केराटिन ट्रीटमेंट जैसा है?”",k:["केराटिन","ट्रीटमेंट","स्थायी","स्ट्रेट","स्मूदनिंग"],t:"नहीं — यह क्यूटिकल सील करने वाला शाइन रिचुअल है, स्ट्रेटनिंग या स्मूदनिंग सर्विस नहीं। पहली ही सर्विस से आईने जैसी चमक देता है और कलर किए बालों पर सुरक्षित है।"},
+    ],
+    prompts:["ग्राहक पूछती हैं कि क्या यह उनके केराटिन ट्रीटमेंट जैसा है। पेशेवर की तरह जवाब दें, बिना बढ़ा-चढ़ाकर कहे।","बेसिन पर शाइन रिचुअल कैसे बताएँगी कि वह बिक्री की कोशिश न लगे?"] },
+};
+/* skyhigh (Maybelline / CPD): + FR, ZH, JA */
+FILL.skyhigh = {
+  FR:{ status:"approved", name:"Lash Sensational Sky High Mascara", tagline:"Longueur sans limite, sans paquets",
+    claims:["extrait de bambou et fibres","longueur sans limite","brosse flexible qui atteint chaque cil","sans paquets","se retire à l'eau tiède"],
+    doNotSay:["fait pousser les cils","effet extension permanent","testé médicalement"],
+    sections:[
+      {title:"Positionnement",k:["positionnement","message","présenter","c'est quoi","produit","parlez"],t:"Tout le pitch en une phrase : le résultat que les clientes associent à un mascara premium, à un prix grand public. La vitesse compte — vous avez quelques secondes en rayon."},
+      {title:"Allégations approuvées",k:["allégation","résultats","longueur","bambou","preuve"],t:"L'extrait de bambou et les fibres construisent une longueur sans limite. La brosse flexible atteint chaque cil sans faire de paquets. Se retire à l'eau tiède."},
+      {title:"Démo en rayon",k:["routine","appliquer","utiliser","comment","démo","brosse"],t:"Zigzag à la racine, balayage vers la pointe, seconde couche pendant que la première est encore humide. Dix secondes de démonstration sur le dos de la main convertissent mieux que n'importe quelle allégation."},
+      {title:"Positionnement prix",k:["prix","coût","valeur","cher","comparer"],t:"Un prix grand public pour le résultat que les clientes associent au mascara premium — c'est tout le pitch."},
+    ],
+    objections:[
+      {title:"« Les mascaras pas chers coulent »",k:["coule","pas cher","bon marché","qualité","tient"],t:"Celui-ci se retire à l'eau tiède, sans démaquillant, et la formule construit la longueur sans paquets. Laissez-moi vous le montrer sur le dos de la main — dix secondes et vous verrez."},
+      {title:"« J'achète une marque premium »",k:["premium","marque","luxe","déjà","cher"],t:"Alors vous savez déjà à quoi ressemble une belle longueur. Celui-ci donne une longueur sans limite avec une brosse flexible qui atteint chaque cil, à prix grand public. Dix secondes sur le dos de la main ?"},
+    ],
+    prompts:["Une cliente dit que les mascaras pas chers coulent toujours. Vous avez dix secondes. Allez-y.","Elle dit n'acheter que du mascara premium. Votre réponse en une phrase ?"] },
+  ZH:{ status:"approved", name:"睫毛超浓密 冲天翘 睫毛膏", tagline:"无限拉长，不结块",
+    claims:["竹提取物与纤维","打造无限长度","柔韧刷头触及每一根睫毛","不结块","温水即可卸除"],
+    doNotSay:["促进睫毛生长","永久接睫效果","经医学测试"],
+    sections:[
+      {title:"产品定位",k:["定位","介绍","是什么","产品","讲讲"],t:"一句话讲完：顾客心中高端睫毛膏才有的效果，用大众价格实现。速度很重要——在货架前您只有几秒钟。"},
+      {title:"核心宣称",k:["宣称","功效","长度","竹","证据"],t:"竹提取物与纤维打造无限长度。柔韧刷头触及每一根睫毛且不结块。温水即可卸除。"},
+      {title:"货架演示",k:["流程","怎么用","使用","演示","刷头"],t:"根部轻轻摆动，向睫毛尖端刷开，第一层未干时叠加第二层。在手背上做十秒演示，比任何宣称都更能促成购买。"},
+      {title:"价格定位",k:["价格","多少钱","价值","贵","对比"],t:"用大众价格换来顾客心中高端睫毛膏的效果——这就是全部卖点。"},
+    ],
+    objections:[
+      {title:"「便宜的睫毛膏会晕」",k:["晕","便宜","掉","质量","脱妆"],t:"这支用温水就能卸除，不需要卸妆油，配方拉长且不结块。我在您手背上演示一下——十秒钟您就看到了。"},
+      {title:"「我用高端品牌」",k:["高端","品牌","贵","奢侈","已经"],t:"那您已经知道好的长度是什么样。这支用柔韧刷头触及每一根睫毛，打造无限长度，价格却很亲民。愿意给我十秒钟吗？"},
+    ],
+    prompts:["顾客说便宜的睫毛膏总是会晕。您有十秒钟，请说。","她说她只买高端睫毛膏。用一句话回应。"] },
+  JA:{ status:"approved", name:"ラッシュセンセーショナル スカイハイ マスカラ", tagline:"限りない長さ、ダマにならない",
+    claims:["竹エキスとファイバー配合","限りない長さを重ねられます","しなやかなブラシが一本一本に届きます","ダマになりにくい","ぬるま湯でオフできます"],
+    doNotSay:["まつげが伸びる","エクステの永久的な効果","医学的に試験済み"],
+    sections:[
+      {title:"ポジショニング",k:["紹介","メッセージ","どんな","製品","説明"],t:"一言でいえば：お客様がプレステージのマスカラに期待する仕上がりを、手に取りやすい価格で。棚の前では数秒が勝負ですので、短くお伝えください。"},
+      {title:"承認訴求",k:["訴求","効果","長さ","竹","証拠"],t:"竹エキスとファイバーが限りない長さを重ねます。しなやかなブラシが一本一本に届き、ダマになりにくい仕上がり。ぬるま湯でオフできます。"},
+      {title:"店頭デモ",k:["手順","使い方","デモ","ブラシ","塗り方"],t:"根元で小刻みに動かし、毛先へ向かって流します。1度目が乾かないうちに2度目を重ねてください。手の甲での10秒のデモは、どんな説明よりも伝わります。"},
+      {title:"価格ポジション",k:["価格","値段","高い","価値","比較"],t:"プレステージのマスカラに期待される仕上がりを、手に取りやすい価格で——お伝えすることはこれだけです。"},
+    ],
+    objections:[
+      {title:"「安いマスカラはにじみますよね」",k:["にじむ","安い","落ちる","品質","パンダ"],t:"こちらはリムーバーを使わずぬるま湯でオフでき、処方はダマにならずに長さを出します。手の甲でお試しいただけますか——10秒でお分かりいただけます。"},
+      {title:"「プレステージブランドを使っています」",k:["プレステージ","ブランド","高級","もう","デパート"],t:"でしたら良い長さがどういうものかご存じですね。こちらはしなやかなブラシで一本一本に届き、限りない長さを、手に取りやすい価格で。10秒だけいただけますか。"},
+    ],
+    prompts:["お客様が「安いマスカラはいつもにじむ」とおっしゃいました。10秒です。どうぞ。","「プレステージのマスカラしか買わない」と言われました。一言でどうお答えしますか。"] },
+};
+
+
+const DIVISIONS = {
+  cpd:  { label: "CPD · Consumer",     hue: "#C2557A", who: "retail promoter" },
+  luxe: { label: "Luxe · Selective",   hue: "#8B78C4", who: "counter beauty advisor" },
+  derm: { label: "Derm · Pharmacy",    hue: "#3E93A4", who: "pharmacist" },
+  ppd:  { label: "PPD · Professional", hue: "#A98C3E", who: "salon stylist" },
+};
+const LANGS = [
+  { c: "EN", bcp47: "en-US", native: "English",  en: "English",  rtl: false, voice: "en" },
+  { c: "FR", bcp47: "fr-FR", native: "Français", en: "French",   rtl: false, voice: "fr" },
+  { c: "AR", bcp47: "ar-SA", native: "العربية",  en: "Arabic",   rtl: true,  voice: "ar" },
+  { c: "ZH", bcp47: "zh-CN", native: "中文",      en: "Chinese",  rtl: false, voice: "zh" },
+  { c: "JA", bcp47: "ja-JP", native: "日本語",    en: "Japanese", rtl: false, voice: "ja" },
+  { c: "HI", bcp47: "hi-IN", native: "हिन्दी",     en: "Hindi",    rtl: false, voice: "hi" },
+];
+const UI = {
+  EN: {
+    focus: { "product-knowledge":"we'll make sure you know this product inside out", "objection-handling":"we'll practise the objections you hear most", "routine-building":"we'll work on building complete routines around it", "price-positioning":"we'll get you confident on price and value" },
+    greet:(n,p,f)=>`Hello ${n}, welcome. I'm Julien, your L'Oréal Beauty Coach. Today we're focusing on ${p} — ${f}. To begin: how would you introduce this product to a customer?`,
+    wrap:"We have about one minute left. Is there one more thing you'd like to be confident on before we finish?",
+    close:(n)=>`Well done, ${n}. I've noted today's session — your readiness scores are on their way. Practise what we covered, and book me again any time.`,
+    objection:"That's a common one — here's the approved way to answer it.", section:"Good question. From the approved launch material:",
+    praise:"Excellent — that's exactly the approved wording.", push:"Let me push you a little.", practise:"Now say that in your own words to a customer.",
+    thinking:"Julien is thinking…", placeholder:"Type your answer…",
+    icons:["Product Info","Claims","Routine","Price","Objections","Do Not Say"],
+    tags:{today:"Today's session",obj:"Objection handling",on:"On message ✓",pack:"From the launch pack",prod:"Product info",claims:"Approved claims",routine:"Routine placement",price:"Price positioning",lib:"Objection library",dont:"Do not say"},
+    titles:{claims:"Say it exactly this way",routine:"How the customer uses it",price:"The approved value story",lib:"Approved responses",dont:"Forbidden wording",on:"Approved claims used"},
+    sugg:["What are the approved claims?","How do I explain the price?","What routine should I recommend?","A customer says it's too expensive"],
+  },
+  FR: {
+    focus:{ "product-knowledge":"nous allons nous assurer que vous connaissez ce produit parfaitement","objection-handling":"nous allons travailler les objections les plus fréquentes","routine-building":"nous allons construire des routines complètes autour du produit","price-positioning":"nous allons vous rendre à l'aise sur le prix et la valeur" },
+    greet:(n,p,f)=>`Bonjour ${n}, bienvenue. Je suis Julien, votre coach beauté L'Oréal. Aujourd'hui nous travaillons sur ${p} — ${f}. Pour commencer : comment présenteriez-vous ce produit à une cliente ?`,
+    wrap:"Il nous reste environ une minute. Y a-t-il un dernier point sur lequel vous aimeriez être à l'aise ?",
+    close:(n)=>`Très bien, ${n}. J'ai enregistré la séance — vos scores arrivent. Entraînez-vous sur ce que nous avons vu, et reprenez rendez-vous quand vous voulez.`,
+    objection:"C'est une objection fréquente — voici la réponse approuvée.", section:"Bonne question. D'après le matériel de lancement approuvé :",
+    praise:"Excellent — c'est exactement la formulation approuvée.", push:"Je vais vous pousser un peu.", practise:"Maintenant, reformulez-le avec vos mots à une cliente.",
+    thinking:"Julien réfléchit…", placeholder:"Tapez votre réponse…",
+    icons:["Produit","Allégations","Routine","Prix","Objections","À ne pas dire"],
+    tags:{today:"Séance du jour",obj:"Gestion d'objection",on:"Message respecté ✓",pack:"Matériel de lancement",prod:"Fiche produit",claims:"Allégations approuvées",routine:"Place dans la routine",price:"Positionnement prix",lib:"Bibliothèque d'objections",dont:"À ne pas dire"},
+    titles:{claims:"Dites-le exactement ainsi",routine:"Comment la cliente l'utilise",price:"Le discours valeur approuvé",lib:"Réponses approuvées",dont:"Formulations interdites",on:"Allégations approuvées utilisées"},
+    sugg:["Quelles sont les allégations approuvées ?","Comment expliquer le prix ?","Quelle routine recommander ?","Une cliente dit que c'est trop cher"],
+  },
+  AR: {
+    focus:{ "product-knowledge":"سنتأكد من معرفتك الكاملة بهذا المنتج","objection-handling":"سنتدرّب على الاعتراضات الأكثر شيوعاً","routine-building":"سنبني روتيناً متكاملاً حول المنتج","price-positioning":"سنجعلك واثقة في الحديث عن السعر والقيمة" },
+    greet:(n,p,f)=>`أهلاً ${n}، مرحباً بكِ. أنا جوليان، مدرّب الجمال من لوريال. اليوم سنعمل على ${p} — ${f}. لنبدأ: كيف تقدّمين هذا المنتج للعميلة؟`,
+    wrap:"بقيت لنا دقيقة تقريباً. هل هناك نقطة أخيرة تودّين إتقانها قبل أن ننهي؟",
+    close:(n)=>`أحسنتِ يا ${n}. سجّلت جلسة اليوم — نتائج جاهزيتك في طريقها إليكِ. تدرّبي على ما تناولناه، واحجزي معي في أي وقت.`,
+    objection:"هذا اعتراض شائع — وهذه هي الإجابة المعتمدة.", section:"سؤال جيد. من المادة المعتمدة للإطلاق:",
+    praise:"ممتاز — هذه هي الصياغة المعتمدة تماماً.", push:"دعيني أختبركِ قليلاً.", practise:"الآن قوليها بأسلوبكِ الخاص للعميلة.",
+    thinking:"جوليان يفكّر…", placeholder:"اكتبي إجابتك…",
+    icons:["المنتج","الادعاءات","الروتين","السعر","الاعتراضات","ممنوع قوله"],
+    tags:{today:"جلسة اليوم",obj:"معالجة الاعتراض",on:"ملتزمة بالرسالة ✓",pack:"من مادة الإطلاق",prod:"معلومات المنتج",claims:"الادعاءات المعتمدة",routine:"مكانه في الروتين",price:"موضع السعر",lib:"مكتبة الاعتراضات",dont:"ممنوع قوله"},
+    titles:{claims:"قوليها بهذه الصيغة تماماً",routine:"كيف تستخدمه العميلة",price:"قصة القيمة المعتمدة",lib:"الردود المعتمدة",dont:"صياغات ممنوعة",on:"ادعاءات معتمدة مستخدمة"},
+    sugg:["ما هي الادعاءات المعتمدة؟","كيف أشرح السعر؟","ما الروتين الذي أنصح به؟","العميلة تقول إنه غالي جداً"],
+  },
+  ZH: {
+    focus:{ "product-knowledge":"我们要确保您对这款产品了如指掌","objection-handling":"我们来演练最常遇到的顾客异议","routine-building":"我们围绕这款产品搭建完整的护理流程","price-positioning":"我们让您在价格与价值上更有底气" },
+    greet:(n,p,f)=>`${n}，您好，欢迎。我是欧莱雅美妆教练 Julien。今天我们聚焦${p}——${f}。首先请告诉我：您会如何向顾客介绍这款产品？`,
+    wrap:"我们还剩大约一分钟。在结束之前，还有哪一点您希望更有把握？",
+    close:(n)=>`${n}，做得很好。今天的记录我已保存——您的准备度评分马上就到。请多练习我们讲过的内容，随时可以再约我。`,
+    objection:"这是常见的异议——以下是官方认可的回应方式。", section:"好问题。根据官方认可的上新资料：",
+    praise:"非常好——这正是官方认可的说法。", push:"我来加一点难度。", practise:"现在请用您自己的话向顾客说一遍。",
+    thinking:"Julien 正在思考…", placeholder:"请输入您的回答…",
+    icons:["产品信息","功效宣称","使用流程","价格","异议应对","禁用话术"],
+    tags:{today:"今日课程",obj:"异议应对",on:"表述合规 ✓",pack:"来自上新资料",prod:"产品信息",claims:"认可宣称",routine:"流程位置",price:"价格定位",lib:"异议库",dont:"禁用话术"},
+    titles:{claims:"请照此表述",routine:"顾客如何使用",price:"认可的价值说法",lib:"认可回应",dont:"禁止使用的措辞",on:"已使用认可宣称"},
+    sugg:["有哪些认可的功效宣称？","价格该怎么解释？","该推荐怎样的护理流程？","顾客说太贵了"],
+  },
+  JA: {
+    focus:{ "product-knowledge":"この製品を隅々まで理解していただきます","objection-handling":"よくいただくご質問への対応を練習します","routine-building":"この製品を軸にした一連のケアを組み立てます","price-positioning":"価格と価値について自信を持ってお話しできるようにします" },
+    greet:(n,p,f)=>`${n}さん、こんにちは。ロレアル ビューティーコーチのジュリアンです。本日は${p}について——${f}。まず、この商品をお客様にどのようにご紹介されますか。`,
+    wrap:"残り1分ほどです。終わる前に、もう一点確認しておきたいことはありますか。",
+    close:(n)=>`${n}さん、お疲れさまでした。本日のセッションを記録しました——評価はまもなくお手元に届きます。学んだ内容を practice し、いつでもまたご予約ください。`,
+    objection:"よくあるご質問です。承認された回答はこちらです。", section:"良いご質問です。承認された発売資料より:",
+    praise:"素晴らしいです——まさに承認された表現です。", push:"少し踏み込んでみましょう。", practise:"では、ご自身の言葉でお客様にお伝えしてみてください。",
+    thinking:"ジュリアンが考えています…", placeholder:"ご回答を入力してください…",
+    icons:["製品情報","訴求","使用手順","価格","ご質問対応","使用禁止表現"],
+    tags:{today:"本日のセッション",obj:"ご質問対応",on:"表現適合 ✓",pack:"発売資料より",prod:"製品情報",claims:"承認訴求",routine:"使用手順",price:"価格ポジション",lib:"想定質問集",dont:"使用禁止表現"},
+    titles:{claims:"この通りにお伝えください",routine:"お客様の使い方",price:"承認された価値の伝え方",lib:"承認された回答",dont:"使ってはいけない表現",on:"承認訴求を使用"},
+    sugg:["承認されている訴求は何ですか","価格はどう説明しますか","どの手順をおすすめしますか","お客様に高いと言われました"],
+  },
+  HI: {
+    focus:{ "product-knowledge":"हम सुनिश्चित करेंगे कि आप इस प्रोडक्ट को पूरी तरह जानती हैं","objection-handling":"हम सबसे आम आपत्तियों का अभ्यास करेंगे","routine-building":"हम इसके आसपास पूरा रूटीन बनाएंगे","price-positioning":"हम कीमत और वैल्यू पर आपका आत्मविश्वास बढ़ाएंगे" },
+    greet:(n,p,f)=>`नमस्ते ${n}, आपका स्वागत है। मैं जूलियन हूँ, आपका लॉरियल ब्यूटी कोच। आज हम ${p} पर काम करेंगे — ${f}। शुरू करते हैं: आप इस प्रोडक्ट को ग्राहक को कैसे बताएंगी?`,
+    wrap:"लगभग एक मिनट बचा है। खत्म करने से पहले कोई और बात जिस पर आप पक्की होना चाहेंगी?",
+    close:(n)=>`बहुत बढ़िया, ${n}। आज का सेशन दर्ज कर लिया है — आपका स्कोर आ रहा है। जो सीखा उसका अभ्यास करें, और कभी भी दोबारा बुक करें।`,
+    objection:"यह आम आपत्ति है — इसका स्वीकृत जवाब यह है।", section:"अच्छा सवाल। स्वीकृत लॉन्च सामग्री के अनुसार:",
+    praise:"बहुत बढ़िया — यही स्वीकृत शब्द हैं।", push:"थोड़ा और आगे बढ़ते हैं।", practise:"अब इसे अपने शब्दों में ग्राहक को कहकर दिखाइए।",
+    thinking:"जूलियन सोच रहे हैं…", placeholder:"अपना जवाब लिखें…",
+    icons:["प्रोडक्ट","दावे","रूटीन","कीमत","आपत्तियाँ","क्या न कहें"],
+    tags:{today:"आज का सेशन",obj:"आपत्ति संभालना",on:"संदेश सही ✓",pack:"लॉन्च सामग्री से",prod:"प्रोडक्ट जानकारी",claims:"स्वीकृत दावे",routine:"रूटीन में जगह",price:"कीमत की स्थिति",lib:"आपत्ति लाइब्रेरी",dont:"क्या न कहें"},
+    titles:{claims:"बिल्कुल ऐसे ही कहें",routine:"ग्राहक कैसे इस्तेमाल करे",price:"स्वीकृत वैल्यू स्टोरी",lib:"स्वीकृत जवाब",dont:"वर्जित शब्द",on:"स्वीकृत दावे इस्तेमाल हुए"},
+    sugg:["स्वीकृत दावे क्या हैं?","कीमत कैसे समझाऊँ?","कौन सा रूटीन बताऊँ?","ग्राहक कहती हैं बहुत महंगा है"],
+  },
+};
+
+const PRODUCTS = [
+  { id:"revitalift", brand:"L'Oréal Paris", division:"cpd", launch:"Priority Launch",
+    packs:{
+      EN:{ status:"source", name:"Revitalift 1.5% Pure Hyaluronic Acid Serum", tagline:"Visibly plumped, hydrated skin",
+        claims:["1.5% pure hyaluronic acid","two molecular weights","intensely hydrated","visibly plumped","fine lines are reduced in two weeks","dermatologist validated","fragrance-free"],
+        doNotSay:["cures","removes wrinkles permanently","guaranteed results"],
+        sections:[
+          {title:"Positioning",k:["positioning","message","about","what is","tell me","introduce"],t:"The one-line message: intense hydration that visibly plumps skin and reduces fine lines in two weeks. Position it as the accessible dermatological choice — validated ingredients at a fair price."},
+          {title:"Hero claims",k:["claim","results","proof","hyaluronic","percent","works","evidence"],t:"It contains 1.5% pure hyaluronic acid with two molecular weights. Skin is intensely hydrated and visibly plumped; fine lines are reduced in two weeks. Dermatologist validated, fragrance-free."},
+          {title:"Routine placement",k:["routine","apply","use","when","how","steps","moisturiser","morning","night"],t:"Apply 2–3 drops on clean skin morning and night, before moisturiser. Pair with UV Defender SPF in the morning — hydrated skin still needs daily UV protection."},
+          {title:"Price positioning",k:["price","cost","value","compare","expensive"],t:"Masstige positioning: dermatological-grade actives at an accessible price. The 1.5% concentration matches or exceeds serums at three times the price."},
+        ],
+        objections:[
+          {title:"“Too expensive”",k:["expensive","price","cost","much","afford"],t:"I understand price matters. This serum contains 1.5% pure hyaluronic acid — a concentration you'd normally find at three times the price. One bottle lasts about two months at 2–3 drops a day."},
+          {title:"“My skin is sensitive”",k:["sensitive","irritate","react","allergy"],t:"This formula was validated by dermatologists for all skin types, including sensitive skin. It's fragrance-free and paraben-free. Start with 2 drops at night for the first week."},
+        ],
+        prompts:["Now imagine I'm your customer: “This is quite expensive for such a small bottle.” What do you say?","Your customer says: “My skin is sensitive — serums always irritate it.” How do you respond?"] },
+      AR:{ status:"approved", name:"سيروم ريفيتاليفت بحمض الهيالورونيك النقي 1.5%", tagline:"بشرة ممتلئة ومرطّبة بشكل مرئي",
+        claims:["1.5% حمض هيالورونيك نقي","وزنان جزيئيان","ترطيب مكثّف","امتلاء مرئي","تقليل الخطوط الدقيقة خلال أسبوعين","مُعتمد من أطباء الجلدية","خالٍ من العطور"],
+        doNotSay:["يعالج","يزيل التجاعيد نهائياً","نتائج مضمونة"],
+        sections:[
+          {title:"الموضع التسويقي",k:["تقديم","الرسالة","ما هو","عرّفي","المنتج"],t:"الرسالة في سطر واحد: ترطيب مكثّف يمنح البشرة امتلاءً مرئياً ويقلّل الخطوط الدقيقة خلال أسبوعين. قدّميه كالخيار الجلدي المتاح — مكوّنات مُثبتة بسعر عادل."},
+          {title:"الادعاءات المعتمدة",k:["ادعاء","نتائج","هيالورونيك","دليل","فعالية"],t:"يحتوي على 1.5% حمض هيالورونيك نقي بوزنين جزيئيين. ترطيب مكثّف وامتلاء مرئي، وتقليل الخطوط الدقيقة خلال أسبوعين. مُعتمد من أطباء الجلدية وخالٍ من العطور."},
+          {title:"مكانه في الروتين",k:["روتين","استخدام","كيف","متى","مرطب","صباح","مساء"],t:"ضعي 2–3 قطرات على بشرة نظيفة صباحاً ومساءً قبل المرطّب. استخدميه مع واقي الشمس صباحاً — البشرة المرطّبة تحتاج الحماية اليومية."},
+          {title:"موضع السعر",k:["سعر","تكلفة","قيمة","غالي","مقارنة"],t:"موضع ماستيج: مكوّنات فعّالة بمستوى جلدي وبسعر متاح. تركيز 1.5% يوازي أو يفوق سيرومات بثلاثة أضعاف السعر."},
+        ],
+        objections:[
+          {title:"«غالي جداً»",k:["غالي","سعر","تكلفة","كثير"],t:"أتفهّم أهمية السعر. هذا السيروم يحتوي 1.5% حمض هيالورونيك نقي — تركيز تجدينه عادةً بثلاثة أضعاف السعر. العبوة تكفي حوالي شهرين بمعدل 2–3 قطرات يومياً."},
+          {title:"«بشرتي حساسة»",k:["حساسة","تهيج","حساسية","تحسس"],t:"هذه التركيبة مُعتمدة من أطباء الجلدية لجميع أنواع البشرة بما فيها الحساسة. خالية من العطور والبارابين. ابدئي بقطرتين مساءً في الأسبوع الأول."},
+        ],
+        prompts:["تخيّلي أنني العميلة: «غالي جداً على عبوة بهذا الحجم». بماذا تردّين؟","العميلة تقول: «بشرتي حساسة، السيرومات دائماً تهيّجها». كيف تجيبين؟"] },
+      ZH:{ status:"approved", name:"复颜 1.5% 纯玻尿酸精华", tagline:"肌肤明显丰盈、水润",
+        claims:["1.5% 纯玻尿酸","双分子量","深度补水","明显丰盈","两周细纹减少","皮肤科验证","无香料"],
+        doNotSay:["治愈","永久去皱","保证效果"],
+        sections:[
+          {title:"产品定位",k:["定位","介绍","是什么","产品","讲讲"],t:"一句话核心信息：深度补水，让肌肤明显丰盈，两周细纹减少。定位为人人可及的皮肤科级选择——经验证的成分，合理的价格。"},
+          {title:"核心宣称",k:["宣称","功效","效果","玻尿酸","证据","有用"],t:"含 1.5% 纯玻尿酸，采用双分子量。肌肤深度补水、明显丰盈；两周细纹减少。皮肤科验证，无香料。"},
+          {title:"使用流程",k:["流程","怎么用","使用","什么时候","面霜","早晚"],t:"洁面后取 2–3 滴，早晚使用，在面霜之前。早晨搭配防晒——补足水分的肌肤同样需要每日防晒。"},
+          {title:"价格定位",k:["价格","多少钱","价值","贵","对比"],t:"轻奢定位：皮肤科级活性成分，价格可及。1.5% 的浓度可媲美甚至超过三倍价格的精华。"},
+        ],
+        objections:[
+          {title:"「太贵了」",k:["贵","价格","多少钱","便宜"],t:"我理解价格很重要。这支精华含 1.5% 纯玻尿酸——这个浓度通常出现在三倍价位的产品里。每天 2–3 滴，一瓶大约可用两个月。"},
+          {title:"「我皮肤敏感」",k:["敏感","刺激","过敏","泛红"],t:"这个配方经皮肤科医生验证，适用于包括敏感肌在内的所有肤质，无香料、无对羟基苯甲酸酯。第一周建议晚间使用 2 滴即可。"},
+        ],
+        prompts:["现在我是顾客：「这么小一瓶，太贵了吧。」您怎么回应？","顾客说：「我皮肤敏感，精华总让我刺痛。」您怎么答？"] },
+      HI:{ status:"approved", name:"रिवाइटलिफ्ट 1.5% प्योर हायलुरोनिक एसिड सीरम", tagline:"साफ़ नज़र आती भरी-भरी, नमी भरी त्वचा",
+        claims:["1.5% प्योर हायलुरोनिक एसिड","दो मॉलिक्युलर वेट","गहरी नमी","दिखने में भरी त्वचा","दो हफ़्ते में महीन रेखाएँ कम","डर्मेटोलॉजिस्ट वैलिडेटेड","खुशबू रहित"],
+        doNotSay:["ठीक करता है","झुर्रियाँ हमेशा के लिए हटाता है","गारंटीड नतीजे"],
+        sections:[
+          {title:"पोज़िशनिंग",k:["पोज़िशन","बताइए","क्या है","प्रोडक्ट","परिचय"],t:"एक लाइन का संदेश: गहरी नमी जो त्वचा को भरा हुआ दिखाती है और दो हफ़्ते में महीन रेखाएँ कम करती है। इसे सुलभ डर्मेटोलॉजिकल विकल्प के रूप में रखें।"},
+          {title:"मुख्य दावे",k:["दावा","नतीजे","असर","हायलुरोनिक","सबूत"],t:"इसमें दो मॉलिक्युलर वेट के साथ 1.5% प्योर हायलुरोनिक एसिड है। त्वचा को गहरी नमी और दिखने में भराव; दो हफ़्ते में महीन रेखाएँ कम। डर्मेटोलॉजिस्ट वैलिडेटेड, खुशबू रहित।"},
+          {title:"रूटीन में जगह",k:["रूटीन","कैसे","इस्तेमाल","कब","मॉइस्चराइज़र","सुबह","रात"],t:"साफ़ त्वचा पर सुबह और रात 2–3 बूँदें, मॉइस्चराइज़र से पहले। सुबह सनस्क्रीन के साथ इस्तेमाल करें।"},
+          {title:"कीमत की स्थिति",k:["कीमत","दाम","वैल्यू","महंगा","तुलना"],t:"मासस्टीज पोज़िशनिंग: डर्मेटोलॉजिकल-ग्रेड एक्टिव्स सुलभ कीमत पर। 1.5% कॉन्सन्ट्रेशन तीन गुना कीमत वाले सीरम के बराबर या बेहतर है।"},
+        ],
+        objections:[
+          {title:"“बहुत महंगा है”",k:["महंगा","कीमत","दाम","सस्ता"],t:"कीमत मायने रखती है, समझती हूँ। इसमें 1.5% प्योर हायलुरोनिक एसिड है — यह कॉन्सन्ट्रेशन आमतौर पर तीन गुना कीमत पर मिलता है। रोज़ 2–3 बूँद से एक बोतल लगभग दो महीने चलती है।"},
+          {title:"“मेरी त्वचा संवेदनशील है”",k:["संवेदनशील","जलन","एलर्जी","रिएक्शन"],t:"यह फ़ॉर्मूला डर्मेटोलॉजिस्ट द्वारा हर स्किन टाइप के लिए वैलिडेटेड है, संवेदनशील त्वचा सहित। खुशबू और पैराबेन रहित। पहले हफ़्ते रात में 2 बूँद से शुरू करें।"},
+        ],
+        prompts:["मान लीजिए मैं ग्राहक हूँ: “इतनी छोटी बोतल और इतनी महंगी?” आप क्या कहेंगी?","ग्राहक कहती हैं: “मेरी त्वचा संवेदनशील है, सीरम से जलन होती है।” आपका जवाब?"] },
+    } },
+
+  { id:"effaclar", brand:"La Roche-Posay", division:"derm", launch:"New Launch",
+    packs:{
+      EN:{ status:"source", name:"Effaclar Duo+M Anti-Imperfection Care", tagline:"Corrects imperfections, limits their return",
+        claims:["contains niacinamide and salicylic acid","visibly corrects imperfections","helps unclog pores","helps limit the return of marks","tested under dermatological control on sensitive skin","non-comedogenic"],
+        doNotSay:["treats acne","cures breakouts","medical-grade","replaces your prescription"],
+        sections:[
+          {title:"Positioning",k:["positioning","message","about","what is","introduce","tell me"],t:"Pharmacy positioning: a dermatologist-recommended daily care for imperfection-prone skin. It corrects visible imperfections and helps limit their return — it is a cosmetic care, not a medicine."},
+          {title:"Hero claims",k:["claim","results","proof","niacinamide","salicylic","works","evidence"],t:"Approved claims: contains niacinamide and salicylic acid. Visibly corrects imperfections. Helps unclog pores. Helps limit the return of marks. Tested under dermatological control on sensitive skin. Non-comedogenic."},
+          {title:"Routine placement",k:["routine","apply","use","how","when","cleanser","morning","night"],t:"Apply morning and evening to clean, dry skin after the Effaclar gel cleanser. Always pair with a non-comedogenic SPF in the morning — salicylic acid increases sun sensitivity."},
+          {title:"Price positioning",k:["price","cost","value","compare","expensive"],t:"Pharmacy positioning: a dermatologist-recommended formula, and one tube typically lasts two months at two applications a day."},
+        ],
+        objections:[
+          {title:"“Will this clear my acne?”",k:["acne","clear","cure","treat","medicine","prescription"],t:"This is a cosmetic care that visibly corrects imperfections and helps limit their return. For acne that needs treatment, the right step is to see a dermatologist or speak to the pharmacist — this can sit alongside what they advise."},
+          {title:"“Too expensive”",k:["expensive","price","cost","much","afford"],t:"I understand. It's a dermatologist-recommended formula tested under dermatological control on sensitive skin, and one tube typically lasts two months at two applications a day."},
+        ],
+        prompts:["A customer asks: “Will this cure my acne?” Careful — answer without crossing into treatment language.","Your customer says it's too expensive for a pharmacy product. What's your answer?"] },
+      FR:{ status:"approved", name:"Effaclar Duo+M Soin Anti-Imperfections", tagline:"Corrige les imperfections, limite leur réapparition",
+        claims:["contient de la niacinamide et de l'acide salicylique","corrige visiblement les imperfections","aide à désobstruer les pores","aide à limiter la réapparition des marques","testé sous contrôle dermatologique sur peaux sensibles","non comédogène"],
+        doNotSay:["traite l'acné","guérit les boutons","qualité médicale","remplace votre ordonnance"],
+        sections:[
+          {title:"Positionnement",k:["positionnement","message","présenter","c'est quoi","produit","parlez"],t:"Positionnement pharmacie : un soin quotidien recommandé par les dermatologues pour les peaux à imperfections. Il corrige visiblement les imperfections et aide à limiter leur réapparition — c'est un soin cosmétique, pas un médicament."},
+          {title:"Allégations approuvées",k:["allégation","résultats","preuve","niacinamide","salicylique","efficace"],t:"Allégations approuvées : contient de la niacinamide et de l'acide salicylique. Corrige visiblement les imperfections. Aide à désobstruer les pores. Aide à limiter la réapparition des marques. Testé sous contrôle dermatologique sur peaux sensibles. Non comédogène."},
+          {title:"Place dans la routine",k:["routine","appliquer","utiliser","comment","quand","nettoyant","matin","soir"],t:"Appliquer matin et soir sur peau propre et sèche, après le gel nettoyant Effaclar. Toujours associer à un SPF non comédogène le matin — l'acide salicylique augmente la sensibilité au soleil."},
+          {title:"Positionnement prix",k:["prix","coût","valeur","cher","comparer"],t:"Positionnement pharmacie : une formule recommandée par les dermatologues, et un tube dure généralement deux mois à raison de deux applications par jour."},
+        ],
+        objections:[
+          {title:"« Est-ce que ça soigne l'acné ? »",k:["acné","soigne","guérit","traite","médicament","ordonnance"],t:"C'est un soin cosmétique qui corrige visiblement les imperfections et aide à limiter leur réapparition. Pour une acné qui nécessite un traitement, il faut consulter un dermatologue ou en parler au pharmacien — ce soin peut accompagner ce qu'ils recommandent."},
+          {title:"« Trop cher »",k:["cher","prix","coût","budget"],t:"Je comprends. C'est une formule recommandée par les dermatologues, testée sous contrôle dermatologique sur peaux sensibles, et un tube dure généralement deux mois à raison de deux applications par jour."},
+        ],
+        prompts:["Une cliente demande : « Est-ce que ça va guérir mon acné ? » Attention — répondez sans basculer dans le langage de traitement.","Votre cliente trouve que c'est trop cher pour un produit de pharmacie. Que répondez-vous ?"] },
+      AR:{ status:"approved", name:"إيفاكلار ديو+إم للعناية بالبشرة ذات العيوب", tagline:"يصحّح العيوب ويحدّ من عودتها",
+        claims:["يحتوي على النياسيناميد وحمض الساليسيليك","يصحّح العيوب بشكل مرئي","يساعد على فتح المسام","يساعد على الحدّ من عودة الآثار","تم اختباره تحت إشراف طبي على البشرة الحساسة","لا يسدّ المسام"],
+        doNotSay:["يعالج حبّ الشباب","يشفي البثور","بمستوى طبي","يغني عن وصفتك الطبية"],
+        sections:[
+          {title:"الموضع التسويقي",k:["تقديم","الرسالة","ما هو","عرّفي","المنتج"],t:"موضع الصيدلية: عناية يومية يوصي بها أطباء الجلدية للبشرة المعرّضة للعيوب. يصحّح العيوب المرئية ويساعد على الحدّ من عودتها — وهو مستحضر تجميلي وليس دواءً."},
+          {title:"الادعاءات المعتمدة",k:["ادعاء","نتائج","دليل","نياسيناميد","ساليسيليك","فعالية"],t:"الادعاءات المعتمدة: يحتوي على النياسيناميد وحمض الساليسيليك. يصحّح العيوب بشكل مرئي. يساعد على فتح المسام. يساعد على الحدّ من عودة الآثار. تم اختباره تحت إشراف طبي على البشرة الحساسة. لا يسدّ المسام."},
+          {title:"مكانه في الروتين",k:["روتين","استخدام","كيف","متى","غسول","صباح","مساء"],t:"يُوضع صباحاً ومساءً على بشرة نظيفة وجافة بعد غسول إيفاكلار. استخدمي دائماً واقي شمس لا يسدّ المسام صباحاً — حمض الساليسيليك يزيد حساسية البشرة للشمس."},
+          {title:"موضع السعر",k:["سعر","تكلفة","قيمة","غالي","مقارنة"],t:"موضع الصيدلية: تركيبة يوصي بها أطباء الجلدية، والأنبوب الواحد يكفي عادةً شهرين بمعدل استخدامين يومياً."},
+        ],
+        objections:[
+          {title:"«هل يعالج حبّ الشباب؟»",k:["حبوب","حب الشباب","يعالج","يشفي","دواء","وصفة"],t:"هذا مستحضر تجميلي يصحّح العيوب بشكل مرئي ويساعد على الحدّ من عودتها. أمّا حبّ الشباب الذي يحتاج علاجاً فالخطوة الصحيحة هي مراجعة طبيب الجلدية أو استشارة الصيدلي — ويمكن استخدام هذا المستحضر إلى جانب ما يوصون به."},
+          {title:"«غالي جداً»",k:["غالي","سعر","تكلفة","كثير"],t:"أتفهّم ذلك. هي تركيبة يوصي بها أطباء الجلدية وتم اختبارها تحت إشراف طبي على البشرة الحساسة، والأنبوب يكفي عادةً شهرين بمعدل استخدامين يومياً."},
+        ],
+        prompts:["العميلة تسأل: «هل سيشفي هذا حبّ الشباب؟» انتبهي — أجيبي دون الدخول في لغة العلاج.","العميلة ترى أنه غالٍ على منتج صيدلية. بماذا تردّين؟"] },
+      ZH:{ status:"draft" },
+    } },
+
+  { id:"genifique", brand:"Lancôme", division:"luxe", launch:"Priority Launch",
+    packs:{
+      EN:{ status:"source", name:"Advanced Génifique Radiance Serum", tagline:"Skin looks visibly radiant and even",
+        claims:["probiotic-derived fractions","skin barrier feels reinforced","visibly more radiant","more even-looking skin","suitable for all skin types","7 drops per application"],
+        doNotSay:["repairs DNA","anti-ageing cure","clinically proven to reverse"],
+        sections:[
+          {title:"Positioning",k:["positioning","message","about","what is","introduce","tell me"],t:"The Luxe ritual: Génifique is the first step after cleansing that makes every product after it perform better. Lead with the ritual and the sensorial experience, not the discount."},
+          {title:"Hero claims",k:["claim","results","proof","probiotic","radiance","works"],t:"Formulated with probiotic-derived fractions. The skin barrier feels reinforced; skin looks visibly more radiant and more even. Suitable for all skin types."},
+          {title:"Routine placement",k:["routine","apply","use","how","when","drops","steps"],t:"Seven drops, morning and evening, on cleansed skin before any other treatment. Apply with the dropper into the palm, warm briefly, then press into the skin — the gesture is part of the ritual."},
+          {title:"Price positioning",k:["price","cost","value","compare","expensive"],t:"Seven drops per application means a 50ml bottle lasts around three months. Frame it as the step that makes the rest of her routine work harder, not as an added expense."},
+        ],
+        objections:[
+          {title:"“It's expensive”",k:["expensive","price","cost","much","afford"],t:"I understand. It's seven drops per use, so a 50ml bottle lasts around three months — and it's the step that helps everything you layer afterwards perform better. May I let you feel it on your skin now?"},
+          {title:"“I already use a serum”",k:["already","another","serum","need","why"],t:"Génifique sits before your current serum rather than replacing it — it's the preparation step that helps what follows absorb and perform. Shall we try it on one side of your face so you can compare?"},
+        ],
+        prompts:["Role-play: your client says “It's beautiful, but it's expensive.” Answer in the Lancôme register — no discounting.","Your client says she already uses a serum from another house. How do you position Génifique?"] },
+      JA:{ status:"approved", name:"アドバンス ジェニフィック ラディアンス セラム", tagline:"澄んだ、均一な印象の肌へ",
+        claims:["プロバイオティクス由来成分配合","肌のバリア感を高めます","明るい印象の肌へ","均一な印象の肌へ","すべての肌質にお使いいただけます","1回7滴"],
+        doNotSay:["DNAを修復する","老化を治す","若返りが臨床的に証明されている"],
+        sections:[
+          {title:"ポジショニング",k:["紹介","メッセージ","どんな","製品","説明"],t:"ラグジュアリーの儀式として：ジェニフィックは洗顔後の最初の一歩であり、その後に重ねるすべての製品の働きを高めます。値引きではなく、儀式と感触からお伝えください。"},
+          {title:"承認訴求",k:["訴求","効果","結果","プロバイオティクス","ツヤ","証拠"],t:"プロバイオティクス由来成分を配合。肌のバリア感が高まり、明るく均一な印象の肌へ。すべての肌質にお使いいただけます。"},
+          {title:"使用手順",k:["手順","使い方","いつ","滴","ステップ"],t:"洗顔後、他のお手入れの前に朝晩7滴。スポイトで手のひらにとり、軽く温めてから肌に押し込むようになじませます。この所作も儀式の一部です。"},
+          {title:"価格ポジション",k:["価格","値段","高い","価値","比較"],t:"1回7滴ですので、50mlで約3か月お使いいただけます。追加の出費ではなく、その後のお手入れ全体を活かす一歩としてお伝えください。"},
+        ],
+        objections:[
+          {title:"「高いですね」",k:["高い","値段","価格","予算"],t:"ごもっともです。1回7滴ですので、50mlで約3か月お使いいただけます。そして後に重ねる製品の効果を高める一歩でもあります。よろしければ今、お肌で感触をお試しいただけますか。"},
+          {title:"「もう美容液を使っています」",k:["もう","既に","美容液","必要","なぜ"],t:"ジェニフィックは今の美容液に置き換わるのではなく、その前に入る準備の一歩です。よろしければ片側だけお試しいただき、比べてみませんか。"},
+        ],
+        prompts:["ロールプレイです。お客様が「素敵ですが、高いですね」とおっしゃいました。ランコムらしい言葉で、値引きせずにお答えください。","お客様は他社の美容液をお使いです。ジェニフィックをどう位置づけますか。"] },
+      ZH:{ status:"approved", name:"小黑瓶 光采精华", tagline:"肌肤看起来更透亮、更均匀",
+        claims:["益生菌衍生成分","肌肤屏障感增强","看起来更透亮","肤色看起来更均匀","适合所有肤质","每次七滴"],
+        doNotSay:["修复DNA","抗老治愈","经临床证明可逆转"],
+        sections:[
+          {title:"产品定位",k:["定位","介绍","是什么","产品","讲讲"],t:"高端仪式感：小黑瓶是洁面后的第一步，让之后的每一件产品都发挥得更好。请从仪式与肤感切入，而不是从折扣切入。"},
+          {title:"核心宣称",k:["宣称","功效","效果","益生菌","透亮","证据"],t:"蕴含益生菌衍生成分。肌肤屏障感增强，看起来更透亮、更均匀。适合所有肤质。"},
+          {title:"使用流程",k:["流程","怎么用","使用","什么时候","滴","步骤"],t:"洁面后、其他护理之前，早晚各七滴。用滴管取于掌心，稍作温热后按压上脸——这个手法本身就是仪式的一部分。"},
+          {title:"价格定位",k:["价格","多少钱","贵","价值","对比"],t:"每次七滴，50毫升大约可用三个月。请把它说成让整套护理更有效的一步，而不是额外的开销。"},
+        ],
+        objections:[
+          {title:"「有点贵」",k:["贵","价格","多少钱","预算"],t:"我理解您的顾虑。每次七滴，50毫升大约可以使用三个月，而且它是让后续所有产品发挥更好效果的关键一步。我可以现在为您试用，让您感受一下吗？"},
+          {title:"「我已经在用精华了」",k:["已经","在用","精华","需要","为什么"],t:"小黑瓶不是取代您现在的精华，而是放在它之前的准备步骤，帮助后续更好吸收和发挥。要不要在半边脸试一下，您自己比较看看？"},
+        ],
+        prompts:["情景演练：顾客说「很好，但是有点贵。」请用兰蔻的语气回应，不要打折。","顾客说她已经在用别家的精华。您怎么定位小黑瓶？"] },
+      FR:{ status:"draft" },
+    } },
+
+  { id:"gloss", brand:"Kérastase", division:"ppd", launch:"New Launch",
+    packs:{
+      EN:{ status:"source", name:"Gloss Absolu Shine Ritual", tagline:"Salon-grade shine, sealed in service",
+        claims:["glycolipid shine complex","seals the cuticle","adds mirror shine from the first service","safe on colour-treated hair","professional use: 2 pumps mid-lengths to ends"],
+        doNotSay:["permanent shine","repairs hair permanently","same as a keratin treatment"],
+        sections:[
+          {title:"Positioning",k:["positioning","message","about","what is","introduce","tell me"],t:"This is a service first and a retail product second. Position it in the chair: the shine ritual you perform at the basin, which the client then maintains at home."},
+          {title:"Hero claims",k:["claim","results","proof","shine","gloss","works"],t:"The glycolipid shine complex seals the cuticle and adds mirror shine from the first service. Safe on colour-treated hair."},
+          {title:"Service protocol",k:["routine","protocol","apply","how","service","pumps","basin"],t:"Two pumps on mid-lengths to ends of towel-dried hair, emulsify for 30 seconds, leave 3 minutes at the basin, rinse. Do not apply at the root — weight at the root reads as greasy, not glossy."},
+          {title:"Price positioning",k:["price","cost","value","compare","expensive"],t:"Price the service, not the bottle. The at-home product extends the salon result between appointments — that's the reason to take it home."},
+        ],
+        objections:[
+          {title:"“My client won't pay for an add-on”",k:["expensive","price","cost","pay","upsell","add-on"],t:"Don't sell it as an add-on — perform it once at the basin as part of the service and let her see the shine in the mirror. The retail conversation happens after she's seen the result, not before."},
+          {title:"“Is it like a keratin treatment?”",k:["keratin","treatment","permanent","straight","smoothing"],t:"No — this is a shine ritual that seals the cuticle, not a smoothing or straightening service. It adds mirror shine from the first service and is safe on colour-treated hair."},
+        ],
+        prompts:["Your client asks whether this is the same as her keratin treatment. Answer as a professional, without over-claiming.","How would you introduce the shine ritual at the basin without it sounding like an upsell?"] },
+      FR:{ status:"approved", name:"Gloss Absolu Rituel de Brillance", tagline:"Brillance de salon, scellée en service",
+        claims:["complexe de brillance glycolipidique","scelle la cuticule","apporte une brillance miroir dès le premier service","sans danger sur cheveux colorés","usage professionnel : 2 pressions des longueurs aux pointes"],
+        doNotSay:["brillance permanente","répare durablement le cheveu","équivalent à un lissage kératine"],
+        sections:[
+          {title:"Positionnement",k:["positionnement","message","présenter","c'est quoi","produit","parlez"],t:"C'est d'abord un service, ensuite un produit de revente. Positionnez-le au fauteuil : le rituel de brillance réalisé au bac, que la cliente prolonge ensuite à la maison."},
+          {title:"Allégations approuvées",k:["allégation","résultats","preuve","brillance","efficace"],t:"Le complexe de brillance glycolipidique scelle la cuticule et apporte une brillance miroir dès le premier service. Sans danger sur cheveux colorés."},
+          {title:"Protocole de service",k:["protocole","routine","appliquer","comment","service","pressions","bac"],t:"Deux pressions des longueurs aux pointes sur cheveux essorés, émulsionner 30 secondes, laisser poser 3 minutes au bac, rincer. Ne pas appliquer aux racines — le poids à la racine donne un effet gras, pas brillant."},
+          {title:"Positionnement prix",k:["prix","coût","valeur","cher","comparer"],t:"Valorisez le service, pas le flacon. Le produit à domicile prolonge le résultat salon entre deux rendez-vous — c'est la raison de l'emporter."},
+        ],
+        objections:[
+          {title:"« Ma cliente ne paiera pas un supplément »",k:["cher","prix","coût","payer","supplément"],t:"Ne le vendez pas comme un supplément — réalisez-le une fois au bac dans le service et laissez-la voir la brillance dans le miroir. La conversation revente vient après le résultat, pas avant."},
+          {title:"« C'est comme un lissage kératine ? »",k:["kératine","lissage","permanent","traitement"],t:"Non — c'est un rituel de brillance qui scelle la cuticule, pas un service de lissage. Il apporte une brillance miroir dès le premier service et convient aux cheveux colorés."},
+        ],
+        prompts:["Votre cliente demande si c'est la même chose que son lissage kératine. Répondez en professionnelle, sans sur-promettre.","Comment introduisez-vous le rituel au bac sans que cela sonne comme une vente forcée ?"] },
+      JA:{ status:"draft" },
+    } },
+
+  { id:"skyhigh", brand:"Maybelline New York", division:"cpd", launch:null,
+    packs:{
+      EN:{ status:"source", name:"Lash Sensational Sky High Mascara", tagline:"Limitless length, no clumps",
+        claims:["bamboo extract and fibres","builds limitless length","flexible wand reaches every lash","no clumping","washes off with warm water"],
+        doNotSay:["lash growth","permanent lash extension effect","medically tested"],
+        sections:[
+          {title:"Positioning",k:["positioning","message","about","what is","introduce","tell me"],t:"The whole pitch in one line: the result customers associate with a premium mascara, at a mass price. Speed matters — you have seconds at the shelf."},
+          {title:"Hero claims",k:["claim","results","proof","length","bamboo","works"],t:"Bamboo extract and fibres build limitless length. The flexible wand reaches every lash with no clumping. Washes off with warm water."},
+          {title:"Demo at shelf",k:["routine","apply","use","how","demo","wand"],t:"Wiggle at the root, sweep to the tip, build a second coat while the first is still wet. Ten seconds of demo on the back of her hand converts better than any claim."},
+          {title:"Price positioning",k:["price","cost","value","compare","expensive"],t:"Mass price for the result customers associate with premium mascara — that is the entire pitch."},
+        ],
+        objections:[
+          {title:"“Cheap mascaras smudge”",k:["smudge","cheap","flake","run","quality"],t:"This one washes off with warm water rather than needing remover, and the formula builds length without clumping. Let me demo it on the back of your hand — ten seconds and you'll see."},
+          {title:"“I use a premium brand”",k:["premium","brand","expensive","luxury","already"],t:"Then you already know what good length looks like. This gives limitless length with a flexible wand that reaches every lash, at a mass price. Worth ten seconds on the back of your hand?"},
+        ],
+        prompts:["A shopper says cheap mascaras always smudge. You have ten seconds. Go.","She says she only buys premium mascara. What's your one-line answer?"] },
+      HI:{ status:"approved", name:"लैश सेंसेशनल स्काई हाई मस्कारा", tagline:"बेहिसाब लंबाई, बिना गुच्छों के",
+        claims:["बैम्बू एक्सट्रैक्ट और फ़ाइबर","बेहिसाब लंबाई","लचीला वैंड हर लैश तक पहुँचता है","गुच्छे नहीं बनते","गुनगुने पानी से निकल जाता है"],
+        doNotSay:["पलकें उगाता है","स्थायी लैश एक्सटेंशन जैसा","मेडिकली टेस्टेड"],
+        sections:[
+          {title:"पोज़िशनिंग",k:["पोज़िशन","बताइए","क्या है","प्रोडक्ट","परिचय"],t:"एक लाइन में पूरी बात: मास कीमत पर वह नतीजा जो ग्राहक प्रीमियम मस्कारा से जोड़ते हैं। शेल्फ़ पर आपके पास सेकंड होते हैं — तेज़ रहें।"},
+          {title:"मुख्य दावे",k:["दावा","नतीजे","असर","लंबाई","बैम्बू"],t:"बैम्बू एक्सट्रैक्ट और फ़ाइबर बेहिसाब लंबाई देते हैं। लचीला वैंड हर लैश तक पहुँचता है, गुच्छे नहीं बनते। गुनगुने पानी से निकल जाता है।"},
+          {title:"शेल्फ़ पर डेमो",k:["रूटीन","कैसे","लगाना","डेमो","वैंड"],t:"जड़ पर हल्का हिलाएँ, सिरे तक स्वीप करें, पहला कोट गीला रहते दूसरा लगाएँ। हाथ के पीछे दस सेकंड का डेमो किसी भी दावे से बेहतर काम करता है।"},
+          {title:"कीमत की स्थिति",k:["कीमत","दाम","वैल्यू","महंगा","तुलना"],t:"मास कीमत पर वह नतीजा जो ग्राहक प्रीमियम मस्कारा से जोड़ते हैं — यही पूरा पिच है।"},
+        ],
+        objections:[
+          {title:"“सस्ते मस्कारा फैल जाते हैं”",k:["फैल","सस्ता","झड़","क्वालिटी"],t:"यह गुनगुने पानी से निकल जाता है, रिमूवर की ज़रूरत नहीं, और फ़ॉर्मूला बिना गुच्छों के लंबाई बनाता है। हाथ के पीछे दस सेकंड में दिखाती हूँ।"},
+          {title:"“मैं प्रीमियम ब्रांड लेती हूँ”",k:["प्रीमियम","ब्रांड","महंगा","लक्ज़री"],t:"तो आप जानती हैं अच्छी लंबाई कैसी दिखती है। यह लचीले वैंड से हर लैश तक पहुँचकर बेहिसाब लंबाई देता है — मास कीमत पर। दस सेकंड दे सकती हैं?"},
+        ],
+        prompts:["ग्राहक कहती हैं सस्ते मस्कारा हमेशा फैल जाते हैं। आपके पास दस सेकंड हैं। बोलिए।","वह कहती हैं वह सिर्फ़ प्रीमियम मस्कारा लेती हैं। एक लाइन में क्या कहेंगी?"] },
+      AR:{ status:"approved", name:"ماسكارا لاش سنسيشنال سكاي هاي", tagline:"طول بلا حدود، دون تكتّل",
+        claims:["خلاصة الخيزران والألياف","طول بلا حدود","فرشاة مرنة تصل إلى كل رمش","لا تتكتّل","تُزال بالماء الدافئ"],
+        doNotSay:["ينمّي الرموش","تأثير إطالة دائم","مُختبر طبياً"],
+        sections:[
+          {title:"الموضع التسويقي",k:["تقديم","الرسالة","ما هو","عرّفي","المنتج"],t:"الرسالة كاملة في سطر: النتيجة التي تربطها العميلة بالماسكارا الفاخرة، بسعر متاح. أمامكِ ثوانٍ عند الرفّ — كوني سريعة."},
+          {title:"الادعاءات المعتمدة",k:["ادعاء","نتائج","طول","خيزران","فعالية"],t:"خلاصة الخيزران والألياف تمنح طولاً بلا حدود. الفرشاة المرنة تصل إلى كل رمش دون تكتّل. تُزال بالماء الدافئ."},
+          {title:"العرض عند الرفّ",k:["روتين","استخدام","كيف","عرض","فرشاة"],t:"حرّكي الفرشاة عند الجذور ثم اسحبيها إلى الأطراف، وضعي الطبقة الثانية والأولى ما زالت رطبة. عشر ثوانٍ من التجربة على ظهر اليد تُقنع أكثر من أي كلام."},
+          {title:"موضع السعر",k:["سعر","تكلفة","قيمة","غالي","مقارنة"],t:"سعر متاح مقابل النتيجة التي تربطها العميلة بالماسكارا الفاخرة — وهذه هي الرسالة كاملة."},
+        ],
+        objections:[
+          {title:"«الماسكارا الرخيصة تتلطّخ»",k:["تتلطخ","رخيص","تتساقط","جودة"],t:"هذه تُزال بالماء الدافئ دون الحاجة لمزيل، والتركيبة تمنح طولاً دون تكتّل. دعيني أجرّبها على ظهر يدكِ — عشر ثوانٍ وسترين."},
+          {title:"«أستخدم ماركة فاخرة»",k:["فاخرة","ماركة","غالي","أصلاً"],t:"إذاً أنتِ تعرفين شكل الطول الجيد. هذه تمنح طولاً بلا حدود بفرشاة مرنة تصل إلى كل رمش، بسعر متاح. تمنحينني عشر ثوانٍ؟"},
+        ],
+        prompts:["العميلة تقول إن الماسكارا الرخيصة تتلطّخ دائماً. أمامكِ عشر ثوانٍ. تفضّلي.","تقول إنها تشتري الماركات الفاخرة فقط. ما ردّكِ في سطر واحد؟"] },
+    } },
+];
+
+
+
+/* Every product is approved in every supported language: HoloMe speaks all six
+   and Whisper hears all six, so no combination is left dark. The status field
+   and the refusal path stay in place — a market can still mark a pack draft in
+   the Nexus and the coach will refuse it. */
+PRODUCTS.forEach((p) => { Object.assign(p.packs, FILL[p.id] || {}); });
+
+/* ============ state ============ */
+const S = {
+  ctx: null, name: "", role: "",
+  day: null, slot: null, product: null, pack: null, lang: "EN", focus: "product-knowledge",
+  ref: "", otp: String(Math.floor(100000 + Math.random() * 900000)),
+  transcript: [], secs: 300, timer: null, wrapSaid: false, closing: false,
+  muted: false, stageIdx: 0, stars: 0, lastCard: null, openIcon: null,
+};
+
+/* ============ helpers ============ */
+const $ = (id) => document.getElementById(id);
+function go(id) {
+  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+  $("scr-" + id).classList.add("active");
+}
+function showErr(id, msg) { const e = $(id); e.textContent = msg; e.style.display = "block"; }
+function hideErr(id) { $(id).style.display = "none"; }
+function esc(s) { const d = document.createElement("i"); d.textContent = s; return d.innerHTML; }
+
+/* ============ access ============ */
+function fillCode(c) { $("in-code").value = c; }
+function doSignIn() {
+  hideErr("err-access");
+  const code = $("in-code").value.trim().toUpperCase();
+  const name = $("in-name").value.trim();
+  if (!CODES[code]) return showErr("err-access", "Access code not recognised. Try one of the demo codes above.");
+  if (!name) return showErr("err-access", "Please enter your name.");
+  S.ctx = CODES[code]; S.name = name; S.role = $("in-role").value;
+  $("org-card").innerHTML = `<b>${esc(name)}</b> · ${S.role}<br>${S.ctx.distributor} — ${S.ctx.territory}, ${S.ctx.market}`;
+  buildSlots(); buildSetup();
+  go("slots");
+}
+
+/* ============ slots ============ */
+function buildSlots() {
+  const dayRow = $("day-row"); dayRow.innerHTML = "";
+  const now = new Date();
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(now); d.setDate(now.getDate() + i);
+    const b = document.createElement("button");
+    b.className = "dayChip";
+    b.innerHTML = d.toLocaleDateString([], { weekday: "short" }) + "<br>" +
+      d.toLocaleDateString([], { day: "numeric", month: "short" });
+    b.onclick = () => { S.day = d; S.slot = null; $("btn-slots").disabled = true;
+      dayRow.querySelectorAll(".dayChip").forEach((x) => x.classList.remove("sel"));
+      b.classList.add("sel"); renderTimes(i); };
+    dayRow.appendChild(b);
+  }
+  $("slot-grid").innerHTML = '<p class="lead">Pick a day to see available coaching slots.</p>';
+}
+function renderTimes(seed) {
+  const grid = $("slot-grid"); grid.innerHTML = "";
+  const times = [];
+  for (const h of [10, 11, 12, 14, 15, 16]) for (const m of [0, 30]) times.push([h, m]);
+  times.forEach(([h, m], j) => {
+    const left = (seed * 7 + j * 13) % 10 < 3 ? 0 : 1 + ((seed + j) % 3);
+    const b = document.createElement("button");
+    b.className = "slot" + (left === 0 ? " full" : "");
+    b.innerHTML = `${h}:${String(m).padStart(2, "0")}<span class="slotCap">${left === 0 ? "Full" : left + " seat" + (left > 1 ? "s" : "")}</span>`;
+    if (left > 0) b.onclick = () => {
+      grid.querySelectorAll(".slot").forEach((x) => x.classList.remove("sel"));
+      b.classList.add("sel");
+      S.slot = `${h}:${String(m).padStart(2, "0")}`;
+      $("btn-slots").disabled = false;
+    };
+    grid.appendChild(b);
+  });
+}
+
+/* ============ setup ============ */
+function T(){ return UI[S.lang] || UI.EN; }
+function isRTL(){ const l=LANGS.find(x=>x.c===S.lang); return !!(l&&l.rtl); }
+function packOf(prod,lang){ const k=prod.packs[lang]; return (k&&k.status!=="draft")?k:null; }
+
+function buildSetup() {
+  const list = $("prod-list"); list.innerHTML = "";
+  PRODUCTS.forEach((p) => {
+    const d = DIVISIONS[p.division];
+    const en = p.packs.EN;
+    const b = document.createElement("button");
+    b.className = "prodCard";
+    b.innerHTML =
+      (p.launch ? `<span class="launchBadge">${p.launch}</span>` : "") +
+      `<div class="prodBrandRow"><span class="divDot" style="background:${d.hue}"></span>` +
+      `<span class="prodBrand">${p.brand}</span><span class="divTag">${d.label}</span></div>` +
+      `<div class="prodName">${en.name}</div><div class="prodTag">${en.tagline}</div>`;
+    b.onclick = () => {
+      S.product = p;
+      list.querySelectorAll(".prodCard").forEach((x) => x.classList.remove("sel"));
+      b.classList.add("sel");
+      if (!packOf(p, S.lang)) S.lang = "EN";
+      buildLangs();
+    };
+    list.appendChild(b);
+  });
+  const row = $("focus-row"); row.innerHTML = "";
+  FOCUSES.forEach((f) => {
+    const b = document.createElement("button");
+    b.className = "chip" + (f.id === S.focus ? " sel" : "");
+    b.textContent = f.label;
+    b.onclick = () => { S.focus = f.id;
+      row.querySelectorAll(".chip").forEach((x) => x.classList.remove("sel"));
+      b.classList.add("sel"); };
+    row.appendChild(b);
+  });
+  buildLangs();
+}
+
+function buildLangs() {
+  const row = $("lang-row"), note = $("lang-note");
+  row.innerHTML = "";
+  if (!S.product) {
+    note.textContent = "Pick a product first — approved languages differ by market.";
+    $("btn-setup").disabled = true;
+    return;
+  }
+  LANGS.forEach((l) => {
+    const entry = S.product.packs[l.c];
+    const runnable = entry && entry.status !== "draft";
+    const b = document.createElement("button");
+    b.className = "chip langChip" + (l.c === S.lang ? " sel" : "") + (runnable ? "" : " blocked");
+    b.innerHTML = `<span class="langNative"${l.rtl ? ' dir="rtl"' : ""}>${l.native}</span>` +
+      `<span class="langMeta">${entry ? entry.status : "none"}</span>`;
+    b.onclick = () => {
+      if (!runnable) {
+        note.className = "langNote bad";
+        note.textContent = entry
+          ? `No market-approved launch pack in ${l.en} yet — the translation is still a draft. The coach will not speak unapproved wording.`
+          : `${l.en} has not been localised for this product yet.`;
+        return;
+      }
+      S.lang = l.c; buildLangs();
+    };
+    row.appendChild(b);
+  });
+  const cur = S.product.packs[S.lang];
+  S.pack = packOf(S.product, S.lang);
+  note.className = "langNote";
+  note.textContent = cur
+    ? `${LANGS.find(x=>x.c===S.lang).en} pack · status: ${cur.status} · version 1 — the coach quotes these approved claims verbatim.`
+    : "";
+  $("btn-setup").disabled = !S.pack;
+}
+
+/* ============ otp ============ */
+(function buildOtp() {
+  const row = $("otp-row");
+  for (let i = 0; i < 6; i++) {
+    const inp = document.createElement("input");
+    inp.className = "otpBox"; inp.maxLength = 1; inp.inputMode = "numeric";
+    inp.oninput = () => { if (inp.value && inp.nextElementSibling) inp.nextElementSibling.focus(); };
+    row.appendChild(inp);
+  }
+})();
+function autofillOtp() {
+  [...$("otp-row").children].forEach((inp, i) => { inp.value = S.otp[i]; });
+}
+function checkOtp() {
+  hideErr("err-otp");
+  const val = [...$("otp-row").children].map((i) => i.value).join("");
+  if (val !== S.otp) return showErr("err-otp", "That code doesn't match. Use the demo code above.");
+  confirmBooking();
+}
+
+/* ============ confirmed ============ */
+function confirmBooking() {
+  S.ref = "LBC-2026-" + Math.floor(100000 + Math.random() * 900000);
+  const first = S.name.split(" ")[0];
+  $("conf-title").innerHTML = `You're booked, <em>${esc(first)}</em>.`;
+  $("ref-code").textContent = S.ref;
+  const dayStr = S.day.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" });
+  $("conf-summary").innerHTML =
+    `<b>Brand:</b> ${S.product.brand} · ${DIVISIONS[S.product.division].label}<br>` +
+    `<b>Product:</b> ${S.pack.name}<br>` +
+    `<b>Language:</b> ${LANGS.find(l=>l.c===S.lang).en} (pack ${S.pack.status})<br>` +
+    `<b>Focus:</b> ${FOCUSES.find((f) => f.id === S.focus).label}<br>` +
+    `<b>When:</b> ${dayStr}, ${S.slot}<br>` +
+    `<b>Distributor:</b> ${S.ctx.distributor} (${S.ctx.territory}, ${S.ctx.market})`;
+  $("wa-body").innerHTML = `Hello <b>${esc(first)}</b> 👋<br><br>Your session with <b>Julien, your ` +
+    `L'Oréal Beauty Coach</b> begins in <b>15 minutes</b> (${S.slot}).<br><br>` +
+    `Ref: <b>${S.ref}</b><br>Tap below when you are ready to join.`;
+  go("confirmed");
+}
+
+/* ============ lobby ============ */
+function enterLobby() {
+  $("lobby-voice").textContent = "HoloMe voice ready — Julien speaks " + LANGS.find(l=>l.c===S.lang).en + " out loud (unmute your device)";
+  $("lobby-pack").textContent = "Launch pack loaded: " + S.pack.name + " · " + LANGS.find(l=>l.c===S.lang).en;
+  go("lobby");
+  let c = 5;
+  $("lobby-count").textContent = c;
+  const t = setInterval(() => {
+    c -= 1;
+    $("lobby-count").textContent = c > 0 ? c : "…";
+    if (c <= 0) { clearInterval(t); startSession(); }
+  }, 1000);
+}
+
+/* ============ voice ============ */
+function pickVoice() {
+  const want = (LANGS.find((l) => l.c === S.lang) || LANGS[0]).voice;
+  let vs = speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith(want));
+  if (!vs.length) vs = speechSynthesis.getVoices().filter((v) => v.lang.startsWith("en"));
+  return vs.find((v) => /\bmale\b|daniel|alex|thomas|david|mark|george|fred|rishi|otoya|kyoko|male/i.test(v.name) && !/female/i.test(v.name)) || vs[0] || null;
+}
+function speak(text) {
+  if (S.muted || !("speechSynthesis" in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; }
+    u.rate = 1.02; u.pitch = 1.05;
+    u.onstart = () => setSpeaking(true);
+    u.onend = () => setSpeaking(false);
+    u.onerror = () => setSpeaking(false);
+    speechSynthesis.speak(u);
+  } catch { /* voice is best-effort */ }
+}
+function setSpeaking(on) { $("scr-session").classList.toggle("speaking", on); }
+function toggleMute() {
+  S.muted = !S.muted;
+  if (S.muted) speechSynthesis.cancel();
+  $("mute-btn").textContent = S.muted ? "🔇 voice off" : "🔊 voice on";
+}
+if ("speechSynthesis" in window) {
+  speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
+
+/* optional mic via Web Speech API (Chrome) */
+(function initMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  const btn = $("mic-btn"); btn.style.display = "";
+  let rec = null, listening = false;
+  btn.onclick = () => {
+    if (listening) { rec && rec.stop(); return; }
+    const L = LANGS.find((l) => l.c === S.lang) || LANGS[0];
+    rec = new SR(); rec.lang = L.bcp47; rec.interimResults = false;
+    rec.onresult = (e) => { const t = e.results[0][0].transcript; $("chat-input").value = t; sendChat(); };
+    rec.onend = () => { listening = false; btn.classList.remove("listening"); };
+    rec.onerror = () => { listening = false; btn.classList.remove("listening"); };
+    try { rec.start(); listening = true; btn.classList.add("listening"); } catch { /* mic unavailable */ }
+  };
+})();
+
+/* ============ session ============ */
+/** Keep the newest line in view in the shared card+chat column. */
+function scrollPanel() {
+  const el = $("panel-scroll");
+  if (el) requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+}
+function coachBubble(text) {
+  const chat = $("chat");
+  const d = document.createElement("div");
+  d.className = "bub bubCoach"; d.textContent = text;
+  if (isRTL()) d.dir = "rtl";
+  chat.appendChild(d); scrollPanel();
+  S.transcript.push({ who: "coach", text });
+  speak(text);
+}
+function youBubble(text) {
+  const chat = $("chat");
+  const d = document.createElement("div");
+  d.className = "bub bubYou"; d.textContent = text;
+  if (isRTL()) d.dir = "rtl";
+  chat.appendChild(d); scrollPanel();
+  S.transcript.push({ who: "you", text });
+}
+function thinking(on) {
+  let el = $("thinking-bub");
+  if (on && !el) {
+    el = document.createElement("div");
+    el.id = "thinking-bub"; el.className = "bub bubThinking"; el.textContent = T().thinking;
+    if (isRTL()) el.dir = "rtl";
+    $("chat").appendChild(el); scrollPanel();
+  } else if (!on && el) el.remove();
+}
+/**
+ * compact = the coach just spoke this content aloud, so the card is a label for
+ * what she referenced, not a second copy of her sentence. Tapping an icon shows
+ * the full body; a reply-triggered card does not repeat the reply.
+ */
+function showCard(tag, title, body, compact) {
+  $("ic-tag").textContent = tag;
+  $("ic-title").textContent = title;
+  $("ic-body").textContent = compact ? "" : body;
+  $("ic-body").style.display = compact ? "none" : "";
+  const card = $("info-card");
+  card.classList.toggle("compact", !!compact);
+  card.dir = isRTL() ? "rtl" : "ltr";
+  card.classList.add("show");
+  scrollPanel();
+}
+function hideCard() {
+  $("info-card").classList.remove("show");
+  document.querySelectorAll(".icoBtn").forEach((b) => b.classList.remove("on"));
+  S.openIcon = null;
+}
+
+/* ---- quick-access icon row: tap for key product info ---- */
+const ICON_IDS = ["product","claims","routine","price","objections","donot"];
+const ICON_GLYPHS = ["🧴","✓","🕐","💬","🛡","⚠"];
+function iconContent(id) {
+  const p = S.pack, t = T();
+  const sec = (i) => p.sections[i];
+  switch (id) {
+    case "product":
+      return { tag: t.tags.prod, title: p.name,
+        body: `${S.product.brand} · ${DIVISIONS[S.product.division].label}\n${p.tagline}\n\n${sec(0) ? sec(0).t : ""}` };
+    case "claims":
+      return { tag: t.tags.claims, title: t.titles.claims, body: p.claims.map((c) => "• " + c).join("\n") };
+    case "routine": {
+      const r = p.sections[2];
+      return { tag: t.tags.routine, title: t.titles.routine, body: r ? r.t : "" };
+    }
+    case "price": {
+      const pr = p.sections[3];
+      return { tag: t.tags.price, title: t.titles.price, body: pr ? pr.t : "" };
+    }
+    case "objections":
+      return { tag: t.tags.lib, title: t.titles.lib, body: p.objections.map((o) => `${o.title}\n${o.t}`).join("\n\n") };
+    case "donot":
+      return { tag: t.tags.dont, title: t.titles.dont, body: p.doNotSay.map((d) => "✕ " + d).join("\n") };
+    default: return null;
+  }
+}
+function tapIcon(id, el) {
+  if (S.openIcon === id) { hideCard(); return; }
+  const c = iconContent(id);
+  if (!c) return;
+  document.querySelectorAll(".icoBtn").forEach((b) => b.classList.remove("on"));
+  el.classList.add("on");
+  S.openIcon = id;
+  showCard(c.tag, c.title, c.body);
+}
+function buildIcons() {
+  $("icon-row").innerHTML = "";
+  const labels = T().icons;
+  ICON_IDS.forEach((id, i) => {
+    const b = document.createElement("button");
+    b.className = "icoBtn";
+    b.innerHTML = `<span class="icoRing">${ICON_GLYPHS[i]}</span><span class="icoLbl">${labels[i]}</span>`;
+    b.onclick = () => tapIcon(id, b);
+    $("icon-row").appendChild(b);
+  });
+}
+function suggest(items) {
+  const row = $("sugg-row"); row.innerHTML = "";
+  items.forEach((t) => {
+    const b = document.createElement("button");
+    b.className = "sugg"; b.textContent = t;
+    if (isRTL()) b.dir = "rtl";
+    b.onclick = () => { $("chat-input").value = t; sendChat(); };
+    row.appendChild(b);
+  });
+}
+function startSession() {
+  S.transcript = []; S.secs = 300; S.wrapSaid = false; S.closing = false; S.stageIdx = 0;
+  $("chat").innerHTML = ""; hideCard(); buildIcons();
+  go("session");
+  const t = T(), first = S.name.split(" ")[0], p = S.pack;
+  $("chat-input").placeholder = t.placeholder;
+  $("chat-input").dir = isRTL() ? "rtl" : "ltr";
+  $("scr-session").classList.toggle("rtl", isRTL());
+  const L = LANGS.find((l) => l.c === S.lang);
+  $("coach-role").textContent = `Beauty Coach · ${L.native} · ${S.product.brand}`;
+  coachBubble(t.greet(first, p.name, t.focus[S.focus]));
+  showCard(t.tags.today, p.name,
+    `${S.product.brand} · ${DIVISIONS[S.product.division].label}\n${p.tagline}`, true);
+  suggest(t.sugg);
+  S.timer = setInterval(() => {
+    if (S.closing) return;
+    S.secs -= 1;
+    $("timer").textContent = Math.floor(S.secs / 60) + ":" + String(S.secs % 60).padStart(2, "0");
+    if (S.secs <= 60 && !S.wrapSaid) { S.wrapSaid = true; coachBubble(T().wrap); }
+    if (S.secs <= 0) endSession();
+  }, 1000);
+}
+function coachReply(utterance) {
+  const p = S.pack, t = T(), text = utterance.toLowerCase();
+  S.lastCard = null;
+  for (const o of p.objections) {
+    if (o.k.some((k) => text.includes(k.toLowerCase()))) {
+      S.objRaised = true;
+      S.lastCard = { tag: t.tags.obj, title: o.title, body: o.t };
+      return `${t.objection} ${o.t} ${t.practise}`;
+    }
+  }
+  let best = null;
+  for (const sec of p.sections) {
+    const score = sec.k.reduce((a, k) => a + (text.includes(k.toLowerCase()) ? 1 : 0), 0);
+    if (score > 0 && (!best || score > best.score)) best = { score, s: sec };
+  }
+  const usedClaims = p.claims.filter((c) => text.includes(c.toLowerCase()));
+  if (usedClaims.length >= 2) {
+    const next = p.prompts[S.stageIdx % p.prompts.length];
+    S.stageIdx += 1;
+    S.objRaised = true;
+    S.lastCard = { tag: t.tags.on, title: t.titles.on, body: usedClaims.join(" · ") };
+    return `${t.praise} ${next}`;
+  }
+  if (best) {
+    S.lastCard = { tag: t.tags.pack, title: best.s.title, body: best.s.t };
+    return `${t.section} ${best.s.t} ${t.practise}`;
+  }
+  const next = p.prompts[S.stageIdx % p.prompts.length];
+  S.stageIdx += 1;
+  S.objRaised = true;
+  return `${t.push} ${next}`;
+}
+function sendChat() {
+  if (S.closing) return;
+  const inp = $("chat-input");
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = "";
+  $("sugg-row").innerHTML = "";
+  hideCard();
+  S.openIcon = null;
+  youBubble(text);
+  thinking(true);
+  setTimeout(() => {
+    thinking(false);
+    const reply = coachReply(text);
+    coachBubble(reply);
+    if (S.lastCard) showCard(S.lastCard.tag, S.lastCard.title, S.lastCard.body, true);
+  }, 900 + Math.random() * 700);
+}
+function endSession() {
+  if (S.closing) return;
+  S.closing = true;
+  clearInterval(S.timer);
+  hideCard();
+  const first = S.name.split(" ")[0];
+  coachBubble(T().close(first));
+  setTimeout(() => { if ("speechSynthesis" in window) speechSynthesis.cancel(); showDebrief(); }, 4200);
+}
+
+/* ============ scoring — same heuristics as the real scorer ============ */
+const DIMS = [
+  { id: "message-fidelity",   label: "Message Fidelity" },
+  { id: "product-accuracy",   label: "Product Accuracy" },
+  { id: "brand-tone",         label: "Brand Tone" },
+  { id: "objection-handling", label: "Objection Handling" },
+  { id: "personalization",    label: "Personalization" },
+  { id: "upsell-fluency",     label: "Upsell Fluency" },
+];
+const PERS_WORDS = ["skin type","sensitive","dry","oily","your skin","your hair","concern","routine","for you","depends"];
+const UPS_WORDS = ["routine","pair","together","also","spf","companion","complete","as well","morning and night","eye cream","cleanser"];
+/* Localised scorer vocabulary — the rubric must recognise customer-context and
+   routine language in the language actually spoken, or non-English sessions
+   would be marked "not tested" for skills the advisor demonstrated. */
+const PERS_L10N = {
+  EN: PERS_WORDS,
+  FR: ["type de peau","sensible","sèche","grasse","votre peau","préoccupation","routine","pour vous","selon"],
+  AR: ["نوع بشرت","حساسة","جافة","دهنية","بشرتك","احتياج","روتين","لكِ","حسب"],
+  ZH: ["肤质","敏感","干性","油性","您的皮肤","需求","流程","为您","根据"],
+  JA: ["肌質","敏感","乾燥","脂性","お客様の肌","お悩み","お手入れ","合わせて"],
+  HI: ["स्किन टाइप","संवेदनशील","रूखी","ऑयली","आपकी त्वचा","चिंता","रूटीन","हिसाब"],
+};
+const UPS_L10N = {
+  EN: UPS_WORDS,
+  FR: ["routine","ensemble","aussi","spf","complète","matin et soir","également"],
+  AR: ["روتين","معاً","أيضاً","واقي الشمس","الكامل","صباحاً ومساءً"],
+  ZH: ["流程","一起","搭配","防晒","整套","早晚"],
+  JA: ["お手入れ","一式","合わせて","日やけ止め","朝晩","おすすめ"],
+  HI: ["रूटीन","साथ में","सनस्क्रीन","पूरा","सुबह-रात"],
+};
+
+function quoteOf(t) { return t.length <= 110 ? t : t.slice(0, 108).replace(/\s+\S*$/, "") + "…"; }
+function scoreSession() {
+  const p = S.pack;
+  const yours = S.transcript.filter((t) => t.who === "you");
+  const all = yours.map((t) => t.text.toLowerCase()).join(" \n ");
+  const evid = (words) => {
+    for (const t of yours) if (words.some((w) => t.text.toLowerCase().includes(w.toLowerCase()))) return quoteOf(t.text);
+    return null;
+  };
+  const out = [];
+  const used = p.claims.filter((c) => all.includes(c.toLowerCase()));
+  const violations = p.doNotSay.filter((w) => all.includes(w.toLowerCase()));
+  const cov = (h, cap) => Math.round(Math.min(1, h / cap) * 100);
+  if (!yours.length) {
+    DIMS.forEach((d) => out.push({ ...d, score: "NE", note: "No advisor responses captured.", evidence: null }));
+    return { dims: out, overall: 0, certified: false };
+  }
+  out.push({ ...DIMS[0], score: cov(used.length, 4),
+    note: used.length ? `Used ${used.length} of ${p.claims.length} approved claim phrases.` : "No approved claim wording detected.",
+    evidence: evid(used.length ? used : p.claims) });
+  out.push({ ...DIMS[1], score: used.length || violations.length ? Math.max(0, cov(used.length, 3) - violations.length * 40) : "IE",
+    note: violations.length ? `Forbidden wording used: ${violations.join(", ")}.` :
+      used.length ? "Product statements align with approved claims." : "Not enough product statements to assess.",
+    evidence: evid([...p.claims, ...p.doNotSay]) });
+  out.push({ ...DIMS[2], score: violations.length ? Math.max(0, 70 - violations.length * 30) : 85,
+    note: violations.length ? "Do-not-say list breached." : "No forbidden wording; tone check is heuristic in this demo.",
+    evidence: quoteOf(yours[yours.length - 1].text) });
+  const objectionRaised = S.objRaised || S.transcript.some((t) => t.who === "coach" && /customer|expensive|sensitive|already|sceptic|marketing|eyebrow/i.test(t.text));
+  const objectionMet = p.objections.some((o) => o.k.some((k) => all.includes(k)));
+  out.push({ ...DIMS[3], score: objectionRaised ? (objectionMet ? 78 : 40) : "NE",
+    note: objectionRaised ? (objectionMet ? "Engaged with the objection scenario." : "Objection raised but approved response elements not detected.")
+      : "No objection scenario arose in this session.",
+    evidence: objectionRaised ? evid(p.objections.flatMap((o) => o.k)) : null });
+  const pe = evid(PERS_L10N[S.lang] || PERS_WORDS);
+  out.push({ ...DIMS[4], score: pe ? 80 : 45,
+    note: pe ? "Referenced customer context." : "No customer-context language detected — mention skin type or concerns.",
+    evidence: pe });
+  const ue = evid(UPS_L10N[S.lang] || UPS_WORDS);
+  out.push({ ...DIMS[5], score: ue ? 80 : 40,
+    note: ue ? "Recommended routine or companion products." : "No routine-completion language detected.",
+    evidence: ue });
+  const nums = out.filter((d) => typeof d.score === "number");
+  const overall = nums.length ? Math.round(nums.reduce((a, d) => a + d.score, 0) / nums.length) : 0;
+  return { dims: out, overall, certified: overall >= 80 && nums.length >= 3 };
+}
+function showDebrief() {
+  const r = scoreSession();
+  $("score-big").textContent = r.overall;
+  const cert = $("score-cert");
+  cert.textContent = r.certified ? "Launch-Ready · Certified" : "Keep practising";
+  cert.className = "scoreCert " + (r.certified ? "certYes" : "certNo");
+  const dims = $("dims"); dims.innerHTML = "";
+  r.dims.forEach((d) => {
+    const numeric = typeof d.score === "number";
+    const div = document.createElement("div");
+    div.className = "dimRow";
+    div.innerHTML =
+      `<div class="dimHead"><span>${d.label}</span><span class="dimScore">${numeric ? d.score : d.score === "NE" ? "Not tested" : "—"}</span></div>` +
+      `<div class="dimBar"><div class="dimFill"></div></div>` +
+      `<div class="dimNote">${d.note}</div>` +
+      (d.evidence ? `<div class="evid">“${esc(d.evidence)}”</div>` : "");
+    dims.appendChild(div);
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => { div.querySelector(".dimFill").style.width = (numeric ? d.score : 0) + "%"; })
+    );
+  });
+  const weak = r.dims.filter((d) => d.score === "NE" || (typeof d.score === "number" && d.score < 60)).slice(0, 3);
+  $("practice-box").innerHTML = weak.length
+    ? "<b>Practise next</b><br>" + weak.map((d) => "• " + d.label).join("<br>")
+    : "<b>Strong session.</b> Try a harder focus next time — objection handling under time pressure.";
+  const stars = $("stars"); stars.innerHTML = "";
+  for (let i = 1; i <= 5; i++) {
+    const s = document.createElement("span");
+    s.className = "star"; s.textContent = "⭐";
+    s.onclick = () => { S.stars = i;
+      [...stars.children].forEach((x, j) => x.classList.toggle("on", j < i)); };
+    stars.appendChild(s);
+  }
+  go("debrief");
+}
+function restart() {
+  S.slot = null; S.product = null; S.pack = null; S.lang = "EN"; S.transcript = [];
+  $("btn-slots").disabled = true; $("btn-setup").disabled = true;
+  buildSlots(); buildSetup();
+  [...$("otp-row").children].forEach((i) => (i.value = ""));
+  go("slots");
+}
+$("otp-demo").textContent = S.otp;
+</script>
+
+<style>
+/* =====================================================================
+   Voice Edition band — premium pass.
+   Rules: one state visible at a time (talk OR info sheet, never both);
+   no -webkit-line-clamp (some webviews compute it as zero height and let
+   siblings paint through the text) — the caption collapses with a plain
+   max-height + fade instead.
+   ===================================================================== */
+[hidden] { display: none !important; }
+
+.voiceBand { flex: 0 0 auto; max-height: 46%; display: flex; flex-direction: column;
+  gap: 6px; z-index: 2; padding: 10px 18px 10px;
+  background: linear-gradient(180deg, #14110d 0%, #0c0b09 60%);
+  border-top: 1px solid rgba(201,164,76,.22); }
+.vState { display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+
+/* Caption: subtitle under the coach. Collapsed = 3 lines with a fade;
+   tap anywhere on it to expand. Plain block layout — robust everywhere. */
+.capBox { position: relative; cursor: pointer; }
+.cap { margin: 0; font-size: 15px; line-height: 1.55; color: #f2ecdf;
+  max-height: 4.6em; overflow: hidden; }
+.capBox::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1.2em;
+  background: linear-gradient(180deg, rgba(20,17,13,0), #14110d 90%); pointer-events: none; }
+.capBox.expand .cap { max-height: 30vh; overflow-y: auto; }
+.capBox.expand::after, .capBox.fits::after { display: none; }
+.cap[dir="rtl"] { text-align: right; }
+.youEcho { margin: 0; font-size: 11.5px; color: var(--mut); font-style: italic; min-height: 14px; }
+.youEcho[dir="rtl"] { text-align: right; }
+
+/* Controls: fixed-height row, camera-app style — ghost sides, one gold mic. */
+.vControls { flex: none; display: flex; align-items: center; justify-content: center;
+  gap: 38px; height: 76px; }
+.vMic { width: 62px; height: 62px; border-radius: 50%; cursor: pointer; font-size: 22px;
+  flex: none; border: 1.5px solid var(--gold); color: var(--gold);
+  background: radial-gradient(85% 85% at 50% 28%, rgba(201,164,76,.24), rgba(18,15,11,.92));
+  box-shadow: 0 0 0 5px rgba(201,164,76,.07);
+  transition: transform .12s ease, box-shadow .3s ease; }
+.vMic:active { transform: scale(.95); }
+.vMic.listening { background: linear-gradient(150deg, var(--gold-l), var(--gold-d));
+  color: #171310; border-color: var(--gold-l); animation: micPulse 1.5s ease-in-out infinite; }
+.vMic.thinking { opacity: .45; animation: none; }
+.vMic.disabled { opacity: .35; }
+@keyframes micPulse {
+  0%,100% { box-shadow: 0 0 0 6px rgba(201,164,76,.22); }
+  50% { box-shadow: 0 0 0 15px rgba(201,164,76,.05); }
+}
+@media (prefers-reduced-motion: reduce) { .vMic.listening { animation: none; } }
+.vSide { background: none; border: 0; cursor: pointer; color: #b8b0a0; font-family: inherit;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px;
+  opacity: .85; }
+.vSide .vGlyph { width: 34px; height: 34px; border-radius: 50%; font-size: 14px;
+  border: 1px solid rgba(255,255,255,.22); display: flex; align-items: center; justify-content: center; }
+.vSide .vLbl { font-size: 7.5px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; }
+.vSide.on { color: var(--gold-l); opacity: 1; }
+.vSide.on .vGlyph { border-color: var(--gold); background: rgba(201,164,76,.14); }
+.vSide.hasNew .vGlyph { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,164,76,.25); }
+.vHint { flex: none; margin: 0; text-align: center; font-size: 10.5px; letter-spacing: .03em;
+  color: var(--dim); min-height: 13px; }
+.typeRow { display: flex; gap: 8px; align-items: center; }
+.typeRow .input { flex: 1; border-radius: 99px; padding: 11px 14px; font-size: 14px; }
+
+/* Info sheet: replaces the talk state inside the band; internal scroll. */
+.vSheet { background: var(--paper); color: #1c1917; border-radius: 16px;
+  padding: 12px 15px 14px; box-shadow: 0 -8px 30px rgba(0,0,0,.4);
+  display: flex; flex-direction: column; min-height: 0; }
+.drawTop { flex: none; display: flex; justify-content: space-between; align-items: center; }
+.drawTop .icTag { font-size: 9px; font-weight: 800; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--gold-d); }
+.drawTop .icX { border: 0; background: none; font-size: 17px; color: #9a938a;
+  cursor: pointer; padding: 2px 6px; }
+.drawTopics { flex: none; display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 6px; }
+.topicChip { border: 1px solid #d3cbba; background: transparent; color: #4b463d;
+  border-radius: 99px; padding: 5px 12px; font-size: 11px; font-weight: 700;
+  cursor: pointer; font-family: inherit; }
+.topicChip.sel { background: #171310; border-color: #171310; color: var(--gold-l); }
+.sheetScroll { overflow-y: auto; min-height: 0; }
+.sheetScroll .icTitle { font-family: Didot, "Bodoni MT", Georgia, serif; font-size: 15.5px;
+  line-height: 1.25; margin: 2px 0 5px; }
+.sheetScroll .icBody { font-size: 11.5px; line-height: 1.62; color: #4b463d; white-space: pre-line; }
+.vSheet[dir="rtl"] { text-align: right; }
+.guidePill { display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  width: 100%; text-align: left; background: rgba(201,164,76,.09);
+  border: 1px dashed rgba(201,164,76,.55); border-radius: 12px; padding: 8px 12px;
+  cursor: pointer; font-family: inherit; }
+.guidePill[dir="rtl"] { text-align: right; align-items: flex-end; }
+.guidePill .gLbl { font-size: 8px; font-weight: 800; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--gold-l); }
+.guidePill .gTxt { font-size: 12px; line-height: 1.45; color: #e8e0cf;
+  display: -webkit-box; overflow: hidden; max-height: 3em; }
+.vMeta { flex: none; display: flex; justify-content: space-between; align-items: center; padding-top: 2px; }
+.vMeta .endBtn { padding: 6px 13px; font-size: 11px; }
+#scr-session.rtl .cap, #scr-session.rtl .youEcho { text-align: right; }
+</style>
+
+<script>
+"use strict";
+/* =====================================================================
+   Voice Edition engine. The medium is voice: Julien speaks every turn and,
+   when she finishes, the mic arms itself. Captions, the info sheet and
+   the type row are backups — and only one band state shows at a time.
+   ===================================================================== */
+(function () {
+  const SRCls = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null, listening = false, voiceless = false, spokeOnce = false;
+
+  const VOICE_UI = {
+    EN: { talk: "Tap the mic and answer out loud", listen: "Listening — tap when you finish", think: "Julien is thinking…", info: "Info", type: "Type", notalk: "Voice input isn't available in this viewer — type below", novoice: "Julien's voice is muted by this viewer — captions carry the session" },
+    FR: { talk: "Touchez le micro et répondez à voix haute", listen: "Je vous écoute — touchez quand vous avez fini", think: "Julien réfléchit…", info: "Infos", type: "Clavier", notalk: "La voix n'est pas disponible ici — écrivez ci-dessous", novoice: "La voix de Julien est coupée par ce navigateur — suivez les sous-titres" },
+    AR: { talk: "اضغطي على الميكروفون وأجيبي بصوتك", listen: "أستمع إليكِ — اضغطي عند الانتهاء", think: "جوليان يفكّر…", info: "معلومات", type: "كتابة", notalk: "الصوت غير متاح هنا — اكتبي إجابتك أدناه", novoice: "صوت جوليان مكتوم في هذا المتصفح — تابعي الترجمة النصية" },
+    ZH: { talk: "点击麦克风，开口回答", listen: "正在聆听——说完请点击", think: "Julien 正在思考…", info: "资料", type: "键盘", notalk: "此浏览器不支持语音输入——请在下方输入", novoice: "此浏览器已静音——请看字幕进行" },
+    JA: { talk: "マイクをタップして、声でお答えください", listen: "聞いています——終わったらタップ", think: "ジュリアンが考えています…", info: "資料", type: "入力", notalk: "この環境では音声入力が使えません——下に入力してください", novoice: "この環境では音声がミュートされています——字幕でご覧ください" },
+    HI: { talk: "माइक दबाइए और बोलकर जवाब दीजिए", listen: "सुन रही हूँ — बोल चुकें तो दबाइए", think: "जूलियन सोच रहे हैं…", info: "जानकारी", type: "टाइप", notalk: "यहाँ आवाज़ उपलब्ध नहीं — नीचे लिखें", novoice: "इस ब्राउज़र में आवाज़ म्यूट है — सबटाइटल देखें" },
+  };
+  const VU = () => VOICE_UI[S.lang] || VOICE_UI.EN;
+
+  /* ---- band states: exactly one of talk / sheet ---- */
+  function setState(state) {
+    $("vs-talk").hidden = state !== "talk";
+    $("drawer").hidden = state !== "sheet";
+    $("info-btn").classList.toggle("on", state === "sheet");
+    if (state === "sheet") $("info-btn").classList.remove("hasNew");
+  }
+
+  function hint() {
+    const el = $("v-hint");
+    if (S.closing) { el.textContent = ""; return; }
+    if (listening) el.textContent = VU().listen;
+    else if ($("mic-btn").classList.contains("thinking")) el.textContent = VU().think;
+    else if (!SRCls) el.textContent = VU().notalk;
+    else if (voiceless) el.textContent = VU().novoice;
+    else el.textContent = VU().talk;
+  }
+  function renderMic() {
+    $("mic-btn").classList.toggle("listening", listening);
+    $("mic-btn").classList.toggle("disabled", !SRCls);
+    hint();
+  }
+
+  /* ---- iOS unlock: speech must be primed inside a tap gesture ---- */
+  function unlockVoice() {
+    if (!("speechSynthesis" in window)) return;
+    try {
+      speechSynthesis.resume();
+      if (!spokeOnce) {
+        const u = new SpeechSynthesisUtterance(" ");
+        u.volume = 0;
+        speechSynthesis.speak(u);
+        spokeOnce = true;
+      }
+    } catch { /* best effort */ }
+  }
+  const _enterLobby = window.enterLobby;
+  window.enterLobby = function () { unlockVoice(); _enterLobby(); };
+
+  /* ---- she speaks; when done, the mic arms itself ---- */
+  window.speak = function (text) {
+    const fin = once(() => {
+      if (S.closing) return;
+      if (SRCls && !listening) armMic();
+      renderMic();
+    });
+    if (S.muted || !("speechSynthesis" in window)) {
+      setTimeout(fin, Math.min(900 + text.length * 22, 4200));
+      return;
+    }
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const v = pickVoice();
+      if (v) { u.voice = v; u.lang = v.lang; }
+      else {
+        const L0 = LANGS.find((l) => l.c === S.lang);
+        if (L0) u.lang = L0.bcp47;
+      }
+      u.rate = 1.02; u.pitch = 1.05;
+      let started = false;
+      u.onstart = () => { started = true; setSpeaking(true); };
+      u.onend = () => { setSpeaking(false); fin(); };
+      u.onerror = () => { setSpeaking(false); fin(); };
+      // Watchdogs: engines that never start (muted webviews) or never end.
+      setTimeout(() => { if (!started) { voiceless = true; hint(); } }, 2500);
+      setTimeout(() => { setSpeaking(false); fin(); }, Math.min(3000 + text.length * 80, 24000));
+      speechSynthesis.speak(u);
+    } catch { fin(); }
+  };
+  function once(f) { let d = false; return () => { if (!d) { d = true; f(); } }; }
+
+  /* ---- the ear ---- */
+  function armMic() {
+    if (!SRCls || listening || S.closing) { renderMic(); return; }
+    const L0 = LANGS.find((l) => l.c === S.lang) || LANGS[0];
+    rec = new SRCls();
+    rec.lang = L0.bcp47;
+    rec.interimResults = false;
+    rec.onresult = (e) => {
+      const t = (e.results[0] && e.results[0][0].transcript || "").trim();
+      if (t && !S.closing) handleUtterance(t);
+    };
+    rec.onend = () => { listening = false; renderMic(); };
+    rec.onerror = () => { listening = false; renderMic(); };
+    try { rec.start(); listening = true; } catch { listening = false; }
+    renderMic();
+  }
+  function stopMic() { try { rec && rec.stop(); } catch { /* ignore */ } listening = false; renderMic(); }
+
+  function handleUtterance(text) {
+    setState("talk");
+    youBubble(text);
+    thinking(true);
+    setTimeout(() => {
+      if (S.closing) return;
+      thinking(false);
+      const reply = coachReply(text);
+      coachBubble(reply);
+      if (S.lastCard) $("info-btn").classList.add("hasNew");
+      if (typeof advanceGuide === "function") advanceGuide(text);
+    }, 900 + Math.random() * 600);
+  }
+
+  /* ---- captions: plain-block collapse, tap to expand ---- */
+  function setCap(text) {
+    const box = $("cap-box"), c = $("cap");
+    c.textContent = text;
+    c.dir = isRTL() ? "rtl" : "ltr";
+    box.classList.remove("expand");
+    requestAnimationFrame(() => {
+      box.classList.toggle("fits", c.scrollHeight <= c.clientHeight + 2);
+    });
+  }
+  window.coachBubble = function (text) {
+    S.transcript.push({ who: "coach", text });
+    setCap(text);
+    speak(text);
+  };
+  window.youBubble = function (text) {
+    S.transcript.push({ who: "you", text });
+    const e = $("you-echo");
+    e.textContent = "“" + text + "”";
+    e.dir = isRTL() ? "rtl" : "ltr";
+  };
+  window.thinking = function (on) {
+    $("mic-btn").classList.toggle("thinking", on);
+    hint();
+  };
+  window.suggest = function () { /* voice-first: no suggestion chips */ };
+
+  /* ---- info sheet ---- */
+  function fillSheet(tag, title, body) {
+    $("ic-tag").textContent = tag;
+    $("ic-title").textContent = title;
+    $("ic-body").textContent = body;
+  }
+  window.showCard = function (tag, title, body) {
+    fillSheet(tag, title, body);
+    $("drawer").dir = isRTL() ? "rtl" : "ltr";
+    setState("sheet");
+  };
+  window.hideCard = function () {
+    setState("talk");
+    document.querySelectorAll(".topicChip").forEach((b) => b.classList.remove("sel"));
+  };
+  function buildTopics() {
+    const row = $("draw-topics");
+    row.innerHTML = "";
+    T().icons.forEach((label, i) => {
+      const b = document.createElement("button");
+      b.className = "topicChip";
+      b.textContent = label;
+      b.onclick = () => {
+        document.querySelectorAll(".topicChip").forEach((x) => x.classList.remove("sel"));
+        b.classList.add("sel");
+        const c = iconContent(ICON_IDS[i]);
+        if (!c) return;
+        fillSheet(c.tag, c.title, c.body);
+        stopMic();
+        speak(c.body.length > 340 ? c.body.slice(0, 337) + "…" : c.body);
+      };
+      row.appendChild(b);
+    });
+  }
+
+  /* ---- session lifecycle ---- */
+  window.startSession = function () {
+    S.transcript = []; S.secs = 300; S.wrapSaid = false; S.closing = false;
+    S.stageIdx = 0; S.lastCard = null;
+    listening = false;
+    setCap(""); $("you-echo").textContent = "";
+    setState("talk"); buildTopics();
+    $("info-btn").classList.remove("hasNew");
+    $("type-row").hidden = Boolean(SRCls);
+    go("session");
+    const t = T(), first = S.name.split(" ")[0], p = S.pack;
+    const L0 = LANGS.find((l) => l.c === S.lang) || LANGS[0];
+    $("coach-role").textContent = "Beauty Coach · " + L0.native + " · " + S.product.brand;
+    $("info-lbl").textContent = VU().info;
+    $("kbd-lbl").textContent = VU().type;
+    $("chat-input").placeholder = t.placeholder;
+    $("chat-input").dir = isRTL() ? "rtl" : "ltr";
+    $("scr-session").classList.toggle("rtl", isRTL());
+    renderMic();
+    coachBubble(t.greet(first, p.name, t.focus[S.focus]));
+    if (typeof initGuide === "function") initGuide();
+    S.timer = setInterval(() => {
+      if (S.closing) return;
+      S.secs -= 1;
+      $("timer").textContent = Math.floor(S.secs / 60) + ":" + String(S.secs % 60).padStart(2, "0");
+      if (S.secs <= 60 && !S.wrapSaid && !listening) { S.wrapSaid = true; coachBubble(T().wrap); }
+      if (S.secs <= 0) endSession();
+    }, 1000);
+  };
+
+  window.sendChat = function () {
+    if (S.closing) return;
+    const inp = $("chat-input");
+    const text = inp.value.trim();
+    if (!text) return;
+    inp.value = "";
+    stopMic();
+    handleUtterance(text);
+  };
+
+  /* The scorecard waits for her: the close line plays to the end (with a
+     watchdog for engines that never fire onend) before the debrief shows. */
+  window.endSession = function () {
+    if (S.closing) return;
+    try { rec && rec.abort && rec.abort(); } catch { /* ignore */ }
+    listening = false;
+    S.closing = true;
+    clearInterval(S.timer);
+    hideCard();
+    S.guideSteps = [];
+    if (typeof renderGuideStep === "function") renderGuideStep();
+    hint();
+    const line = T().close(S.name.split(" ")[0]);
+    S.transcript.push({ who: "coach", text: line });
+    setCap(line);
+    speakThrough(line, () => setTimeout(showDebrief, 600));
+  };
+  function speakThrough(text, done) {
+    const fin = once(() => { setSpeaking(false); done(); });
+    if (S.muted || !("speechSynthesis" in window)) {
+      // No audio: hold long enough for the caption to be read instead.
+      setTimeout(fin, Math.min(1200 + text.length * 45, 9000));
+      return;
+    }
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const v = pickVoice();
+      if (v) { u.voice = v; u.lang = v.lang; }
+      else {
+        const L0 = LANGS.find((l) => l.c === S.lang);
+        if (L0) u.lang = L0.bcp47;
+      }
+      u.rate = 1.02; u.pitch = 1.05;
+      let started = false;
+      u.onstart = () => { started = true; setSpeaking(true); };
+      u.onend = fin;
+      u.onerror = fin;
+      setTimeout(() => { if (!started) setTimeout(fin, Math.min(800 + text.length * 40, 8000)); }, 2500);
+      setTimeout(fin, Math.min(4000 + text.length * 95, 30000));
+      speechSynthesis.speak(u);
+    } catch { fin(); }
+  }
+
+  /* ---- controls ---- */
+  $("cap-box").onclick = () => {
+    const box = $("cap-box");
+    if (!box.classList.contains("fits")) box.classList.toggle("expand");
+  };
+  $("mic-btn").onclick = () => {
+    unlockVoice();
+    if (listening) { stopMic(); return; }
+    if (!SRCls) { $("type-row").hidden = false; $("chat-input").focus(); return; }
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    setSpeaking(false);
+    armMic();
+  };
+  $("kbd-btn").onclick = () => {
+    setState("talk");
+    const row = $("type-row");
+    row.hidden = !row.hidden;
+    $("kbd-btn").classList.toggle("on", !row.hidden);
+    if (!row.hidden) $("chat-input").focus();
+  };
+  $("info-btn").onclick = () => {
+    if (!$("drawer").hidden) { hideCard(); return; }
+    if (S.lastCard) showCard(S.lastCard.tag, S.lastCard.title, S.lastCard.body);
+    else {
+      const c = iconContent("product");
+      if (c) showCard(c.tag, c.title, c.body);
+    }
+  };
+})();
+</script>
+
+<style>
+/* HOLOME byline */
+.poweredBy { text-align: center; font-size: 8px; letter-spacing: .3em; text-transform: uppercase;
+  color: #6f6759; margin: -16px 0 18px; }
+.poweredTop { font-size: 7.5px; letter-spacing: .22em; text-transform: uppercase;
+  color: #6f6759; margin-top: 1px; }
+</style>
+
+<script>
+"use strict";
+/* =====================================================================
+   Guided walkthrough. A demo viewer does not know which answers exercise
+   which scoring dimensions, so the coach offers a gold "try saying"
+   suggestion after every turn. The four steps deliberately cover all six
+   dimensions — claims, objection, personalisation, routine/upsell — so a
+   complete walkthrough ends with a fully scored debrief, not "Not tested".
+   ===================================================================== */
+const GUIDE = {
+  EN: { label: "Try saying", pitch: "Let me pitch it: ", obj: (k) => "A customer just told me it's " + k + ".",
+    pers: "For sensitive skin I would adapt the routine to her skin type and her main concern.",
+    ups: "I would recommend the complete routine together — morning and night, with SPF as well." },
+  FR: { label: "Essayez de dire", pitch: "Je le présenterais ainsi : ", obj: (k) => "Une cliente vient de me dire : " + k + ".",
+    pers: "Pour une peau sensible, j'adapterais la routine à son type de peau et à sa préoccupation.",
+    ups: "Je recommanderais la routine complète, matin et soir, avec un SPF également." },
+  AR: { label: "جرّبي أن تقولي", pitch: "أقدّمه هكذا: ", obj: (k) => "عميلة قالت لي للتو: " + k + ".",
+    pers: "لبشرة حساسة أُكيّف الروتين حسب نوع بشرتها واحتياجها.",
+    ups: "أنصح بالروتين الكامل معاً — صباحاً ومساءً، مع واقي الشمس أيضاً." },
+  ZH: { label: "试着说", pitch: "我会这样介绍：", obj: (k) => "有顾客刚对我说：" + k + "。",
+    pers: "如果她是敏感肌，我会根据她的肤质和需求调整流程。",
+    ups: "我会推荐整套流程一起使用——早晚搭配，再加上防晒。" },
+  JA: { label: "こう言ってみましょう", pitch: "こうご紹介します：", obj: (k) => "お客様に「" + k + "」と言われました。",
+    pers: "敏感肌のお客様には、肌質とお悩みに合わせてお手入れを調整します。",
+    ups: "朝晩の完全なお手入れを一式で、日やけ止めも合わせておすすめします。" },
+  HI: { label: "कहकर देखें", pitch: "मैं ऐसे बताऊँगी: ", obj: (k) => "ग्राहक ने अभी कहा: " + k + "।",
+    pers: "संवेदनशील त्वचा हो तो मैं उनकी स्किन टाइप और चिंता के हिसाब से रूटीन बदलूँगी।",
+    ups: "मैं पूरा रूटीन साथ में बताऊँगी — सुबह-रात, और साथ में सनस्क्रीन भी।" },
+};
+function buildGuide() {
+  const p = S.pack, G = GUIDE[S.lang] || GUIDE.EN;
+  const sep = S.lang === "AR" ? "، " : (S.lang === "ZH" || S.lang === "JA") ? "、" : ", ";
+  const kw = (p.objections[0] && p.objections[0].k[0]) || "";
+  return [G.pitch + p.claims.slice(0, 4).join(sep) + ".", G.obj(kw), G.pers, G.ups];
+}
+function initGuide() {
+  S.objRaised = false;
+  S.guideSteps = buildGuide();
+  S.guideIdx = 0;
+  renderGuideStep();
+}
+function advanceGuide(saidText) {
+  const cur = S.guideSteps && S.guideSteps[S.guideIdx];
+  const said = (saidText || "").replace(/^💡\s*/, "").trim();
+  if (cur && said === cur.trim()) S.guideIdx += 1;
+  renderGuideStep();
+}
+function renderGuideStep() {
+  const txt = (S.guideSteps || [])[S.guideIdx] || null;
+  const pill = document.getElementById("guide-pill");
+  if (pill) {
+    if (!txt) { pill.hidden = true; return; }
+    pill.hidden = false;
+    pill.dir = isRTL() ? "rtl" : "ltr";
+    document.getElementById("guide-lbl").textContent = (GUIDE[S.lang] || GUIDE.EN).label;
+    document.getElementById("guide-txt").textContent = txt;
+    pill.onclick = () => { pill.hidden = true; document.getElementById("chat-input").value = txt; sendChat(); };
+  } else {
+    suggest(txt ? ["💡 " + txt] : []);
+  }
+}
+</script>
+<style>
+/* =====================================================================
+   STUDIO SCRIM SYSTEM
+   The interface no longer sits *against* the avatar plate — it grows out
+   of it. Three paired presets (plate + scrim) so the same layout stays
+   premium whether the digital human is shot on black or on white.
+
+   plate = the backdrop the avatar is filmed on
+   scrim = the tone the interface derives from it
+   ===================================================================== */
+
+/* ---- NOIR: dark plate, dark interface (original direction, refined) ---- */
+#scr-session[data-scrim="noir"] {
+  --plateA: #262019; --plateB: #0d0c0a;
+  --bloom: rgba(201,164,76,.16);
+  --vig: rgba(0,0,0,.42);
+  --bandTop: rgba(15,13,10,.30); --bandMid: #100e0b; --bandBot: #080706;
+  --chrome: #0c0b09; --onChrome: #ffffff; --onChromeSub: #b3ab9a;
+  --onBand: #f3eee2; --onBandMute: #ada595; --onBandFaint: #7e7768;
+  --hair: rgba(201,164,76,.30);
+  --ghost: rgba(255,255,255,.22);
+  --sheetBg: #faf7f2; --onSheet: #1c1917; --sheetSub: #4b463d; --chipLine: #d3cbba;
+  --pillBg: rgba(201,164,76,.10); --pillLine: rgba(201,164,76,.50);
+  --micBg: radial-gradient(85% 85% at 50% 28%, rgba(201,164,76,.26), rgba(18,15,11,.94));
+  --micLine: #c9a44c; --micInk: #d8b968; --micHalo: rgba(201,164,76,.09);
+  --btnBg: rgba(201,164,76,.20); --btnLine: #c9a44c; --btnInk: #e2c67f;
+  --btnHalo: rgba(201,164,76,.45);
+}
+/* ---- IVORY: light plate, light interface. The recommended pairing for a
+       digital human filmed on a white studio backdrop. ---- */
+#scr-session[data-scrim="ivory"] {
+  --plateA: #ffffff; --plateB: #e8e4dc;
+  --bloom: rgba(255,255,255,.7);
+  --vig: rgba(96,84,64,.20);
+  --bandTop: rgba(247,243,235,.35); --bandMid: #f6f1e7; --bandBot: #efe8da;
+  --chrome: #fbf8f2; --onChrome: #1a1611; --onChromeSub: #6b6254;
+  --onBand: #211c15; --onBandMute: #6d6455; --onBandFaint: #948a78;
+  --hair: rgba(154,123,45,.42);
+  --ghost: rgba(34,29,22,.28);
+  --sheetBg: #ffffff; --onSheet: #1c1917; --sheetSub: #4b463d; --chipLine: #cfc6b4;
+  --pillBg: rgba(154,123,45,.10); --pillLine: rgba(154,123,45,.55);
+  --micBg: linear-gradient(155deg, #f1e2b4 0%, #d9ba6c 55%, #c1a052 100%);
+  --micLine: #9a7b2d; --micInk: #3a2c10; --micHalo: rgba(154,123,45,.16);
+  --btnBg: rgba(154,123,45,.16); --btnLine: #9a7b2d; --btnInk: #6d5518;
+  --btnHalo: rgba(154,123,45,.40);
+}
+/* ---- ATELIER: light plate, graduated bronze interface. For when the
+       brand wants a dark UI over a white plate — the gradient does the
+       transition so there is no hard seam. ---- */
+#scr-session[data-scrim="atelier"] {
+  --plateA: #ffffff; --plateB: #d9d2c6;
+  --bloom: rgba(255,252,246,.62);
+  --vig: rgba(74,60,40,.26);
+  --bandTop: rgba(120,102,78,.16); --bandMid: #3a3227; --bandBot: #191510;
+  --chrome: #241f18; --onChrome: #ffffff; --onChromeSub: #b8ae9a;
+  --onBand: #f6f1e6; --onBandMute: #b8ae9a; --onBandFaint: #8a8171;
+  --hair: rgba(201,164,76,.40);
+  --ghost: rgba(255,255,255,.24);
+  --sheetBg: #faf7f2; --onSheet: #1c1917; --sheetSub: #4b463d; --chipLine: #d3cbba;
+  --pillBg: rgba(201,164,76,.12); --pillLine: rgba(201,164,76,.52);
+  --micBg: radial-gradient(85% 85% at 50% 28%, rgba(201,164,76,.30), rgba(30,25,18,.94));
+  --micLine: #c9a44c; --micInk: #dcbe72; --micHalo: rgba(201,164,76,.12);
+  --btnBg: rgba(201,164,76,.22); --btnLine: #c9a44c; --btnInk: #e2c67f;
+  --btnHalo: rgba(201,164,76,.45);
+}
+
+/* ---------- chrome ---------- */
+#scr-session .topBar { background: var(--chrome); gap: 10px; }
+#scr-session .topBrand { color: var(--onChrome); }
+#scr-session .topSub, #scr-session .poweredTop { color: var(--onChromeSub); }
+#scr-session .timer { color: var(--onChrome); background: transparent;
+  border-color: var(--hair); }
+.scrimBtn { margin-left: auto; display: inline-flex; align-items: center; gap: 5px;
+  height: 30px; padding: 0 13px; border-radius: 99px; cursor: pointer; font-family: inherit;
+  font-size: 9.5px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+  white-space: nowrap;
+  background: var(--btnBg); border: 1px solid var(--btnLine); color: var(--btnInk); }
+.scrimBtn b { font-size: 12px; line-height: 1; font-weight: 400; }
+@media (prefers-reduced-motion: no-preference) {
+  .scrimBtn { animation: scrimHint 2.6s ease-in-out 3; }
+}
+@keyframes scrimHint {
+  0%, 100% { box-shadow: 0 0 0 0 var(--btnHalo); }
+  50% { box-shadow: 0 0 0 6px transparent; }
+}
+
+/* ---------- the plate ---------- */
+#scr-session .stageBand {
+  background:
+    radial-gradient(58% 42% at 50% 30%, var(--bloom), transparent 70%),
+    radial-gradient(120% 100% at 50% 8%, var(--plateA) 0%, var(--plateB) 78%);
+}
+#scr-session .coachWrap { z-index: 1; }
+/* Studio vignette — stops any plate, white included, reading as a flat box. */
+#scr-session .stageBand::before {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(ellipse 74% 62% at 50% 36%, transparent 42%, var(--vig) 100%);
+}
+/* The bridge: the plate dissolves into the band's own top tone, so the two
+   surfaces meet in a gradient rather than at a hard horizontal edge. */
+#scr-session .stageBand::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 26%;
+  z-index: 3; pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, var(--bandTop) 55%, var(--bandMid) 100%);
+}
+
+/* ---------- name row: part of the gradient, not a separate bar ---------- */
+#scr-session .nameRow { background: var(--bandMid); border-top: 0; }
+#scr-session .nameRow .nm { color: var(--onBand); }
+#scr-session .nameRow .rl { color: var(--onBandMute); }
+
+/* ---------- the interface band ---------- */
+#scr-session .voiceBand, #scr-session .panel {
+  background: linear-gradient(180deg, var(--bandMid) 0%, var(--bandBot) 100%);
+  border-top: 0; position: relative;
+}
+/* One hairline of light where the surfaces meet — the only hard edge, and
+   it reads as a lightbox seam rather than a crop. */
+#scr-session .voiceBand::before, #scr-session .panel::before {
+  content: ""; position: absolute; top: 0; left: 12%; right: 12%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--hair), transparent);
+}
+#scr-session .cap { color: var(--onBand); }
+#scr-session .capBox::after {
+  background: linear-gradient(180deg, transparent, var(--bandMid) 92%);
+}
+#scr-session .youEcho { color: var(--onBandMute); }
+#scr-session .vHint { color: var(--onBandFaint); }
+#scr-session .vSide { color: var(--onBandMute); }
+#scr-session .vSide .vGlyph { border-color: var(--ghost); }
+#scr-session .guidePill { background: var(--pillBg); border-color: var(--pillLine); }
+#scr-session .guidePill .gTxt { color: var(--onBand); }
+#scr-session .typeRow .input { background: var(--pillBg); border-color: var(--ghost);
+  color: var(--onBand); }
+#scr-session .endBtn { color: var(--onBandMute); border-color: var(--ghost); }
+#scr-session .muteBtn { color: var(--onBandFaint); }
+#scr-session .vSheet, #scr-session .infoCard {
+  background: var(--sheetBg); color: var(--onSheet);
+  box-shadow: 0 -10px 34px rgba(0,0,0,.22);
+}
+#scr-session .sheetScroll .icBody, #scr-session .infoCard .icBody { color: var(--sheetSub); }
+#scr-session .topicChip { border-color: var(--chipLine); }
+#scr-session .vMic { background: var(--micBg); border-color: var(--micLine);
+  color: var(--micInk); box-shadow: 0 0 0 5px var(--micHalo); }
+#scr-session .vMic.listening { background: linear-gradient(150deg, #d8b968, #9a7b2d);
+  color: #171310; border-color: #d8b968; }
+#scr-session .sendBtn { background: linear-gradient(150deg, #d8b968, #9a7b2d); color: #171310; }
+#scr-session .bub.bubCoach { background: var(--sheetBg); color: var(--onSheet); }
+#scr-session .bub.bubYou { color: var(--onBand); border-color: var(--ghost); }
+#scr-session .icoLbl { color: var(--onBandMute); }
+#scr-session .icoRing { border-color: var(--ghost); }
+#scr-session .sugg { background: var(--pillBg); border-color: var(--ghost); color: var(--onBand); }
+
+/* Toast naming the preset while cycling. */
+.scrimToast { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+  z-index: 9; background: rgba(12,11,9,.82); color: #f3eee2; border: 1px solid var(--hair);
+  border-radius: 99px; padding: 6px 14px; font-size: 10.5px; letter-spacing: .14em;
+  text-transform: uppercase; font-weight: 700; pointer-events: none;
+  opacity: 0; transition: opacity .25s ease; }
+.scrimToast.show { opacity: 1; }
+</style>
+
+<script>
+"use strict";
+/* Backdrop preview. Production picks the scrim from the plate the digital
+   human is actually filmed on; here it cycles so the pairing can be judged
+   on a real device before the live avatar is wired in. */
+(function () {
+  const PRESETS = [
+    { id: "noir",    short: "Noir",    label: "Studio Noir · dark plate" },
+    { id: "ivory",   short: "Blanc",   label: "Studio Blanc · light plate" },
+    { id: "atelier", short: "Atelier", label: "Atelier · dark UI on light plate" },
+  ];
+  let i = 0;
+  const scr = document.getElementById("scr-session");
+  const toast = document.createElement("div");
+  toast.className = "scrimToast";
+  (document.getElementById("stage-session") || scr).appendChild(toast);
+  let t = null;
+  const btn = document.getElementById("scrim-btn");
+  function apply(showToast) {
+    scr.dataset.scrim = PRESETS[i].id;
+    btn.innerHTML = '<b>\u25D0</b>' + PRESETS[i].short;
+    if (!showToast) return;
+    btn.style.animation = "none";
+    toast.textContent = PRESETS[i].label;
+    toast.classList.add("show");
+    clearTimeout(t);
+    t = setTimeout(() => toast.classList.remove("show"), 1600);
+  }
+  apply(false);
+  document.getElementById("scrim-btn").onclick = () => {
+    i = (i + 1) % PRESETS.length;
+    apply(true);
+  };
+})();
+</script>

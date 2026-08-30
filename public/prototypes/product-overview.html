@@ -1,0 +1,370 @@
+<title>L'Oréal Beauty Coach — Product Overview</title>
+<style>
+:root{
+  --paper:#F7F5F1; --card:#FFFFFF; --sunk:#EFEBE4;
+  --ink:#1A1613; --body:#4A423A; --mute:#7A7066; --faint:#9C9287;
+  --rule:#DFD8CD; --hair:#EBE5DB;
+  --gold:#8A6A18; --goldbg:#F4EEDC; --goldline:#C9A44C;
+  --cpd:#A8355B; --luxe:#5F4A93; --derm:#256A78; --ppd:#7A6224;
+  --ok:#2C6E52; --okbg:#E4F0E9; --stop:#A03225; --stopbg:#F7E7E3;
+  --disp:Didot,"Bodoni MT","Hoefler Text","Playfair Display",Georgia,serif;
+  --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#141210; --card:#1D1A16; --sunk:#241F1A;
+    --ink:#F3EFE8; --body:#CBC2B6; --mute:#9A9084; --faint:#7A7166;
+    --rule:#332C24; --hair:#282219;
+    --gold:#D8B65E; --goldbg:#2A2213; --goldline:#8A6E28;
+    --cpd:#E08AA8; --luxe:#A492D8; --derm:#68B4C2; --ppd:#C4A85E;
+    --ok:#6FC79C; --okbg:#16301F; --stop:#E58A76; --stopbg:#331914;
+  }
+}
+</style>
+<style>
+:root[data-theme="dark"]{
+  --paper:#141210; --card:#1D1A16; --sunk:#241F1A;
+  --ink:#F3EFE8; --body:#CBC2B6; --mute:#9A9084; --faint:#7A7166;
+  --rule:#332C24; --hair:#282219;
+  --gold:#D8B65E; --goldbg:#2A2213; --goldline:#8A6E28;
+  --cpd:#E08AA8; --luxe:#A492D8; --derm:#68B4C2; --ppd:#C4A85E;
+  --ok:#6FC79C; --okbg:#16301F; --stop:#E58A76; --stopbg:#331914;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--body);
+  font-family:var(--sans);font-size:16.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 26px 110px}
+.col{max-width:66ch}
+h1,h2,h3,h4{color:var(--ink)}
+
+.mast{padding:66px 0 34px;border-bottom:2px solid var(--goldline)}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);margin:0 0 20px}
+h1{font-family:var(--disp);font-weight:400;font-size:clamp(32px,5.4vw,56px);line-height:1.06;
+  letter-spacing:-.01em;margin:0 0 18px;text-wrap:balance}
+h1 em{font-style:italic}
+.stand{font-size:19.5px;line-height:1.55;color:var(--mute);margin:0;max-width:58ch}
+.mastmeta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:30px;font-family:var(--mono);
+  font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint)}
+
+section{padding-top:60px}
+.sechead{display:flex;align-items:center;gap:14px;margin:0 0 12px;font-family:var(--mono);
+  font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+.sechead::after{content:"";flex:1;height:1px;background:var(--rule)}
+h2{font-family:var(--disp);font-weight:400;font-size:clamp(24px,3.4vw,36px);line-height:1.18;
+  margin:0 0 18px;text-wrap:balance}
+h3{font-size:15px;font-weight:700;margin:32px 0 8px;letter-spacing:.005em}
+p{margin:0 0 17px}
+a{color:var(--gold);text-underline-offset:3px}
+strong{font-weight:700;color:var(--ink)}
+.lead{font-size:18.5px;line-height:1.58}
+
+.pull{font-family:var(--disp);font-style:italic;font-size:24px;line-height:1.38;color:var(--ink);
+  margin:34px 0;padding-left:20px;border-left:2px solid var(--goldline);max-width:52ch}
+
+/* surfaces */
+.surf{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);margin:30px 0 6px}
+@media(min-width:780px){.surf{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1040px){.surf{grid-template-columns:repeat(4,1fr)}}
+.scard{background:var(--card);padding:22px 20px 24px;display:flex;flex-direction:column;gap:7px}
+.scard .who{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.scard h4{font-family:var(--disp);font-weight:400;font-size:21px;margin:0;letter-spacing:-.005em}
+.scard p{margin:0;font-size:14px;line-height:1.55}
+
+/* flow */
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:28px 0 6px}
+.step{flex:1 1 165px;background:var(--card);border:1px solid var(--rule);padding:14px 16px}
+.step b{display:block;font-size:13.5px;color:var(--ink);margin-bottom:3px}
+.step span{font-size:13px;line-height:1.5;display:block;color:var(--mute)}
+.step em{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);font-style:normal;display:block;margin-bottom:6px}
+
+/* tables */
+.tw{overflow-x:auto;margin:26px 0 6px;border:1px solid var(--rule);background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:14.5px}
+th,td{text-align:left;padding:13px 17px;border-bottom:1px solid var(--hair);vertical-align:top}
+thead th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);font-weight:400;background:var(--sunk);border-bottom:1px solid var(--rule)}
+tbody tr:last-child td{border-bottom:none}
+td.lang{font-size:15.5px}
+.tag{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;
+  text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap}
+.t-ok{background:var(--okbg);color:var(--ok)}
+.t-stop{background:var(--stopbg);color:var(--stop)}
+.t-gold{background:var(--goldbg);color:var(--gold)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:99px;margin-right:7px;vertical-align:1px}
+
+/* value grid */
+.val{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);margin:28px 0 6px}
+@media(min-width:860px){.val{grid-template-columns:repeat(2,1fr)}}
+.vcard{background:var(--card);padding:22px 24px 24px}
+.vcard .role{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:9px}
+.vcard h4{font-family:var(--disp);font-weight:400;font-size:20px;margin:0 0 9px}
+.vcard p{font-size:14.5px;line-height:1.58;margin:0 0 11px}
+.vcard p:last-child{margin:0}
+.gain{font-size:13.5px;color:var(--ink);border-top:1px solid var(--hair);padding-top:10px;margin-top:12px}
+.gain b{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--faint);display:block;margin-bottom:3px;font-weight:400}
+
+.note{background:var(--sunk);border-left:2px solid var(--goldline);padding:17px 21px;margin:26px 0;
+  font-size:15px;line-height:1.58}
+.note p:last-child{margin-bottom:0}
+
+.brandwall{display:flex;flex-wrap:wrap;gap:6px;margin:22px 0 4px}
+.bchip{font-size:12.5px;padding:5px 11px;border:1px solid var(--rule);background:var(--card);
+  border-radius:99px;color:var(--body)}
+.bchip i{font-style:normal;display:inline-block;width:6px;height:6px;border-radius:99px;margin-right:6px}
+
+footer{margin-top:76px;padding-top:24px;border-top:1px solid var(--rule);font-family:var(--mono);
+  font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);line-height:1.8}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Product Overview · BYOND Asia</p>
+  <h1>L'Oréal Beauty Coach</h1>
+  <p class="stand">An AI digital-human coach that trains every advisor, in every market, on every new launch — and proves the approved message survived the trip to the customer.</p>
+  <div class="mastmeta">
+    <span>4 divisions</span><span>~37 brands</span>
+    <span>6 languages · voice confirmed</span><span>Built &amp; running</span>
+  </div>
+</header>
+
+<section class="col">
+  <p class="sechead">The problem</p>
+  <h2>A launch message survives five hops. Nobody sees where it breaks.</h2>
+  <p class="lead">L'Oréal writes a claim once, in Paris, in one language, cleared by legal. By the time a customer hears it, it has passed through zone, market, distributor, and an advisor standing at a shelf — usually in a different language than it was written in.</p>
+  <p>Each hop is a re-telling, and every re-telling is an unlogged opportunity for the claim to drift: a percentage rounded up, a hedge dropped, a cosmetic benefit nudged into medical language. Today the drift is invisible. Nobody can point to where a message mutated, and nobody can prove it didn't.</p>
+  <p>Training doesn't close this. A deck read once in a hotel ballroom is not evidence, and a quiz score is not proof that an advisor can hold the approved wording under pressure from a real customer asking a real objection.</p>
+  <p class="pull">The gap is not knowledge. It is that nothing between HQ and the shop floor is <em>observable</em>.</p>
+</section>
+
+<section>
+  <p class="sechead">The product</p>
+  <h2 class="col">Four surfaces, one governed loop</h2>
+  <p class="col">Beauty Coach is not a chatbot bolted onto a product catalogue. It is a closed loop: the product team publishes a launch, advisors rehearse it against a digital human, every rehearsal is scored with evidence, and HQ sees the truth roll up by market.</p>
+
+  <div class="surf">
+    <article class="scard">
+      <p class="who">Product &amp; marketing team</p>
+      <h4>Product Nexus</h4>
+      <p>Where a launch enters the system. Upload the product, photos, positioning, hero claims, objection library and the forbidden wording. Publishing mints an immutable version — nothing is edited in place.</p>
+    </article>
+    <article class="scard">
+      <p class="who">Advisor · distributor · agent</p>
+      <h4>The Coach</h4>
+      <p>A digital human that books like an appointment. The advisor states country, territory, distributor and product, then rehearses out loud — objections, price, routine — and is corrected in the moment.</p>
+    </article>
+    <article class="scard">
+      <p class="who">Advisor · L&amp;D</p>
+      <h4>Readiness Scorecard</h4>
+      <p>Six dimensions scored from what the advisor actually said, each carrying the verbatim quote it was scored on. Untested dimensions are marked untested — never guessed at.</p>
+    </article>
+    <article class="scard">
+      <p class="who">HQ · zone · market</p>
+      <h4>Launch Readiness HQ</h4>
+      <p>Readiness by market, territory, distributor and advisor. Which claims land, which get dropped, which markets are still cold two weeks before a launch goes live.</p>
+    </article>
+  </div>
+
+  <div class="flow">
+    <div class="step"><em>Publish</em><b>Nexus</b><span>Launch pack versioned and approved per language.</span></div>
+    <div class="step"><em>Book</em><b>Appointment</b><span>Advisor picks brand, focus and language.</span></div>
+    <div class="step"><em>Rehearse</em><b>Coaching session</b><span>Spoken practice against the approved wording.</span></div>
+    <div class="step"><em>Score</em><b>Scorecard</b><span>Six dimensions, verbatim evidence, certify or re-coach.</span></div>
+    <div class="step"><em>See</em><b>HQ dashboard</b><span>Roll-up by market; weak markets feed back into bookings.</span></div>
+  </div>
+</section>
+
+<section class="col">
+  <p class="sechead">What makes it different</p>
+  <h2>The coach cannot make anything up</h2>
+  <p>This is the design decision everything else follows from. The coach answers only from the published launch pack. Approved claims are quoted verbatim — never paraphrased, never summarised, never translated at runtime.</p>
+
+  <h3>Language is governance, not translation</h3>
+  <p>An approved claim is a regulatory artifact for one market in one language. Machine-translating it does not produce a translated claim; it produces an <strong>unapproved</strong> one. So packs are authored per language and carry their own status — source, market-approved, or draft — and a draft is never spoken.</p>
+
+  <div class="note">
+    <p><b>Ask for a language that isn't signed off and the coach refuses to start.</b> It names what is missing and who has to approve it. That refusal is the product working, not failing — it is the only way a system like this belongs anywhere near a regulated claim.</p>
+  </div>
+
+  <h3>Four divisions, four definitions of "ready"</h3>
+  <p>A pharmacist and a hypermarket promoter are not the same advisor and must not be graded the same way. The rubric is weighted per division: Dermatological Beauty weights product accuracy heavily and upselling lightly, so a pharmacist who sells beautifully but misstates a clinical claim fails. Consumer Products inverts it. Each division also injects its own guardrail into the coach and role-plays its own counter.</p>
+
+  <h3>Every score carries its evidence</h3>
+  <p>Scores are not opinions. Each dimension cites the advisor's own words back to them, and dimensions the session never exercised are reported as untested rather than filled in. That is what makes a scorecard defensible to the advisor being scored and useful to the manager reading it.</p>
+</section>
+
+<section>
+  <p class="sechead">How it helps L'Oréal</p>
+  <h2 class="col">What each side of the house gets</h2>
+  <p class="col">The same loop pays off differently depending on where you sit. This is the part worth reading twice.</p>
+
+  <div class="val">
+    <article class="vcard">
+      <p class="role">Product &amp; marketing</p>
+      <h4>Your launch message actually arrives</h4>
+      <p>You write the positioning once and it reaches every advisor in every market unchanged — not a summary of a summary made by someone who saw the deck in March. When you change a claim, the change is live in the next session, not in the next training cycle.</p>
+      <p>And you find out which of your claims advisors can't carry. If nobody in three markets ever repeats your hero claim, that is a message problem you learn in week two instead of after the launch.</p>
+      <div class="gain"><b>Gain</b>Launch messaging lands intact, and weak claims surface before the launch, not after.</div>
+    </article>
+
+    <article class="vcard">
+      <p class="role">Regulatory &amp; legal</p>
+      <h4>A claim can no longer drift quietly</h4>
+      <p>The coach quotes approved wording verbatim and refuses to speak any language pack a market has not signed off. Forbidden wording is scored against explicitly, so an advisor drifting toward treatment or cure language is caught and corrected in rehearsal — not in front of a customer, and not in a regulator's complaint file.</p>
+      <p>Every pack is versioned and every session is logged. For the first time there is an audit trail between the claim you approved and the words an advisor actually used.</p>
+      <div class="gain"><b>Gain</b>Claim compliance becomes observable and auditable instead of assumed.</div>
+    </article>
+
+    <article class="vcard">
+      <p class="role">Zone &amp; market GM</p>
+      <h4>You see readiness before the launch, not after the numbers</h4>
+      <p>Sell-out tells you a launch went badly a month late. Readiness tells you which markets, territories and distributors are cold while you can still do something — reallocate coaching, delay a market, or push a distributor.</p>
+      <p>Because scoring is division-weighted, a market's readiness number means the same thing whether it is a pharmacy network or a hypermarket chain.</p>
+      <div class="gain"><b>Gain</b>A leading indicator of launch execution, weeks ahead of sell-out data.</div>
+    </article>
+
+    <article class="vcard">
+      <p class="role">Distributor &amp; L&amp;D</p>
+      <h4>Training that scales past the trainer</h4>
+      <p>A market trainer can run a handful of sessions a week. The coach runs them in parallel, at any hour, in the advisor's own language, and never gets tired of the same objection. High-turnover channels stop being the place where launch knowledge goes to die.</p>
+      <p>Certification stops being attendance. An advisor is certified because they held the approved wording under pressure, with the transcript to show for it.</p>
+      <div class="gain"><b>Gain</b>Coaching capacity decoupled from headcount; certification backed by evidence.</div>
+    </article>
+
+    <article class="vcard">
+      <p class="role">The advisor</p>
+      <h4>Somewhere safe to be wrong</h4>
+      <p>A private session where you can fumble the objection three times, in your own language, with nobody watching and no customer lost. The coach corrects gently, hands you the approved sentence, and makes you say it back.</p>
+      <p>Advisors who feel prepared sell better and stay longer. That is the least measurable benefit here and probably not the smallest.</p>
+      <div class="gain"><b>Gain</b>Confidence at the counter, built by rehearsal rather than by reading.</div>
+    </article>
+
+    <article class="vcard">
+      <p class="role">The group</p>
+      <h4>A product-knowledge asset that compounds</h4>
+      <p>Every launch published into the Nexus stays there, versioned, in every approved language. Over two or three years that becomes L'Oréal's structured product-knowledge library — the canonical answer to "what are we allowed to say about this product, in this market, right now."</p>
+      <p>That asset is worth more than the training it was built for. It is the substrate for advisor apps, consumer-facing assistants, and internal search.</p>
+      <div class="gain"><b>Gain</b>A durable, structured claims library — reusable far beyond coaching.</div>
+    </article>
+  </div>
+</section>
+
+<section>
+  <p class="sechead">Coverage today</p>
+  <h2 class="col">Built, running, and division-aware</h2>
+
+  <h3 class="col">Divisions — each with its own advisor, guardrail and rubric</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th style="width:200px">Division</th><th>Who it coaches</th><th style="width:240px">Rubric emphasis</th></tr></thead>
+      <tbody>
+        <tr><td><span class="dot" style="background:var(--cpd)"></span><strong>Consumer Products</strong></td><td>Retail promoters and brand ambassadors on a hypermarket or drugstore shelf</td><td>Speed and upsell fluency; guards against over-claiming to close</td></tr>
+        <tr><td><span class="dot" style="background:var(--luxe)"></span><strong>L'Oréal Luxe</strong></td><td>Counter beauty advisors in department stores, boutiques and travel retail</td><td>Brand tone and ritual; the right fact in the wrong register still fails</td></tr>
+        <tr><td><span class="dot" style="background:var(--derm)"></span><strong>Dermatological Beauty</strong></td><td>Pharmacists, pharmacy assistants and clinic staff</td><td>Product accuracy weighted heaviest; hard stop at treatment language</td></tr>
+        <tr><td><span class="dot" style="background:var(--ppd)"></span><strong>Professional Products</strong></td><td>Hairdressers and colourists who both use and sell the product</td><td>Service protocol before end-benefit; technical accuracy first</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="col">Brands mapped to divisions</h3>
+  <div class="brandwall">
+    <span class="bchip"><i style="background:var(--cpd)"></i>L'Oréal Paris</span>
+    <span class="bchip"><i style="background:var(--cpd)"></i>Garnier</span>
+    <span class="bchip"><i style="background:var(--cpd)"></i>Maybelline</span>
+    <span class="bchip"><i style="background:var(--cpd)"></i>NYX</span>
+    <span class="bchip"><i style="background:var(--cpd)"></i>Essie</span>
+    <span class="bchip"><i style="background:var(--cpd)"></i>Mixa</span>
+    <span class="bchip"><i style="background:var(--cpd)"></i>Dark &amp; Lovely</span>
+    <span class="bchip"><i style="background:var(--cpd)"></i>3CE</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Lancôme</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>YSL Beauté</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Armani Beauty</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Kiehl's</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Biotherm</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Helena Rubinstein</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Urban Decay</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>IT Cosmetics</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Aesop</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Prada Beauty</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Valentino Beauty</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Mugler</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Maison Margiela</span>
+    <span class="bchip"><i style="background:var(--luxe)"></i>Shu Uemura</span>
+    <span class="bchip"><i style="background:var(--derm)"></i>La Roche-Posay</span>
+    <span class="bchip"><i style="background:var(--derm)"></i>Vichy</span>
+    <span class="bchip"><i style="background:var(--derm)"></i>CeraVe</span>
+    <span class="bchip"><i style="background:var(--derm)"></i>SkinCeuticals</span>
+    <span class="bchip"><i style="background:var(--derm)"></i>Skinbetter Science</span>
+    <span class="bchip"><i style="background:var(--derm)"></i>Dermablend</span>
+    <span class="bchip"><i style="background:var(--ppd)"></i>L'Oréal Professionnel</span>
+    <span class="bchip"><i style="background:var(--ppd)"></i>Kérastase</span>
+    <span class="bchip"><i style="background:var(--ppd)"></i>Redken</span>
+    <span class="bchip"><i style="background:var(--ppd)"></i>Matrix</span>
+    <span class="bchip"><i style="background:var(--ppd)"></i>Biolage</span>
+    <span class="bchip"><i style="background:var(--ppd)"></i>Pureology</span>
+    <span class="bchip"><i style="background:var(--ppd)"></i>Mizani</span>
+    <span class="bchip"><i style="background:var(--ppd)"></i>Shu Uemura Art of Hair</span>
+  </div>
+  <p class="col" style="font-size:14px;color:var(--mute);margin-top:14px">Shu Uemura appears twice on purpose. Its makeup is Luxe, sold at a counter; Art of Hair is Professional, sold by a stylist. Division is resolved from the product, not the brand name — which is why the coach speaks to each one correctly.</p>
+
+  <h3 class="col">Languages — all six speaking and listening</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th style="width:150px">Language</th><th>Zone coverage</th><th style="width:130px">Voice out</th><th style="width:130px">Voice in</th></tr></thead>
+      <tbody>
+        <tr><td class="lang"><strong>English</strong></td><td>Global HQ, North America, India, SE Asia — the source language every pack is authored in</td><td><span class="tag t-ok">HoloMe ✓</span></td><td><span class="tag t-ok">Whisper ✓</span></td></tr>
+        <tr><td class="lang"><strong>Français</strong></td><td>Europe, Canada, francophone Sub-Saharan Africa — and the Paris approval chain itself</td><td><span class="tag t-ok">HoloMe ✓</span></td><td><span class="tag t-ok">Whisper ✓</span></td></tr>
+        <tr><td class="lang"><strong>العربية</strong></td><td>SAPMENA — Gulf, Levant, North Africa. Pharmacy-heavy, so Derm-critical. Full right-to-left interface</td><td><span class="tag t-ok">HoloMe ✓</span></td><td><span class="tag t-ok">Whisper ✓</span></td></tr>
+        <tr><td class="lang"><strong>中文</strong></td><td>North Asia — among the group's largest markets, with the tightest local advertising-claim enforcement</td><td><span class="tag t-ok">HoloMe ✓</span></td><td><span class="tag t-ok">Whisper ✓</span></td></tr>
+        <tr><td class="lang"><strong>日本語</strong></td><td>North Asia — quasi-drug classification makes exact claim wording legally load-bearing</td><td><span class="tag t-ok">HoloMe ✓</span></td><td><span class="tag t-ok">Whisper ✓</span></td></tr>
+        <tr><td class="lang"><strong>हिन्दी</strong></td><td>SAPMENA — India. Mass-channel scale, where promoter turnover is highest</td><td><span class="tag t-ok">HoloMe ✓</span></td><td><span class="tag t-ok">Whisper ✓</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="col" style="font-size:14px;color:var(--mute);margin-top:14px">HoloMe gives the coach her voice; Whisper is how she hears. Transcription pins the session language rather than detecting it — a one-word Arabic answer must not be transcribed as Farsi and then scored against a pack the advisor never spoke.</p>
+</section>
+
+<section class="col">
+  <p class="sechead">Deployment</p>
+  <h2>How it lands in a L'Oréal environment</h2>
+  <p>The coach runs as a web application — no app install for advisors, which matters in channels where the device is a shared shop tablet or the advisor's own phone. Access is by distributor-issued code, so country, territory and distributor are established at sign-in rather than typed in and mistyped.</p>
+  <p><strong>Data residency is a first-class setting, not an afterthought.</strong> Speech transcription can point at a hosted service for a pilot or at a Whisper-compatible endpoint inside L'Oréal's own network for markets where advisor voice recordings cannot leave the perimeter. The same applies to the pack store.</p>
+  <p>Launch content enters through the Nexus and belongs to L'Oréal. There is no scenario where the coaching library is locked inside a vendor's format.</p>
+</section>
+
+<section class="col">
+  <p class="sechead">Proposed pilot</p>
+  <h2>One launch, two markets, ninety days</h2>
+  <p>The fastest way to prove this is not a broad rollout. It is a single real launch, run properly, in two markets that differ enough to be a real test — ideally one Dermatological Beauty market in SAPMENA and one Consumer Products market in North Asia, so both the strictest claim regime and the highest-volume channel are exercised.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th style="width:150px">Phase</th><th>What happens</th><th style="width:230px">What it proves</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Weeks 1–3</strong><br><span style="color:var(--mute);font-size:13px">Load</span></td><td>Product team publishes one real launch into the Nexus; markets approve their language packs</td><td>That the approval workflow fits how L'Oréal actually signs off claims</td></tr>
+        <tr><td><strong>Weeks 4–9</strong><br><span style="color:var(--mute);font-size:13px">Coach</span></td><td>Advisors across both markets book and rehearse; scorecards accumulate; weak advisors are re-coached</td><td>That advisors will use it voluntarily, and that scores move with practice</td></tr>
+        <tr><td><strong>Weeks 10–13</strong><br><span style="color:var(--mute);font-size:13px">Read</span></td><td>HQ compares readiness against actual launch execution in both markets</td><td>Whether readiness predicts execution — the number that decides a rollout</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>What we would measure</h3>
+  <p>Claim-fidelity rate (share of advisors who can carry the hero claim verbatim), forbidden-wording incidence before and after coaching, time-to-certification per advisor, and coverage — what share of the target advisor base rehearsed at all. The last one is the honest test of whether advisors find it useful or merely mandated.</p>
+
+  <div class="note">
+    <p><b>One thing to settle early:</b> who signs off a language pack. The system enforces that someone does — whether that is zone regulatory, market legal, or the local brand GM differs across L'Oréal's zones, and it determines who holds the approver role in the Nexus. Worth deciding in week one rather than discovering in week six.</p>
+  </div>
+</section>
+
+<footer>
+  BYOND Asia · L'Oréal Beauty Coach — Product Overview<br>
+  Division structure, brand portfolio and channel descriptions reflect L'Oréal's public reporting. Claim-regime characterisations are directional and should be confirmed with L'Oréal regulatory. Product content shown in the prototype is illustrative, not client-approved.
+</footer>
+
+</div>
