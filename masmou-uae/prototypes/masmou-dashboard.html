@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مسموع — ذكاء الاستماع الوطني · وزارة الاتصالات</title>
+<style>
+/* ================= UAE FLAG DESIGN SYSTEM =================
+   red #CE1126 · green #007A3D · white #FFFFFF · black #0E0E10 */
+:root{
+  --red:#CE1126; --red-d:#A50D1E; --green:#007A3D; --green-d:#005C2E;
+  --black:#0E0E10; --black-2:#1A1B1E; --amber:#C8A200;
+  --bg:#F4F5F4; --card:#FFFFFF; --ink:#141416; --grey:#6E7276; --line:#E4E6E4;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Segoe UI",Tahoma,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+[dir="rtl"] body{letter-spacing:0}
+
+/* ================= HEADER ================= */
+header{background:linear-gradient(100deg,#050506,var(--black) 55%,#1D1E22);color:#fff;padding:15px 26px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.hLogo{display:flex;align-items:center;gap:12px}
+/* UAE flag mark */
+.flagMark{width:38px;height:26px;border-radius:4px;overflow:hidden;display:flex;box-shadow:0 2px 8px rgba(0,0,0,.45);flex-shrink:0}
+.flagMark .hoist{width:11px;background:var(--red)}
+.flagMark .bands{flex:1;display:flex;flex-direction:column}
+.flagMark .bands i{flex:1}
+.flagMark .bands i:nth-child(1){background:var(--green)}
+.flagMark .bands i:nth-child(2){background:#fff}
+.flagMark .bands i:nth-child(3){background:var(--black)}
+.hLogo .t b{display:block;font-size:16px;font-weight:800;letter-spacing:.3px}
+.hLogo .t small{display:block;font-size:9px;font-weight:700;letter-spacing:1.2px;color:#E8B7BD}
+.hTitle h1{font-size:17px;font-weight:800}
+.hTitle p{font-size:11.5px;opacity:.72;margin-top:2px}
+.hRight{margin-inline-start:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.live{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;background:rgba(255,255,255,.12);padding:7px 12px;border-radius:99px}
+.live i{width:8px;height:8px;border-radius:50%;background:#35D07A;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.langTgl,.viewTgl,.range{display:flex;background:rgba(255,255,255,.12);border-radius:11px;padding:3px}
+.langTgl button{border:0;background:transparent;color:#fff;font-size:11.5px;font-weight:800;padding:7px 12px;border-radius:9px;opacity:.7;letter-spacing:.4px;transition:.15s}
+.langTgl button.on{background:#fff;color:var(--black);opacity:1}
+.viewTgl button{border:0;background:transparent;color:#fff;font-size:12px;font-weight:800;padding:8px 14px;border-radius:9px;opacity:.72;transition:.15s}
+.viewTgl button.on{background:#fff;color:var(--black);opacity:1;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.range button{border:0;background:transparent;color:#fff;font-size:12px;font-weight:700;padding:7px 13px;border-radius:9px;opacity:.7}
+.range button.on{background:#fff;color:var(--black);opacity:1}
+.actBtn{border:0;background:rgba(255,255,255,.15);color:#fff;font-weight:800;font-size:12px;padding:9px 15px;border-radius:11px;position:relative}
+.actBtn .n{position:absolute;top:-6px;inset-inline-end:-6px;background:var(--red);color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.brief{border:0;background:var(--red);color:#fff;font-weight:800;font-size:12px;padding:9px 15px;border-radius:11px}
+
+.filterBar{display:flex;align-items:center;gap:12px;padding:10px 26px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.scope{font-size:12px;font-weight:600;color:var(--grey)}
+.scope b{color:var(--ink)}
+.chip{display:none;align-items:center;gap:7px;background:#FBEAEC;color:var(--red-d);font-size:12px;font-weight:800;padding:6px 12px;border-radius:99px}
+.chip.on{display:inline-flex}
+.chip button{border:0;background:transparent;color:var(--red-d);font-weight:800;font-size:13px}
+
+.wrap{padding:20px 26px 40px;max-width:1680px;margin:0 auto}
+.flowTag{display:flex;align-items:center;gap:10px;margin:22px 0 12px}
+.flowTag span{font-size:10.5px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;color:var(--green-d)}
+.flowTag i{flex:1;height:1px;background:linear-gradient(90deg,#C9D3CB,transparent)}
+.flowTag.act span{color:var(--red-d)}
+.card{background:var(--card);border-radius:15px;padding:18px 20px;box-shadow:0 2px 10px rgba(14,14,16,.06)}
+.cardHead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cardHead h2{font-size:14.5px;font-weight:800}
+.cardHead small{font-size:11px;color:var(--grey);font-weight:600;margin-inline-start:auto}
+
+/* ================= KPI ================= */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.kpi{background:var(--card);border-radius:15px;padding:15px 17px;border-inline-start:4px solid var(--green);box-shadow:0 2px 10px rgba(14,14,16,.06)}
+.kpi.k2{border-inline-start-color:var(--black)}
+.kpi.k3{border-inline-start-color:var(--amber)}
+.kpi.k4{border-inline-start-color:var(--red)}
+.kpi .lbl{font-size:10px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--grey)}
+.kpi .val{font-size:30px;font-weight:800;margin:3px 0 1px;font-variant-numeric:tabular-nums}
+.kpi .delta{font-size:10.5px;font-weight:700;color:var(--grey)}
+.kpi .delta.up{color:var(--green)}
+.kpi .delta.down{color:var(--red)}
+
+/* ================= AGENDA ================= */
+.agendaGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.agItem{border:1px solid var(--line);border-radius:13px;padding:12px 13px;position:relative;overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .15s}
+.agItem:hover{box-shadow:0 6px 20px rgba(14,14,16,.13);transform:translateY(-2px)}
+.agItem b{font-size:13px;line-height:1.35;display:block;padding-inline-start:8px}
+.agItem .mn{font-size:10.5px;font-weight:700;color:var(--grey);margin:6px 0 9px;padding-inline-start:8px;display:inline-block}
+.agItem .edge{position:absolute;inset-inline-start:0;top:0;bottom:0;width:4px}
+.agRow{display:flex;align-items:center;gap:8px;padding-inline-start:8px}
+.agPill{color:#fff;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:7px;font-variant-numeric:tabular-nums}
+.agNote{font-size:10.5px;font-weight:700;color:var(--grey);margin-inline-start:auto}
+
+/* ================= MAP ================= */
+.grid-main{display:grid;grid-template-columns:1.45fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:1180px){.grid-main{grid-template-columns:1fr}}
+.mapWrap{position:relative;direction:ltr}
+#mapSvg{width:100%;height:auto;display:block}
+.state{stroke:#fff;stroke-width:2.4;cursor:pointer;transition:filter .15s,opacity .15s}
+.state:hover{filter:brightness(1.08)}
+.state.sel{stroke:var(--black);stroke-width:3.4}
+.state.dim{opacity:.35}
+.stLbl{font-size:12px;font-weight:800;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.35);stroke-width:2.6px;pointer-events:none;text-anchor:middle}
+.seaLbl{font-size:11px;font-weight:700;fill:#9FB4A6;letter-spacing:2.2px}
+.bubble{fill:rgba(14,14,16,.55);pointer-events:none}
+.bubble-pulse{fill:rgba(14,14,16,.16);pointer-events:none;transform-origin:center;animation:pulse 2.4s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.7);opacity:.8}100%{transform:scale(1.5);opacity:0}}
+#mapTip{position:absolute;background:var(--black);color:#fff;font-size:12px;font-weight:600;padding:9px 12px;border-radius:10px;pointer-events:none;opacity:0;transition:opacity .12s;z-index:5;line-height:1.5;direction:inherit}
+.legend{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:10.5px;color:var(--grey);font-weight:700;flex-wrap:wrap}
+.legend .bar{width:130px;height:9px;border-radius:6px;background:linear-gradient(90deg,var(--red),var(--amber),var(--green))}
+[dir="rtl"] .legend .bar{background:linear-gradient(270deg,var(--red),var(--amber),var(--green))}
+.legend .bub{display:flex;align-items:center;gap:5px}
+.legend .bub i{width:11px;height:11px;border-radius:50%;background:rgba(14,14,16,.45);display:inline-block}
+
+#distCard{display:none}
+#distCard.on{display:block}
+.distSummary{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--grey);font-weight:600;margin-bottom:11px}
+.distSummary b{color:var(--ink)}
+.distGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.dTile{border-radius:11px;padding:10px 11px;color:#fff;cursor:pointer;position:relative;transition:transform .12s}
+.dTile:hover{transform:translateY(-2px)}
+.dTile b{display:block;font-size:12.5px;line-height:1.3;text-shadow:0 1px 4px rgba(0,0,0,.35)}
+.dTile small{font-size:10px;font-weight:700;opacity:.92;text-shadow:0 1px 4px rgba(0,0,0,.35)}
+.dTile .sc{position:absolute;top:8px;inset-inline-end:9px;font-size:10.5px;font-weight:800;background:rgba(0,0,0,.28);padding:2px 7px;border-radius:6px}
+
+/* ================= CHARTS ================= */
+.chart svg{width:100%;height:auto;direction:ltr}
+.lg{display:flex;gap:14px;font-size:10.5px;color:var(--grey);font-weight:700;margin-top:6px;flex-wrap:wrap}
+.lg span{display:flex;align-items:center;gap:5px}
+.lg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.donutRow{display:flex;align-items:center;gap:18px}
+.donutRow svg{width:130px;height:130px;flex-shrink:0;direction:ltr}
+.donutStats{flex:1;display:flex;flex-direction:column;gap:8px}
+.dStat{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700}
+.dStat i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.dStat b{margin-inline-start:auto;font-variant-numeric:tabular-nums}
+.langRow{display:flex;align-items:center;gap:10px;padding:7px 0}
+.langRow .nm{width:120px;font-size:12.5px;font-weight:700}
+.langRow .barBg{flex:1;height:9px;background:#EDEFED;border-radius:6px;overflow:hidden}
+.langRow .barFill{height:100%;background:var(--green);border-radius:6px}
+.langRow b{width:44px;text-align:end;font-size:12px;font-variant-numeric:tabular-nums}
+
+/* ================= TOPICS ================= */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+@media(max-width:1180px){.grid-3{grid-template-columns:1fr}}
+.topicRow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.topicRow:last-child{border-bottom:0}
+.topicRow:hover .nm{color:var(--red-d)}
+.topicRow .nm{width:44%;font-size:12.5px;font-weight:700;line-height:1.3;transition:color .12s}
+.topicRow .nm .go{color:var(--grey);font-size:11px;margin-inline-start:4px}
+.topicRow .barBg{flex:1;height:8px;background:#EDEFED;border-radius:5px;overflow:hidden}
+.topicRow .barFill{height:100%;border-radius:5px}
+.topicRow .ct{width:52px;text-align:end;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.topicRow .tr{width:26px;text-align:end;font-size:11px;font-weight:800}
+.tr.up{color:var(--red)}.tr.down{color:var(--green)}.tr.flat{color:var(--grey)}
+.hintLine{font-size:11px;color:var(--grey);font-weight:700;margin-top:10px}
+.kwWrap{display:flex;flex-wrap:wrap;gap:8px}
+.kw{background:#F1F3F1;border-radius:99px;padding:6px 13px;font-weight:700;color:var(--ink)}
+.kw em{font-style:normal;font-size:10px;font-weight:800;color:var(--red);margin-inline-start:5px}
+.kw em.g{color:var(--green)}
+.sug{border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:9px}
+.sug .top{display:flex;align-items:flex-start;gap:8px}
+.sug b{font-size:12.5px;line-height:1.4;flex:1}
+.tag{font-size:9.5px;font-weight:800;letter-spacing:.3px;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.tag.act{background:#E3F2E9;color:var(--green-d)}
+.tag.ack{background:#EDEFED;color:#3D4440}
+.tag.rev{background:#FBF3D9;color:#7A6400}
+.tag.asg{background:#FBEAEC;color:var(--red-d)}
+.sug .meta{display:flex;gap:12px;font-size:10.5px;color:var(--grey);font-weight:600;margin-top:6px;flex-wrap:wrap}
+.assignMini{border:0;background:var(--black);color:#fff;font-size:10.5px;font-weight:800;padding:6px 11px;border-radius:8px;margin-top:8px}
+.assignedNote{font-size:10.5px;color:var(--green-d);font-weight:800;margin-top:7px}
+
+/* ================= FEED ================= */
+.grid-2{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:16px}
+@media(max-width:1180px){.grid-2{grid-template-columns:1fr}}
+.feedRow{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--line)}
+.feedRow:last-child{border-bottom:0}
+.sdot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.feedRow .fx{flex:1}
+.feedRow .quote{font-size:12.5px;line-height:1.55}
+.feedRow small{display:block;font-size:10.5px;color:var(--grey);font-weight:600;margin-top:3px}
+.urgent{border:1px solid #F0C6CC;background:#FDF5F6;border-radius:13px;padding:12px 14px;margin-bottom:10px}
+.urgent b{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--red-d)}
+.urgent p{font-size:12.5px;font-weight:600;line-height:1.5;margin-top:5px}
+.doneCard{border:1px solid #BFE0CC;background:#F4FAF6;border-radius:13px;padding:12px 14px}
+.doneCard .dh2{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--green-d)}
+.doneCard p{font-size:12.5px;font-weight:700;line-height:1.5;margin-top:5px}
+.doneCard .meta{display:flex;gap:12px;font-size:10.5px;color:var(--grey);font-weight:600;margin-top:6px;flex-wrap:wrap}
+
+/* ================= MODALS ================= */
+.modal{position:fixed;inset:0;background:rgba(10,10,12,.55);display:none;align-items:flex-start;justify-content:center;padding:34px 20px;z-index:60;overflow-y:auto}
+.modal.open{display:flex}
+.mCard{background:#fff;border-radius:17px;max-width:720px;width:100%;padding:24px 26px;position:relative;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.mCard h3{font-size:17.5px;font-weight:800;margin-bottom:3px;padding-inline-end:40px}
+.mCard .sub{font-size:12px;color:var(--grey);margin-bottom:14px;font-weight:600}
+.mCard h4{font-size:12px;font-weight:800;margin:16px 0 8px;color:var(--green-d);letter-spacing:.3px;text-transform:uppercase}
+.mClose{position:absolute;top:16px;inset-inline-end:18px;border:0;background:#F1F3F1;width:32px;height:32px;border-radius:50%;font-size:15px;color:var(--grey)}
+.miniStats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.miniStat{flex:1;min-width:120px;background:#F4F6F4;border-radius:11px;padding:10px 12px}
+.miniStat small{font-size:10px;font-weight:800;letter-spacing:.6px;color:var(--grey);text-transform:uppercase}
+.miniStat b{display:block;font-size:17px;margin-top:2px;line-height:1.3}
+.spark{width:100%;height:44px;direction:ltr}
+.subIssue{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.subIssue:last-child{border:0}
+.subIssue .nm{width:46%;font-weight:700;line-height:1.3}
+.subIssue .barBg{flex:1;height:8px;background:#EDEFED;border-radius:5px;overflow:hidden}
+.subIssue .barFill{height:100%;background:var(--red);border-radius:5px}
+.subIssue b{width:40px;text-align:end;font-variant-numeric:tabular-nums;font-size:12px}
+.distHits{display:flex;flex-wrap:wrap;gap:7px}
+.distHit{font-size:11px;font-weight:700;background:#FBEAEC;color:var(--red-d);padding:5px 11px;border-radius:99px}
+.qList .q{border-inline-start:3px solid var(--green);background:#F7FAF8;border-radius:0 10px 10px 0;padding:10px 13px;font-size:12.5px;line-height:1.55;font-style:italic;margin-bottom:8px}
+[dir="rtl"] .qList .q{border-radius:10px 0 0 10px}
+.qList .q small{display:block;font-style:normal;font-size:10.5px;color:var(--grey);font-weight:700;margin-top:5px}
+.mFoot{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.btnP{flex:1;border:0;background:var(--black);color:#fff;font-weight:800;font-size:13.5px;padding:13px;border-radius:12px}
+.btnS{flex:1;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-weight:700;font-size:13.5px;padding:13px;border-radius:12px}
+label.f{display:block;font-size:12px;font-weight:800;margin:12px 0 5px}
+input.f,select.f,textarea.f{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit}
+textarea.f{min-height:64px;resize:vertical}
+.deptHint{font-size:10.5px;color:var(--green-d);font-weight:700;margin-top:5px}
+.prioRow{display:flex;gap:8px}
+.prio{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:9px;text-align:center;font-size:12px;font-weight:700;cursor:pointer}
+.prio.sel{background:var(--black);border-color:var(--black);color:#fff}
+.prio.hi.sel{background:var(--red);border-color:var(--red)}
+
+#drawer{position:fixed;top:0;inset-inline-end:-420px;width:400px;max-width:92vw;height:100vh;background:#fff;box-shadow:-12px 0 40px rgba(0,0,0,.18);z-index:70;transition:inset-inline-end .3s;display:flex;flex-direction:column}
+#drawer.open{inset-inline-end:0}
+#drawer .dh{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
+#drawer .dh h3{font-size:15px;font-weight:800}
+#drawer .dh button{border:0;background:#F1F3F1;width:30px;height:30px;border-radius:50%}
+#drawer .body{flex:1;overflow-y:auto;padding:16px 20px}
+.task{border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:10px}
+.task .t1{display:flex;align-items:flex-start;gap:8px}
+.task b{font-size:12.5px;line-height:1.4;flex:1}
+.task .meta{display:flex;gap:10px;flex-wrap:wrap;font-size:10.5px;color:var(--grey);font-weight:600;margin-top:6px}
+.task select{border:1.5px solid var(--line);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:700;font-family:inherit;margin-top:8px}
+.emptyT{font-size:12px;color:var(--grey);font-weight:600;text-align:center;padding:26px 6px;line-height:1.6}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--black);color:#fff;font-size:13px;font-weight:700;padding:13px 20px;border-radius:12px;z-index:90;transition:transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:min(90vw,560px);text-align:center;line-height:1.45}
+.toast.show{transform:translateX(-50%)}
+footer{padding:18px 26px 30px;text-align:center;font-size:11px;color:var(--grey);font-weight:600}
+body:not(.du) .du-only{display:none!important}
+
+/* ================= HAPPINESS INDEX ================= */
+.kpi.k5{border-inline-start-color:#B08900;background:linear-gradient(135deg,#FFFDF4,#fff 60%)}
+.layerTgl{display:flex;background:#F1F3F1;border-radius:10px;padding:3px;flex-basis:100%;max-width:340px}
+.layerTgl button{flex:1;border:0;background:transparent;font-size:11px;font-weight:800;padding:6px 10px;border-radius:8px;color:var(--grey);transition:.15s;white-space:nowrap}
+.layerTgl button.on{background:var(--black);color:#fff}
+.hpHead{display:flex;align-items:center;gap:13px;margin-bottom:10px}
+.hpBig{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;color:#B08900;line-height:1}
+.hpMeta b{display:block;font-size:12px}
+.hpMeta small{font-size:10.5px;color:var(--grey);font-weight:700}
+.hpRow{display:flex;align-items:center;gap:10px;padding:6px 0;cursor:pointer}
+.hpRow:hover .nm{color:var(--red-d)}
+.hpRow .nm{width:110px;font-size:12px;font-weight:700;transition:color .12s}
+.hpRow .barBg{flex:1;height:8px;background:#EDEFED;border-radius:5px;overflow:hidden}
+.hpRow .barFill{height:100%;border-radius:5px}
+.hpRow b{width:48px;text-align:end;font-size:12px;font-variant-numeric:tabular-nums}
+.hpSrc{font-size:10px;color:var(--grey);font-weight:700;margin-top:9px;line-height:1.5}
+.centreRow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.centreRow:last-child{border:0}
+.centreRow .nm{flex:1;font-weight:700;line-height:1.35}
+.centreRow .nm small{display:block;font-size:10.5px;color:var(--grey);font-weight:600}
+.centreRow .sc{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;width:56px;text-align:end}
+.smSplit{display:flex;width:120px;height:9px;border-radius:6px;overflow:hidden;flex-shrink:0}
+.smSplit i{height:100%}
+.gapCard{border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:9px;border-inline-start:4px solid var(--amber)}
+.gapCard.policy{border-inline-start-color:var(--red)}
+.gapCard.invest{border-inline-start-color:var(--black)}
+.gapCard.good{border-inline-start-color:var(--green)}
+.gapCard b{font-size:12.5px}
+.gapCard p{font-size:12px;line-height:1.55;color:#3D4440;margin-top:4px;font-weight:600}
+.gapCard .nums{display:flex;gap:12px;font-size:10.5px;font-weight:800;margin-top:6px;flex-wrap:wrap}
+.methodNote{background:#F7F8F5;border:1px solid #E7E9E2;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.6;font-weight:600;color:#3D4440}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hLogo">
+    <div class="flagMark"><div class="hoist"></div><div class="bands"><i></i><i></i><i></i></div></div>
+    <div class="t"><b data-i18n="brand">مسموع<span style="font-weight:300">.ai</span></b><small data-i18n="brandTag">كل صوت مسموع</small></div>
+  </div>
+  <div class="hTitle">
+    <h1 data-i18n="hTitle">ذكاء مسموع — وزارة الاتصالات</h1>
+    <p data-i18n="hSub">ما يقوله المواطنون والمقيمون لمعالي الوزير · دولة الإمارات العربية المتحدة</p>
+  </div>
+  <div class="hRight">
+    <div class="langTgl">
+      <button id="tglAr" class="on" onclick="setUiLang('ar')">العربية</button>
+      <button id="tglEn" onclick="setUiLang('en')">EN</button>
+    </div>
+    <div class="viewTgl" id="viewTgl">
+      <button data-v="min" class="on" onclick="setView('min')" data-i18n="roleMin">👤 معالي الوزير</button>
+      <button data-v="du" onclick="setView('du')" data-i18n="roleDu">🛠️ وحدة الإنجاز</button>
+    </div>
+    <div class="live"><i></i><span data-i18n="live">مباشر</span></div>
+    <div class="range" id="range">
+      <button data-d="7" class="on" data-i18n="r7">٧ أيام</button>
+      <button data-d="30" data-i18n="r30">٣٠ يوماً</button>
+      <button data-d="90" data-i18n="r90">٩٠ يوماً</button>
+    </div>
+    <button class="actBtn du-only" onclick="openDrawer()"><span data-i18n="hDirectives">📋 التكليفات</span><span class="n" id="taskCount">0</span></button>
+    <button class="brief" onclick="document.getElementById('briefModal').classList.add('open')" data-i18n="hBrief">📄 موجز الوزير</button>
+  </div>
+</header>
+
+<div class="filterBar">
+  <span class="scope"><span data-i18n="showing">العرض:</span> <b id="scopeLbl">كل الإمارات</b></span>
+  <span class="chip" id="stateChip"><span id="stateChipNm"></span><button onclick="selectState(null)">✕</button></span>
+  <span class="scope" id="viewNote" style="margin-inline-start:auto"></span>
+</div>
+
+<div class="wrap">
+
+  <div class="flowTag"><span data-i18n="flowInsights">الرؤى</span><i></i></div>
+  <div class="kpis">
+    <div class="kpi"><div class="lbl" data-i18n="kpiSess">الجلسات</div><div class="val" id="kSess">—</div><div class="delta up" data-i18n="kpiSessD">▲ ١٤٪ عن الفترة السابقة</div></div>
+    <div class="kpi k2"><div class="lbl" data-i18n="kpiCit">مواطنون ومقيمون تم الاستماع إليهم</div><div class="val" id="kCit">—</div><div class="delta up" data-i18n="kpiCitD">▲ ١١٪ عن الفترة السابقة</div></div>
+    <div class="kpi k3"><div class="lbl" data-i18n="kpiConf">مؤشر الثقة الوطني</div><div class="val" id="kSent">—</div><div class="delta up" data-i18n="kpiConfD">▲ نقطتان عن الفترة السابقة</div></div>
+    <div class="kpi k4"><div class="lbl" data-i18n="kpiDig">مؤشر رضا الخدمات الرقمية</div><div class="val" id="kDig">—</div><div class="delta down" data-i18n="kpiDigD">▼ ٣ نقاط عن الفترة السابقة</div></div>
+    <div class="kpi k5" onclick="openHappy()" style="cursor:pointer"><div class="lbl" data-i18n="kpiHap">😊 مؤشر السعادة — مراكز الإسعاد</div><div class="val" id="kHap" style="color:#B08900">—</div><div class="delta up" data-i18n="kpiHapD">▲ ٠٫٨ نقطة عن الربع السابق</div></div>
+  </div>
+
+  <!-- MINISTRY PRIORITIES -->
+  <div class="card" style="margin-top:16px">
+    <div class="cardHead"><h2 data-i18n="agendaH">🎯 أولويات الوزارة — كما يراها الناس</h2><small data-i18n="agendaS">أولويات وزارة الاتصالات، مقيّمة مباشرة من أصوات المواطنين والمقيمين · الجهة المسؤولة معروضة</small></div>
+    <div class="agendaGrid" id="agendaGrid"></div>
+  </div>
+
+  <!-- MAP + SIDE -->
+  <div class="grid-main">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div class="cardHead">
+          <h2 data-i18n="mapH">🗺️ نبض الدولة حسب الإمارة</h2>
+          <small data-i18n="mapS">اللون = الثقة · الدائرة = حجم الجلسات · اختر إمارة لعرض المناطق</small>
+          <div class="layerTgl" id="layerTgl">
+            <button data-l="voice" class="on" onclick="setLayer('voice')" data-i18n="layerVoice">🗣️ أصوات مسموع</button>
+            <button data-l="happy" onclick="setLayer('happy')" data-i18n="layerHappy">😊 مؤشر السعادة</button>
+          </div>
+        </div>
+        <div class="mapWrap">
+          <div id="mapTip"></div>
+          <svg viewBox="0 0 1000 600" id="mapSvg" role="img" aria-label="UAE sentiment map">
+            <text class="seaLbl" x="80" y="80">ARABIAN GULF</text>
+            <text class="seaLbl" x="835" y="470">GULF OF OMAN</text>
+          </svg>
+        </div>
+        <div class="legend">
+          <small id="legLo" data-i18n="legLow">ثقة منخفضة</small><div class="bar"></div><small id="legHi" data-i18n="legHigh">ثقة مرتفعة</small>
+          <span class="bub"><i></i><span id="legVolLbl" data-i18n="legVol">حجم الجلسات</span></span>
+        </div>
+      </div>
+
+      <div class="card" id="distCard">
+        <div class="cardHead">
+          <h2 id="distTitle">📍</h2>
+          <small data-i18n="distS">اللون = ثقة المنطقة · اختر منطقة لتصفية الأصوات</small>
+        </div>
+        <div class="distSummary" id="distSummary"></div>
+        <div class="distGrid" id="distGrid"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card chart">
+        <div class="cardHead"><h2 data-i18n="trendH">📈 اتجاه الثقة</h2><small data-i18n="trendS">حصة الجلسات · ١٢ أسبوعاً</small></div>
+        <svg viewBox="0 0 520 200" id="trendSvg"></svg>
+        <div class="lg">
+          <span><i style="background:var(--green)"></i><span data-i18n="posL">إيجابي</span></span>
+          <span><i style="background:var(--red)"></i><span data-i18n="negL">سلبي</span></span>
+          <span><i style="background:#B9BFBB"></i><span data-i18n="neuL">محايد</span></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cardHead"><h2 data-i18n="splitH">🎯 توزيع المشاعر</h2><small id="donutScope">كل الإمارات</small></div>
+        <div class="donutRow">
+          <svg viewBox="0 0 42 42" id="donutSvg"></svg>
+          <div class="donutStats" id="donutStats"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cardHead"><h2 data-i18n="hapH">😊 مؤشر السعادة</h2><small data-i18n="hapS">مراكز إسعاد المتعاملين</small></div>
+        <div class="hpHead"><div class="hpBig" id="hpNat">—</div><div class="hpMeta"><b id="hpNatLbl" data-i18n="hapNatLbl">المؤشر الوطني</b><small data-i18n="hapTarget">المستهدف الوطني: ٩٠٫٠٪</small></div></div>
+        <div id="hpList"></div>
+        <div class="hpSrc" data-i18n="hapSrc">المصدر: تقييمات فورية عند إنجاز الخدمة في مراكز إسعاد المتعاملين في الدولة · تحديث ربع سنوي · بيانات اصطناعية للعرض</div>
+        <button class="btnS" style="width:100%;margin-top:10px" onclick="openHappy()" data-i18n="hapOpen">فتح تحليل السعادة والفجوات</button>
+      </div>
+      <div class="card">
+        <div class="cardHead"><h2 data-i18n="langH">🌐 لغات الجلسات</h2><small data-i18n="langS">التفاعل حسب المجتمعات</small></div>
+        <div id="langList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPICS + KEYWORDS + PROPOSALS -->
+  <div class="grid-3">
+    <div class="card">
+      <div class="cardHead"><h2 data-i18n="topicH">🔥 أبرز القضايا المطروحة</h2><small id="topicScope">كل الإمارات</small></div>
+      <div id="topicList"></div>
+      <div class="hintLine" id="topicHint"></div>
+    </div>
+    <div class="card">
+      <div class="cardHead"><h2 data-i18n="kwH">💬 الكلمات الأكثر تداولاً</h2><small data-i18n="kwS">مرجحة بالنمو</small></div>
+      <div class="kwWrap" id="kwWrap"></div>
+      <div class="du-only">
+        <div class="cardHead" style="margin-top:20px"><h2 data-i18n="dwH">🏛️ عبء الإدارات</h2><small data-i18n="dwS">تكليفات مفتوحة صادرة عبر المنصة</small></div>
+        <div id="deptStats"><div class="emptyT" data-i18n="dwEmpty">لا توجد تكليفات بعد.<br>افتح تحليل قضية لإصدار تكليف.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="cardHead"><h2 data-i18n="sugH">💡 أبرز مقترحات الناس</h2><small data-i18n="sugS">مرتبة حسب التكرار × الانتشار</small></div>
+      <div id="sugList"></div>
+    </div>
+  </div>
+
+  <!-- FEED + ESCALATIONS -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="cardHead"><h2 data-i18n="feedH">🗣️ أحدث الأصوات</h2><small id="feedScope"></small></div>
+      <div id="feedList"></div>
+    </div>
+    <div class="card">
+      <div class="cardHead"><h2 data-i18n="escH">🚨 تصعيدات عاجلة</h2><small data-i18n="escS">أثر مرتفع · مراجعة في اليوم نفسه</small></div>
+      <div class="urgent"><b data-i18n="escFlag">⚑ مُصعّدة · قبل ساعتين</b><p data-i18n="escBody"><b>الساحل الشرقي — الفجيرة ودبا</b>: بلاغات متزايدة عن انقطاعات متكررة في الإنترنت مساءً تؤثر على العاملين عن بُعد والطلبة.</p><button class="assignMini du-only" onclick="openAssign('Recurring evening internet outages — East Coast','Telecom & internet quality','high')" data-i18n="issueDir">⚡ إصدار تكليف</button></div>
+      <div class="flowTag act" style="margin-top:16px"><span data-i18n="flowOutcomes">النتائج</span><i></i></div>
+      <div class="cardHead" style="margin-top:6px"><h2 data-i18n="ysH">✅ أنتم قلتم، نحن فعلنا</h2><small data-i18n="ysS">إغلاق الحلقة مع الناس</small></div>
+      <div class="doneCard">
+        <div class="dh2" data-i18n="ysTag">✓ أُنجز هذا الأسبوع</div>
+        <p data-i18n="ysItem">تمت ترقية تغطية الشبكة في ١٢ منطقة جبلية في رأس الخيمة والفجيرة بعد ٦٣٤ جلسة أثارت ضعف التغطية.</p>
+        <div class="meta"><span data-i18n="ysMeta1">مستند إلى <b>٦٣٤ جلسة</b></span><span data-i18n="ysMeta2">تم إشعار المشاركين برسالة: <b>٦٣٤</b></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer data-i18n="footer">مسموع · وزارة الاتصالات · دولة الإمارات العربية المتحدة · كل صوت مسموع · نموذج تجريبي ببيانات اصطناعية · BYOND asia</footer>
+
+<!-- ============ TOPIC DEEP-DIVE ============ -->
+<div class="modal" id="topicModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard">
+    <button class="mClose" onclick="document.getElementById('topicModal').classList.remove('open')">✕</button>
+    <h3 id="tmTitle"></h3>
+    <div class="sub" id="tmSub"></div>
+    <div class="miniStats" id="tmStats"></div>
+    <h4 data-i18n="tmTrend">الاتجاه · ١٢ أسبوعاً</h4>
+    <svg class="spark" viewBox="0 0 400 44" id="tmSpark"></svg>
+    <h4 data-i18n="tmWhat">ما الذي يطرحه الناس تحديداً</h4>
+    <div id="tmSubs"></div>
+    <h4 data-i18n="tmHot">المناطق الأكثر تأثراً</h4>
+    <div class="distHits" id="tmDists"></div>
+    <h4 data-i18n="tmVoices">أصوات ممثِّلة</h4>
+    <div class="qList" id="tmQuotes"></div>
+    <div class="mFoot">
+      <button class="btnS" onclick="toast(tt('toastSessions'))" data-i18n="tmViewAll">عرض كل الجلسات</button>
+      <button class="btnP du-only" id="tmAssign" data-i18n="tmIssue">⚡ إصدار تكليف للجهة المسؤولة</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ISSUE DIRECTIVE ============ -->
+<div class="modal" id="assignModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard" style="max-width:560px">
+    <button class="mClose" onclick="document.getElementById('assignModal').classList.remove('open')">✕</button>
+    <h3 data-i18n="asgH">إصدار تكليف</h3>
+    <div class="sub" data-i18n="asgSub">يوجَّه هذا الموضوع إلى الإدارة المسؤولة مع مالك محدد وأولوية وتاريخ استحقاق، وتتابعه وحدة الإنجاز حتى الإغلاق.</div>
+    <label class="f" data-i18n="asgIssue">الموضوع</label>
+    <input class="f" id="aIssue">
+    <label class="f" data-i18n="asgDept">الجهة المكلفة</label>
+    <select class="f" id="aDept"></select>
+    <div class="deptHint" id="aDeptHint"></div>
+    <label class="f" data-i18n="asgPrio">الأولوية</label>
+    <div class="prioRow">
+      <div class="prio" data-p="normal" data-i18n="prioNormal">عادية</div>
+      <div class="prio" data-p="elevated" data-i18n="prioElevated">مرتفعة</div>
+      <div class="prio hi" data-p="high" data-i18n="prioHigh">عاجلة</div>
+    </div>
+    <label class="f" data-i18n="asgDue">تاريخ الاستحقاق</label>
+    <input class="f" id="aDue" type="date">
+    <label class="f" data-i18n="asgNote">توجيه للجهة (اختياري)</label>
+    <textarea class="f" id="aNote"></textarea>
+    <div class="mFoot">
+      <button class="btnS" onclick="document.getElementById('assignModal').classList.remove('open')" data-i18n="cancel">إلغاء</button>
+      <button class="btnP" onclick="createTask()" data-i18n="asgSubmit">إصدار ومتابعة</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TRACKER DRAWER ============ -->
+<div id="drawer">
+  <div class="dh"><h3 data-i18n="drawerH">📋 متابعة التكليفات</h3><button onclick="document.getElementById('drawer').classList.remove('open')">✕</button></div>
+  <div class="body" id="taskList"></div>
+</div>
+
+<!-- ============ MINISTER BRIEFING ============ -->
+<div class="modal" id="briefModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard">
+    <button class="mClose" onclick="document.getElementById('briefModal').classList.remove('open')">✕</button>
+    <h3 data-i18n="bfH">موجز معالي الوزير الأسبوعي</h3>
+    <div class="sub" data-i18n="bfSub">الأسبوع ٣٦ · ٣١ أغسطس – ٦ سبتمبر ٢٠٢٦ · مولّد آلياً ومراجع بشرياً · سري — نموذج تجريبي</div>
+    <h4 data-i18n="bfHeadline">الخلاصة</h4>
+    <p style="font-size:13px;line-height:1.6" data-i18n="bfHeadlineB">٣٬٤٨٠ جلسة (+١٤٪). مؤشر الثقة الوطني +٤ (ارتفاع نقطتين) بفضل رضا واسع عن الخدمات الحكومية الرقمية. القضية الأولى: <b>جودة الاتصالات والإنترنت</b> — الانقطاعات المسائية في الساحل الشرقي هي المحرك الأبرز. <b>صدر ٣ تكليفات الأسبوع الماضي؛ أُنجز واحد.</b></p>
+    <h4 data-i18n="bfTop">أبرز القضايا</h4>
+    <p style="font-size:13px;line-height:1.65" data-i18n="bfTopB">١. جودة الاتصالات والإنترنت — انقطاعات الساحل الشرقي (٨٤٦ جلسة) · ٢. الأمن السيبراني والاحتيال الإلكتروني — رسائل التصيد (٦١٢) · ٣. أسعار وباقات الاتصالات (٥٤٠) · ٤. الشمول الرقمي وكبار المواطنين (٣٩٨).</p>
+    <h4 data-i18n="bfGeo">المتابعة الجغرافية</h4>
+    <p style="font-size:13px;line-height:1.6" data-i18n="bfGeoB">الفجيرة ورأس الخيمة دون المتوسط الوطني في جودة التغطية. يُوصى بحزمة بنية تحتية للساحل الشرقي ومتابعة أسبوعية حتى استقرار الخدمة.</p>
+    <h4 data-i18n="bfAcc">المساءلة بين الإدارات</h4>
+    <p style="font-size:13px;line-height:1.6" data-i18n="bfAccB">البنية التحتية والتغطية: تكليف واحد (مستحق هذا الأسبوع). الأمن السيبراني: واحد مفتوح. حماية المستهلك: واحد أُنجز. متوسط زمن الإنجاز في ٤ أسابيع: ٩٫٢ يوم.</p>
+  </div>
+</div>
+
+<!-- ============ HAPPINESS DEEP-DIVE ============ -->
+<div class="modal" id="happyModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mCard">
+    <button class="mClose" onclick="document.getElementById('happyModal').classList.remove('open')">✕</button>
+    <h3 data-i18n="hapMH">😊 مؤشر السعادة — مراكز إسعاد المتعاملين</h3>
+    <div class="sub" data-i18n="hapMSub">تقييم فوري عند إنجاز الخدمة (راضٍ / محايد / غير راضٍ) · الربع الثالث ٢٠٢٦ · بيانات اصطناعية للعرض</div>
+    <div class="miniStats" id="hapStats"></div>
+    <h4 data-i18n="hapByEm">حسب الإمارة</h4>
+    <div id="hapEmList"></div>
+    <h4 data-i18n="hapCentres">أبرز المراكز — الأعلى والأدنى</h4>
+    <div id="hapCentreList"></div>
+    <div class="lg" style="margin-top:8px">
+      <span><i style="background:var(--green)"></i><span data-i18n="satL">راضٍ</span></span>
+      <span><i style="background:#B9BFBB"></i><span data-i18n="neuSatL">محايد</span></span>
+      <span><i style="background:var(--red)"></i><span data-i18n="unsatL">غير راضٍ</span></span>
+    </div>
+    <h4 data-i18n="hapGapH">مراقبة الفجوة — السعادة مقابل أصوات مسموع</h4>
+    <div id="hapGapList"></div>
+    <h4 data-i18n="hapMethodH">المنهجية</h4>
+    <div class="methodNote" data-i18n="hapMethodB">مؤشر السعادة يقيس لحظة الخدمة عند الكاونتر؛ ومسموع يقيس ما يقوله الناس عن حياتهم بعد تلك اللحظة. عندما يرتفع مؤشر السعادة وتنخفض الثقة في مسموع في المكان نفسه، فالقضية في السياسة لا في المركز — والفجوة بين المؤشرين هي الرؤية.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   MASMOU.AI — UAE Ministry of Communications deployment
+   UI language: Arabic (default, RTL) / English (LTR).
+   All data keys stay in English — they are join keys for routing.
+================================================================ */
+let uiLang='ar';
+const I18N={ar:{},en:{}};
+const tt=k=>(I18N[uiLang][k]!==undefined?I18N[uiLang][k]:(I18N.en[k]||k));
+
+I18N.ar={
+ brand:'مسموع<span style="font-weight:300">.ai</span>', brandTag:"كل صوت مسموع",
+ hTitle:"ذكاء مسموع — وزارة الاتصالات",
+ hSub:"ما يقوله المواطنون والمقيمون لمعالي الوزير · دولة الإمارات العربية المتحدة",
+ roleMin:"👤 معالي الوزير", roleDu:"🛠️ وحدة الإنجاز", live:"مباشر",
+ r7:"٧ أيام", r30:"٣٠ يوماً", r90:"٩٠ يوماً",
+ hDirectives:"📋 التكليفات", hBrief:"📄 موجز الوزير", showing:"العرض:",
+ flowInsights:"الرؤى", flowOutcomes:"النتائج",
+ kpiSess:"الجلسات", kpiSessD:"▲ ١٤٪ عن الفترة السابقة",
+ kpiCit:"مواطنون ومقيمون تم الاستماع إليهم", kpiCitD:"▲ ١١٪ عن الفترة السابقة",
+ kpiConf:"مؤشر الثقة الوطني", kpiConfD:"▲ نقطتان عن الفترة السابقة",
+ kpiDig:"مؤشر رضا الخدمات الرقمية", kpiDigD:"▼ ٣ نقاط عن الفترة السابقة",
+ agendaH:"🎯 أولويات الوزارة — كما يراها الناس",
+ agendaS:"أولويات وزارة الاتصالات، مقيّمة مباشرة من أصوات المواطنين والمقيمين · الجهة المسؤولة معروضة",
+ mapH:"🗺️ نبض الدولة حسب الإمارة",
+ mapS:"اللون = الثقة · الدائرة = حجم الجلسات · اختر إمارة لعرض المناطق",
+ legLow:"ثقة منخفضة", legHigh:"ثقة مرتفعة", legVol:"حجم الجلسات",
+ distS:"اللون = ثقة المنطقة · اختر منطقة لتصفية الأصوات", distTitleBase:"📍 مناطق",
+ trendH:"📈 اتجاه الثقة", trendS:"حصة الجلسات · ١٢ أسبوعاً",
+ posL:"إيجابي", negL:"سلبي", neuL:"محايد",
+ splitH:"🎯 توزيع المشاعر",
+ langH:"🌐 لغات الجلسات", langS:"التفاعل حسب المجتمعات",
+ topicH:"🔥 أبرز القضايا المطروحة",
+ kwH:"💬 الكلمات الأكثر تداولاً", kwS:"مرجحة بالنمو",
+ dwH:"🏛️ عبء الإدارات", dwS:"تكليفات مفتوحة صادرة عبر المنصة",
+ dwEmpty:"لا توجد تكليفات بعد.<br>افتح تحليل قضية لإصدار تكليف.",
+ sugH:"💡 أبرز مقترحات الناس", sugS:"مرتبة حسب التكرار × الانتشار",
+ feedH:"🗣️ أحدث الأصوات",
+ escH:"🚨 تصعيدات عاجلة", escS:"أثر مرتفع · مراجعة في اليوم نفسه",
+ escFlag:"⚑ مُصعّدة · قبل ساعتين",
+ escBody:"<b>الساحل الشرقي — الفجيرة ودبا</b>: بلاغات متزايدة عن انقطاعات متكررة في الإنترنت مساءً تؤثر على العاملين عن بُعد والطلبة.",
+ issueDir:"⚡ إصدار تكليف",
+ ysH:"✅ أنتم قلتم، نحن فعلنا", ysS:"إغلاق الحلقة مع الناس", ysTag:"✓ أُنجز هذا الأسبوع",
+ ysItem:"تمت ترقية تغطية الشبكة في ١٢ منطقة جبلية في رأس الخيمة والفجيرة بعد ٦٣٤ جلسة أثارت ضعف التغطية.",
+ ysMeta1:"مستند إلى <b>٦٣٤ جلسة</b>", ysMeta2:"تم إشعار المشاركين برسالة: <b>٦٣٤</b>",
+ footer:"مسموع · وزارة الاتصالات · دولة الإمارات العربية المتحدة · كل صوت مسموع · نموذج تجريبي ببيانات اصطناعية · BYOND asia",
+ tmTrend:"الاتجاه · ١٢ أسبوعاً", tmWhat:"ما الذي يطرحه الناس تحديداً",
+ tmHot:"المناطق الأكثر تأثراً", tmVoices:"أصوات ممثِّلة",
+ tmViewAll:"عرض كل الجلسات", tmIssue:"⚡ إصدار تكليف للجهة المسؤولة",
+ asgH:"إصدار تكليف",
+ asgSub:"يوجَّه هذا الموضوع إلى الإدارة المسؤولة مع مالك محدد وأولوية وتاريخ استحقاق، وتتابعه وحدة الإنجاز حتى الإغلاق.",
+ asgIssue:"الموضوع", asgDept:"الجهة المكلفة", asgPrio:"الأولوية", asgDue:"تاريخ الاستحقاق",
+ asgNote:"توجيه للجهة (اختياري)",
+ notePh:"مثال: تقرير أسبوعي عن استقرار الخدمة في الساحل الشرقي خلال ١٤ يوماً.",
+ prioNormal:"عادية", prioElevated:"مرتفعة", prioHigh:"عاجلة",
+ cancel:"إلغاء", asgSubmit:"إصدار ومتابعة",
+ drawerH:"📋 متابعة التكليفات",
+ drawerEmpty:"لا توجد تكليفات بعد.<br><br>افتح أي تحليل قضية أو تصعيداً أو مقترحاً واضغط <b>إصدار تكليف</b>. يُسجَّل كل تكليف هنا مع الجهة المسؤولة وتاريخ الاستحقاق والحالة.",
+ bfH:"موجز معالي الوزير الأسبوعي",
+ bfSub:"الأسبوع ٣٦ · ٣١ أغسطس – ٦ سبتمبر ٢٠٢٦ · مولّد آلياً ومراجع بشرياً · سري — نموذج تجريبي",
+ bfHeadline:"الخلاصة",
+ bfHeadlineB:"٣٬٤٨٠ جلسة (+١٤٪). مؤشر الثقة الوطني +٤ (ارتفاع نقطتين) بفضل رضا واسع عن الخدمات الحكومية الرقمية. القضية الأولى: <b>جودة الاتصالات والإنترنت</b> — الانقطاعات المسائية في الساحل الشرقي هي المحرك الأبرز. <b>صدر ٣ تكليفات الأسبوع الماضي؛ أُنجز واحد.</b>",
+ bfTop:"أبرز القضايا",
+ bfTopB:"١. جودة الاتصالات والإنترنت — انقطاعات الساحل الشرقي (٨٤٦ جلسة) · ٢. الأمن السيبراني والاحتيال الإلكتروني — رسائل التصيد (٦١٢) · ٣. أسعار وباقات الاتصالات (٥٤٠) · ٤. الشمول الرقمي وكبار المواطنين (٣٩٨).",
+ bfGeo:"المتابعة الجغرافية",
+ bfGeoB:"الفجيرة ورأس الخيمة دون المتوسط الوطني في جودة التغطية. يُوصى بحزمة بنية تحتية للساحل الشرقي ومتابعة أسبوعية حتى استقرار الخدمة.",
+ bfAcc:"المساءلة بين الإدارات",
+ bfAccB:"البنية التحتية والتغطية: تكليف واحد (مستحق هذا الأسبوع). الأمن السيبراني: واحد مفتوح. حماية المستهلك: واحد أُنجز. متوسط زمن الإنجاز في ٤ أسابيع: ٩٫٢ يوم.",
+ kpiHap:"😊 مؤشر السعادة — مراكز الإسعاد", kpiHapD:"▲ ٠٫٨ نقطة عن الربع السابق",
+ layerVoice:"🗣️ أصوات مسموع", layerHappy:"😊 مؤشر السعادة",
+ legLowH:"سعادة أدنى", legHighH:"سعادة أعلى", legVolH:"حجم التقييمات",
+ hapH:"😊 مؤشر السعادة", hapS:"مراكز إسعاد المتعاملين",
+ hapNatLbl:"المؤشر الوطني", hapTarget:"المستهدف الوطني: ٩٠٫٠٪",
+ hapSrc:"المصدر: تقييمات فورية عند إنجاز الخدمة في مراكز إسعاد المتعاملين في الدولة · تحديث ربع سنوي · بيانات اصطناعية للعرض",
+ hapOpen:"فتح تحليل السعادة والفجوات",
+ hapMH:"😊 مؤشر السعادة — مراكز إسعاد المتعاملين",
+ hapMSub:"تقييم فوري عند إنجاز الخدمة (راضٍ / محايد / غير راضٍ) · الربع الثالث ٢٠٢٦ · بيانات اصطناعية للعرض",
+ hapByEm:"حسب الإمارة", hapCentres:"أبرز المراكز — الأعلى والأدنى",
+ satL:"راضٍ", neuSatL:"محايد", unsatL:"غير راضٍ",
+ hapGapH:"مراقبة الفجوة — السعادة مقابل أصوات مسموع", hapMethodH:"المنهجية",
+ hapMethodB:"مؤشر السعادة يقيس لحظة الخدمة عند الكاونتر؛ ومسموع يقيس ما يقوله الناس عن حياتهم بعد تلك اللحظة. عندما يرتفع مؤشر السعادة وتنخفض الثقة في مسموع في المكان نفسه، فالقضية في السياسة لا في المركز — والفجوة بين المؤشرين هي الرؤية.",
+ hapNatStat:"المؤشر الوطني", hapHighest:"أعلى مركز", hapLowest:"أدنى مركز", hapRatings:"تقييمات هذا الربع",
+ happyWord:"السعادة", ratingsWord:"تقييم",
+ /* dynamic */
+ allUae:"كل الإمارات", clickDistricts:"اختر لعرض المناطق",
+ districtsWord:"مناطق", lowestConf:"الأدنى ثقة:", highestConf:"الأعلى:",
+ topConcern:"القضية الأبرز:", topPrefix:"الأبرز:", sessionsWord:"جلسة",
+ confidenceWord:"الثقة", spreadWord:"الانتشار:", emiratesWord:"إمارات",
+ leadWord:"الجهة:", worsening:"يتراجع", improving:"يتحسن", steady:"مستقر",
+ anonymised:"مجهولة الهوية", feedScopeBase:"مجهولة الهوية · ملخصات ذكية بمقاطع حرفية",
+ hintDeep:"👈 اختر قضية لفتح التحليل المعمّق",
+ hintDeepDu:"👈 اختر قضية لفتح التحليل وإصدار تكليف",
+ viewNoteMin:"عرض معالي الوزير — نبض الدولة في دقيقتين",
+ viewNoteDu:"وحدة الإنجاز — التنفيذ: إصدار ومتابعة وإغلاق",
+ tmSessions:"الجلسات", tmWkTrend:"اتجاه ٤ أسابيع", tmLead:"الجهة المسؤولة",
+ lastDays:d=>"آخر "+fmtN(d)+" أيام",
+ aiSuggest:"✓ اقتراح آلي للجهة المسؤولة بناءً على تصنيف الموضوع: ",
+ stAssigned:"مُكلَّفة", stProgress:"قيد التنفيذ", stResolved:"أُنجزت",
+ deptWord:"الجهة:", dueWord:"الاستحقاق:", overdueTag:" ⚠ متأخر", priorityWord:"الأولوية:",
+ noOpenDir:"لا توجد تكليفات مفتوحة.<br>أصدر واحداً من تحليل قضية.",
+ tagDelivered:"أُنجز", tagAck:"قيد الدراسة", tagReview:"قيد المراجعة", tagIssued:"صدر تكليف",
+ toastSessions:"نموذج تجريبي: ستُفتح قائمة الجلسات الكاملة في مستكشف الجلسات.",
+ toastIssued:n=>"✓ صدر التكليف إلى "+n+" — تتابعه وحدة الإنجاز",
+ toastDelivered:'✓ أُنجز — يمكن إشعار من أثاروا الموضوع برسالة "أنتم قلتم، نحن فعلنا".',
+ toastFiltered:d=>"تمت تصفية الأصوات إلى "+d, toastCleared:"أُلغيت تصفية المناطق",
+};
+
+I18N.en={
+ brand:'MASMOU<span style="font-weight:300">.ai</span>', brandTag:"EVERY VOICE HEARD",
+ hTitle:"MASMOU Intelligence — Ministry of Communications",
+ hSub:"What citizens and residents are telling the Minister · United Arab Emirates",
+ roleMin:"👤 The Minister", roleDu:"🛠️ Delivery Unit", live:"LIVE",
+ r7:"7d", r30:"30d", r90:"90d",
+ hDirectives:"📋 Directives", hBrief:"📄 Minister's Brief", showing:"Showing:",
+ flowInsights:"Insights", flowOutcomes:"Outcomes",
+ kpiSess:"Sessions", kpiSessD:"▲ 14% vs prior period",
+ kpiCit:"Citizens & residents heard", kpiCitD:"▲ 11% vs prior period",
+ kpiConf:"National Confidence", kpiConfD:"▲ 2 pts vs prior period",
+ kpiDig:"Digital Services Sentiment", kpiDigD:"▼ 3 pts vs prior period",
+ agendaH:"🎯 Ministry priorities — as the people see them",
+ agendaS:"the Ministry of Communications' priorities, scored live by citizen and resident voices · lead department shown",
+ mapH:"🗺️ National pulse by emirate",
+ mapS:"Colour = confidence · Circle = session volume · Click an emirate for its districts",
+ legLow:"Low confidence", legHigh:"High confidence", legVol:"Session volume",
+ distS:"Colour = district confidence · Click a tile to filter voices", distTitleBase:"📍 Districts",
+ trendH:"📈 Confidence trend", trendS:"share of sessions · 12 weeks",
+ posL:"Positive", negL:"Negative", neuL:"Neutral",
+ splitH:"🎯 Sentiment split",
+ langH:"🌐 Session languages", langS:"engagement by community",
+ topicH:"🔥 Top concerns raised",
+ kwH:"💬 Trending keywords", kwS:"growth-weighted",
+ dwH:"🏛️ Department workload", dwS:"open directives issued via this platform",
+ dwEmpty:"No directives issued yet.<br>Open a concern deep dive to issue one.",
+ sugH:"💡 Top proposals from the public", sugS:"ranked by frequency × spread",
+ feedH:"🗣️ Latest voices",
+ escH:"🚨 Escalations", escS:"high-impact · same-day review",
+ escFlag:"⚑ FLAGGED · 2h ago",
+ escBody:"<b>East Coast — Fujairah & Dibba</b>: rising reports of recurring evening internet outages affecting remote workers and students.",
+ issueDir:"⚡ Issue directive",
+ ysH:"✅ You said, we did", ysS:"closing the loop with the public", ysTag:"✓ DELIVERED THIS WEEK",
+ ysItem:"Network coverage upgraded across 12 mountain districts in Ras Al Khaimah and Fujairah, after 634 sessions raised weak coverage.",
+ ysMeta1:"Driven by <b>634 sessions</b>", ysMeta2:"Participants notified: <b>634</b>",
+ footer:"MASMOU · Ministry of Communications · United Arab Emirates · Every voice heard · Demo prototype with synthetic data · BYOND asia",
+ tmTrend:"Trend · 12 weeks", tmWhat:"What exactly people are raising",
+ tmHot:"Most-affected districts", tmVoices:"Representative voices",
+ tmViewAll:"View all sessions", tmIssue:"⚡ Issue directive to lead department",
+ asgH:"Issue directive",
+ asgSub:"Routes this matter to the responsible department with an owner, priority and due date, tracked by the Delivery Unit to closure.",
+ asgIssue:"Matter", asgDept:"Assign to department", asgPrio:"Priority", asgDue:"Due date",
+ asgNote:"Direction to the department (optional)",
+ notePh:"e.g. Weekly service-stability report for the East Coast within 14 days.",
+ prioNormal:"Normal", prioElevated:"Elevated", prioHigh:"Urgent",
+ cancel:"Cancel", asgSubmit:"Issue & track",
+ drawerH:"📋 Directive Tracker",
+ drawerEmpty:"No directives yet.<br><br>Open any concern deep dive, escalation or proposal and tap <b>Issue directive</b>. Every directive is logged here with its owner, due date and status.",
+ bfH:"Weekly Minister's Brief",
+ bfSub:"Week 36 · 31 Aug – 6 Sep 2026 · Auto-generated, human-reviewed · Confidential — demo",
+ bfHeadline:"Headline",
+ bfHeadlineB:"3,480 sessions (+14%). National confidence +4 (up 2 pts), lifted by broad satisfaction with digital government services. Top concern: <b>telecom & internet quality</b> — recurring evening outages on the East Coast are the clearest driver. <b>3 directives issued last week; 1 delivered.</b>",
+ bfTop:"Top concerns",
+ bfTopB:"1. Telecom & internet quality — East Coast outages (846 sessions) · 2. Cybersecurity & online fraud — phishing SMS (612) · 3. Telecom pricing & packages (540) · 4. Digital inclusion & senior citizens (398).",
+ bfGeo:"Geographic watch",
+ bfGeoB:"Fujairah and Ras Al Khaimah sit below the national mean on coverage quality. Recommend an East Coast infrastructure package with weekly follow-up until service stabilises.",
+ bfAcc:"Cross-department accountability",
+ bfAccB:"Infrastructure & Coverage: 1 directive (due this week). Cybersecurity: 1 open. Consumer Protection: 1 delivered. Average delivery time over 4 weeks: 9.2 days.",
+ kpiHap:"😊 Happiness Index — Happiness Centres", kpiHapD:"▲ 0.8 pts vs prior quarter",
+ layerVoice:"🗣️ MASMOU voices", layerHappy:"😊 Happiness Index",
+ legLowH:"Lower happiness", legHighH:"Higher happiness", legVolH:"Rating volume",
+ hapH:"😊 Happiness Index", hapS:"Customer Happiness Centres",
+ hapNatLbl:"National index", hapTarget:"National target: 90.0%",
+ hapSrc:"Source: instant post-service ratings at Customer Happiness Centres nationwide · quarterly refresh · synthetic demo data",
+ hapOpen:"Open happiness & gap analysis",
+ hapMH:"😊 Happiness Index — Customer Happiness Centres",
+ hapMSub:"Instant rating at service completion (satisfied / neutral / unsatisfied) · Q3 2026 · synthetic demo data",
+ hapByEm:"By emirate", hapCentres:"Notable centres — highest & lowest",
+ satL:"Satisfied", neuSatL:"Neutral", unsatL:"Unsatisfied",
+ hapGapH:"Gap watch — happiness vs MASMOU voices", hapMethodH:"Methodology",
+ hapMethodB:"The Happiness Index measures the service moment at the counter; MASMOU measures what people say about their lives after that moment. When happiness is high but MASMOU confidence is low in the same place, the issue is policy, not the centre — the gap between the two indices is the insight.",
+ hapNatStat:"National index", hapHighest:"Highest centre", hapLowest:"Lowest centre", hapRatings:"Ratings this quarter",
+ happyWord:"Happiness", ratingsWord:"ratings",
+ allUae:"All Emirates", clickDistricts:"Click for districts",
+ districtsWord:"districts", lowestConf:"Lowest confidence:", highestConf:"Highest:",
+ topConcern:"Top concern:", topPrefix:"Top:", sessionsWord:"sessions",
+ confidenceWord:"confidence", spreadWord:"Spread:", emiratesWord:"emirates",
+ leadWord:"Lead:", worsening:"worsening", improving:"improving", steady:"steady",
+ anonymised:"anonymised", feedScopeBase:"anonymised · AI summaries with verbatim anchors",
+ hintDeep:"👉 Click a concern to open the deep dive",
+ hintDeepDu:"👉 Click a concern to open the deep dive & issue a directive",
+ viewNoteMin:"Minister View — the national pulse in two minutes",
+ viewNoteDu:"Delivery Unit — execution: issue, track & close",
+ tmSessions:"Sessions", tmWkTrend:"4-wk trend", tmLead:"Lead department",
+ lastDays:d=>"last "+d+" days",
+ aiSuggest:"✓ AI-suggested lead department from topic classification: ",
+ stAssigned:"Assigned", stProgress:"In progress", stResolved:"Delivered",
+ deptWord:"Department:", dueWord:"Due:", overdueTag:" ⚠ OVERDUE", priorityWord:"Priority:",
+ noOpenDir:"No open directives.<br>Issue one from a concern deep dive.",
+ tagDelivered:"DELIVERED", tagAck:"UNDER STUDY", tagReview:"UNDER REVIEW", tagIssued:"ISSUED",
+ toastSessions:"Demo: the full session list would open in the Session Explorer.",
+ toastIssued:n=>"✓ Directive issued to "+n+" — tracked by the Delivery Unit",
+ toastDelivered:'✓ Delivered — the people who raised this can be notified: "You said, we did."',
+ toastFiltered:d=>"Voices filtered to "+d, toastCleared:"District filter cleared",
+};
+
+/* ================================================================
+   DATA — Ministry of Communications deployment profile
+================================================================ */
+const TOPICS=["Telecom & internet quality","Cybersecurity & online fraud","Telecom pricing & packages",
+ "Digital government services","Digital inclusion & seniors","Remote-area coverage",
+ "Media & broadcasting","Postal & logistics","AI & innovation"];
+const NEG_TOPICS=new Set(["Telecom & internet quality","Cybersecurity & online fraud","Telecom pricing & packages","Remote-area coverage"]);
+const T_TOPIC={
+ "Telecom & internet quality":"جودة الاتصالات والإنترنت",
+ "Cybersecurity & online fraud":"الأمن السيبراني والاحتيال الإلكتروني",
+ "Telecom pricing & packages":"أسعار وباقات الاتصالات",
+ "Digital government services":"الخدمات الحكومية الرقمية",
+ "Digital inclusion & seniors":"الشمول الرقمي وكبار المواطنين",
+ "Remote-area coverage":"تغطية المناطق النائية",
+ "Media & broadcasting":"الإعلام والبث",
+ "Postal & logistics":"البريد والخدمات اللوجستية",
+ "AI & innovation":"الذكاء الاصطناعي والابتكار",
+ "General feedback":"ملاحظات عامة",
+};
+const KW_POOL={
+ "Telecom & internet quality":["انقطاع","السرعة","فايبر","5G","التغطية"],
+ "Cybersecurity & online fraud":["احتيال","تصيد","رسائل نصية","رابط مشبوه","حساب مخترق"],
+ "Telecom pricing & packages":["الباقات","الأسعار","التجوال","الفواتير","عروض"],
+ "Digital government services":["تطبيق","الهوية الرقمية","معاملة","تجديد","دفع إلكتروني"],
+ "Digital inclusion & seniors":["كبار المواطنين","تدريب","تبسيط","مساعدة","لغة"],
+ "Remote-area coverage":["الجبال","القرى","إشارة","برج","الساحل الشرقي"],
+ "Media & broadcasting":["المحتوى","القنوات","البث","المنصات","الأخبار"],
+ "Postal & logistics":["طرد","توصيل","تتبع","صندوق بريد","تأخير"],
+ "AI & innovation":["الذكاء الاصطناعي","تدريب","وظائف","مبادرة","بيانات"],
+};
+const DEPTS=[
+ {id:"infra",en:"Infrastructure & Coverage",ar:"البنية التحتية والتغطية"},
+ {id:"cyber",en:"Cybersecurity Directorate",ar:"إدارة الأمن السيبراني"},
+ {id:"consumer",en:"Consumer Protection",ar:"حماية المستهلك"},
+ {id:"digigov",en:"Digital Government Office",ar:"مكتب الحكومة الرقمية"},
+ {id:"inclusion",en:"Digital Inclusion Programme",ar:"برنامج الشمول الرقمي"},
+ {id:"media",en:"Media Regulatory Office",ar:"مكتب تنظيم الإعلام"},
+ {id:"postal",en:"Postal & Logistics",ar:"البريد والخدمات اللوجستية"},
+ {id:"innov",en:"Innovation & AI Office",ar:"مكتب الابتكار والذكاء الاصطناعي"},
+ {id:"du",en:"Minister's Delivery Unit",ar:"وحدة الإنجاز"},
+];
+const TOPIC_DEPT={
+ "Telecom & internet quality":"infra","Cybersecurity & online fraud":"cyber",
+ "Telecom pricing & packages":"consumer","Digital government services":"digigov",
+ "Digital inclusion & seniors":"inclusion","Remote-area coverage":"infra",
+ "Media & broadcasting":"media","Postal & logistics":"postal","AI & innovation":"innov",
+ "General feedback":"du",
+};
+/* Ministry priorities (agenda) — scored by listening */
+const AGENDA=[
+ {a:"Nationwide fibre & 5G quality",ar:"جودة الألياف والجيل الخامس في كل الدولة",m:"infra",v:-0.16,dir:"worse",topic:"Telecom & internet quality"},
+ {a:"A digital government that feels effortless",ar:"حكومة رقمية بلا عناء",m:"digigov",v:0.34,dir:"better",topic:"Digital government services"},
+ {a:"Protect people from online fraud",ar:"حماية الناس من الاحتيال الإلكتروني",m:"cyber",v:-0.12,dir:"worse",topic:"Cybersecurity & online fraud"},
+ {a:"Fair, transparent telecom pricing",ar:"أسعار اتصالات عادلة وشفافة",m:"consumer",v:-0.08,dir:"flat",topic:"Telecom pricing & packages"},
+ {a:"No one left offline — inclusion for all",ar:"لا أحد خارج الشبكة — شمول رقمي للجميع",m:"inclusion",v:0.06,dir:"better",topic:"Digital inclusion & seniors"},
+ {a:"An AI-ready nation",ar:"دولة جاهزة للذكاء الاصطناعي",m:"innov",v:0.22,dir:"better",topic:"AI & innovation"},
+];
+
+/* Emirates + districts (AR/EN) */
+const GEO={
+ "Abu Dhabi":{ar:"أبوظبي",d:[["Abu Dhabi City","مدينة أبوظبي"],["Al Ain","العين"],["Al Dhafra","الظفرة"],["Yas Island","جزيرة ياس"],["Musaffah","مصفح"]]},
+ "Dubai":{ar:"دبي",d:[["Deira","ديرة"],["Bur Dubai","بر دبي"],["Jumeirah","جميرا"],["Al Barsha","البرشاء"],["Hatta","حتا"],["Dubai South","دبي الجنوب"]]},
+ "Sharjah":{ar:"الشارقة",d:[["Sharjah City","مدينة الشارقة"],["Khor Fakkan","خورفكان"],["Kalba","كلباء"],["Al Dhaid","الذيد"]]},
+ "Ajman":{ar:"عجمان",d:[["Ajman City","مدينة عجمان"],["Masfout","مصفوت"],["Al Manama","المنامة"]]},
+ "Umm Al Quwain":{ar:"أم القيوين",d:[["UAQ City","مدينة أم القيوين"],["Falaj Al Mualla","فلج المعلا"]]},
+ "Ras Al Khaimah":{ar:"رأس الخيمة",d:[["RAK City","مدينة رأس الخيمة"],["Al Jazirah Al Hamra","الجزيرة الحمراء"],["Khatt","خت"],["Sha'am","شعم"]]},
+ "Fujairah":{ar:"الفجيرة",d:[["Fujairah City","مدينة الفجيرة"],["Dibba Al-Fujairah","دبا الفجيرة"],["Masafi","مسافي"],["Qidfa","قدفع"]]},
+};
+const STATES=[
+ {id:"abu",n:"Abu Dhabi",s:940,v:0.14},
+ {id:"dxb",n:"Dubai",s:1180,v:0.07},
+ {id:"shj",n:"Sharjah",s:620,v:-0.06},
+ {id:"ajm",n:"Ajman",s:180,v:-0.12},
+ {id:"uaq",n:"Umm Al Quwain",s:90,v:-0.02},
+ {id:"rak",n:"Ras Al Khaimah",s:260,v:-0.11},
+ {id:"fuj",n:"Fujairah",s:210,v:-0.19},
+];
+function hash(str){let h=0;for(const c of str)h=(h*31+c.charCodeAt(0))>>>0;return h}
+STATES.forEach(st=>{
+  const h=hash(st.n);
+  st.topics=TOPICS.map((t,i)=>({t,c:Math.round(st.s*(0.06+((h>>>i)&7)/36))})).sort((a,b)=>b.c-a.c);
+  st.langs={"العربية Arabic":34+(h%10),"English":26+((h>>>2)%8),"हिन्दी Hindi":12+((h>>>4)%5),
+    "اردو Urdu":8+((h>>>6)%4),"Filipino":6+((h>>>8)%3),"中文 Mandarin":3+((h>>>10)%2),"Русский Russian":2+((h>>>12)%2)};
+  const ds=GEO[st.n].d;
+  let rem=st.s;
+  st.districts=ds.map((dd,i)=>{
+    const hh=hash(dd[0]+st.n);
+    const share=i===ds.length-1?Math.max(rem,6):Math.max(6,Math.round(st.s*(0.9/ds.length)+((hh%9)-4)));
+    rem-=share;
+    const dv=Math.max(-0.6,Math.min(0.55,st.v+(((hh>>>3)%21)-10)/40));
+    return {en:dd[0],ar:dd[1],s:Math.max(share,6),v:dv,topTopic:st.topics[(hh>>>5)%3].t};
+  }).sort((a,b)=>b.s-a.s);
+});
+
+const TOPIC_DETAIL={
+ "Telecom & internet quality":{subs:[["Evening outages & instability","الانقطاعات المسائية وعدم الاستقرار",38],["Actual vs advertised speed","السرعة الفعلية مقابل المعلنة",26],["Fibre availability in new areas","توفر الألياف في المناطق الجديدة",20],["Indoor 5G coverage","تغطية الجيل الخامس داخل المباني",16]],
+  quotes:[["الإنترنت في منطقتنا ينقطع كل مساء تقريباً، وأنا أعمل من المنزل.","Our internet drops almost every evening, and I work from home.","دبا الفجيرة · Dibba Al-Fujairah · العربية"],
+   ["I pay for 500Mbps and get 90 on a good day.","أدفع مقابل ٥٠٠ ميغابت وأحصل على ٩٠ في أفضل الأيام.","Al Barsha, Dubai · English"],
+   ["الحي الجديد الذي انتقلنا إليه لا تصله الألياف بعد.","Our new neighbourhood still has no fibre.","الذيد، الشارقة · Al Dhaid, Sharjah · العربية"]],
+  dists:["Dibba Al-Fujairah","Khatt","Al Dhaid","Hatta","Masafi"],trend:[22,23,25,26,28,29,31,32,34,35,37,38]},
+ "Cybersecurity & online fraud":{subs:[["Phishing SMS & fake links","رسائل التصيد والروابط المزيفة",42],["Impersonation of banks & authorities","انتحال صفة البنوك والجهات",26],["Elderly targeted by scams","استهداف كبار المواطنين",18],["Account takeovers","اختراق الحسابات",14]],
+  quotes:[["رسائل الاحتيال تصلني كل يوم، وكاد والدي أن يقع في واحدة الأسبوع الماضي.","Scam texts reach me daily — my father nearly fell for one last week.","ديرة، دبي · Deira, Dubai · العربية"],
+   ["A fake 'delivery fee' link took 800 dirhams from my cousin.","رابط 'رسوم توصيل' مزيف أخذ ٨٠٠ درهم من ابن عمي.","Sharjah City · English"],
+   ["نحتاج رقماً واحداً سهلاً للتبليغ الفوري عن الاحتيال.","We need one easy number for instant fraud reporting.","مدينة العين · Al Ain · العربية"]],
+  dists:["Deira","Sharjah City","Ajman City","Musaffah","RAK City"],trend:[16,17,18,19,20,21,22,24,25,26,27,28]},
+ "Telecom pricing & packages":{subs:[["Package value for money","قيمة الباقات مقابل السعر",36],["Roaming costs","تكاليف التجوال",24],["Hidden add-ons & renewals","الإضافات الخفية والتجديد التلقائي",22],["Family & senior plans","باقات العائلة وكبار المواطنين",18]],
+  quotes:[["الباقات مرتفعة مقارنة بما نحصل عليه فعلياً.","Packages are expensive for what we actually get.","مدينة عجمان · Ajman City · العربية"],
+   ["Roaming for one week abroad cost more than my monthly plan.","التجوال لأسبوع واحد كلّف أكثر من باقتي الشهرية.","Jumeirah, Dubai · English"],
+   ["أتمنى باقة مبسطة وواضحة لوالديّ.","I wish there was a simple, clear plan for my parents.","مدينة الشارقة · Sharjah City · العربية"]],
+  dists:["Ajman City","Sharjah City","Deira","UAQ City","Bur Dubai"],trend:[15,15,16,17,17,18,19,19,20,21,21,22]},
+ "Digital government services":{subs:[["Praise: renewals in minutes","إشادة: التجديد في دقائق",44],["One login across services","دخول موحد لكل الخدمات",22],["Support when something fails","الدعم عند تعثر المعاملة",20],["More services in one app","خدمات أكثر في تطبيق واحد",14]],
+  quotes:[["جددت هويتي عبر التطبيق في خمس دقائق. شكراً — استمروا.","I renewed my ID in the app in five minutes. Thank you — keep going.","مدينة أبوظبي · Abu Dhabi City · العربية"],
+   ["When a payment fails, I can't reach a human quickly.","عندما يفشل الدفع، لا أصل إلى موظف بسرعة.","Dubai South · English"],
+   ["أتمنى أن تُجمع كل الخدمات في تطبيق واحد.","I hope all services come together in one app.","مدينة رأس الخيمة · RAK City · العربية"]],
+  dists:["Abu Dhabi City","Bur Dubai","Sharjah City","Al Ain","RAK City"],trend:[24,25,26,27,29,30,31,33,34,35,36,37]},
+ "Digital inclusion & seniors":{subs:[["Simpler interfaces for seniors","واجهات أبسط لكبار المواطنين",34],["In-person help points","نقاط مساعدة حضورية",28],["Training in the community","تدريب في الأحياء",22],["More languages in support","لغات أكثر في الدعم",16]],
+  quotes:[["أتمنى دعماً أكبر لكبار المواطنين لاستخدام التطبيقات الحكومية.","I hope for more support for seniors using government apps.","مدينة أم القيوين · UAQ City · العربية"],
+   ["My mother needs a person, not a chatbot, when she is stuck.","والدتي تحتاج إنساناً لا روبوت محادثة عندما تتعثر.","Al Barsha, Dubai · English"],
+   ["دورات قصيرة في المجالس تصنع فرقاً كبيراً.","Short courses in the majlis make a big difference.","المنامة، عجمان · Al Manama, Ajman · العربية"]],
+  dists:["UAQ City","Al Manama","Kalba","Khatt","Al Dhafra"],trend:[10,10,11,12,12,13,13,14,14,15,15,16]},
+ "Remote-area coverage":{subs:[["Mountain & valley coverage","تغطية الجبال والأودية",40],["East Coast stability","استقرار الساحل الشرقي",30],["Farm & desert connectivity","اتصال المزارع والمناطق الصحراوية",18],["Emergency reachability","إمكانية الاتصال في الطوارئ",12]],
+  quotes:[["قريتنا في الجبال ما زالت الإشارة فيها ضعيفة جداً.","Our mountain village still has a very weak signal.","خت، رأس الخيمة · Khatt, RAK · العربية"],
+   ["Between Masafi and Dibba the signal disappears completely.","بين مسافي ودبا تختفي الإشارة تماماً.","Masafi, Fujairah · English"],
+   ["مزرعتنا في الظفرة بلا تغطية تُذكر.","Our farm in Al Dhafra has almost no coverage.","الظفرة، أبوظبي · Al Dhafra · العربية"]],
+  dists:["Khatt","Masafi","Hatta","Al Dhafra","Sha'am"],trend:[14,15,16,16,17,18,19,20,21,22,23,24]},
+ "Media & broadcasting":{subs:[["Local content & platforms","المحتوى المحلي والمنصات",38],["Arabic content for youth","محتوى عربي للشباب",30],["Accuracy & misinformation","الدقة ومكافحة المعلومات المضللة",32]],
+  quotes:[["نريد منصات محلية تنافس بالمحتوى العربي الجيد.","We want local platforms competing with great Arabic content.","مدينة الشارقة · Sharjah City · العربية"],
+   ["My kids watch everything in English — where is Arabic content for them?","أطفالي يشاهدون كل شيء بالإنجليزية — أين المحتوى العربي لهم؟","Yas Island · English"],
+   ["الشائعات تنتشر أسرع من التصحيح.","Rumours spread faster than corrections.","بر دبي · Bur Dubai · العربية"]],
+  dists:["Sharjah City","Yas Island","Bur Dubai","Al Ain","Fujairah City"],trend:[9,9,10,10,11,11,12,12,13,13,14,14]},
+ "Postal & logistics":{subs:[["Parcel delays & tracking","تأخر الطرود والتتبع",42],["Address accuracy","دقة العناوين",30],["Counter service hours","ساعات خدمة المراكز",28]],
+  quotes:[["طردي تأخر أسبوعين والتتبع لا يتحدث.","My parcel is two weeks late and tracking never updates.","مدينة الفجيرة · Fujairah City · العربية"],
+   ["Deliveries keep calling because they can't find our address.","التوصيل يتصل دائماً لأنهم لا يجدون عنواننا.","Falaj Al Mualla · English"],
+   ["ساعات المركز لا تناسب من يعمل.","Counter hours don't suit working people.","كلباء · Kalba · العربية"]],
+  dists:["Fujairah City","Falaj Al Mualla","Kalba","Masfout","Al Dhaid"],trend:[8,8,9,9,9,10,10,11,11,11,12,12]},
+ "AI & innovation":{subs:[["Excitement about AI services","حماس لخدمات الذكاء الاصطناعي",40],["AI skills & training","مهارات وتدريب الذكاء الاصطناعي",34],["Jobs & the future of work","الوظائف ومستقبل العمل",26]],
+  quotes:[["أريد أن يتعلم أبنائي الذكاء الاصطناعي في المدرسة.","I want my children learning AI at school.","مدينة أبوظبي · Abu Dhabi City · العربية"],
+   ["Proud that government services are getting smarter every year.","فخور بأن الخدمات الحكومية تزداد ذكاءً كل عام.","Dubai South · English"],
+   ["نحتاج دورات مجانية للمقيمين في المهارات الرقمية.","We need free digital-skills courses for residents.","مصفح · Musaffah · العربية"]],
+  dists:["Abu Dhabi City","Dubai South","Musaffah","Sharjah City","RAK City"],trend:[7,8,8,9,10,10,11,12,12,13,14,15]},
+};
+const SUGS=[
+ {b:"One national short-code to instantly report fraud SMS",ar:"رقم وطني موحد للتبليغ الفوري عن رسائل الاحتيال",c:730,sp:7,tag:"rev",lbl:"UNDER REVIEW",topic:"Cybersecurity & online fraud"},
+ {b:"Publish real vs advertised speeds per provider, per area",ar:"نشر السرعات الفعلية مقابل المعلنة لكل مزود وكل منطقة",c:640,sp:7,tag:"ack",lbl:"UNDER STUDY",topic:"Telecom & internet quality"},
+ {b:"A simple, discounted 'senior citizen' telecom plan",ar:"باقة اتصالات مبسطة ومخفضة لكبار المواطنين",c:520,sp:6,tag:"rev",lbl:"UNDER REVIEW",topic:"Digital inclusion & seniors"},
+ {b:"Community digital-help points in every district",ar:"نقاط مساعدة رقمية مجتمعية في كل منطقة",c:450,sp:7,tag:"ack",lbl:"UNDER STUDY",topic:"Digital inclusion & seniors"},
+ {b:"East Coast fibre acceleration plan with public milestones",ar:"خطة تسريع الألياف للساحل الشرقي بمراحل معلنة",c:410,sp:3,tag:"act",lbl:"DELIVERED",topic:"Remote-area coverage"},
+];
+const FEED=[
+ {st:"Fujairah",d:"Dibba Al-Fujairah",v:-0.6,t:"Telecom & internet quality",q:"الإنترنت في منطقتنا ينقطع كل مساء تقريباً، وأنا أعمل من المنزل.",qen:"Our internet drops almost every evening, and I work from home.",l:"العربية",time:{ar:"قبل ٩ دقائق",en:"9 min ago"}},
+ {st:"Dubai",d:"Deira",v:-0.5,t:"Cybersecurity & online fraud",q:"رسائل الاحتيال تصلني كل يوم، وكاد والدي أن يقع في واحدة.",qen:"Scam texts reach me daily — my father nearly fell for one.",l:"العربية",time:{ar:"قبل ٢٤ دقيقة",en:"24 min ago"}},
+ {st:"Abu Dhabi",d:"Abu Dhabi City",v:0.7,t:"Digital government services",q:"جددت هويتي عبر التطبيق في خمس دقائق. شكراً — استمروا.",qen:"I renewed my ID in the app in five minutes. Thank you — keep going.",l:"العربية",time:{ar:"قبل ٤٠ دقيقة",en:"40 min ago"}},
+ {st:"Sharjah",d:"Al Dhaid",v:-0.4,t:"Telecom & internet quality",q:"Our new neighbourhood still has no fibre connection.",qen:"Our new neighbourhood still has no fibre connection.",l:"English",time:{ar:"قبل ساعة",en:"1 h ago"}},
+ {st:"Ajman",d:"Ajman City",v:-0.3,t:"Telecom pricing & packages",q:"الباقات مرتفعة مقارنة بما نحصل عليه فعلياً.",qen:"Packages are expensive for what we actually get.",l:"العربية",time:{ar:"قبل ساعة",en:"1 h ago"}},
+ {st:"Ras Al Khaimah",d:"Khatt",v:-0.55,t:"Remote-area coverage",q:"قريتنا في الجبال ما زالت الإشارة فيها ضعيفة جداً.",qen:"Our mountain village still has a very weak signal.",l:"العربية",time:{ar:"قبل ساعتين",en:"2 h ago"}},
+ {st:"Umm Al Quwain",d:"UAQ City",v:0.2,t:"Digital inclusion & seniors",q:"دورة التدريب للأهالي في المركز المجتمعي كانت ممتازة.",qen:"The training course for parents at the community centre was excellent.",l:"العربية",time:{ar:"قبل ٣ ساعات",en:"3 h ago"}},
+ {st:"Dubai",d:"Dubai South",v:0.6,t:"AI & innovation",q:"Proud that government services are getting smarter every year.",qen:"Proud that government services are getting smarter every year.",l:"English",time:{ar:"قبل ٣ ساعات",en:"3 h ago"}},
+ {st:"Fujairah",d:"Fujairah City",v:-0.35,t:"Postal & logistics",q:"طردي تأخر أسبوعين والتتبع لا يتحدّث.",qen:"My parcel is two weeks late and tracking never updates.",l:"العربية",time:{ar:"قبل ٤ ساعات",en:"4 h ago"}},
+];
+const TREND=[[38,30],[39,29],[39,28],[40,28],[41,27],[41,27],[42,26],[43,26],[43,25],[44,25],[45,24],[46,23]];
+
+/* ================================================================
+   HAPPINESS INDEX — Customer Happiness Centres (synthetic demo)
+   hp = % satisfied at service completion · r = ratings this quarter
+================================================================ */
+const HAPPY={
+ abu:{hp:90.2,r:41200,centres:[["Khalifa City Happiness Centre","مركز إسعاد المتعاملين — مدينة خليفة",92.1],["Al Ain Happiness Centre","مركز إسعاد المتعاملين — العين",89.8],["Madinat Zayed Centre (Al Dhafra)","مركز مدينة زايد (الظفرة)",87.4]]},
+ dxb:{hp:91.4,r:56400,centres:[["Al Twar Happiness Centre","مركز إسعاد المتعاملين — الطوار",93.2],["Al Barsha Happiness Centre","مركز إسعاد المتعاملين — البرشاء",91.0],["Hatta Happiness Centre","مركز إسعاد المتعاملين — حتا",86.9]]},
+ shj:{hp:87.6,r:18300,centres:[["Sharjah City Happiness Centre","مركز إسعاد المتعاملين — مدينة الشارقة",89.3],["Khor Fakkan Centre","مركز خورفكان",85.1]]},
+ ajm:{hp:85.9,r:6200,centres:[["Ajman City Happiness Centre","مركز إسعاد المتعاملين — مدينة عجمان",85.9]]},
+ uaq:{hp:86.4,r:3100,centres:[["UAQ Happiness Centre","مركز إسعاد المتعاملين — أم القيوين",86.4]]},
+ rak:{hp:84.7,r:9800,centres:[["RAK City Happiness Centre","مركز إسعاد المتعاملين — مدينة رأس الخيمة",87.0],["Khatt Service Centre","مركز خدمات خت",81.3]]},
+ fuj:{hp:83.1,r:7600,centres:[["Fujairah City Happiness Centre","مركز إسعاد المتعاملين — مدينة الفجيرة",85.4],["Dibba Service Centre","مركز خدمات دبا",80.2]]},
+};
+const HAP_GAPS=[
+ {id:"ajm",tone:"policy",
+  en:{h:"Ajman — happy counters, unhappy bills",p:"Counter happiness is high (85.9%) while MASMOU pricing sentiment is clearly negative (−12). People are satisfied with how they are served, not with what they pay — the fix is pricing policy, not centre operations.",n:"Happiness 85.9% · MASMOU −12 · driver: Telecom pricing & packages"},
+  ar:{h:"عجمان — كاونترات سعيدة وفواتير غير سعيدة",p:"سعادة المراكز مرتفعة (٨٥٫٩٪) بينما مشاعر الأسعار في مسموع سلبية بوضوح (−١٢). الناس راضون عن طريقة خدمتهم لا عن ما يدفعونه — الحل في سياسة التسعير لا في تشغيل المراكز.",n:"السعادة ٨٥٫٩٪ · مسموع −١٢ · المحرك: أسعار وباقات الاتصالات"}},
+ {id:"fuj",tone:"invest",
+  en:{h:"Fujairah — both indices low: invest, don't retrain",p:"The only emirate where happiness (83.1%) and MASMOU confidence (−19) fall together. The evening-outage escalation explains both — this is an infrastructure gap that no amount of counter courtesy can close.",n:"Happiness 83.1% · MASMOU −19 · driver: Telecom & internet quality"},
+  ar:{h:"الفجيرة — المؤشران منخفضان معاً: استثمار لا تدريب",p:"الإمارة الوحيدة التي ينخفض فيها مؤشر السعادة (٨٣٫١٪) والثقة في مسموع (−١٩) معاً. تصعيد الانقطاعات المسائية يفسّر الاثنين — هذه فجوة بنية تحتية لا تُغلق بلطف الكاونتر.",n:"السعادة ٨٣٫١٪ · مسموع −١٩ · المحرك: جودة الاتصالات والإنترنت"}},
+ {id:"abu",tone:"good",
+  en:{h:"Abu Dhabi — aligned and rising",p:"Happiness (90.2%) and MASMOU confidence (+14) move together, both lifted by digital-services praise. This is what a closed loop looks like — hold as the national reference.",n:"Happiness 90.2% · MASMOU +14 · driver: Digital government services"},
+  ar:{h:"أبوظبي — توافق وارتفاع",p:"مؤشر السعادة (٩٠٫٢٪) والثقة في مسموع (+١٤) يتحركان معاً، مدفوعين بالإشادة بالخدمات الرقمية. هكذا تبدو الحلقة المغلقة — مرجع وطني يُحتذى.",n:"السعادة ٩٠٫٢٪ · مسموع +١٤ · المحرك: الخدمات الحكومية الرقمية"}},
+];
+const HAP_NAT=(()=>{let s=0,r=0;Object.values(HAPPY).forEach(h=>{s+=h.hp*h.r;r+=h.r});return{hp:s/r,r};})();
+
+/* ================================================================
+   MAP GEOMETRY — stylised UAE (not to survey scale)
+================================================================ */
+const SHAPES={
+ abu:{d:"M60 330 L150 272 L250 246 L350 236 L440 228 L520 224 L560 262 L560 368 L515 458 L400 522 L245 545 L105 505 L42 425 Z",lx:300,ly:420,bx:300,by:380},
+ dxb:{d:"M520 224 L575 200 L640 184 L692 206 L700 262 L646 306 L560 262 Z",lx:614,ly:252,bx:620,by:245},
+ shj:{d:"M640 184 L700 156 L762 170 L788 218 L748 274 L700 262 L692 206 Z",lx:718,ly:222,bx:722,by:215,small:1},
+ ajm:{d:"M700 156 L734 143 L744 168 L714 178 Z",lx:652,ly:140,bx:723,by:158,small:1},
+ uaq:{d:"M734 143 L784 116 L812 142 L788 180 L762 170 L744 168 Z",lx:706,ly:98,bx:776,by:148,small:1},
+ rak:{d:"M784 116 L818 58 L872 36 L906 82 L864 152 L812 142 Z",lx:852,ly:100,bx:852,by:96},
+ fuj:{d:"M906 82 L944 142 L954 244 L926 326 L872 306 L862 224 L864 152 Z",lx:908,ly:225,bx:906,by:220},
+};
+
+/* ================================================================
+   HELPERS
+================================================================ */
+let rangeD=7, selState=null, selDistrict=null, tasks=[], assignCtx=null, view='min';
+const $=id=>document.getElementById(id);
+const fmtN=n=>n.toLocaleString(uiLang==='ar'?'ar-AE':'en-AE');
+const dTopic=t=>uiLang==='ar'?(T_TOPIC[t]||t):t;
+const dState=n=>uiLang==='ar'?(GEO[n]?GEO[n].ar:n):n;
+const dDistrict=(st,en)=>{const g=GEO[st];if(!g)return en;const f=g.d.find(x=>x[0]===en);return uiLang==='ar'&&f?f[1]:en;};
+const dDept=id=>{const d=DEPTS.find(x=>x.id===id)||DEPTS[DEPTS.length-1];return uiLang==='ar'?d.ar:d.en;};
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._x);el._x=setTimeout(()=>el.classList.remove('show'),3200);}
+const sentColor=v=>{
+  const t=Math.max(0,Math.min(1,(v+0.5)));
+  const lerp=(a,b,u)=>Math.round(a+(b-a)*u);
+  let c1,c2,u;
+  if(t<0.5){c1=[206,17,38];c2=[200,162,0];u=t/0.5}else{c1=[200,162,0];c2=[0,122,61];u=(t-0.5)/0.5}
+  return `rgb(${lerp(c1[0],c2[0],u)},${lerp(c1[1],c2[1],u)},${lerp(c1[2],c2[2],u)})`;
+};
+const scale=n=>Math.round(n*(rangeD===7?1:rangeD===30?4.1:11.6));
+let mapLayer='voice';
+const fmtP=x=>x.toLocaleString(uiLang==='ar'?'ar-AE':'en-AE',{minimumFractionDigits:1,maximumFractionDigits:1});
+/* happiness 83–93% mapped onto the same red→amber→green scale */
+const hpColor=hp=>sentColor((hp-88)/10);
+const smSplit=hp=>{const un=Math.round((100-hp)*0.45),neu=Math.round(100-hp-un);return{sat:Math.round(hp),neu,un};};
+
+/* ================================================================
+   MAP
+================================================================ */
+const mapSvg=$('mapSvg'), tip=$('mapTip');
+function drawMap(){
+  mapSvg.querySelectorAll('.state,.bubble,.bubble-pulse,.stLbl').forEach(e=>e.remove());
+  const maxS=Math.max(...STATES.map(s=>s.s));
+  STATES.forEach(st=>{
+    const sh=SHAPES[st.id]; if(!sh)return;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',sh.d);
+    path.setAttribute('class','state'+(selState===st.id?' sel':'')+(selState&&selState!==st.id?' dim':''));
+    const hap=HAPPY[st.id];
+    path.setAttribute('fill',mapLayer==='happy'?hpColor(hap.hp):sentColor(st.v));
+    path.addEventListener('click',()=>selectState(selState===st.id?null:st.id));
+    path.addEventListener('mousemove',e=>{
+      const r=mapSvg.parentElement.getBoundingClientRect();
+      tip.style.left=(e.clientX-r.left+14)+'px';tip.style.top=(e.clientY-r.top-10)+'px';tip.style.opacity=1;
+      tip.innerHTML=mapLayer==='happy'
+        ?`<b>${dState(st.n)}</b><br>${tt('happyWord')} ${fmtP(hap.hp)}٪ · ${fmtN(hap.r)} ${tt('ratingsWord')}<br><span style="opacity:.7">${tt('confidenceWord')} ${st.v>0?'+':''}${fmtN(Math.round(st.v*100))} · ${tt('clickDistricts')}</span>`
+        :`<b>${dState(st.n)}</b><br>${fmtN(scale(st.s))} ${tt('sessionsWord')} · ${tt('confidenceWord')} ${st.v>0?'+':''}${fmtN(Math.round(st.v*100))}<br><span style="opacity:.7">${tt('clickDistricts')}</span>`;
+    });
+    path.addEventListener('mouseleave',()=>tip.style.opacity=0);
+    mapSvg.appendChild(path);
+    const r=5+13*Math.sqrt(st.s/maxS);
+    const pulse=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    pulse.setAttribute('cx',sh.bx);pulse.setAttribute('cy',sh.by);pulse.setAttribute('r',r);
+    pulse.setAttribute('class','bubble-pulse');
+    pulse.style.transformOrigin=`${sh.bx}px ${sh.by}px`;
+    const bub=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    bub.setAttribute('cx',sh.bx);bub.setAttribute('cy',sh.by);bub.setAttribute('r',r*0.5);
+    bub.setAttribute('class','bubble');
+    mapSvg.appendChild(pulse);mapSvg.appendChild(bub);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',sh.lx);t.setAttribute('y',sh.ly);t.setAttribute('class','stLbl');
+    if(sh.small)t.setAttribute('font-size','10.5');
+    t.textContent=dState(st.n);mapSvg.appendChild(t);
+  });
+  $('legLo').textContent=tt(mapLayer==='happy'?'legLowH':'legLow');
+  $('legHi').textContent=tt(mapLayer==='happy'?'legHighH':'legHigh');
+  $('legVolLbl').textContent=tt(mapLayer==='happy'?'legVolH':'legVol');
+}
+function setLayer(l){
+  mapLayer=l;
+  document.querySelectorAll('#layerTgl button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
+  drawMap();
+}
+
+function renderDistricts(){
+  const card=$('distCard');
+  if(!selState){card.classList.remove('on');selDistrict=null;return}
+  const st=STATES.find(s=>s.id===selState);
+  card.classList.add('on');
+  $('distTitle').textContent=`📍 ${dState(st.n)} — ${uiLang==='ar'?'المناطق':'districts'}`;
+  const worst=[...st.districts].sort((a,b)=>a.v-b.v)[0];
+  const best=[...st.districts].sort((a,b)=>b.v-a.v)[0];
+  const dn=d=>uiLang==='ar'?d.ar:d.en;
+  $('distSummary').innerHTML=
+    `<span><b>${fmtN(st.districts.length)}</b> ${tt('districtsWord')}</span>
+     <span>${tt('lowestConf')} <b style="color:var(--red)">${dn(worst)}</b> (${fmtN(Math.round(worst.v*100))})</span>
+     <span>${tt('highestConf')} <b style="color:var(--green)">${dn(best)}</b> (+${fmtN(Math.round(best.v*100))})</span>
+     <span>${tt('topConcern')} <b>${dTopic(st.topics[0].t)}</b></span>`;
+  $('distGrid').innerHTML=st.districts.map(d=>
+    `<div class="dTile" style="background:${sentColor(d.v)};${selDistrict===d.en?'outline:3px solid var(--black)':''}" onclick="selectDistrict('${d.en.replace(/'/g,"\\'")}')">
+      <span class="sc">${d.v>0?'+':''}${fmtN(Math.round(d.v*100))}</span>
+      <b>${dn(d)}</b>
+      <small>${fmtN(scale(d.s))} ${tt('sessionsWord')}</small><br>
+      <small style="opacity:.85">${tt('topPrefix')} ${dTopic(d.topTopic)}</small>
+    </div>`).join('');
+}
+function selectState(id){selState=id;selDistrict=null;render();}
+function selectDistrict(d){
+  selDistrict=selDistrict===d?null:d;render();
+  const st=STATES.find(s=>s.id===selState);
+  toast(selDistrict?tt('toastFiltered')(dDistrict(st.n,d)):tt('toastCleared'));
+}
+
+/* ================================================================
+   AGENDA
+================================================================ */
+function renderAgenda(){
+  $('agendaGrid').innerHTML=AGENDA.map(a=>{
+    const col=sentColor(a.v);
+    const note=tt(a.dir==='worse'?'worsening':a.dir==='better'?'improving':'steady');
+    const arrow=a.dir==='worse'?'▲':a.dir==='better'?'▼':'—';
+    const label=uiLang==='ar'?a.ar:a.a;
+    return `<div class="agItem" onclick="openTopic('${a.topic.replace(/'/g,"\\'")}',${scale(400)})">
+      <span class="edge" style="background:${col}"></span>
+      <b>${label}</b>
+      <span class="mn">${tt('leadWord')} ${dDept(a.m)}</span>
+      <div class="agRow">
+        <span class="agPill" style="background:${col}">${a.v>0?'+':''}${fmtN(Math.round(a.v*100))}</span>
+        <span style="font-size:11px;font-weight:800;color:${a.dir==='worse'?'var(--red)':a.dir==='better'?'var(--green)':'var(--grey)'}">${arrow}</span>
+        <span class="agNote">${note}</span>
+      </div>
+    </div>`;}).join('');
+}
+
+/* ================================================================
+   MAIN RENDER
+================================================================ */
+function currentStates(){return selState?STATES.filter(s=>s.id===selState):STATES}
+function render(){
+  const set=currentStates();
+  const name=selState?dState(set[0].n):tt('allUae');
+  const distLbl=selDistrict?' · '+dDistrict(set[0].n,selDistrict):'';
+  $('scopeLbl').textContent=name+distLbl;
+  $('donutScope').textContent=name;
+  $('topicScope').textContent=name;
+  const chip=$('stateChip');
+  chip.classList.toggle('on',!!selState);
+  $('stateChipNm').textContent=name+distLbl;
+
+  const sess=set.reduce((a,s)=>a+s.s,0);
+  const sent=set.reduce((a,s)=>a+s.v*s.s,0)/sess;
+  $('kSess').textContent=fmtN(scale(sess));
+  $('kCit').textContent=fmtN(Math.round(scale(sess)*0.93));
+  const ns=Math.round(sent*50)+2;
+  const kS=$('kSent');kS.textContent=(ns>0?"+":"")+fmtN(ns);
+  kS.style.color=ns>=5?"var(--green)":ns<=-5?"var(--red)":"var(--amber)";
+  const dg=34; const kD=$('kDig'); kD.textContent="+"+fmtN(dg); kD.style.color="var(--green)";
+  $('kHap').textContent=fmtP(selState?HAPPY[selState].hp:HAP_NAT.hp)+'٪';
+
+  const agg={};set.forEach(st=>st.topics.forEach(x=>agg[x.t]=(agg[x.t]||0)+x.c));
+  const list=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxT=list[0][1];
+  const trends=["up","up","flat","down","flat","up","flat","down"];
+  $('topicList').innerHTML=list.map(([tp,c],i)=>{
+    const neg=NEG_TOPICS.has(tp);
+    return `<div class="topicRow" onclick="openTopic('${tp.replace(/'/g,"\\'")}',${scale(c)})">
+      <div class="nm">${dTopic(tp)}<span class="go">${uiLang==='ar'?'◂':'▸'}</span></div>
+      <div class="barBg"><div class="barFill" style="width:${Math.round(c/maxT*100)}%;background:${neg?"var(--red)":"var(--green)"}"></div></div>
+      <div class="ct">${fmtN(scale(c))}</div>
+      <div class="tr ${trends[i]}">${trends[i]==="up"?"▲":trends[i]==="down"?"▼":"—"}</div>
+    </div>`;}).join('');
+
+  const kws=[];list.slice(0,4).forEach(([tp],ti)=>(KW_POOL[tp]||[]).slice(0,ti===0?4:3).forEach((k,i)=>kws.push({k,g:36-ti*8-i*4})));
+  $('kwWrap').innerHTML=kws.slice(0,12).map(x=>
+    `<span class="kw" style="font-size:${12+Math.round(x.g/9)}px">${x.k}<em class="${x.g<14?'g':''}">+${fmtN(x.g)}٪</em></span>`).join('');
+
+  const lagg={};set.forEach(st=>Object.entries(st.langs).forEach(([l,p])=>lagg[l]=(lagg[l]||0)+p*st.s));
+  const ltot=Object.values(lagg).reduce((a,b)=>a+b,0);
+  $('langList').innerHTML=Object.entries(lagg).sort((a,b)=>b[1]-a[1]).map(([l,v])=>{
+    const pc=Math.round(v/ltot*100);
+    return `<div class="langRow"><div class="nm">${l}</div><div class="barBg"><div class="barFill" style="width:${pc}%"></div></div><b>${fmtN(pc)}٪</b></div>`;}).join('');
+
+  const pos=Math.round(45+sent*40), neg=Math.round(28-sent*34), neu=100-pos-neg;
+  drawDonut(pos,neu,neg);
+
+  $('sugList').innerHTML=SUGS.map((s,i)=>{
+    const assigned=tasks.find(x=>x.src==='sug'+i);
+    const lbl=assigned?tt('tagIssued'):tt(s.tag==='act'?'tagDelivered':s.tag==='ack'?'tagAck':'tagReview');
+    return `<div class="sug"><div class="top"><b>${uiLang==='ar'?s.ar:s.b}</b><span class="tag ${assigned?'asg':s.tag}">${lbl}</span></div>
+     <div class="meta"><span><b>${fmtN(scale(s.c))}</b> ${tt('sessionsWord')}</span><span>${tt('spreadWord')} <b>${fmtN(s.sp)} ${tt('emiratesWord')}</b></span></div>
+     ${assigned?`<div class="assignedNote">→ ${dDept(assigned.dept)} · ${tt('dueWord')} ${assigned.due}</div>`
+       :`<button class="assignMini du-only" onclick="openAssign('${s.b.replace(/'/g,"\\'")}','${s.topic}','normal','sug${i}')">${tt('issueDir')}</button>`}
+    </div>`;}).join('');
+
+  let feed=FEED;
+  if(selState)feed=feed.filter(f=>f.st===set[0].n);
+  if(selDistrict)feed=feed.filter(f=>f.d===selDistrict);
+  if(!feed.length)feed=FEED.slice(0,3);
+  $('feedScope').textContent=(selState?name+' · ':'')+tt('anonymised');
+  $('feedList').innerHTML=feed.map(f=>
+    `<div class="feedRow"><div class="sdot" style="background:${sentColor(f.v)}"></div>
+      <div class="fx"><span class="quote">"${uiLang==='ar'?f.q:f.qen}"</span>
+      <small>${dDistrict(f.st,f.d)}، ${dState(f.st)} · ${dTopic(f.t)} · ${f.l} · ${f.time[uiLang]}</small></div></div>`).join('');
+
+  renderDistricts();
+  drawMap();
+  renderDeptStats();
+  renderAgenda();
+  renderHappiness();
+}
+
+/* ================================================================
+   HAPPINESS INDEX
+================================================================ */
+function renderHappiness(){
+  const hp=selState?HAPPY[selState].hp:HAP_NAT.hp;
+  $('hpNat').textContent=fmtP(hp)+'٪';
+  $('hpNatLbl').textContent=selState?dState(STATES.find(s=>s.id===selState).n):tt('hapNatLbl');
+  $('hpList').innerHTML=STATES.map(st=>{
+    const h=HAPPY[st.id];
+    return `<div class="hpRow" onclick="openHappy()">
+      <div class="nm">${dState(st.n)}</div>
+      <div class="barBg"><div class="barFill" style="width:${Math.round((h.hp-78)/16*100)}%;background:${hpColor(h.hp)}"></div></div>
+      <b>${fmtP(h.hp)}٪</b>
+    </div>`;}).join('');
+}
+const smBar=hp=>{const s=smSplit(hp);
+  return `<div class="smSplit"><i style="width:${s.sat}%;background:var(--green)"></i><i style="width:${s.neu}%;background:#B9BFBB"></i><i style="width:${s.un}%;background:var(--red)"></i></div>`;};
+function openHappy(){
+  const all=[];Object.entries(HAPPY).forEach(([id,h])=>h.centres.forEach(c=>all.push({id,en:c[0],ar:c[1],hp:c[2]})));
+  all.sort((a,b)=>b.hp-a.hp);
+  const hiC=all[0],loC=all[all.length-1];
+  $('hapStats').innerHTML=
+   `<div class="miniStat"><small>${tt('hapNatStat')}</small><b style="color:#B08900">${fmtP(HAP_NAT.hp)}٪</b></div>
+    <div class="miniStat"><small>${tt('hapHighest')}</small><b style="font-size:12.5px">${uiLang==='ar'?hiC.ar:hiC.en}<br><span style="color:var(--green)">${fmtP(hiC.hp)}٪</span></b></div>
+    <div class="miniStat"><small>${tt('hapLowest')}</small><b style="font-size:12.5px">${uiLang==='ar'?loC.ar:loC.en}<br><span style="color:var(--red)">${fmtP(loC.hp)}٪</span></b></div>
+    <div class="miniStat"><small>${tt('hapRatings')}</small><b>${fmtN(HAP_NAT.r)}</b></div>`;
+  $('hapEmList').innerHTML=STATES.map(st=>{
+    const h=HAPPY[st.id];
+    return `<div class="centreRow"><div class="nm">${dState(st.n)}<small>${fmtN(h.r)} ${tt('ratingsWord')} · ${fmtN(h.centres.length)} ${uiLang==='ar'?'مراكز':'centres'}</small></div>
+      ${smBar(h.hp)}
+      <div class="sc" style="color:${hpColor(h.hp)}">${fmtP(h.hp)}٪</div></div>`;}).join('');
+  const pick=[...all.slice(0,3),...all.slice(-3)];
+  $('hapCentreList').innerHTML=pick.map(c=>
+    `<div class="centreRow"><div class="nm">${uiLang==='ar'?c.ar:c.en}<small>${dState(STATES.find(x=>x.id===c.id).n)}</small></div>
+      ${smBar(c.hp)}
+      <div class="sc" style="color:${hpColor(c.hp)}">${fmtP(c.hp)}٪</div></div>`).join('');
+  $('hapGapList').innerHTML=HAP_GAPS.map(g=>{
+    const x=g[uiLang]||g.en;
+    return `<div class="gapCard ${g.tone}"><b>${x.h}</b><p>${x.p}</p><div class="nums"><span>${x.n}</span></div></div>`;}).join('');
+  $('happyModal').classList.add('open');
+}
+
+function drawTrend(){
+  const svg=$('trendSvg');
+  const W=520,H=200,pad={l:34,r:8,t:12,b:24};
+  const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+  const x=i=>pad.l+i/(TREND.length-1)*iw;
+  const y=v=>pad.t+(1-v/60)*ih;
+  let g='';
+  [0,20,40,60].forEach(v=>{g+=`<line x1="${pad.l}" y1="${y(v)}" x2="${W-pad.r}" y2="${y(v)}" stroke="#EDEFED" stroke-width="1.5"/><text x="${pad.l-8}" y="${y(v)+4}" font-size="10" fill="#9AA09C" text-anchor="end" font-weight="700">${v}%</text>`;});
+  const posLine=TREND.map((t,i)=>`${x(i)},${y(t[0])}`).join(' ');
+  const negLine=TREND.map((t,i)=>`${x(i)},${y(t[1])}`).join(' ');
+  const neuPts=TREND.map((t,i)=>`${x(i)},${y(100-t[0]-t[1])}`).join(' ');
+  g+=`<polygon points="${pad.l},${y(0)} ${posLine} ${W-pad.r},${y(0)}" fill="rgba(0,122,61,.10)"/>`;
+  g+=`<polyline points="${posLine}" fill="none" stroke="#007A3D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  g+=`<polyline points="${negLine}" fill="none" stroke="#CE1126" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  g+=`<polyline points="${neuPts}" fill="none" stroke="#B9BFBB" stroke-width="2" stroke-dasharray="4 5"/>`;
+  const last=TREND[11];
+  g+=`<circle cx="${x(11)}" cy="${y(last[0])}" r="4.5" fill="#007A3D"/><text x="${x(11)-6}" y="${y(last[0])-9}" font-size="11" font-weight="800" fill="#007A3D" text-anchor="end">${last[0]}%</text>`;
+  g+=`<circle cx="${x(11)}" cy="${y(last[1])}" r="4.5" fill="#CE1126"/><text x="${x(11)-6}" y="${y(last[1])+16}" font-size="11" font-weight="800" fill="#CE1126" text-anchor="end">${last[1]}%</text>`;
+  ["W25","W27","W29","W31","W33","W35"].forEach((w,i)=>{g+=`<text x="${Math.min(x(i*2+1),W-24)}" y="${H-4}" font-size="10" fill="#9AA09C" font-weight="700" text-anchor="middle">${w}</text>`;});
+  svg.innerHTML=g;
+}
+function drawDonut(pos,neu,neg){
+  const svg=$('donutSvg');
+  const C=2*Math.PI*15.9;
+  const seg=(pc,off,color)=>`<circle cx="21" cy="21" r="15.9" fill="none" stroke="${color}" stroke-width="7" stroke-dasharray="${pc/100*C} ${C}" stroke-dashoffset="${-off/100*C}" transform="rotate(-90 21 21)"/>`;
+  svg.innerHTML=seg(pos,0,'#007A3D')+seg(neu,pos,'#B9BFBB')+seg(neg,pos+neu,'#CE1126')+
+    `<text x="21" y="20" text-anchor="middle" font-size="8.5" font-weight="800" fill="#141416">${pos}%</text>
+     <text x="21" y="27.5" text-anchor="middle" font-size="4.2" font-weight="700" fill="#6E7276">${tt('posL').toUpperCase()}</text>`;
+  $('donutStats').innerHTML=
+   `<div class="dStat"><i style="background:var(--green)"></i>${tt('posL')}<b>${fmtN(pos)}٪</b></div>
+    <div class="dStat"><i style="background:#B9BFBB"></i>${tt('neuL')}<b>${fmtN(neu)}٪</b></div>
+    <div class="dStat"><i style="background:var(--red)"></i>${tt('negL')}<b>${fmtN(neg)}٪</b></div>`;
+}
+
+/* ================================================================
+   TOPIC DEEP DIVE
+================================================================ */
+let currentTopic=null, lastCount=0;
+function openTopic(t,count){
+  currentTopic=t; lastCount=count;
+  const d=TOPIC_DETAIL[t]||{subs:[["General mentions","سبتات عامة",100]],quotes:[],dists:["—"],trend:[8,8,9,9,10,10,11,11,12,12,13,13]};
+  $('tmTitle').textContent=dTopic(t);
+  $('tmSub').textContent=(selState?dState(STATES.find(s=>s.id===selState).n):tt('allUae'))+' · '+tt('lastDays')(rangeD);
+  const tr=d.trend, delta=Math.round((tr[11]-tr[7])/tr[7]*100);
+  $('tmStats').innerHTML=
+   `<div class="miniStat"><small>${tt('tmSessions')}</small><b>${fmtN(count)}</b></div>
+    <div class="miniStat"><small>${tt('tmWkTrend')}</small><b style="color:${delta>0?'var(--red)':'var(--green)'}">${delta>0?'▲ +':''}${fmtN(delta)}٪</b></div>
+    <div class="miniStat"><small>${tt('tmLead')}</small><b style="font-size:13px">${dDept(TOPIC_DEPT[t]||'du')}</b></div>`;
+  const mx=Math.max(...tr), pts=tr.map((v,i)=>`${i/(tr.length-1)*396+2},${42-(v/mx)*38}`).join(' ');
+  $('tmSpark').innerHTML=`<polyline points="${pts}" fill="none" stroke="${NEG_TOPICS.has(t)?'#CE1126':'#007A3D'}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="398" cy="${42-(tr[11]/mx)*38}" r="3.5" fill="${NEG_TOPICS.has(t)?'#CE1126':'#007A3D'}"/>`;
+  const mS=Math.max(...d.subs.map(s=>s[2]));
+  $('tmSubs').innerHTML=d.subs.map(([en,ar,v])=>
+    `<div class="subIssue"><div class="nm">${uiLang==='ar'?ar:en}</div><div class="barBg"><div class="barFill" style="width:${v/mS*100}%"></div></div><b>${fmtN(v)}٪</b></div>`).join('');
+  $('tmDists').innerHTML=d.dists.map(x=>{
+    const st=STATES.find(s=>s.districts.some(dd=>dd.en===x));
+    return `<span class="distHit">${st?dDistrict(st.n,x):x}</span>`;}).join('');
+  $('tmQuotes').innerHTML=d.quotes.map(([ar,en,m])=>
+    `<div class="q">"${uiLang==='ar'?ar:en}"<small>${m}</small></div>`).join('');
+  $('tmAssign').onclick=()=>{$('topicModal').classList.remove('open');openAssign(t,t,'elevated');};
+  $('topicModal').classList.add('open');
+}
+
+/* ================================================================
+   DIRECTIVES
+================================================================ */
+function buildDeptSelect(){
+  const keep=$('aDept').value;
+  $('aDept').innerHTML=DEPTS.map(d=>`<option value="${d.id}">${dDept(d.id)}</option>`).join('');
+  if(keep)$('aDept').value=keep;
+}
+let prio='normal';
+document.querySelectorAll('.prio').forEach(p=>p.onclick=()=>{
+  document.querySelectorAll('.prio').forEach(x=>x.classList.remove('sel'));
+  p.classList.add('sel');prio=p.dataset.p;
+});
+function openAssign(issue,topic,pri,src){
+  assignCtx={src:src||('adhoc'+Date.now()),topic};
+  $('aIssue').value=uiLang==='ar'?(T_TOPIC[issue]||issue):issue;
+  const rec=TOPIC_DEPT[topic]||'du';
+  buildDeptSelect();
+  $('aDept').value=rec;
+  $('aDeptHint').textContent=tt('aiSuggest')+dDept(rec);
+  prio=pri||'normal';
+  document.querySelectorAll('.prio').forEach(x=>x.classList.toggle('sel',x.dataset.p===prio));
+  const d=new Date();d.setDate(d.getDate()+(prio==='high'?3:14));
+  $('aDue').value=d.toISOString().slice(0,10);
+  $('aNote').value='';
+  $('aNote').placeholder=tt('notePh');
+  $('assignModal').classList.add('open');
+}
+function createTask(){
+  const dept=$('aDept').value;
+  tasks.unshift({
+    id:'MSM-DIR-'+String(1000+tasks.length+1),
+    issue:$('aIssue').value, dept, topic:assignCtx.topic,
+    prio, due:$('aDue').value, note:$('aNote').value,
+    status:'Assigned', src:assignCtx.src, userText:true,
+  });
+  $('assignModal').classList.remove('open');
+  renderTasks();render();
+  toast(tt('toastIssued')(dDept(dept)));
+}
+function renderTasks(){
+  const openN=tasks.filter(t=>t.status!=='Resolved').length;
+  $('taskCount').textContent=fmtN(openN);
+  if(!tasks.length){$('taskList').innerHTML=`<div class="emptyT">${tt('drawerEmpty')}</div>`;return}
+  $('taskList').innerHTML=tasks.map((x,i)=>{
+    const over=new Date(x.due)<new Date()&&x.status!=='Resolved';
+    const cls=x.status==='Resolved'?'act':x.status==='In progress'?'rev':'asg';
+    const stLbl=x.status==='Resolved'?tt('stResolved'):x.status==='In progress'?tt('stProgress'):tt('stAssigned');
+    return `<div class="task">
+      <div class="t1"><b>${x.issue}</b><span class="tag ${cls}">${stLbl}</span></div>
+      <div class="meta">
+        <span>${x.id}</span><span>${tt('deptWord')} <b>${dDept(x.dept)}</b></span>
+        <span>${tt('dueWord')} <b>${x.due}</b>${over?tt('overdueTag'):''}</span>
+        <span>${tt('priorityWord')} <b>${tt(x.prio==='high'?'prioHigh':x.prio==='elevated'?'prioElevated':'prioNormal')}</b></span>
+      </div>
+      ${x.note?`<div class="meta"><span>"${x.note}"</span></div>`:''}
+      <select onchange="setStatus(${i},this.value)">
+        <option value="Assigned" ${x.status==='Assigned'?'selected':''}>${tt('stAssigned')}</option>
+        <option value="In progress" ${x.status==='In progress'?'selected':''}>${tt('stProgress')}</option>
+        <option value="Resolved" ${x.status==='Resolved'?'selected':''}>${tt('stResolved')}</option>
+      </select>
+    </div>`;}).join('');
+}
+function setStatus(i,v){
+  tasks[i].status=v;renderTasks();render();
+  if(v==='Resolved')toast(tt('toastDelivered'));
+}
+function renderDeptStats(){
+  const open=tasks.filter(t=>t.status!=='Resolved');
+  if(!open.length){$('deptStats').innerHTML=`<div class="emptyT">${tt('dwEmpty')}</div>`;return}
+  const agg={};open.forEach(t=>agg[t.dept]=(agg[t.dept]||0)+1);
+  const mx=Math.max(...Object.values(agg));
+  $('deptStats').innerHTML=Object.entries(agg).sort((a,b)=>b[1]-a[1]).map(([id,c])=>
+    `<div class="langRow"><div class="nm" style="width:auto;flex:1">${dDept(id)}</div><div class="barBg" style="max-width:90px"><div class="barFill" style="width:${c/mx*100}%;background:var(--red)"></div></div><b>${fmtN(c)}</b></div>`).join('');
+}
+function openDrawer(){$('drawer').classList.add('open')}
+
+/* ================================================================
+   VIEW + LANGUAGE
+================================================================ */
+function setView(v){
+  view=v;
+  document.body.classList.toggle('du',v==='du');
+  document.querySelectorAll('#viewTgl button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  $('viewNote').textContent=tt(v==='min'?'viewNoteMin':'viewNoteDu');
+  $('topicHint').innerHTML=tt(v==='du'?'hintDeepDu':'hintDeep');
+  render();renderTasks();
+}
+function applyI18n(){
+  document.documentElement.lang=uiLang;
+  document.documentElement.dir=uiLang==='ar'?'rtl':'ltr';
+  $('tglAr').classList.toggle('on',uiLang==='ar');
+  $('tglEn').classList.toggle('on',uiLang==='en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=I18N[uiLang][el.dataset.i18n];
+    if(typeof v==='string')el.innerHTML=v;
+  });
+  drawTrend();
+  setView(view);
+  if($('topicModal').classList.contains('open')&&currentTopic)openTopic(currentTopic,lastCount);
+  if($('happyModal').classList.contains('open'))openHappy();
+}
+function setUiLang(l){uiLang=l;applyI18n();}
+
+$('range').addEventListener('click',e=>{
+  if(e.target.dataset.d){rangeD=+e.target.dataset.d;
+    document.querySelectorAll('#range button').forEach(b=>b.classList.toggle('on',b===e.target));
+    render();}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));$('drawer').classList.remove('open');}});
+
+applyI18n();
+</script>
+</body>
+</html>

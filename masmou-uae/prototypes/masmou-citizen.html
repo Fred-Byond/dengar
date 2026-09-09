@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مسموع — تحدث مع الوزير · وزارة الاتصالات</title>
+<style>
+/* ============ UAE FLAG DESIGN SYSTEM ============ */
+:root{
+  --red:#CE1126; --red-d:#A50D1E; --green:#007A3D; --green-d:#005C2E;
+  --black:#0E0E10; --white:#FFFFFF;
+  --bg:#0A0B0C; --card:#FFFFFF; --ink:#141416; --grey:#6E7276; --line:#E4E6E4;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Segoe UI",Tahoma,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  background:#0A0B0C;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:22px 14px;color:var(--ink)}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+#phone{width:100%;max-width:412px;background:linear-gradient(180deg,#050506,#101114 45%,#17181C);
+  border-radius:34px;overflow:hidden;position:relative;box-shadow:0 26px 70px rgba(0,0,0,.6);min-height:780px;
+  display:flex;flex-direction:column}
+.demoTag{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:9;
+  background:rgba(255,255,255,.14);color:#fff;font-size:8.5px;font-weight:800;letter-spacing:1.2px;
+  padding:4px 12px;border-radius:99px;backdrop-filter:blur(6px)}
+#uiLangTgl{position:absolute;top:38px;left:0;right:0;display:flex;justify-content:center;z-index:8;pointer-events:none}
+#uiLangTgl .box{pointer-events:auto;display:flex;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);
+  border-radius:99px;padding:3px;backdrop-filter:blur(8px)}
+#uiLangTgl button{border:0;background:transparent;color:#fff;font-size:11px;font-weight:800;padding:6px 14px;border-radius:99px}
+#uiLangTgl button.on{background:#fff;color:var(--ink)}
+
+/* UAE flag strip across the hero */
+.flagStrip{display:flex;height:6px}
+.flagStrip i{flex:1}
+.flagStrip i:nth-child(1){background:var(--green)}
+.flagStrip i:nth-child(2){background:#fff}
+.flagStrip i:nth-child(3){background:var(--black)}
+.flagStrip .hoist{flex:0 0 26%;background:var(--red)}
+
+.hero{padding:66px 22px 18px;text-align:center;color:#fff}
+.flagMark{width:44px;height:30px;border-radius:5px;overflow:hidden;display:flex;box-shadow:0 3px 12px rgba(0,0,0,.5);margin:0 auto 12px}
+.flagMark .hoist{width:12px;background:var(--red)}
+.flagMark .bands{flex:1;display:flex;flex-direction:column}
+.flagMark .bands i{flex:1}
+.flagMark .bands i:nth-child(1){background:var(--green)}
+.flagMark .bands i:nth-child(2){background:#fff}
+.flagMark .bands i:nth-child(3){background:var(--black)}
+.hero .brand{font-size:24px;font-weight:800;letter-spacing:.3px}
+.hero .brand span{font-weight:300}
+.hero .minTag{font-size:11px;font-weight:700;opacity:.75;margin-top:3px}
+.hero h1{font-size:21px;font-weight:800;line-height:1.3;margin-top:12px}
+.hero h1 em{font-style:normal;color:#F0B9C0}
+.hero p{font-size:12.5px;opacity:.8;margin-top:7px;line-height:1.55}
+
+.sheet{background:#F4F5F4;border-radius:26px 26px 0 0;flex:1;padding:20px 18px 24px;display:flex;flex-direction:column;gap:13px}
+.card{background:var(--card);border-radius:18px;padding:17px;box-shadow:0 6px 22px rgba(10,11,12,.10)}
+h2.t2{font-size:13.5px;font-weight:800;margin-bottom:9px}
+.steps{display:flex;gap:9px}
+.step{flex:1;background:#fff;border-radius:14px;padding:12px 9px;text-align:center;box-shadow:0 4px 14px rgba(10,11,12,.08)}
+.step .ic{font-size:20px}
+.step b{display:block;font-size:11.5px;margin-top:6px;line-height:1.3}
+.step small{display:block;font-size:9.5px;color:var(--grey);font-weight:600;margin-top:3px;line-height:1.35}
+label.f{display:block;font-size:12px;font-weight:800;color:var(--ink);margin:12px 0 6px}
+input.f,select.f{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px;font-size:14px;font-weight:600;background:#fff}
+input.f::placeholder{font-weight:500;color:#B4BAB6}
+.btn{width:100%;border:0;background:var(--red);color:#fff;font-size:16px;font-weight:800;padding:15px;border-radius:14px;margin-top:14px;transition:transform .12s}
+.btn:active{transform:scale(.975)}
+.btn:disabled{filter:grayscale(.6) opacity(.5);cursor:default}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);font-weight:700;font-size:14px;padding:13px}
+.btn.green{background:var(--green)}
+.hintS{font-size:11px;color:var(--grey);font-weight:600;line-height:1.55;margin-top:9px}
+.pdpa{font-size:10px;color:var(--grey);font-weight:600;line-height:1.6;margin-top:10px;text-align:center}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pick{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:12px 8px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+.pick.sel{background:var(--green);border-color:var(--green);color:#fff;font-weight:800}
+.langGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slotGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.slot{border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:10px 6px;text-align:center;font-size:12.5px;font-weight:700;cursor:pointer}
+.slot.sel{background:var(--black);border-color:var(--black);color:#fff}
+.slot.off{opacity:.35;cursor:default;text-decoration:line-through}
+.dayStrip{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.day{flex:0 0 62px;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:9px 4px;text-align:center;cursor:pointer}
+.day.sel{background:var(--red);border-color:var(--red);color:#fff}
+.day b{display:block;font-size:15px}
+.day small{font-size:9.5px;font-weight:700;opacity:.8}
+
+.otpRow{display:flex;gap:10px;justify-content:center;direction:ltr}
+.otp{width:56px;height:60px;border:1.5px solid var(--line);border-radius:12px;text-align:center;font-size:24px;font-weight:800}
+.otp:focus{border-color:var(--green);outline:none}
+
+/* session */
+.sessWrap{background:linear-gradient(180deg,#101114,#17181C);border-radius:18px;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.35)}
+.avatarBox{position:relative;height:250px;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 20%,#2A2C31,#101114 75%)}
+.avatarBox svg{height:225px}
+.liveTag{position:absolute;top:10px;inset-inline-start:12px;display:flex;align-items:center;gap:6px;background:rgba(206,17,38,.9);color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.8px;padding:4px 10px;border-radius:99px}
+.liveTag i{width:6px;height:6px;border-radius:50%;background:#fff;animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.timer{position:absolute;top:10px;inset-inline-end:12px;background:rgba(255,255,255,.14);color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;font-variant-numeric:tabular-nums}
+.who2{padding:10px 16px 2px;color:#fff}
+.who2 b{font-size:14.5px;display:block}
+.who2 small{font-size:10.5px;opacity:.7}
+.caption{min-height:64px;margin:10px 14px;background:rgba(255,255,255,.07);border-radius:12px;padding:10px 13px;color:#E8EAE8;font-size:12.5px;line-height:1.6}
+.caption .whoTag{font-size:9px;font-weight:800;letter-spacing:.7px;opacity:.6;display:block;margin-bottom:3px}
+.micRow{display:flex;align-items:center;justify-content:center;gap:22px;padding:14px 0 18px}
+.mic{width:64px;height:64px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:24px;box-shadow:0 8px 24px rgba(206,17,38,.45);transition:transform .15s}
+.mic.onair{background:var(--green);animation:mpulse 1.6s infinite}
+@keyframes mpulse{0%,100%{box-shadow:0 0 0 0 rgba(0,122,61,.4)}50%{box-shadow:0 0 0 16px rgba(0,122,61,0)}}
+.micLbl{color:#fff;font-size:11px;font-weight:700;opacity:.8;text-align:center;padding-bottom:14px}
+.endBtn{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:16px}
+
+/* closing */
+.refBox{background:#EFF6F1;border:1.5px dashed var(--green);border-radius:14px;padding:13px;text-align:center;margin-top:12px}
+.refBox small{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--green-d);text-transform:uppercase;display:block}
+.refBox b{font-size:19px;letter-spacing:1px;font-variant-numeric:tabular-nums}
+.summaryBox{background:#FDF9EF;border-inline-start:3px solid #C8A200;border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.65;margin-top:12px}
+.summaryBox .sh2{font-size:10px;font-weight:800;letter-spacing:.6px;color:#7A6400;text-transform:uppercase;display:block;margin-bottom:5px}
+.counterBox{background:linear-gradient(135deg,var(--green-d),var(--green));border-radius:15px;color:#fff;padding:15px;text-align:center;margin-top:12px}
+.counterBox small{font-size:10.5px;font-weight:700;opacity:.92;display:block;line-height:1.5}
+.counterBox .n{font-size:36px;font-weight:800;letter-spacing:.5px;font-variant-numeric:tabular-nums;margin:3px 0}
+.rateBox{background:#FFFDF4;border:1.5px solid #EADFB4;border-radius:14px;padding:12px;text-align:center;margin-top:12px}
+.rateBox small{font-size:10px;font-weight:800;letter-spacing:.6px;color:#7A6400;text-transform:uppercase;display:block;margin-bottom:8px}
+.rateRow{display:flex;justify-content:center;gap:14px}
+.rateRow button{border:1.5px solid var(--line);background:#fff;font-size:26px;width:56px;height:56px;border-radius:16px;transition:transform .12s,border-color .12s;line-height:1}
+.rateRow button:hover{transform:translateY(-2px)}
+.rateRow button.sel{border-color:var(--green);background:#EFF6F1;box-shadow:0 4px 14px rgba(0,122,61,.18)}
+.rateNote{font-size:10.5px;color:var(--grey);font-weight:700;margin-top:8px;line-height:1.5}
+.shareCard{background:linear-gradient(135deg,#0E0E10,#26272B);border-radius:16px;color:#fff;padding:16px;text-align:center;margin-top:12px}
+.shareCard .fm{margin:0 auto 8px}
+.shareCard b{font-size:14.5px;display:block}
+.shareCard small{display:block;font-size:10.5px;opacity:.75;margin-top:3px}
+.shareCard .slogan{font-size:13.5px;font-weight:800;color:#F0B9C0;margin-top:9px;letter-spacing:.3px}
+.siteUrl{text-align:center;font-size:10.5px;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:1.2px;padding:12px 0 4px}
+
+.scr{display:none}
+.scr.on{display:block;animation:fade .4s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:10.5px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;color:var(--red)}
+h2.title{font-size:20px;font-weight:800;margin:4px 0 3px}
+p.sub{font-size:12.5px;color:var(--grey);line-height:1.55;font-weight:600}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--black);color:#fff;
+  font-size:12.5px;font-weight:700;padding:12px 18px;border-radius:12px;z-index:90;transition:transform .3s;
+  max-width:min(88vw,380px);text-align:center;line-height:1.5}
+.toast.show{transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div class="demoTag" data-i18n="demoTag">نموذج تجريبي</div>
+  <div id="uiLangTgl"><div class="box">
+    <button id="tglAr" class="on" onclick="setUiLang('ar')">العربية</button>
+    <button id="tglEn" onclick="setUiLang('en')">EN</button>
+  </div></div>
+
+  <div class="hero">
+    <div class="flagMark"><div class="hoist"></div><div class="bands"><i></i><i></i><i></i></div></div>
+    <div class="brand" data-i18n="brand">مسموع<span>.ai</span></div>
+    <div class="minTag" data-i18n="minTag">وزارة الاتصالات · دولة الإمارات العربية المتحدة</div>
+    <h1 data-i18n="heroH">تحدث مع <em>الوزير</em></h1>
+    <p data-i18n="heroP">خمس دقائق خاصة مع النسخة الرقمية من معالي الوزير. صوتك يصل — ويُحدث أثراً.</p>
+  </div>
+  <div class="flagStrip"><i class="hoist"></i><i></i><i></i><i></i></div>
+
+  <div class="sheet">
+
+    <!-- ===== S1: WELCOME ===== -->
+    <div class="scr on" id="s1">
+      <div class="steps">
+        <div class="step"><div class="ic">📅</div><b data-i18n="st1">احجز</b><small data-i18n="st1s">اختر الوقت المناسب لك</small></div>
+        <div class="step"><div class="ic">💬</div><b data-i18n="st2">تحدث</b><small data-i18n="st2s">٥ دقائق بلغتك</small></div>
+        <div class="step"><div class="ic">✅</div><b data-i18n="st3">نستمع</b><small data-i18n="st3s">نستمع باهتمام ونتابع</small></div>
+      </div>
+      <button class="btn" onclick="go('s2')" data-i18n="cta">ابدأ الحديث مع الوزير</button>
+      <p class="pdpa" data-i18n="pdpa">جلستك خاصة ومجهولة الهوية في التحليلات. لا تُستخدم بياناتك لتدريب أي نموذج ذكاء اصطناعي. البيانات تبقى داخل دولة الإمارات.</p>
+    </div>
+
+    <!-- ===== S2: SLOT ===== -->
+    <div class="scr" id="s2">
+      <div class="card">
+        <div class="eyebrow" data-i18n="step1">الخطوة ١ من ٣</div>
+        <h2 class="title" data-i18n="slotTitle">احجز موعدك</h2>
+        <p class="sub" data-i18n="slotSub">خمس دقائق محجوزة لك وحدك.</p>
+        <label class="f" data-i18n="dateLbl">اليوم</label>
+        <div class="dayStrip" id="dayStrip"></div>
+        <label class="f" data-i18n="timeLbl">الوقت</label>
+        <div class="slotGrid" id="slotGrid"></div>
+        <button class="btn" id="slotNext" disabled onclick="go('s3')" data-i18n="continue">متابعة</button>
+      </div>
+    </div>
+
+    <!-- ===== S3: REGISTER ===== -->
+    <div class="scr" id="s3">
+      <div class="card">
+        <div class="eyebrow" data-i18n="step2">الخطوة ٢ من ٣</div>
+        <h2 class="title" data-i18n="regTitle">عرّفنا بنفسك</h2>
+        <p class="sub" data-i18n="regSub">بياناتك محمية ولا تظهر في التحليلات.</p>
+        <label class="f" data-i18n="fName">الاسم</label>
+        <input class="f" id="fName">
+        <label class="f" data-i18n="fPhone">رقم الهاتف</label>
+        <input class="f mono" id="fPhone" inputmode="tel" dir="ltr" placeholder="05x xxx xxxx">
+        <label class="f" data-i18n="fEmirate">الإمارة</label>
+        <select class="f" id="fEmirate" onchange="fillDistricts()"></select>
+        <label class="f" data-i18n="fDistrict">المنطقة</label>
+        <select class="f" id="fDistrict"></select>
+        <label class="f" data-i18n="fLang">لغة الجلسة</label>
+        <div class="langGrid" id="langGrid"></div>
+        <label class="f" data-i18n="fTopic">الموضوع الأقرب إليك</label>
+        <select class="f" id="fTopic"></select>
+        <button class="btn" onclick="sendOtp()" data-i18n="regNext">إرسال رمز التحقق</button>
+      </div>
+    </div>
+
+    <!-- ===== S4: OTP ===== -->
+    <div class="scr" id="s4">
+      <div class="card">
+        <div class="eyebrow" data-i18n="step3">الخطوة ٣ من ٣</div>
+        <h2 class="title" data-i18n="otpTitle">أدخل رمز التحقق</h2>
+        <p class="sub" data-i18n="otpSub">أرسلنا رمزاً من ٤ أرقام إلى هاتفك. (للتجربة: 1234)</p>
+        <div class="otpRow" style="margin-top:16px">
+          <input class="otp" maxlength="1" inputmode="numeric">
+          <input class="otp" maxlength="1" inputmode="numeric">
+          <input class="otp" maxlength="1" inputmode="numeric">
+          <input class="otp" maxlength="1" inputmode="numeric">
+        </div>
+        <button class="btn" id="otpBtn" disabled onclick="confirmBooking()" data-i18n="verify">تأكيد</button>
+      </div>
+    </div>
+
+    <!-- ===== S5: CONFIRMED ===== -->
+    <div class="scr" id="s5">
+      <div class="card" style="text-align:center">
+        <div style="font-size:44px">✅</div>
+        <h2 class="title" data-i18n="confTitle">تم تأكيد موعدك</h2>
+        <p class="sub" id="confDetail"></p>
+        <div class="refBox"><small data-i18n="refLbl">رقم المرجع</small><b class="mono" id="bookRef">—</b></div>
+        <p class="hintS" data-i18n="confHint">سنذكّرك برسالة واتساب قبل موعدك بساعة. احتفظ برقم المرجع — به تتابع ما حدث لصوتك لاحقاً.</p>
+        <button class="btn green" onclick="startSession()" data-i18n="joinNow">(للتجربة) ادخل الجلسة الآن</button>
+      </div>
+    </div>
+
+    <!-- ===== S6: SESSION ===== -->
+    <div class="scr" id="s6">
+      <div class="sessWrap">
+        <div class="avatarBox">
+          <div class="liveTag"><i></i><span data-i18n="liveLbl">مباشر</span></div>
+          <div class="timer" id="timer">5:00</div>
+          <!-- Stylised Emirati minister digital human (generic, dignified) -->
+          <svg viewBox="0 0 200 230" fill="none">
+            <ellipse cx="100" cy="222" rx="72" ry="8" fill="rgba(0,0,0,.35)"/>
+            <path d="M40 230 L46 150 Q48 118 74 108 L126 108 Q152 118 154 150 L160 230 Z" fill="#F4F2ED"/>
+            <path d="M96 108 L104 108 L110 140 L100 152 L90 140 Z" fill="#E8E4DC"/>
+            <rect x="86" y="86" width="28" height="30" rx="10" fill="#C99B72"/>
+            <circle cx="100" cy="64" r="30" fill="#D3A67E"/>
+            <path d="M66 60 Q64 24 100 22 Q136 24 134 60 L134 74 Q134 80 128 78 L126 56 Q114 44 100 44 Q86 44 74 56 L72 78 Q66 80 66 74 Z" fill="#FBFAF7"/>
+            <path d="M64 56 Q100 40 136 56 L134 48 Q100 30 66 48 Z" fill="#141416"/>
+            <path d="M63 58 Q100 42 137 58 L136 52 Q100 35 64 52 Z" fill="#141416"/>
+            <path d="M72 78 L74 120 Q86 132 100 132 Q114 132 126 120 L128 78 Q114 70 100 70 Q86 70 72 78 Z" fill="#FBFAF7" opacity=".9"/>
+            <circle cx="89" cy="64" r="3" fill="#2A2118"/>
+            <circle cx="111" cy="64" r="3" fill="#2A2118"/>
+            <path d="M84 57 Q89 54 94 57" stroke="#4A3826" stroke-width="2" stroke-linecap="round"/>
+            <path d="M106 57 Q111 54 116 57" stroke="#4A3826" stroke-width="2" stroke-linecap="round"/>
+            <path d="M92 84 Q100 89 108 84" stroke="#8A5A3A" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+            <path d="M97 68 Q95 74 97 77 L103 77" stroke="#B98B62" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+        <div class="who2"><b data-i18n="minName">معالي وزير الاتصالات</b><small data-i18n="minRole">نسخة رقمية · تستمع إليك الآن</small></div>
+        <div class="caption" id="caption"></div>
+        <div class="micRow">
+          <button class="endBtn" onclick="endSession()" title="end">⏹</button>
+          <button class="mic" id="micBtn" onclick="toggleMic()">🎙️</button>
+          <div style="width:44px"></div>
+        </div>
+        <div class="micLbl" id="micLbl" data-i18n="tapSpeak">اضغط الميكروفون وتحدث بحرية</div>
+      </div>
+    </div>
+
+    <!-- ===== S7: CLOSING ===== -->
+    <div class="scr" id="s7">
+      <div class="card" style="text-align:center">
+        <div style="font-size:40px">🤲</div>
+        <h2 class="title" data-i18n="closeTitle">شكراً لك. صوتك وصل.</h2>
+        <div class="summaryBox" style="text-align:start">
+          <span class="sh2" data-i18n="sumLbl">ما سمعناه منك</span>
+          <span id="sumText"></span>
+        </div>
+        <div class="refBox"><small data-i18n="refLbl">رقم المرجع</small><b class="mono" id="closeRef">—</b></div>
+        <div class="rateBox">
+          <small data-i18n="rateLbl">قيّم تجربتك — مؤشر السعادة</small>
+          <div class="rateRow" id="rateRow">
+            <button onclick="rateHap(this,1)" aria-label="unsatisfied">☹️</button>
+            <button onclick="rateHap(this,2)" aria-label="neutral">😐</button>
+            <button onclick="rateHap(this,3)" aria-label="satisfied">😊</button>
+          </div>
+          <div class="rateNote" data-i18n="rateNote">تقييمك ينضم إلى مؤشر السعادة الوطني لمراكز إسعاد المتعاملين.</div>
+        </div>
+        <div class="counterBox">
+          <small data-i18n="cntPre">أنت الصوت رقم</small>
+          <div class="n" id="cntNum">—</div>
+          <small data-i18n="cntPost">الذي استمعت إليه الوزارة هذا الشهر. صوتك يُحتسب مع أصواتهم جميعاً.</small>
+        </div>
+        <p class="hintS" data-i18n="closeHint">إذا اتُّخذ إجراء بشأن ما طرحته، سنخبرك برسالة واتساب: أنتم قلتم، نحن فعلنا.</p>
+        <div class="shareCard">
+          <div class="flagMark fm"><div class="hoist"></div><div class="bands"><i></i><i></i><i></i></div></div>
+          <b data-i18n="shareT">مسموع.ai</b>
+          <small data-i18n="shareS">تحدثتُ مع الوزير اليوم — وصوتي وصل.</small>
+          <div class="slogan" data-i18n="slogan">كل صوت مسموع</div>
+        </div>
+        <button class="btn ghost" onclick="resetAll()" data-i18n="again">جلسة جديدة</button>
+      </div>
+      <div class="siteUrl">MASMOU.AI</div>
+    </div>
+
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   MASMOU citizen experience — Arabic-first, RTL, UAE MoC
+================================================================ */
+let uiLang='ar';
+const I18N={ar:{},en:{}};
+const tt=k=>(I18N[uiLang][k]!==undefined?I18N[uiLang][k]:(I18N.en[k]||k));
+
+I18N.ar={
+ demoTag:"نموذج تجريبي",
+ brand:'مسموع<span>.ai</span>',
+ minTag:"وزارة الاتصالات · دولة الإمارات العربية المتحدة",
+ heroH:'تحدث مع <em>الوزير</em>',
+ heroP:"خمس دقائق خاصة مع النسخة الرقمية من معالي الوزير. صوتك يصل — ويُحدث أثراً.",
+ st1:"احجز", st1s:"اختر الوقت المناسب لك",
+ st2:"تحدث", st2s:"٥ دقائق بلغتك",
+ st3:"نستمع", st3s:"نستمع باهتمام ونتابع",
+ cta:"ابدأ الحديث مع الوزير",
+ pdpa:"جلستك خاصة ومجهولة الهوية في التحليلات. لا تُستخدم بياناتك لتدريب أي نموذج ذكاء اصطناعي. البيانات تبقى داخل دولة الإمارات.",
+ step1:"الخطوة ١ من ٣", step2:"الخطوة ٢ من ٣", step3:"الخطوة ٣ من ٣",
+ slotTitle:"احجز موعدك", slotSub:"خمس دقائق محجوزة لك وحدك.",
+ dateLbl:"اليوم", timeLbl:"الوقت", continue:"متابعة",
+ regTitle:"عرّفنا بنفسك", regSub:"بياناتك محمية ولا تظهر في التحليلات.",
+ fName:"الاسم", fPhone:"رقم الهاتف", fEmirate:"الإمارة", fDistrict:"المنطقة",
+ fLang:"لغة الجلسة", fTopic:"الموضوع الأقرب إليك",
+ namePh:"الاسم الكامل",
+ regNext:"إرسال رمز التحقق",
+ otpTitle:"أدخل رمز التحقق", otpSub:"أرسلنا رمزاً من ٤ أرقام إلى هاتفك. (للتجربة: 1234)", verify:"تأكيد",
+ confTitle:"تم تأكيد موعدك",
+ refLbl:"رقم المرجع",
+ confHint:"سنذكّرك برسالة واتساب قبل موعدك بساعة. احتفظ برقم المرجع — به تتابع ما حدث لصوتك لاحقاً.",
+ joinNow:"(للتجربة) ادخل الجلسة الآن",
+ liveLbl:"مباشر",
+ minName:"معالي وزير الاتصالات", minRole:"نسخة رقمية · تستمع إليك الآن",
+ tapSpeak:"اضغط الميكروفون وتحدث بحرية", listening:"يستمع إليك...",
+ closeTitle:"شكراً لك. صوتك وصل.",
+ sumLbl:"ما سمعناه منك",
+ cntPre:"أنت الصوت رقم",
+ cntPost:"الذي استمعت إليه الوزارة هذا الشهر. صوتك يُحتسب مع أصواتهم جميعاً.",
+ closeHint:"إذا اتُّخذ إجراء بشأن ما طرحته، سنخبرك برسالة واتساب: أنتم قلتم، نحن فعلنا.",
+ rateLbl:"قيّم تجربتك — مؤشر السعادة",
+ rateNote:"تقييمك ينضم إلى مؤشر السعادة الوطني لمراكز إسعاد المتعاملين.",
+ rateThanks:"😊 شكراً — سُجّل تقييمك في مؤشر السعادة.",
+ shareT:"مسموع.ai", shareS:"تحدثتُ مع الوزير اليوم — وصوتي وصل.", slogan:"كل صوت مسموع",
+ again:"جلسة جديدة",
+ confAt:(d,t)=>d+" · "+t+" · خمس دقائق مخصصة لك",
+ otpToast:"✓ تم إرسال الرمز (للتجربة: 1234)",
+ welcome1:"أهلاً وسهلاً. تفضل، أنا أستمع إليك — تحدث بلغتك وبطريقتك.",
+ probe1:"فهمت. هل يحدث هذا كل يوم تقريباً، ومنذ متى؟",
+ confirmLine:"شكراً لوضوحك. سجلت ما قلته وسيصل إلى الجهة المسؤولة مع أصوات منطقتك.",
+ sumBody:(dist,topic)=>"من <b>"+dist+"</b>، تحدثتَ عن <b>"+topic+"</b> — وسجلنا ما قلته بكلماتك، وسيُحتسب ضمن الصورة الوطنية التي يراها معالي الوزير أسبوعياً.",
+ whoYou:"أنت", whoMin:"الوزير",
+ youSaidDemo:"«الإنترنت عندنا ينقطع كل مساء تقريباً، وأنا أعمل من المنزل وأحتاج اتصالاً مستقراً.»",
+};
+I18N.en={
+ demoTag:"DEMO PROTOTYPE",
+ brand:'MASMOU<span>.ai</span>',
+ minTag:"Ministry of Communications · United Arab Emirates",
+ heroH:'Speak to <em>the Minister</em>',
+ heroP:"Five private minutes with the Minister's digital human. Your voice reaches — and makes a difference.",
+ st1:"Book", st1s:"Pick a time that suits you",
+ st2:"Speak", st2s:"5 minutes, in your language",
+ st3:"We listen", st3s:"We listen with care & follow up",
+ cta:"Start speaking to the Minister",
+ pdpa:"Your session is private and anonymised in analytics. Your data is never used to train any AI model. Data stays inside the UAE.",
+ step1:"STEP 1 OF 3", step2:"STEP 2 OF 3", step3:"STEP 3 OF 3",
+ slotTitle:"Book your slot", slotSub:"Five minutes reserved just for you.",
+ dateLbl:"Day", timeLbl:"Time", continue:"Continue",
+ regTitle:"Tell us about you", regSub:"Your details are protected and never shown in analytics.",
+ fName:"Name", fPhone:"Phone number", fEmirate:"Emirate", fDistrict:"District",
+ fLang:"Session language", fTopic:"Closest topic",
+ namePh:"Full name",
+ regNext:"Send verification code",
+ otpTitle:"Enter the code", otpSub:"We sent a 4-digit code to your phone. (Demo: 1234)", verify:"Verify",
+ confTitle:"Your session is confirmed",
+ refLbl:"Reference number",
+ confHint:"We'll remind you on WhatsApp an hour before. Keep your reference — it lets you track what happened to your voice.",
+ joinNow:"(Demo) Join the session now",
+ liveLbl:"LIVE",
+ minName:"The Minister of Communications", minRole:"Digital human · listening to you now",
+ tapSpeak:"Tap the mic and speak freely", listening:"Listening...",
+ closeTitle:"Thank you. Your voice was heard.",
+ sumLbl:"What we heard from you",
+ cntPre:"You are voice number",
+ cntPost:"the Ministry has listened to this month. Your voice counts with all of theirs.",
+ closeHint:'If action is taken on what you raised, we\'ll tell you on WhatsApp: "You said, we did."',
+ rateLbl:"Rate your experience — Happiness Index",
+ rateNote:"Your rating joins the national Happiness Index of the Customer Happiness Centres.",
+ rateThanks:"😊 Thank you — your rating was added to the Happiness Index.",
+ shareT:"MASMOU.ai", shareS:"I spoke to the Minister today — and my voice was heard.", slogan:"EVERY VOICE HEARD",
+ again:"New session",
+ confAt:(d,t)=>d+" · "+t+" · five minutes reserved for you",
+ otpToast:"✓ Code sent (demo: 1234)",
+ welcome1:"Welcome. Please — I'm listening. Speak in your language, in your own way.",
+ probe1:"I understand. Does this happen almost every day, and since when?",
+ confirmLine:"Thank you for being clear. I've recorded what you said — it will reach the responsible department together with your district's voices.",
+ sumBody:(dist,topic)=>"From <b>"+dist+"</b>, you spoke about <b>"+topic+"</b> — we recorded it in your own words, and it now counts in the national picture the Minister sees every week.",
+ whoYou:"YOU", whoMin:"MINISTER",
+ youSaidDemo:'"Our internet drops almost every evening, and I work from home — I need a stable connection."',
+};
+
+/* Emirates + districts + topics (EN keys, AR display) */
+const GEO={
+ "Abu Dhabi":{ar:"أبوظبي",d:[["Abu Dhabi City","مدينة أبوظبي"],["Al Ain","العين"],["Al Dhafra","الظفرة"],["Yas Island","جزيرة ياس"],["Musaffah","مصفح"]]},
+ "Dubai":{ar:"دبي",d:[["Deira","ديرة"],["Bur Dubai","بر دبي"],["Jumeirah","جميرا"],["Al Barsha","البرشاء"],["Hatta","حتا"],["Dubai South","دبي الجنوب"]]},
+ "Sharjah":{ar:"الشارقة",d:[["Sharjah City","مدينة الشارقة"],["Khor Fakkan","خورفكان"],["Kalba","كلباء"],["Al Dhaid","الذيد"]]},
+ "Ajman":{ar:"عجمان",d:[["Ajman City","مدينة عجمان"],["Masfout","مصفوت"],["Al Manama","المنامة"]]},
+ "Umm Al Quwain":{ar:"أم القيوين",d:[["UAQ City","مدينة أم القيوين"],["Falaj Al Mualla","فلج المعلا"]]},
+ "Ras Al Khaimah":{ar:"رأس الخيمة",d:[["RAK City","مدينة رأس الخيمة"],["Al Jazirah Al Hamra","الجزيرة الحمراء"],["Khatt","خت"],["Sha'am","شعم"]]},
+ "Fujairah":{ar:"الفجيرة",d:[["Fujairah City","مدينة الفجيرة"],["Dibba Al-Fujairah","دبا الفجيرة"],["Masafi","مسافي"],["Qidfa","قدفع"]]},
+};
+const TOPICS=[
+ ["Telecom & internet quality","جودة الاتصالات والإنترنت"],
+ ["Cybersecurity & online fraud","الأمن السيبراني والاحتيال الإلكتروني"],
+ ["Telecom pricing & packages","أسعار وباقات الاتصالات"],
+ ["Digital government services","الخدمات الحكومية الرقمية"],
+ ["Digital inclusion & seniors","الشمول الرقمي وكبار المواطنين"],
+ ["Remote-area coverage","تغطية المناطق النائية"],
+ ["Media & broadcasting","الإعلام والبث"],
+ ["Postal & logistics","البريد والخدمات اللوجستية"],
+ ["AI & innovation","الذكاء الاصطناعي والابتكار"],
+ ["General feedback","ملاحظات عامة"],
+];
+const LANGS=["العربية","English","हिन्दी","اردو","Filipino","中文","Русский"];
+
+const $=id=>document.getElementById(id);
+const fmtN=n=>n.toLocaleString(uiLang==='ar'?'ar-AE':'en-AE');
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),3200);}
+function go(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');window.scrollTo({top:0});}
+
+const S={day:null,slot:null,lang:'العربية',emirate:'Fujairah',district:'Dibba Al-Fujairah',topic:'Telecom & internet quality',ref:null};
+
+/* days + slots */
+const DAYS_AR=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس"];
+const DAYS_EN=["Sun","Mon","Tue","Wed","Thu"];
+function buildDays(){
+  const strip=$('dayStrip');strip.innerHTML='';
+  for(let i=0;i<5;i++){
+    const d=document.createElement('div');
+    d.className='day'+(S.day===i?' sel':'');
+    d.innerHTML=`<small>${uiLang==='ar'?DAYS_AR[i]:DAYS_EN[i]}</small><b>${fmtN(14+i)}</b><small>${uiLang==='ar'?'سبتمبر':'Sep'}</small>`;
+    d.onclick=()=>{S.day=i;buildDays();checkSlot();};
+    strip.appendChild(d);
+  }
+}
+const SLOTS=["18:00","18:15","18:30","19:00","19:15","20:00"];
+function buildSlots(){
+  const g=$('slotGrid');g.innerHTML='';
+  SLOTS.forEach((t,i)=>{
+    const off=i===2;
+    const s=document.createElement('div');
+    s.className='slot'+(off?' off':'')+(S.slot===t?' sel':'');
+    s.textContent=t;
+    if(!off)s.onclick=()=>{S.slot=t;buildSlots();checkSlot();};
+    g.appendChild(s);
+  });
+}
+function checkSlot(){$('slotNext').disabled=!(S.day!==null&&S.slot);}
+
+function buildSelects(){
+  $('fEmirate').innerHTML=Object.entries(GEO).map(([en,g])=>`<option value="${en}">${uiLang==='ar'?g.ar:en}</option>`).join('');
+  $('fEmirate').value=S.emirate;
+  fillDistricts();
+  $('fTopic').innerHTML=TOPICS.map(([en,ar])=>`<option value="${en}">${uiLang==='ar'?ar:en}</option>`).join('');
+  $('fTopic').value=S.topic;
+  const lg=$('langGrid');lg.innerHTML='';
+  LANGS.forEach(l=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='pick'+(S.lang===l?' sel':'');b.textContent=l;
+    b.onclick=()=>{S.lang=l;buildSelects();};
+    lg.appendChild(b);
+  });
+  $('fName').placeholder=tt('namePh');
+}
+function fillDistricts(){
+  S.emirate=$('fEmirate').value||S.emirate;
+  const g=GEO[S.emirate];
+  $('fDistrict').innerHTML=g.d.map(([en,ar])=>`<option value="${en}">${uiLang==='ar'?ar:en}</option>`).join('');
+  if(g.d.some(x=>x[0]===S.district))$('fDistrict').value=S.district;
+  $('fDistrict').onchange=()=>S.district=$('fDistrict').value;
+}
+function sendOtp(){
+  S.topic=$('fTopic').value;S.district=$('fDistrict').value;S.emirate=$('fEmirate').value;
+  toast(tt('otpToast'));go('s4');
+  document.querySelectorAll('.otp')[0].focus();
+}
+document.addEventListener('input',e=>{
+  if(!e.target.classList.contains('otp'))return;
+  const boxes=[...document.querySelectorAll('.otp')];
+  const i=boxes.indexOf(e.target);
+  if(e.target.value&&i<3)boxes[i+1].focus();
+  $('otpBtn').disabled=!boxes.every(b=>b.value.length===1);
+});
+function makeRef(){
+  const n=String(10000+Math.floor(Math.random()*89999));
+  return 'MSM-2026-0914-'+n;
+}
+function confirmBooking(){
+  S.ref=makeRef();
+  $('bookRef').textContent=S.ref;
+  const day=(uiLang==='ar'?DAYS_AR:DAYS_EN)[S.day||0]+' '+fmtN(14+(S.day||0));
+  $('confDetail').textContent=tt('confAt')(day,S.slot||SLOTS[0]);
+  go('s5');
+}
+
+/* session */
+let mic=false, tState=300, tInt=null, phase=0;
+function startSession(){
+  go('s6');phase=0;tState=300;
+  caption('whoMin',tt('welcome1'));
+  clearInterval(tInt);
+  tInt=setInterval(()=>{
+    tState--;
+    const m=Math.floor(tState/60),s=String(tState%60).padStart(2,'0');
+    $('timer').textContent=m+':'+s;
+    if(tState<=0)endSession();
+  },1000);
+}
+function caption(who,text){
+  $('caption').innerHTML=`<span class="whoTag">${tt(who)}</span>${text}`;
+}
+function toggleMic(){
+  mic=!mic;
+  $('micBtn').classList.toggle('onair',mic);
+  $('micLbl').textContent=mic?tt('listening'):tt('tapSpeak');
+  if(mic){
+    setTimeout(()=>{if(!mic)return;caption('whoYou',tt('youSaidDemo'));},900);
+    setTimeout(()=>{if(!mic)return;
+      phase++;
+      caption('whoMin',phase===1?tt('probe1'):tt('confirmLine'));
+      mic=false;$('micBtn').classList.remove('onair');$('micLbl').textContent=tt('tapSpeak');
+    },3400);
+  }
+}
+function endSession(){
+  clearInterval(tInt);mic=false;
+  if(!S.ref)S.ref=makeRef();
+  renderClosing();
+  go('s7');
+}
+function renderClosing(){
+  $('closeRef').textContent=S.ref;
+  const g=GEO[S.emirate];
+  const distDisp=uiLang==='ar'?(g.d.find(x=>x[0]===S.district)||g.d[0])[1]:S.district;
+  const topDisp=uiLang==='ar'?(TOPICS.find(x=>x[0]===S.topic)||TOPICS[0])[1]:S.topic;
+  $('sumText').innerHTML=tt('sumBody')(distDisp+ (uiLang==='ar'?'، '+g.ar:', '+S.emirate),topDisp);
+  $('cntNum').textContent=fmtN(3247);
+}
+function rateHap(el,v){
+  document.querySelectorAll('#rateRow button').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  toast(tt('rateThanks'));
+}
+function resetAll(){
+  S.day=null;S.slot=null;S.ref=null;phase=0;
+  document.querySelectorAll('#rateRow button').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.otp').forEach(b=>b.value='');
+  $('otpBtn').disabled=true;$('slotNext').disabled=true;
+  buildDays();buildSlots();go('s1');
+}
+
+/* i18n */
+function applyI18n(){
+  document.documentElement.lang=uiLang;
+  document.documentElement.dir=uiLang==='ar'?'rtl':'ltr';
+  $('tglAr').classList.toggle('on',uiLang==='ar');
+  $('tglEn').classList.toggle('on',uiLang==='en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=I18N[uiLang][el.dataset.i18n];
+    if(typeof v==='string')el.innerHTML=v;
+  });
+  buildDays();buildSlots();buildSelects();
+  if($('s7').classList.contains('on'))renderClosing();
+  if($('s5').classList.contains('on')&&S.ref){
+    $('bookRef').textContent=S.ref;
+    const day=(uiLang==='ar'?DAYS_AR:DAYS_EN)[S.day||0]+' '+fmtN(14+(S.day||0));
+    $('confDetail').textContent=tt('confAt')(day,S.slot||SLOTS[0]);
+  }
+}
+function setUiLang(l){uiLang=l;applyI18n();}
+applyI18n();
+</script>
+</body>
+</html>
