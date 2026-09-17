@@ -195,22 +195,38 @@
   bottom: 0;
   z-index: 4;
   min-height: 41%;
-  max-height: 64%;
+  /* THE LAW: the overlay owns the bottom of the stage and nothing above it.
+     The avatar fills the face zone, so unlike the canvas stand-in there is no
+     figure to lift out of the way — the ceiling here IS the guarantee, and it
+     is set so a head-and-shoulders avatar is never crowded by a card. */
+  max-height: 56%;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   gap: 11px;
   padding: 22px 15px 18px;
   scroll-behavior: smooth;
+  /* Opaque for all but the top fifth. The avatar behind is bright, and a
+     translucent panel over it turns every card into low-contrast text. */
   background: linear-gradient(
     to top,
     #140e31 0%,
-    #140e31 52%,
-    rgba(20, 14, 49, 0.86) 74%,
+    #140e31 80%,
+    rgba(20, 14, 49, 0.93) 91%,
     rgba(20, 14, 49, 0) 100%
   );
   pointer-events: none;
   overflow-y: auto;
+  /* Content scrolling past the top fades out rather than being cut through
+     mid-sentence with the avatar showing behind the cut.
+     mask-repeat MUST be no-repeat: the default tiles this 58px gradient all
+     the way down and bands every card in the overlay. */
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, #000 58px);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, #000 58px);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
 }
 /* Children must never shrink below their content. A squeezed flex item
    overflows its own box and collides with the next one — which is exactly
@@ -803,7 +819,7 @@
   .lower {
     gap: 9px;
     padding: 18px 14px 14px;
-    max-height: 66%;
+    max-height: 56%;
   }
   .caption {
     font-size: 14.5px;
@@ -1199,4 +1215,89 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ── Spoken debrief (S7·a) ───────────────────────────────────────────
+   Beat-synced with the coach's voice: each card lands as she starts saying
+   it, so the card confirms what was heard instead of competing with it. */
+@keyframes debriefRise {
+  from {
+    transform: translateY(9px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.debriefCard {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 13px;
+  background: linear-gradient(180deg, #221846 0%, #1c1440 100%);
+  animation: debriefRise 0.5s ease both;
+}
+.debriefCard + .debriefCard {
+  margin-top: 9px;
+}
+.debriefTitle {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--dim2);
+  margin-bottom: 9px;
+}
+.debriefGood {
+  border-color: #2e6b52;
+}
+.debriefGood .debriefTitle,
+.debriefGood .debriefMark {
+  color: #8fd7b4;
+}
+.debriefBad {
+  border-color: #7e4a55;
+}
+.debriefBad .debriefTitle,
+.debriefBad .debriefMark {
+  color: #f0b9ac;
+}
+.debriefNext {
+  border-color: #3f6a76;
+}
+.debriefNext .debriefTitle,
+.debriefNext .debriefMark {
+  color: #a8dce4;
+}
+.debriefRow {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--paper);
+}
+.debriefRow + .debriefRow {
+  margin-top: 8px;
+}
+.debriefMark {
+  flex: none;
+  width: 13px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim2);
+}
+.debriefText {
+  flex: 1;
+}
+.debriefQuote {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--dim);
+  font-style: italic;
+}
+.debriefBtn {
+  margin-top: 12px;
 }

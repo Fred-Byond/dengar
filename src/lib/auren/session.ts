@@ -53,6 +53,9 @@ export type Stage =
   | "stress"
   | "coach"
   | "retest"
+  /* The coach speaks the assessment before the record is rendered. Paper III
+     §9.2: the sentence, not the number, is the product — so a person says it. */
+  | "debrief"
   | "evidence"
   | "modes"
   | "verify"

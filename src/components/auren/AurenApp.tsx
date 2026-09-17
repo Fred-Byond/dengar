@@ -14,11 +14,13 @@ import {
 } from "@/lib/auren/i18n";
 import {
   CHALLENGES,
+  ELEMENTS,
   FAILURE_SIGNATURES,
   PROTECT_MARKERS,
   VERIFICATION_ACTIONS,
   type ChallengeObject,
 } from "@/lib/auren/objects";
+import { composeDebrief } from "@/lib/auren/debrief";
 import {
   bindSignature,
   budgetedQuestions,
@@ -34,6 +36,7 @@ import {
   type Stage,
 } from "@/lib/auren/session";
 import { CoachEvidencePanel, type CoachBeat } from "./CoachEvidencePanel";
+import { DebriefPanel, type DebriefCard } from "./DebriefPanel";
 import { ReasoningMapRail, type RailState } from "./ReasoningMapRail";
 import { Scorecard } from "./Scorecard";
 import styles from "./auren.module.css";
@@ -63,6 +66,8 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
   const [holding, setHolding] = useState(false);
   const [prop, setProp] = useState<{ head: string; body: string } | null>(null);
   const [coachSig, setCoachSig] = useState<BoundSignature | null>(null);
+  const [debriefCards, setDebriefCards] = useState<DebriefCard[]>([]);
+  const [debriefDone, setDebriefDone] = useState(false);
   const [coachBeat, setCoachBeat] = useState<CoachBeat>(1);
   const [, bump] = useState(0);
 
@@ -337,7 +342,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
       if (stale(g)) return;
 
       if (phase === "stress") void runCoach();
-      else void runEvidence();
+      else void runDebrief();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [goStage, say, listen, rerender]
@@ -399,7 +404,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
     const failed = CHALLENGES[0];
     const retest = selectRetest(failed, "E-VER-02");
     if (retest) void runChallenge(retest, "retest");
-    else void runEvidence();
+    else void runDebrief();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goStage, say, runChallenge]);
 
@@ -407,6 +412,85 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
     goStage("evidence", "S7");
     setMicArmed(false);
   }, [goStage]);
+
+  /* ── Stage: DEBRIEF [S7·a] ────────────────────────────────────────
+     The loop used to end by replacing the digital human with a full-screen
+     document — at the one moment the learner most needs a person, the person
+     left. So the coach says the assessment herself, in four beats, and the
+     written record follows on request as the audit rather than the delivery.
+
+     The composition is shared with the self-contained prototype (see
+     lib/auren/debrief.ts), so the two builds cannot reach different
+     conclusions about the same record. */
+  const runDebrief = useCallback(async () => {
+    const g = genRef.current;
+    goStage("debrief", "S7");
+    setMicArmed(false);
+    setProp(null);
+    setCoachSig(null);
+    setDebriefCards([]);
+    setDebriefDone(false);
+    setSaid("");
+
+    const session = sessionRef.current;
+    const lg = session.lang;
+    const action = VERIFICATION_ACTIONS["VA-REGCHECK-001"];
+
+    const script = composeDebrief({
+      transferred: session.transferred === true,
+      assessed: budgetedQuestions()
+        .map((q) => {
+          const record = session.reasoningMap[q.targetElement];
+          if (!record) return null;
+          return {
+            id: q.targetElement,
+            label: t(ELEMENTS[q.targetElement].label, lg),
+            demonstrated: record.status === "demonstrated",
+            evidence: record.evidence,
+          };
+        })
+        .filter((e): e is NonNullable<typeof e> => e !== null),
+      signatures: session.signatures.map((bound) => ({
+        id: bound.failId,
+        definition: t(FAILURE_SIGNATURES[bound.failId].definition, lg),
+        quote: bound.quote,
+      })),
+      teach: action ? t(action.teach, lg) : "",
+      // Elements with no question authored against them cannot be resolved in
+      // any session. Saying so out loud is the honest retraining queue.
+      queued: Math.max(
+        0,
+        Object.keys(ELEMENTS).length - budgetedQuestions().length
+      ),
+      ui: (key: string) => ui(key as Parameters<typeof ui>[0], lg),
+    });
+
+    await say(ui("debriefOpener", lg));
+    if (stale(g)) return;
+
+    // BEAT 1 — the verdict, alone. Nothing on screen competes with it.
+    await say(script.verdict);
+    if (stale(g)) return;
+
+    // BEATS 2-4 — each card lands as she starts saying it.
+    const beats: [DebriefCard["kind"], string, string][] = [
+      ["good", ui("debriefRightTitle", lg), script.right],
+      ["bad", ui("debriefWrongTitle", lg), script.wrong],
+      ["next", ui("debriefImproveTitle", lg), script.improve],
+    ];
+    const rows = [script.rightRows, script.wrongRows, script.improveRows];
+    for (let i = 0; i < beats.length; i += 1) {
+      const [kind, title, line] = beats[i];
+      setDebriefCards((prev) => [...prev, { kind, title, rows: rows[i] }]);
+      await say(line);
+      if (stale(g)) return;
+    }
+
+    await say(ui("debriefHandoff", lg));
+    if (stale(g)) return;
+    setDebriefDone(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goStage, say]);
 
   /* ── Entry ────────────────────────────────────────────────────────
      The consent act replaces the first-run mode menu (ordering fix D1).
@@ -459,7 +543,8 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
     stage === "diagnose" ||
     stage === "stress" ||
     stage === "coach" ||
-    stage === "retest";
+    stage === "retest" ||
+    stage === "debrief";
   const elementIds = budgetedQuestions().map((q) => q.targetElement);
 
   return (
@@ -712,7 +797,23 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
               />
             ) : null}
 
+            {stage === "debrief" ? (
+              <DebriefPanel
+                cards={debriefCards}
+                quoteLabel={ui("debriefYouSaid", lang)}
+                action={
+                  debriefDone
+                    ? {
+                        label: ui("debriefRecordBtn", lang),
+                        onClick: runEvidence,
+                      }
+                    : undefined
+                }
+              />
+            ) : null}
+
             {stage !== "understand" &&
+            stage !== "debrief" &&
             !(stage === "coach" && railState !== "revealed") ? (
               <ReasoningMapRail
                 session={session}
@@ -733,7 +834,9 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
             </div>
             <div className={styles.said}>{said}</div>
 
-            <div className={styles.mic}>
+            {/* Nothing to say during the debrief — and hiding the control
+                shrinks the overlay, which widens the clear zone above it. */}
+            <div className={styles.mic} hidden={stage === "debrief"}>
               <button
                 type="button"
                 className={`${styles.micBtn} ${holding ? styles.micHot : ""}`}
@@ -760,6 +863,7 @@ export function AurenApp({ sdkKey }: AurenAppProps) {
           <Scorecard
             session={session}
             onAgain={restart}
+            onReplay={() => void runDebrief()}
             onModes={() => goStage("modes", "S7")}
             onCertify={() => {
               setVerifyStep(0);

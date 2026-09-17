@@ -361,6 +361,143 @@ export const UI = {
     AR: "تلقّيت توجيهًا بشأن التحقق المستقل، ومع ذلك تجاوزه السيناريو الجديد. هذا دليل صادق، وهو أنفع لك من نتيجة ناجحة.",
   },
 
+  /* ── Spoken debrief (S7·a) ───────────────────────────────────────────
+     Paper III §9.2: the sentence, not the number, is the product. The
+     debrief is that sentence SPOKEN, by the coach, with the face on screen —
+     because a record the learner reads is a document, and a record the coach
+     says to them is the thing they carry out of the room.
+
+     Every line here is a template filled from record fields. Nothing in the
+     debrief is generated at runtime: {n}, {total}, {list} and {defs} are
+     substituted from the session's own reasoning map and signature bindings,
+     and the definitions and coaching lines come from the object library. */
+  debriefOpener: {
+    EN: "That's the rehearsal finished. Before you read anything, let me tell you what I actually saw.",
+    ES: "Con eso termina el ensayo. Antes de que leas nada, déjame contarte lo que vi de verdad.",
+    ZH: "演练到此结束。在你看任何文字之前，先让我告诉你我实际看到了什么。",
+    AR: "بهذا انتهى التدريب. وقبل أن تقرأ أي شيء، دعني أخبرك بما رأيته فعلًا.",
+  },
+  debriefRightTitle: {
+    EN: "What you did right",
+    ES: "Lo que hiciste bien",
+    ZH: "你做对的地方",
+    AR: "ما أحسنت فيه",
+  },
+  debriefWrongTitle: {
+    EN: "What went wrong",
+    ES: "Lo que salió mal",
+    ZH: "出问题的地方",
+    AR: "ما أخفق",
+  },
+  debriefImproveTitle: {
+    EN: "Where you improve",
+    ES: "Dónde puedes mejorar",
+    ZH: "你可以改进的地方",
+    AR: "أين تتحسّن",
+  },
+  debriefRightLead: {
+    EN: "Start with what held. You resolved {n} of {total} reasoning elements before any pressure was applied: {list}.",
+    ES: "Empecemos por lo que aguantó. Resolviste {n} de {total} elementos de razonamiento antes de aplicar ninguna presión: {list}.",
+    ZH: "先说守住的部分。在施加任何压力之前，你解决了 {total} 个推理要素中的 {n} 个：{list}。",
+    AR: "لنبدأ بما صمد. حسمت {n} من أصل {total} من عناصر التفكير قبل أي ضغط: {list}.",
+  },
+  debriefRightNone: {
+    EN: "I have to start with the uncomfortable part. Not one reasoning element resolved cleanly before the pressure even began.",
+    ES: "Tengo que empezar por la parte incómoda. Ni un solo elemento de razonamiento quedó resuelto con claridad antes siquiera de empezar la presión.",
+    ZH: "我得从不舒服的部分说起。在压力开始之前，没有一个推理要素被干净地解决。",
+    AR: "عليّ أن أبدأ بالجزء غير المريح. لم يُحسم أي عنصر من عناصر التفكير بوضوح قبل أن يبدأ الضغط أصلًا.",
+  },
+  debriefWrongLead: {
+    EN: "Then I stopped being your coach. Here is what the pressure found. {defs}",
+    ES: "Luego dejé de ser tu coach. Esto es lo que encontró la presión. {defs}",
+    ZH: "然后我不再是你的教练。以下是压力找出来的问题。{defs}",
+    AR: "ثم توقّفت عن كوني مدرّبك. وهذا ما كشفه الضغط. {defs}",
+  },
+  debriefWrongNone: {
+    EN: "Under pressure, nothing broke that I could bind to a sentence you said. That is a genuinely good result, and it is also one session.",
+    ES: "Bajo presión no se rompió nada que yo pudiera vincular a una frase tuya. Es un buen resultado de verdad, y también es una sola sesión.",
+    ZH: "在压力之下，没有出现我能绑定到你某句话上的失效。这确实是个好结果，但也只是一次会话。",
+    AR: "تحت الضغط، لم ينكسر شيء أستطيع ربطه بجملة قلتها. هذه نتيجة جيدة فعلًا، وهي أيضًا جلسة واحدة فقط.",
+  },
+  debriefImproveLead: {
+    EN: "So here is the single behaviour to take out of this.",
+    ES: "Así que esta es la única conducta que te llevas de aquí.",
+    ZH: "所以，你要从这里带走的就是这一个行为。",
+    AR: "إذن هذا هو السلوك الوحيد الذي تخرج به من هنا.",
+  },
+  debriefTransferPass: {
+    EN: "And when a completely different scam asked you the same question, you did it. That is the only reason your score moves.",
+    ES: "Y cuando una estafa completamente distinta te hizo la misma pregunta, lo hiciste. Esa es la única razón por la que se mueve tu puntuación.",
+    ZH: "而当一个完全不同的骗局问你同样的问题时，你做到了。这是你的分数发生变化的唯一原因。",
+    AR: "وحين طرح عليك احتيال مختلف تمامًا السؤال نفسه، فعلتها. هذا هو السبب الوحيد لتغيّر درجتك.",
+  },
+  debriefTransferFail: {
+    EN: "When a completely different scam asked you the same question, it still got past you. I am not going to dress that up — it is more useful to you than a pass would have been.",
+    ES: "Cuando una estafa completamente distinta te hizo la misma pregunta, volvió a colarse. No te lo voy a maquillar: eso te sirve más que un aprobado.",
+    ZH: "当一个完全不同的骗局问你同样的问题时，它还是绕过了你。我不会粉饰这一点——它对你的价值大于一个「通过」。",
+    AR: "وحين طرح عليك احتيال مختلف تمامًا السؤال نفسه، تجاوزك مرة أخرى. لن أجمّل ذلك — فهو أنفع لك من نتيجة ناجحة.",
+  },
+  debriefTransferItem: {
+    EN: "Held the verification under pressure in a scenario with nothing in common with the one you failed",
+    ES: "Mantuviste la verificación bajo presión en un escenario sin nada en común con aquel en el que fallaste",
+    ZH: "在一个与你失败情境毫无共同点的场景中，你在压力下守住了核实这一步",
+    AR: "صمدت في التحقق تحت الضغط ضمن سيناريو لا يشترك في شيء مع السيناريو الذي أخفقت فيه",
+  },
+  debriefRightNoneShort: {
+    EN: "Nothing resolved before the pressure started — that is the honest starting point",
+    ES: "Nada quedó resuelto antes de empezar la presión: ese es el punto de partida honesto",
+    ZH: "在压力开始之前没有任何要素被解决——这就是诚实的起点",
+    AR: "لم يُحسم شيء قبل أن يبدأ الضغط — وهذه هي نقطة البداية الصادقة",
+  },
+  debriefWrongNoneShort: {
+    EN: "No failure signature could be bound to anything you said",
+    ES: "No se pudo vincular ninguna firma de fallo a nada que dijeras",
+    ZH: "没有任何失效特征能够绑定到你说过的话",
+    AR: "لم يمكن ربط أي نمط إخفاق بشيء قلته",
+  },
+  debriefQueue: {
+    EN: "{n} elements could not be tested in this session. They are queued for the next one, and that is what you come back for.",
+    ES: "{n} elementos no se pudieron poner a prueba en esta sesión. Quedan en cola para la siguiente, y por eso vuelves.",
+    ZH: "本次会话中有 {n} 个要素无法测试。它们已排入下一次的队列，这也正是你要回来的原因。",
+    AR: "هناك {n} من العناصر لم يكن اختبارها ممكنًا في هذه الجلسة. وقد أُدرجت في قائمة الجلسة التالية، وهذا سبب عودتك.",
+  },
+  debriefQueueNone: {
+    EN: "Nothing is left queued from this session.",
+    ES: "No queda nada pendiente de esta sesión.",
+    ZH: "本次会话没有留下待办的要素。",
+    AR: "لم يتبقَّ شيء مؤجَّل من هذه الجلسة.",
+  },
+  debriefHandoff: {
+    EN: "Your full record is ready when you want it. Every line in it points at something you actually said.",
+    ES: "Tu registro completo está listo cuando lo quieras. Cada línea apunta a algo que dijiste tú.",
+    ZH: "你的完整记录随时可以查看。里面每一行都指向你真正说过的话。",
+    AR: "سجلّك الكامل جاهز متى أردت. كل سطر فيه يشير إلى شيء قلته فعلًا.",
+  },
+  debriefRecordBtn: {
+    EN: "Open my full record",
+    ES: "Abrir mi registro completo",
+    ZH: "打开我的完整记录",
+    AR: "افتح سجلّي الكامل",
+  },
+  debriefReplayBtn: {
+    EN: "Play the debrief again",
+    ES: "Reproducir el resumen otra vez",
+    ZH: "再听一次总结",
+    AR: "أعد تشغيل الملخّص",
+  },
+  debriefSpokenLabel: {
+    EN: "Spoken debrief",
+    ES: "Resumen hablado",
+    ZH: "语音总结",
+    AR: "ملخّص منطوق",
+  },
+  debriefYouSaid: {
+    EN: "you said",
+    ES: "dijiste",
+    ZH: "你说过",
+    AR: "قلت",
+  },
+
   // ── Modes ────────────────────────────────────────────────────────────
   modesKicker: {
     EN: "Now that the words mean something",

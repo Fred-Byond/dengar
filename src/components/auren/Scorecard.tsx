@@ -30,11 +30,14 @@ export function Scorecard({
   onAgain,
   onModes,
   onCertify,
+  onReplay,
 }: {
   session: AurenSession;
   onAgain: () => void;
   onModes: () => void;
   onCertify: () => void;
+  /** Hand the record back to the coach to say again. */
+  onReplay: () => void;
 }) {
   const lang = session.lang;
   const [open, setOpen] = useState<string | null>(null);
@@ -169,6 +172,14 @@ export function Scorecard({
       )}
 
       {/* The retention loop: the next weakness, named, one tap away. */}
+      <button
+        type="button"
+        className={`${styles.btn} ${styles.btnGhost}`}
+        onClick={onReplay}
+      >
+        {ui("debriefReplayBtn", lang)}
+      </button>
+      <div style={{ height: 9 }} />
       <button type="button" className={styles.btn} onClick={onAgain}>
         {ui("againBtn", lang)}
       </button>

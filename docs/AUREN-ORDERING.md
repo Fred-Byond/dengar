@@ -38,6 +38,7 @@ cheap **and** it improves the demonstration.
 | **D3** | Restraint ordered as absence. A waveform proves the microphone works, not that the mind does. | Give the silence a non-analytical tell. Situation Map stays invisible as doctrine demands. | Before |
 | **D4** | The soul screen is specified as a layout — quote cards and map-unfreeze fire together at the emotional peak. | Three staged beats ~2s apart: their sentence alone → the signature named → the map flips. | Before |
 | **D5** | The verdict is buried in the audit. Stage 7 opens with the four-column matrix. | Verdict sentence first, matrix beneath it, AILS under that. Paper III §9.2 already makes this argument. | Before |
+| **D5·a** | The loop ends by replacing the digital human with a full-screen document. At the one moment the learner most needs a person, the person leaves. | A spoken debrief at **S7·a**: the coach says the verdict, what held, what broke and what changes, in four beats, with the face on screen. The written record follows on request, as the audit rather than the delivery. | Before |
 | **D6** | RETEST has no failure branch. Stage 6's exit is simply "→ Stage 7". | Carry non-transfer honestly to the scorecard. Never loop COACH twice to manufacture a pass. | Before |
 | **D7** | PROTECT's position contradicts its commercial thesis. A habit cannot form behind a menu traversal. | Persistent PROTECT control on every screen — one control, not a mode door. Still one line in the Madrid script. | Before |
 | **D8** | Ten minutes does not survive arithmetic. Eight elements at one voice turn each ≈ 3 min for DIAGNOSE alone. | Hard budget of **four elements per session**; the rest route to the retraining queue, which is what brings the learner back. | Before |
@@ -57,8 +58,9 @@ Realistic voice-turn estimates, not the truncated demo path.
 | STRESS | 1:30 | 1:30 |
 | COACH | 1:15 | 1:15 |
 | RETEST | 1:30 | 1:30 |
-| EVIDENCE | 1:00 | 1:00 |
-| **Total** | **10:30** | **8:40** |
+| DEBRIEF *(new)* | — | 1:05 *(spoken, D5·a)* |
+| EVIDENCE | 1:00 | 0:35 *(now the audit, on request)* |
+| **Total** | **10:30** | **9:20** |
 
 The specified order lands past the ten minutes the product thesis promises, with no
 slack for ASR retries. The built order leaves ~80 seconds.
@@ -97,11 +99,17 @@ src/lib/auren/
   session.ts     Session model, engine states, satisfaction-rule evaluation,
                  the surface-distance retest selector, the mode gate, the AILS
                  aggregation rule, and the verdict.
+  debrief.ts     What the coach SAYS at the end, composed from record fields.
+                 Dependency-free on purpose: `npm run locale` compiles it and
+                 injects it into the prototype, so the two builds reach the
+                 same conclusion from the same record — not just the same
+                 words.
 
 src/components/auren/
   AurenApp.tsx            Stage router driving the loop over useKlleonAvatar.
   ReasoningMapRail.tsx    Three states; the freeze rule lives here.
   CoachEvidencePanel.tsx  Beat-driven, so the caller stages it as a cut.
+  DebriefPanel.tsx        The spoken debrief's visual half; beat-driven.
   Scorecard.tsx           Verdict first, then the four-column evidence chain.
   auren.module.css        Brand system; face zone / overlay zone layout law.
 ```
@@ -159,7 +167,12 @@ into the engine:
 `src/lib/auren/i18n.ts` and `objects.ts` are canonical. The self-contained
 prototype gets its copy injected by `npm run locale`
 (`scripts/build-prototype-locale.mjs`), which compiles both files and writes the
-result between markers in the HTML. **Do not hand-edit the prototype's locale
+result between markers in the HTML. The same generator also injects the
+debrief's **composition rules**, not just its strings: shared strings stop the
+two builds saying different words, shared composition stops them reaching
+different conclusions from the same record.
+
+**Do not hand-edit the prototype's locale
 block** — a demo that has drifted from the product is worse than no demo.
 
 ### Arabic
@@ -223,17 +236,27 @@ place named, so a component change cannot quietly undo it.
 10. **No account wall before the first session.** The landing's primary path
     reaches the loop without an account, and identity verification never
     appears before the evidence chain exists.
-11. **The overlay zone scrolls, it does not squeeze.** `.lower` children carry
+11. **The overlay never crowds the face, and the figure gets out of its way.**
+    The renderer sizes and places the figure inside the height left *above* the
+    overlay, measured with a `ResizeObserver` rather than assumed — so a taller
+    overlay lifts and shrinks the head instead of the overlay climbing over it.
+    The torso still runs to the floor behind the overlay; that is what makes
+    the figure read as a person standing in the room rather than a portrait in
+    a window. The engine panel publishes the measured clearance, so the
+    guarantee is demonstrable rather than asserted. Worst measured
+    chin-to-overlay gap, across five viewports and every stage of the loop:
+    **84 px**.
+12. **The overlay zone scrolls, it does not squeeze.** `.lower` children carry
     `flex: none` and the container scrolls to its newest content. A shrunk flex
     item overflows its own box and collides with the next one — the mobile
     defect this rule exists to prevent.
-12. **The figure is sized from a figure box, not the viewport.** Deriving the
+13. **The figure is sized from a figure box, not the viewport.** Deriving the
     digital-human proportions from height alone throws the shoulders past both
     edges on a phone and it stops reading as a person.
-13. **Satisfaction cues are localized with the question.** Adding a language
+14. **Satisfaction cues are localized with the question.** Adding a language
     means adding its cues and its resistance pattern, or the variant looks
     translated and scores every learner as failing.
-14. **Only signatures the Coach explained may show a coach result.** An element
+15. **Only signatures the Coach explained may show a coach result.** An element
     whose signature was recorded but never taught has not been coached, and
     crediting it on the scorecard overstates the record.
 
