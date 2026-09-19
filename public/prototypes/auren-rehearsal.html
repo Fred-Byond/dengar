@@ -4576,7 +4576,9 @@ $("authBtn").onclick = () => {
     otpSent = true;
     S.account.phone = $("ph").value;
     show($("otpWrap"));
-    $("authBtn").textContent = "Verify and continue";
+    /* Governed string, not a literal: hardcoding it left the one button on
+       the sign-in path in English in all five languages. */
+    $("authBtn").textContent = U("verifyContinueBtn");
     log("sign-in code sent (simulated)");
     const first = document.querySelector("#otpRow input");
     if(first) first.focus();
