@@ -120,6 +120,25 @@ and the face-zone/overlay-zone layout law.
 
 ---
 
+## Three doors, not one
+
+The rehearsal is one of three surfaces, and a hub (`/prototypes/auren-index.html`)
+now stands in front of them in the Beauty programme's house treatment:
+
+| Door | Who opens it | What it is |
+|---|---|---|
+| **Rehearse** | A retail investor | The voice-first loop. Account-free, four languages. |
+| **Nexus** | An authority's analyst or reviewer | Lodge an emerging tactic, derive candidate objects, run the publish gate. |
+| **Supervision** | A supervisor or programme lead | Every enrolled participant, every assessment, the verdict and what to do next. |
+
+The middle door is what makes the third one worth having: a console reporting how
+people did against a corpus nobody is refreshing measures a fixed exam. The loop
+from supervision back to intelligence — *these tactics are beating people and we
+cannot yet rehearse against these* — is the part an incident-report pipeline
+cannot produce. See [`AUREN-NEXUS.md`](AUREN-NEXUS.md).
+
+---
+
 ## The front door
 
 Paper IV's Stage 0 is thirty seconds and explicitly account-free, and it moves

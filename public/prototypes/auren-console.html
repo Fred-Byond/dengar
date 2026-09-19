@@ -1,26 +1,33 @@
-<title>AUREN Nexus</title>
+<title>AUREN Supervision Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,300;0,400;0,500;1,400&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════
-   AUREN NEXUS — the scam-intelligence layer.
+   AUREN SUPERVISION CONSOLE
 
-   Same visual system as the Knowledge Authority console: they are two rooms
-   in one building and a reviewer moves between them in a single afternoon.
-   The one thing added here is the traffic-light protocol ramp, because
-   sharing markings are how intelligence actually moves between authorities
-   and a console that invented its own colours for them would be lying about
-   the process it claims to support.
+   The other end of the rehearsals: what a securities commission sees once
+   its programme participants have actually been put under pressure.
+
+   Colour is assigned by the job it does, and the palettes were validated
+   rather than eyeballed:
+     · readiness magnitude → one sequential hue, light→dark, monotone L,
+       light end clearing the surface (checked in both modes);
+     · verdict → a reserved status trio that never doubles as a series
+       colour and never appears without its icon and its label.
    ═════════════════════════════════════════════════════════════════════ */
 :root{
   --ground:#FBFAF8; --surface:#FFFFFF; --surface-2:#F4F2ED;
   --line:#E3DFD7; --line-soft:#EFECE6;
   --ink:#15171B; --ink-2:#3D424A; --ink-3:#6B7079; --ink-4:#93979E;
   --accent:#B0632F; --accent-soft:#F8EDE4; --on-accent:#FFFFFF;
-  --pass:#2F7A5E; --fail:#A8402F; --warn:#8A6A22; --idle:#93979E;
-  --tlp-clear:#6B7079; --tlp-green:#2F7A5E; --tlp-amber:#8A6A22; --tlp-red:#A8402F;
-  --bar:#DFD8CC;
+  /* Sequential — readiness magnitude. Validated: monotone L, gaps ≥0.06,
+     single hue (13° spread), light end 2.1:1 on this surface. */
+  --s1:#D3A87A; --s2:#C08F52; --s3:#A87031; --s4:#8A5220; --s5:#653813;
+  /* Status — reserved. Always shipped with an icon and a label. */
+  --good:#2F7A5E; --warn:#C08A1E; --crit:#A8362B;
+  --good-soft:#E8F2ED; --warn-soft:#FAF0DC; --crit-soft:#F8E8E5;
+  --track:#EDE9E1; --thresh:#8E949D;
   --sans:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --serif:"Newsreader",Georgia,serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
@@ -31,9 +38,11 @@
     --line:#2B3038; --line-soft:#22262D;
     --ink:#EDECE9; --ink-2:#C2C6CC; --ink-3:#8E949D; --ink-4:#6A7079;
     --accent:#D98A50; --accent-soft:#2A211A; --on-accent:#17130F;
-    --pass:#6FBF9A; --fail:#E08268; --warn:#D6AE5C; --idle:#6A7079;
-    --tlp-clear:#8E949D; --tlp-green:#6FBF9A; --tlp-amber:#D6AE5C; --tlp-red:#E08268;
-    --bar:#333942;
+    /* The ramp flips its anchor in dark, as a sequential ramp must. */
+    --s1:#7E5230; --s2:#9C6A3C; --s3:#BE8A52; --s4:#D6A970; --s5:#EBC694;
+    --good:#6FBF9A; --warn:#E8C466; --crit:#E0705A;
+    --good-soft:#16241E; --warn-soft:#2A2314; --crit-soft:#2A1815;
+    --track:#262B33; --thresh:#6A7079;
   }
 }
 :root[data-theme="dark"]{
@@ -41,263 +50,232 @@
   --line:#2B3038; --line-soft:#22262D;
   --ink:#EDECE9; --ink-2:#C2C6CC; --ink-3:#8E949D; --ink-4:#6A7079;
   --accent:#D98A50; --accent-soft:#2A211A; --on-accent:#17130F;
-  --pass:#6FBF9A; --fail:#E08268; --warn:#D6AE5C; --idle:#6A7079;
-  --tlp-clear:#8E949D; --tlp-green:#6FBF9A; --tlp-amber:#D6AE5C; --tlp-red:#E08268;
-  --bar:#333942;
+  --s1:#7E5230; --s2:#9C6A3C; --s3:#BE8A52; --s4:#D6A970; --s5:#EBC694;
+  --good:#6FBF9A; --warn:#E8C466; --crit:#E0705A;
+  --good-soft:#16241E; --warn-soft:#2A2314; --crit-soft:#2A1815;
+  --track:#262B33; --thresh:#6A7079;
 }
 *{box-sizing:border-box}
 body{
   margin:0;background:var(--ground);color:var(--ink-2);
-  font-family:var(--sans);font-size:15px;line-height:1.6;
-  -webkit-font-smoothing:antialiased;
+  font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;
 }
-button{font-family:inherit;cursor:pointer}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+button,select{font-family:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-visible{
   outline:2px solid var(--accent);outline-offset:2px;
 }
-@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
 .hidden{display:none!important}
-h1,h2,h3{text-wrap:balance;color:var(--ink);margin:0}
+h1,h2,h3{margin:0;color:var(--ink);text-wrap:balance}
 
 /* ── Sign in ─────────────────────────────────────────────────────────── */
 .signin{min-height:100dvh;display:grid;place-items:center;padding:24px}
 .signinCard{
-  width:min(460px,100%);background:var(--surface);border:1px solid var(--line);
+  width:min(470px,100%);background:var(--surface);border:1px solid var(--line);
   border-radius:4px;padding:34px 32px;display:flex;flex-direction:column;gap:14px;
 }
-.mark{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.mark{display:flex;align-items:center;gap:10px}
 .markDot{width:11px;height:11px;border-radius:2px;background:var(--accent);flex:none}
-.markName{font-family:var(--mono);font-size:12px;letter-spacing:.17em;text-transform:uppercase;color:var(--ink)}
-.signinCard h1{font-family:var(--serif);font-size:27px;font-weight:400;line-height:1.24}
+.markName{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+.signinCard h1{font-family:var(--serif);font-size:26px;font-weight:400;line-height:1.24}
 .signinCard p{margin:0;font-size:13.5px;color:var(--ink-3)}
 .field{display:flex;flex-direction:column;gap:5px}
 .field label{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
-.field select,.field input,.field textarea{
-  padding:10px 11px;border:1px solid var(--line);border-radius:3px;
-  background:var(--surface);color:var(--ink);font-family:inherit;font-size:14.5px;
+select,.field input{
+  padding:9px 11px;border:1px solid var(--line);border-radius:3px;
+  background:var(--surface);color:var(--ink);font-size:14px;
 }
-.field textarea{resize:vertical;min-height:78px;line-height:1.55}
-.btn{
-  padding:11px 15px;border:1px solid var(--accent);border-radius:3px;
-  background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;
-}
-.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn{padding:11px 15px;border:1px solid var(--accent);border-radius:3px;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600}
 .btnGhost{background:transparent;color:var(--ink-2);border-color:var(--line)}
-.btnSm{padding:6px 10px;font-size:12.5px;font-weight:500}
-.btnRow{display:flex;gap:8px;flex-wrap:wrap}
+.btnSm{padding:6px 11px;font-size:12.5px;font-weight:500}
 
 /* ── Shell ───────────────────────────────────────────────────────────── */
 .shell{min-height:100dvh;display:flex;flex-direction:column}
 .topbar{
-  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-  padding:12px 20px;border-bottom:1px solid var(--line);background:var(--surface);
-  position:sticky;top:env(safe-area-inset-top,0px);z-index:9;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 20px;
+  border-bottom:1px solid var(--line);background:var(--surface);
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:12;
 }
-.ws{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
-.wsBtn{padding:7px 13px;border:0;background:transparent;color:var(--ink-3);font-size:13px;font-weight:500}
-.wsBtn+.wsBtn{border-left:1px solid var(--line)}
-.wsOn{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.nav{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.tCell{font-size:12.5px;font-weight:600;white-space:nowrap}
+.navBtn{padding:7px 14px;border:0;background:transparent;color:var(--ink-3);font-size:13px;font-weight:500}
+.navBtn+.navBtn{border-left:1px solid var(--line)}
+.navOn{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .grow{flex:1}
 .who{text-align:right;font-size:12px;color:var(--ink-3);line-height:1.35}
 .who b{display:block;color:var(--ink);font-size:13px;font-weight:600}
-.body{flex:1;display:flex;align-items:flex-start;min-width:0}
-.rail{
-  width:248px;flex:none;border-right:1px solid var(--line);background:var(--surface);
-  padding:18px 14px;display:flex;flex-direction:column;gap:22px;align-self:stretch;
-}
-.railGroup{display:flex;flex-direction:column;gap:5px}
-.railLabel{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-4);margin-bottom:3px}
-.navBtn{
-  text-align:left;padding:8px 10px;border:0;border-radius:3px;background:transparent;
-  color:var(--ink-2);font-size:13.5px;
-}
-.navOn{background:var(--surface-2);color:var(--ink);font-weight:600}
-.railNote{font-size:11.5px;color:var(--ink-3);line-height:1.5}
-.railNote b{color:var(--ink-2)}
-.main{flex:1;min-width:0;padding:22px 24px 60px;display:flex;flex-direction:column;gap:20px}
+.main{padding:20px 24px 70px;display:flex;flex-direction:column;gap:18px;max-width:1360px;width:100%;margin:0 auto}
 .main>*{min-width:0;max-width:100%}
-@media (max-width:860px){
-  .body{flex-direction:column;align-items:stretch}
-  .rail{width:100%;border-right:0;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap;gap:16px}
-  .main{padding:18px 16px 50px}
-  .topbar{padding:10px 16px}
-}
+@media (max-width:760px){.main{padding:16px 16px 56px}.topbar{padding:10px 16px}}
 
-/* ── Page head ───────────────────────────────────────────────────────── */
-.pageHead{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
-.pageHead>div:first-child{flex:1;min-width:260px}
-.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-4);display:block;margin-bottom:6px}
 .pageHead h2{font-family:var(--serif);font-size:25px;font-weight:400;line-height:1.22}
-.pageHead p{margin:6px 0 0;font-size:13.5px;color:var(--ink-3);max-width:68ch}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-4);display:block;margin-bottom:6px}
+.pageHead p{margin:6px 0 0;font-size:13.5px;color:var(--ink-3);max-width:76ch}
 
-/* ── Stats ───────────────────────────────────────────────────────────── */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:10px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:13px 14px}
-.statN{font-family:var(--mono);font-size:25px;font-weight:600;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
-.statL{font-size:11.5px;color:var(--ink-3);margin-top:4px;line-height:1.4}
-.stat.alarm .statN{color:var(--fail)}
-.stat.good .statN{color:var(--pass)}
+/* ── Filters — one row, above the charts ─────────────────────────────── */
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:13px 15px;background:var(--surface);border:1px solid var(--line);border-radius:4px}
+.filters .field{min-width:150px}
+
+/* ── Tiles ───────────────────────────────────────────────────────────── */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px 15px}
+.tileL{font-size:11.5px;color:var(--ink-3);line-height:1.35}
+.tileV{font-family:var(--mono);font-size:27px;font-weight:600;color:var(--ink);line-height:1.1;margin-top:5px;font-variant-numeric:tabular-nums}
+.tileS{font-size:11.5px;color:var(--ink-4);margin-top:4px;line-height:1.4}
+.tile.vGood .tileV{color:var(--good)} .tile.vWarn .tileV{color:var(--warn)} .tile.vCrit .tileV{color:var(--crit)}
+
+/* ── Cards & charts ──────────────────────────────────────────────────── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:17px 18px}
+.card h3{font-family:var(--serif);font-size:18px;font-weight:400}
+.cardNote{font-size:12.5px;color:var(--ink-3);margin:4px 0 14px;line-height:1.5}
+
+.chartRow{display:grid;grid-template-columns:minmax(96px,1.1fr) minmax(90px,3fr) 46px;gap:11px;align-items:center;padding:6px 0}
+.chartRow+.chartRow{border-top:1px solid var(--line-soft)}
+.rowLbl{font-size:13px;color:var(--ink-2);line-height:1.3}
+.rowLbl small{display:block;font-family:var(--mono);font-size:10px;color:var(--ink-4)}
+/* Track, fill, and a threshold rule — the fill is thin, its data-end rounded,
+   and it is anchored to the baseline at left. */
+.track{position:relative;height:9px;background:var(--track);border-radius:0 4px 4px 0;cursor:default}
+.fill{height:100%;border-radius:0 4px 4px 0;transition:width .3s ease}
+.threshMark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--thresh);opacity:.85}
+.rowVal{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+.legendRow{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:13px;padding-top:11px;border-top:1px solid var(--line-soft);font-size:11.5px;color:var(--ink-3)}
+.swatchRow{display:flex;align-items:center;gap:5px}
+.sw{width:13px;height:9px;border-radius:2px;display:inline-block}
+.threshKey{display:inline-block;width:2px;height:11px;background:var(--thresh);vertical-align:-2px;margin-right:4px}
+
+/* ── Status: colour + icon + label, never colour alone ───────────────── */
+.tag{
+  display:inline-flex;align-items:center;gap:5px;font-family:var(--sans);font-size:11.5px;
+  font-weight:600;padding:3px 9px;border-radius:3px;white-space:nowrap;border:1px solid transparent;
+}
+.tGood{background:var(--good-soft);color:var(--good);border-color:var(--good)}
+.tWarn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.tCrit{background:var(--crit-soft);color:var(--crit);border-color:var(--crit)}
+.tagIco{font-family:var(--mono);font-size:11px}
 
 /* ── Tables ──────────────────────────────────────────────────────────── */
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
-table{border-collapse:collapse;width:100%;min-width:640px}
+table{border-collapse:collapse;width:100%;min-width:720px}
 th{
-  text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;
-  text-transform:uppercase;color:var(--ink-4);font-weight:500;
-  padding:10px 13px;border-bottom:1px solid var(--line);background:var(--surface-2);
-  white-space:nowrap;
+  text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-4);font-weight:500;padding:10px 13px;border-bottom:1px solid var(--line);
+  background:var(--surface-2);white-space:nowrap;
 }
-td{padding:11px 13px;border-bottom:1px solid var(--line-soft);font-size:13.5px;vertical-align:top}
+td{padding:10px 13px;border-bottom:1px solid var(--line-soft);font-size:13.5px;vertical-align:middle}
 tr:last-child td{border-bottom:0}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover{background:var(--surface-2)}
 .mono{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
-.rowBtn{border:0;background:transparent;padding:0;color:var(--accent);font-family:var(--mono);font-size:12px;font-weight:600;text-align:left}
-.rowBtn:hover{text-decoration:underline}
-.sub{display:block;font-size:12px;color:var(--ink-3);margin-top:3px;line-height:1.4;max-width:52ch}
+.sub2{display:block;font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.scoreCell{display:flex;align-items:center;gap:9px}
+.mini{position:relative;flex:1;min-width:52px;height:8px;background:var(--track);border-radius:0 4px 4px 0}
+.miniFill{height:100%;border-radius:0 4px 4px 0}
 
-/* ── Chips: state encoded in form, not only in words ─────────────────── */
-.chip{
-  display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;
-  text-transform:uppercase;padding:3px 7px;border-radius:2px;border:1px solid var(--line);
-  color:var(--ink-3);white-space:nowrap;
+/* ── Drawer ──────────────────────────────────────────────────────────── */
+.scrim{position:fixed;inset:0;background:rgba(10,10,12,.45);opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:20}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--surface);
+  border-left:1px solid var(--line);transform:translateX(100%);transition:transform .24s ease;
+  z-index:21;display:flex;flex-direction:column;
 }
-.chip.k{background:var(--surface-2)}
-.cSUBMITTED{border-color:var(--idle);color:var(--idle)}
-.cTRIAGED{border-color:var(--ink-3);color:var(--ink-3)}
-.cDERIVED{border-color:var(--warn);color:var(--warn)}
-.cIN_REVIEW{border-color:var(--accent);color:var(--accent)}
-.cRELEASED{border-color:var(--pass);color:var(--pass)}
-.cDECLINED{border-color:var(--fail);color:var(--fail)}
-.cSUPERSEDED{border-color:var(--idle);color:var(--idle)}
-/* Traffic-light protocol — the intelligence world's own marking, kept. */
-.tlp{border-left-width:3px}
-.tCLEAR{border-color:var(--tlp-clear);color:var(--tlp-clear)}
-.tGREEN{border-color:var(--tlp-green);color:var(--tlp-green)}
-.tAMBER{border-color:var(--tlp-amber);color:var(--tlp-amber)}
-.tRED{border-color:var(--tlp-red);color:var(--tlp-red)}
-
-/* ── Panels / detail ─────────────────────────────────────────────────── */
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px 19px}
-.panel h3{font-family:var(--serif);font-size:19px;font-weight:400;margin-bottom:4px}
-.panelHead{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
-.panelHead>div:first-child{flex:1;min-width:220px}
-.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:13.5px}
-.kv dt{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-4);padding-top:3px}
+.drawer.on{transform:none}
+.dHead{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
+.dHead h3{font-family:var(--serif);font-size:22px;font-weight:400;line-height:1.2}
+.dHead .mono{margin-top:3px}
+.dBody{padding:18px 20px 40px;overflow-y:auto;flex:1}
+.secHead{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-4);margin:20px 0 9px}
+.secHead:first-child{margin-top:0}
+.kv{display:grid;grid-template-columns:132px 1fr;gap:5px 12px;font-size:13px}
+.kv dt{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-4);padding-top:3px}
 .kv dd{margin:0;color:var(--ink-2)}
-@media (max-width:620px){.kv{grid-template-columns:1fr;gap:2px 0}.kv dd{margin-bottom:9px}}
-.prose{font-size:13.5px;line-height:1.62;color:var(--ink-2);max-width:74ch}
-.listTight{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.6;color:var(--ink-2)}
-.listTight li{margin-bottom:3px}
-.sectTitle{
-  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--ink-4);margin:18px 0 8px;
+.dim{padding:11px 0;border-bottom:1px solid var(--line-soft)}
+.dim:last-of-type{border-bottom:0}
+.dimHead{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.dimName{font-size:13.5px;color:var(--ink);font-weight:600}
+.dimScore{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.dimNote{font-size:12px;color:var(--ink-3);line-height:1.5;margin-top:6px}
+.evid{
+  font-family:var(--serif);font-style:italic;font-size:14px;line-height:1.5;color:var(--ink-2);
+  border-left:2px solid var(--accent);padding:2px 0 2px 12px;margin-top:8px;
 }
-.sectTitle:first-child{margin-top:0}
-
-/* A note that carries an argument, not a decoration. Used sparingly. */
-.note{
-  border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:3px;
-  background:var(--accent-soft);padding:13px 15px;font-size:13px;line-height:1.6;color:var(--ink-2);
-}
+.elGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:8px}
+.el{border:1px solid var(--line);border-radius:3px;padding:9px 11px;background:var(--surface)}
+.elName{font-size:12.5px;color:var(--ink);font-weight:600;display:flex;gap:6px;align-items:baseline}
+.elId{font-family:var(--mono);font-size:10px;color:var(--ink-4);margin-top:2px}
+.el.pass{border-left:3px solid var(--good)}
+.el.fail{border-left:3px solid var(--crit)}
+.el.nt{border-left:3px solid var(--line);opacity:.72}
+.note{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:3px;background:var(--accent-soft);padding:12px 14px;font-size:13px;line-height:1.6;color:var(--ink-2)}
 .note b{color:var(--ink)}
-.note.hard{border-left-color:var(--fail);background:transparent}
-.note.quiet{border-left-color:var(--line);background:var(--surface-2)}
-
-/* ── Gaps: the honest half of a derivation ───────────────────────────── */
-.gap{border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:3px;padding:11px 13px;background:var(--surface)}
-.gap+.gap{margin-top:8px}
-.gapHead{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px}
-.gapField{font-size:13.5px;font-weight:600;color:var(--ink)}
-.gapRole{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--accent)}
-.gapWhy{font-size:12.5px;color:var(--ink-3);line-height:1.55}
-
-/* ── Gate report ─────────────────────────────────────────────────────── */
-.gRow{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line-soft);align-items:flex-start}
-.gRow:last-child{border-bottom:0}
-.gVerdict{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;width:66px;flex:none;padding-top:2px}
-.vpass{color:var(--pass)} .vfail{color:var(--fail)} .vna{color:var(--idle)} .vadv{color:var(--warn)}
-.gName{font-size:13.5px;color:var(--ink);font-weight:600}
-.gAsserts{font-size:12.5px;color:var(--ink-3);line-height:1.5;margin-top:2px}
-.finding{font-size:12.5px;color:var(--fail);line-height:1.55;margin-top:6px;padding-left:11px;border-left:2px solid var(--line)}
-.finding b{font-family:var(--mono);font-size:11.5px;font-weight:600}
-
-/* ── Bars: resistance read at a glance ───────────────────────────────── */
-.bar{height:6px;border-radius:3px;background:var(--bar);overflow:hidden;min-width:90px;margin-top:5px}
-.barFill{height:100%;border-radius:3px;background:var(--pass)}
-.barFill.low{background:var(--fail)}
-.barFill.mid{background:var(--warn)}
-.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13.5px;color:var(--ink);font-weight:600}
-
-/* ── Alert cards for emerging tactics ────────────────────────────────── */
-.alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:10px}
-.alert{border:1px solid var(--line);border-top:3px solid var(--fail);border-radius:4px;background:var(--surface);padding:14px 15px}
-.alert.gapCard{border-top-color:var(--warn)}
-.alertName{font-family:var(--serif);font-size:17px;color:var(--ink);line-height:1.25}
-.alertMeta{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:7px;letter-spacing:.04em}
-.alertWhy{font-size:12.5px;color:var(--ink-3);line-height:1.55;margin-top:8px}
+.note.plain{background:var(--surface-2);border-left-color:var(--line)}
+.note.crit{background:var(--crit-soft);border-left-color:var(--crit)}
 .empty{font-size:13px;color:var(--ink-3);font-style:italic}
+
+/* ── Tooltip ─────────────────────────────────────────────────────────── */
+.tip{
+  position:fixed;pointer-events:none;z-index:40;background:var(--ink);color:var(--ground);
+  font-size:12px;line-height:1.45;padding:7px 10px;border-radius:4px;max-width:250px;
+  opacity:0;transition:opacity .12s ease;
+}
+.tip.on{opacity:1}
+.tip b{color:var(--ground)}
 </style>
 
-<!-- ══ Sign in ═══════════════════════════════════════════════════════ -->
 <div class="signin" id="signin">
   <div class="signinCard">
-    <div class="mark"><span class="markDot"></span><span class="markName">AUREN Nexus</span></div>
-    <h1>Sign in to the scam-intelligence network.</h1>
-    <p>Your authority and role travel with everything you do here. The role is not a preference — it is recorded on every object you advance and every release you sign, and it decides which of the gaps below your signature can close.</p>
-    <div class="field">
-      <label for="authSel">Contributing authority</label>
-      <select id="authSel"></select>
-    </div>
-    <div class="field">
-      <label for="roleSel">Role</label>
+    <div class="mark"><span class="markDot"></span><span class="markName">AUREN Supervision</span></div>
+    <h1>Sign in to your programme.</h1>
+    <p>You see the participants your authority enrolled, and no one else's. Enrolment is
+      where consent was captured — it is printed on every record that names a person.</p>
+    <div class="field"><label for="authSel">Authority</label><select id="authSel"></select></div>
+    <div class="field"><label for="roleSel">Role</label>
       <select id="roleSel">
-        <option value="role:submitting_officer">Submitting officer — lodges signals</option>
-        <option value="role:analyst">Analyst — triages and derives</option>
-        <option value="role:domain_reviewer">Domain reviewer — authors content</option>
-        <option value="role:legal_reviewer">Legal reviewer — anchors and rationales</option>
-        <option value="role:safety_reviewer">Safety reviewer — ladders and ceilings</option>
-        <option value="role:supervisor">Supervisor — reads cohort outcomes</option>
+        <option value="role:supervisor">Supervisor — reads outcomes</option>
+        <option value="role:programme_lead">Programme lead — schedules coaching</option>
       </select>
     </div>
     <button class="btn" id="enterBtn">Enter</button>
-    <p class="mono" style="font-size:11px;color:var(--ink-4)">Demonstration corpus. Signals describe documented typologies; cohort figures are synthetic and generated from a fixed seed.</p>
+    <p class="mono" style="font-size:11px;color:var(--ink-4)">Demonstration · participants and
+      scores are synthetic, generated from a fixed seed.</p>
   </div>
 </div>
 
-<!-- ══ Shell ═════════════════════════════════════════════════════════ -->
 <div class="shell hidden" id="shell">
   <div class="topbar">
-    <div class="mark" style="margin:0"><span class="markDot"></span><span class="markName">AUREN Nexus</span></div>
-    <div class="ws">
-      <button class="wsBtn wsOn" data-ws="intel">Intelligence</button>
-      <button class="wsBtn" data-ws="author">Authoring</button>
-      <button class="wsBtn" data-ws="super">Supervision</button>
+    <div class="mark"><span class="markDot"></span><span class="markName">AUREN Supervision</span></div>
+    <div class="nav">
+      <button class="navBtn navOn" data-v="overview">Overview</button>
+      <button class="navBtn" data-v="people">Participants</button>
+      <button class="navBtn" data-v="sessions">Assessments</button>
     </div>
     <span class="grow"></span>
     <div class="who"><b id="whoName">—</b><span id="whoRole">—</span></div>
     <button class="btn btnGhost btnSm" id="outBtn">Sign out</button>
   </div>
-
-  <div class="body">
-    <aside class="rail">
-      <div class="railGroup" id="railNav"></div>
-      <div class="railGroup">
-        <span class="railLabel">Standing rule</span>
-        <div class="railNote" id="railRule"></div>
-      </div>
-    </aside>
-    <main class="main" id="main"></main>
-  </div>
+  <main class="main" id="main"></main>
 </div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-label="Participant assessment">
+  <div class="dHead">
+    <div style="flex:1;min-width:0"><h3 id="dTitle">—</h3><div class="mono" id="dSub">—</div></div>
+    <button class="btn btnGhost btnSm" id="dClose">Close</button>
+  </div>
+  <div class="dBody" id="dBody"></div>
+</aside>
+<div class="tip" id="tip" role="status"></div>
 
 <script>
 "use strict";
 
 /* ═══════════════════════════════════════════════════════════════════
    ENGINE — compiled from src/lib/nexus/* and src/lib/console/*.
-
-   Do not hand-edit between the markers: run `npm run nexus`, so the
-   prototype and the application cannot disagree about what a derivation
-   proposes, what the gate blocks, or what the dashboard counts.
+   Do not hand-edit between the markers: run `npm run nexus`.
    ═════════════════════════════════════════════════════════════════ */
 
 /* AUREN-NEXUS-START — generated by scripts/build-nexus-prototype.mjs */
@@ -3011,621 +2989,409 @@ function dimensionMeans(prog, filter) {
 
 /* AUREN-NEXUS-END */
 
-/* ═══════════════════════════════════════════════════════════════════
-   STATE
-   ═════════════════════════════════════════════════════════════════ */
-
-const S = {
-  user: null,                 // { authorityId, role }
-  ws: "intel",
-  panel: "queue",
-  signals: SIGNALS.map(s => ({ ...s, indicators: [...s.indicators] })),
-  selected: null,
-  derivation: null,
-  gateReport: null,
-  records: null,
-  view: null,
-};
-
-const AS_OF = "2026-09-19";
-
-/* Deep link. The hub presents these as three separate solutions, so a card has
-   to land inside the right one rather than dropping everybody on the queue and
-   asking them to find it. The role is pre-selected to the one that workspace is
-   actually for — a supervisor arriving at an analyst's console learns nothing. */
-const WS_PARAM = (new URLSearchParams(location.search).get("ws") || "").toLowerCase();
-const DEEP = ["intel", "author", "super"].includes(WS_PARAM) ? WS_PARAM : null;
-const DEEP_ROLE = { intel: "role:analyst", author: "role:domain_reviewer", super: "role:supervisor" };
-
-/* Opened from the repo the console is a sibling file; published as an artifact
-   it is a separate artifact, so the link has to be absolute. Same detection the
-   hub uses, for the same reason. */
-const CONSOLE_LOCAL = location.pathname.includes("/prototypes/");
-const CONSOLE_HREF = CONSOLE_LOCAL
-  ? "./auren-console.html"
-  : "https://claude.ai/artifact/PLACEHOLDER-CONSOLE";
-if (DEEP) {
-  S.ws = DEEP;
-  S.panel = DEEP === "intel" ? "queue" : DEEP === "author" ? "derive" : "overview";
-}
 const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
 
-function pack() { return vertical("auren"); }
-function deployedLanguages() { return pack().languages; }
-function markets() { return pack().markets; }
+const PROG = buildProgramme();
+const BY_ID = new Map(PROG.participants.map(p => [p.id, p]));
 
-/* Role gating. Every action names the role that can perform it, and a
-   blocked button says which role — the same contract as a derivation gap. */
-const CAN = {
-  lodge: ["role:submitting_officer", "role:analyst"],
-  triage: ["role:analyst"],
-  derive: ["role:analyst"],
-  decline: ["role:analyst", "role:supervisor"],
-  review: ["role:domain_reviewer", "role:legal_reviewer", "role:safety_reviewer"],
+const S = { user:null, view:"overview", f:{ jur:"all", cohort:"all", verdict:"all" } };
+
+/* Readiness magnitude → the sequential ramp. Five steps, one hue. */
+function seq(v){
+  if (v >= 86) return "var(--s5)";
+  if (v >= 78) return "var(--s4)";
+  if (v >= 68) return "var(--s3)";
+  if (v >= 58) return "var(--s2)";
+  return "var(--s1)";
+}
+/* Verdict → reserved status, always with its icon and its label. */
+const TAG = {
+  ready: ['tGood', '✓', 'Investor-ready'],
+  coach: ['tWarn', '▲', 'Coaching recommended'],
+  priority: ['tCrit', '■', 'Priority coaching'],
 };
-function may(action) { return CAN[action].includes(S.user.role); }
-function needs(action) {
-  return CAN[action].map(r => r.replace("role:", "").replace(/_/g, " ")).join(" or ");
+function tag(v){
+  const [cls, ico, label] = TAG[v];
+  return `<span class="tag ${cls}"><span class="tagIco">${ico}</span>${label}</span>`;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   SIGN IN
-   ═════════════════════════════════════════════════════════════════ */
-
-$("authSel").innerHTML = AUTHORITIES
-  .map(a => `<option value="${a.id}">${esc(a.name)} · ${esc(a.jurisdiction)}</option>`)
-  .join("");
-
-if (DEEP) {
-  $("roleSel").value = DEEP_ROLE[DEEP];
-  document.querySelectorAll(".wsBtn").forEach(x => x.classList.toggle("wsOn", x.dataset.ws === DEEP));
-}
+/* ── Sign in ──────────────────────────────────────────────────────── */
+$("authSel").innerHTML = AUTHORITIES.filter(a => a.id !== "AUTH-IOSCO")
+  .map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join("")
+  + `<option value="ALL">IOSCO — all contributing programmes</option>`;
 
 $("enterBtn").onclick = () => {
-  S.user = { authorityId: $("authSel").value, role: $("roleSel").value };
-  const a = authority(S.user.authorityId);
-  $("whoName").textContent = a ? a.name : S.user.authorityId;
+  const id = $("authSel").value;
+  S.user = { authorityId: id, role: $("roleSel").value };
+  const a = authority(id);
+  $("whoName").textContent = id === "ALL" ? "IOSCO — all programmes" : (a ? a.name : id);
   $("whoRole").textContent = S.user.role;
   $("signin").classList.add("hidden");
   $("shell").classList.remove("hidden");
   render();
 };
 $("outBtn").onclick = () => {
-  S.user = null; S.selected = null; S.derivation = null; S.gateReport = null;
-  $("shell").classList.add("hidden");
-  $("signin").classList.remove("hidden");
+  S.user = null; closeDrawer();
+  $("shell").classList.add("hidden"); $("signin").classList.remove("hidden");
 };
-
-document.querySelectorAll(".wsBtn").forEach(b => {
+document.querySelectorAll(".navBtn").forEach(b => {
   b.onclick = () => {
-    S.ws = b.dataset.ws;
-    S.panel = S.ws === "intel" ? "queue" : S.ws === "author" ? "derive" : "overview";
-    document.querySelectorAll(".wsBtn").forEach(x => x.classList.toggle("wsOn", x === b));
+    S.view = b.dataset.v;
+    document.querySelectorAll(".navBtn").forEach(x => x.classList.toggle("navOn", x === b));
     render();
   };
 });
 
-/* ═══════════════════════════════════════════════════════════════════
-   RENDER
-   ═════════════════════════════════════════════════════════════════ */
+/* Transfer in a table cell. Three states, never two: a session where nothing
+   failed has no retest, and showing that as a cross would be a lie about the
+   participant. Glyph plus word, so the column is not read by colour. */
+function transferCell(t){
+  if (t === null) return `<span class="tCell" style="color:var(--ink-3)">– not tested</span>`;
+  return t
+    ? `<span class="tCell" style="color:var(--good)">✓ held</span>`
+    : `<span class="tCell" style="color:var(--crit)">✕ did not hold</span>`;
+}
 
-const RAIL = {
-  intel: [["queue", "Signal queue"], ["lodge", "Lodge a signal"], ["vocab", "Controlled vocabulary"]],
-  author: [["derive", "Derivation"], ["gate", "Publish gate"]],
-  super: [["overview", "Cohort overview"], ["tactics", "Tactic performance"], ["contrib", "Contribution"]],
-};
-const RULES = {
-  intel: "A signal is intelligence, not content. Nothing lodged here reaches a learner until a named human in a declared role has authored it, reviewed it, and released it through the gate.",
-  author: "Derivation proposes. It never fills a field whose authority it does not have — every gap below names the role that must close it.",
-  super: "Cohort level only, and within-session transfer only. No individual appears here, and nothing on this page is evidence of durable behaviour change.",
-};
+/* ── Scope: an authority sees its own enrolments, and nothing else. ── */
+function inScope(p){
+  return S.user.authorityId === "ALL" || p.authorityId === S.user.authorityId;
+}
+function match(a, p){
+  if (!inScope(p)) return false;
+  if (S.f.jur !== "all" && p.jurisdiction !== S.f.jur) return false;
+  if (S.f.cohort !== "all" && p.cohortId !== S.f.cohort) return false;
+  if (S.f.verdict !== "all" && a.verdict !== S.f.verdict) return false;
+  return true;
+}
+function visibleAssessments(){
+  return PROG.assessments.filter(a => { const p = BY_ID.get(a.participantId); return p && match(a, p); });
+}
 
-function render() {
-  $("railRule").textContent = RULES[S.ws];
-  $("railNav").innerHTML =
-    `<span class="railLabel">${S.ws === "intel" ? "Intelligence" : S.ws === "author" ? "Authoring" : "Supervision"}</span>` +
-    RAIL[S.ws].map(([id, label]) =>
-      `<button class="navBtn ${S.panel === id ? "navOn" : ""}" data-p="${id}">${esc(label)}</button>`).join("");
-  $("railNav").querySelectorAll(".navBtn").forEach(b => {
-    b.onclick = () => { S.panel = b.dataset.p; render(); };
-  });
+/* ── Filters ──────────────────────────────────────────────────────── */
+function filterBar(){
+  const jurs = [...new Set(PROG.participants.filter(inScope).map(p => p.jurisdiction))].sort();
+  const cohorts = [...new Map(PROG.participants.filter(inScope).map(p => [p.cohortId, p.cohortName]))];
+  const opt = (v, l, cur) => `<option value="${v}" ${v === cur ? "selected" : ""}>${esc(l)}</option>`;
+  return `<div class="filters">
+    <div class="field"><label for="fJur">Jurisdiction</label><select id="fJur">
+      ${opt("all", "All jurisdictions", S.f.jur)}${jurs.map(j => opt(j, j, S.f.jur)).join("")}</select></div>
+    <div class="field"><label for="fCoh">Cohort</label><select id="fCoh">
+      ${opt("all", "All cohorts", S.f.cohort)}${cohorts.map(([id, n]) => opt(id, n, S.f.cohort)).join("")}</select></div>
+    <div class="field"><label for="fVer">Verdict</label><select id="fVer">
+      ${opt("all", "All verdicts", S.f.verdict)}${Object.keys(TAG).map(v => opt(v, TAG[v][2], S.f.verdict)).join("")}</select></div>
+  </div>`;
+}
 
+/* ── Chart row: track, thin fill, threshold rule, direct value ─────── */
+function chartRow(label, sub, value, tipHtml, max){
+  const w = Math.max(2, Math.round((value / (max || 100)) * 100));
+  const tp = Math.round((READY_THRESHOLD / (max || 100)) * 100);
+  return `<div class="chartRow">
+    <div class="rowLbl">${esc(label)}${sub ? `<small>${esc(sub)}</small>` : ""}</div>
+    <div class="track" data-tip="${esc(tipHtml)}">
+      <div class="fill" style="width:${w}%;background:${seq(value)}"></div>
+      <span class="threshMark" style="left:${tp}%"></span>
+    </div>
+    <div class="rowVal">${value}</div>
+  </div>`;
+}
+const chartLegend = `<div class="legendRow">
+  <span class="swatchRow"><span class="sw" style="background:var(--s1)"></span>
+    <span class="sw" style="background:var(--s3)"></span>
+    <span class="sw" style="background:var(--s5)"></span> lower → higher readiness</span>
+  <span><span class="threshKey"></span>${READY_THRESHOLD} = readiness threshold</span>
+</div>`;
+
+/* ── Views ────────────────────────────────────────────────────────── */
+function render(){
   const m = $("main");
-  if (S.ws === "intel") m.innerHTML = S.panel === "lodge" ? lodgeView() : S.panel === "vocab" ? vocabView() : queueView();
-  else if (S.ws === "author") m.innerHTML = S.panel === "gate" ? gateView() : deriveView();
-  else m.innerHTML = S.panel === "tactics" ? tacticsView() : S.panel === "contrib" ? contribView() : overviewView();
-
+  m.innerHTML = S.view === "people" ? peopleView() : S.view === "sessions" ? sessionsView() : overviewView();
   wire();
 }
 
-/* ── Intelligence · queue ──────────────────────────────────────────── */
-
-function statusChip(s) { return `<span class="chip c${s}">${s.replace("_", " ")}</span>`; }
-function tlpChip(t) { return `<span class="chip tlp t${t}">TLP:${t}</span>`; }
-
-function queueView() {
-  const sig = S.signals;
-  const n = (f) => sig.filter(f).length;
-  const rehearsable = new Set(sig.filter(s => s.status === "RELEASED").map(s => s.surface.typology));
-  const gaps = TYPOLOGIES.filter(t => !rehearsable.has(t.id) && sig.some(s => s.surface.typology === t.id)).length;
-
-  return `
-  <div class="pageHead">
-    <div>
-      <span class="eyebrow">${esc(AUTHORITIES.length)} contributing authorities</span>
-      <h2>Signal queue</h2>
-      <p>What member authorities are seeing, in one shape. A tactic described the same way by six regulators is a tactic that can be rehearsed against; described six ways, it is six anecdotes.</p>
-    </div>
-  </div>
-  <div class="stats">
-    <div class="stat"><div class="statN">${sig.length}</div><div class="statL">Signals lodged</div></div>
-    <div class="stat"><div class="statN">${n(s => ["TRIAGED","DERIVED","IN_REVIEW"].includes(s.status))}</div><div class="statL">In the pipeline</div></div>
-    <div class="stat good"><div class="statN">${n(s => s.status === "RELEASED")}</div><div class="statL">Released — rehearsable today</div></div>
-    <div class="stat ${gaps ? "alarm" : ""}"><div class="statN">${gaps}</div><div class="statL">Known but not yet rehearsable</div></div>
-    <div class="stat"><div class="statN">${n(s => s.status === "DECLINED")}</div><div class="statL">Declined, with reasons</div></div>
-  </div>
-  ${S.selected ? signalDetail(S.selected) : ""}
-  <div class="tw">
-    <table>
-      <thead><tr>
-        <th>Signal</th><th>Authority</th><th>Typology</th><th>Status</th><th>Sharing</th><th>Confidence</th>
-      </tr></thead>
-      <tbody>
-        ${sig.map(s => {
-          const a = authority(s.authorityId);
-          return `<tr>
-            <td><button class="rowBtn" data-sig="${s.id}">${s.id}</button>
-              <span class="sub">${esc(s.title)}</span></td>
-            <td>${esc(a ? a.name : s.authorityId)}<span class="sub mono">${esc(s.jurisdiction)} · from ${esc(s.observedFrom)}</span></td>
-            <td class="mono">${esc(s.surface.typology ? label(TYPOLOGIES, s.surface.typology) : "— unclassified —")}</td>
-            <td>${statusChip(s.status)}</td>
-            <td>${tlpChip(s.sharing)}</td>
-            <td class="mono">${esc(s.confidence)}</td>
-          </tr>`;
-        }).join("")}
-      </tbody>
-    </table>
-  </div>`;
-}
-
-function signalDetail(id) {
-  const s = S.signals.find(x => x.id === id);
-  if (!s) return "";
-  const a = authority(s.authorityId);
-  const findings = checkIntake(s);
-  const blocking = findings.filter(f => f.blocking);
-  const next = nextSignalStatus(s.status);
-
-  const surfaceRow = (k, list, v) =>
-    `<dt>${k}</dt><dd>${v ? esc(label(list, v)) + ` <span class="mono">${esc(v)}</span>` : '<span class="mono" style="color:var(--fail)">not classified</span>'}</dd>`;
-
-  return `
-  <div class="panel">
-    <div class="panelHead">
-      <div>
-        <span class="eyebrow">${esc(s.id)} · lodged by ${esc(a ? a.name : s.authorityId)}</span>
-        <h3>${esc(s.title)}</h3>
-      </div>
-      <div class="btnRow">
-        ${statusChip(s.status)} ${tlpChip(s.sharing)}
-        <button class="btn btnGhost btnSm" data-close="1">Close</button>
-      </div>
-    </div>
-
-    <div class="sectTitle">How it works</div>
-    <p class="prose">${esc(s.method)}</p>
-
-    <div class="sectTitle">Observable indicators</div>
-    ${s.indicators.length
-      ? `<ul class="listTight">${s.indicators.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`
-      : `<p class="empty">None recorded. A tactic nobody could notice cannot be rehearsed, only described.</p>`}
-
-    <div class="sectTitle">Classification</div>
-    <dl class="kv">
-      ${surfaceRow("Typology", TYPOLOGIES, s.surface.typology)}
-      ${surfaceRow("Channel", CHANNELS, s.surface.channel)}
-      ${surfaceRow("Persona", PERSONAS, s.surface.persona)}
-      ${surfaceRow("Product class", PRODUCT_CLASSES, s.surface.productClass)}
-      <dt>Defeats</dt><dd>${s.defeats ? esc(s.defeats) : '<span style="color:var(--fail)">Not stated — nothing can be derived.</span>'}</dd>
-      <dt>Target profile</dt><dd>${esc(s.targetProfile)}</dd>
-    </dl>
-
-    ${s.declineReason ? `<div class="sectTitle">Decline reason</div><div class="note hard">${esc(s.declineReason)}</div>` : ""}
-
-    <div class="sectTitle">Intake check</div>
-    ${findings.length === 0
-      ? `<div class="note quiet">Complete. Nothing blocks derivation.</div>`
-      : findings.map(f => `<div class="gap" style="border-left-color:var(--${f.blocking ? "fail" : "warn"})">
-            <div class="gapHead"><span class="gapField">${esc(f.field)}</span>
-              <span class="gapRole">${f.blocking ? "blocking" : "advisory"}</span></div>
-            <div class="gapWhy">${esc(f.detail)}</div></div>`).join("")}
-
-    <div class="sectTitle">Pipeline</div>
-    <div class="btnRow">
-      ${next && s.status !== "DECLINED"
-        ? `<button class="btn btnSm" data-adv="${s.id}" ${(!may("triage") || blocking.length) ? "disabled" : ""}>Advance to ${next.replace("_", " ")}</button>`
-        : ""}
-      ${s.status !== "DECLINED" && s.status !== "RELEASED"
-        ? `<button class="btn btnGhost btnSm" data-dec="${s.id}" ${may("decline") ? "" : "disabled"}>Decline</button>`
-        : ""}
-      ${["DERIVED", "IN_REVIEW", "RELEASED"].includes(s.status)
-        ? `<button class="btn btnGhost btnSm" data-auth="${s.id}">Open in Authoring</button>` : ""}
-    </div>
-    ${blocking.length
-      ? `<div class="note hard" style="margin-top:11px"><b>Blocked.</b> ${blocking.length} field${blocking.length === 1 ? "" : "s"} must be completed by the lodging authority before this signal can advance.</div>`
-      : !may("triage") && next
-        ? `<div class="note quiet" style="margin-top:11px">Advancing is an <b>${esc(needs("triage"))}</b> action. You are signed in as ${esc(S.user.role.replace("role:", "").replace(/_/g, " "))}.</div>`
-        : ""}
-  </div>`;
-}
-
-/* ── Intelligence · lodge ──────────────────────────────────────────── */
-
-function opts(list) { return list.map(t => `<option value="${t.id}">${esc(t.label)}</option>`).join(""); }
-
-function lodgeView() {
-  const allowed = may("lodge");
-  return `
-  <div class="pageHead">
-    <div>
-      <span class="eyebrow">Fixed intelligence frame</span>
-      <h2>Lodge a signal</h2>
-      <p>The frame is fixed so that everything downstream can rely on the shape existing. The field that matters most is the last one: what reasoning this tactic defeats. Without it there is nothing to connect the signal to a competency element, and no derivation is possible.</p>
-    </div>
-  </div>
-  ${allowed ? "" : `<div class="note quiet">Lodging is a <b>${esc(needs("lodge"))}</b> action. The form is shown read-only.</div>`}
-  <div class="panel">
-    <div class="field"><label for="fTitle">Title</label>
-      <input id="fTitle" placeholder="One line a supervisor would recognise it by" value="Clone firm using a real licence number"></div>
-    <div style="height:12px"></div>
-    <div class="field"><label for="fMethod">How it works</label>
-      <textarea id="fMethod" placeholder="What the tactic actually does, in your own words.">Callers quote a genuine licence number belonging to an authorised firm, alongside a company name one character different from the real one. The number checks out on the register; the name does not match the entry it belongs to.</textarea></div>
-    <div style="height:12px"></div>
-    <div class="field"><label for="fInd">Observable indicators — one per line</label>
-      <textarea id="fInd">Licence number is real but registered to a different entity name
-Domain registered within the last ninety days
-Payment account name differs from the firm name</textarea></div>
-    <div style="height:12px"></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">
-      <div class="field"><label for="fTyp">Typology</label><select id="fTyp">${opts(TYPOLOGIES)}</select></div>
-      <div class="field"><label for="fCh">Channel</label><select id="fCh">${opts(CHANNELS)}</select></div>
-      <div class="field"><label for="fPer">Persona</label><select id="fPer">${opts(PERSONAS)}</select></div>
-      <div class="field"><label for="fPc">Product class</label><select id="fPc">${opts(PRODUCT_CLASSES)}</select></div>
-      <div class="field"><label for="fConf">Confidence</label><select id="fConf">${CONFIDENCE.map(c => `<option>${c}</option>`).join("")}</select></div>
-      <div class="field"><label for="fShare">Sharing</label><select id="fShare">${SHARING.map(c => `<option>${c}</option>`).join("")}</select></div>
-    </div>
-    <div style="height:12px"></div>
-    <div class="field"><label for="fDefeats">What reasoning does it defeat?</label>
-      <textarea id="fDefeats" placeholder="The competency this tactic is designed to break.">Independent verification. The register check appears to succeed, so it stops being repeated against the entity name.</textarea></div>
-    <div style="height:14px"></div>
-    <button class="btn" id="lodgeBtn" ${allowed ? "" : "disabled"}>Lodge signal</button>
-  </div>`;
-}
-
-/* ── Intelligence · vocabulary ─────────────────────────────────────── */
-
-function vocabTable(title, list, why) {
-  return `<div class="panel">
-    <div class="panelHead"><div><h3>${esc(title)}</h3><p class="prose" style="margin-top:4px">${esc(why)}</p></div></div>
-    <div class="tw"><table style="min-width:520px"><thead><tr><th>Term</th><th>Id</th><th>How to classify</th></tr></thead><tbody>
-      ${list.map(t => `<tr><td>${esc(t.label)}</td><td class="mono">${esc(t.id)}</td><td>${esc(t.note)}</td></tr>`).join("")}
-    </tbody></table></div></div>`;
-}
-
-function vocabView() {
-  return `
-  <div class="pageHead">
-    <div>
-      <span class="eyebrow">Closed lists · changing one is a governance act</span>
-      <h2>Controlled vocabulary</h2>
-      <p>Four axes, and they exist for a reason that shows up at runtime. AUREN proves transfer only on a retest sharing <em>nothing</em> with the scenario the learner failed. With free text that comparison is a guess; with closed lists it is a set operation that still holds when the corpus reaches two hundred challenges.</p>
-    </div>
-  </div>
-  <div class="note"><b>Surface distance must reach ${RETEST_MIN_DISTANCE} of 4</b> for a retest to count. Adding a term changes what “different enough” means for every retest already in the field, which is why it is not a dropdown an administrator edits.</div>
-  ${vocabTable("Typology — what the fraud is", TYPOLOGIES, "The primary axis. Also the unit the supervisory dashboard counts in.")}
-  ${vocabTable("Channel — how it reaches the person", CHANNELS, "Second axis of surface distance.")}
-  ${vocabTable("Persona — who appears to be speaking", PERSONAS, "Third axis. This is what the learner actually faces.")}
-  ${vocabTable("Product class — what is nominally sold", PRODUCT_CLASSES, "Fourth axis.")}`;
-}
-
-/* ── Authoring · derivation ────────────────────────────────────────── */
-
-function deriveView() {
-  const candidates = S.signals.filter(s => ["TRIAGED", "DERIVED", "IN_REVIEW", "RELEASED"].includes(s.status));
-  const sel = S.selected && candidates.some(c => c.id === S.selected) ? S.selected : (candidates[0] && candidates[0].id);
-  const s = S.signals.find(x => x.id === sel);
-
-  let inner = `<p class="empty">No signal has been triaged yet.</p>`;
-  if (s) {
-    if (!S.derivation || S.derivation.signalId !== s.id) {
-      S.derivation = derive(s, deployedLanguages(), markets());
-    }
-    const d = S.derivation;
-    inner = `
-    <div class="note"><b>${esc(derivationSummary(d))}</b></div>
-    <div class="sectTitle">Element mapping</div>
-    <p class="prose">${esc(d.mappingBasis)}</p>
-
-    <div class="sectTitle">Candidate objects — all DRAFT</div>
-    <div class="tw"><table style="min-width:560px">
-      <thead><tr><th>Object</th><th>Kind</th><th>Status</th><th>Must be signed by</th></tr></thead>
-      <tbody>${d.objects.map(o => `<tr>
-        <td class="mono">${esc(o.id)}<span class="sub">${esc(o.label)}</span></td>
-        <td><span class="chip k">${esc(o.kind)}</span></td>
-        <td><span class="chip cSUBMITTED">${esc(o.governance.status)}</span></td>
-        <td class="mono">${o.governance.approverRoles.map(r => esc(r.replace("role:", ""))).join(" · ")}</td>
-      </tr>`).join("")}</tbody>
-    </table></div>
-
-    <div class="sectTitle">What the derivation could not supply</div>
-    ${d.gaps.map(g => `<div class="gap">
-      <div class="gapHead"><span class="gapField">${esc(g.objectId)} — ${esc(g.field)}</span>
-        <span class="gapRole">${esc(g.role)}</span></div>
-      <div class="gapWhy">${esc(g.detail)}</div></div>`).join("")}
-
-    <div style="height:14px"></div>
-    <button class="btn" id="runGateBtn">Run the publish gate with these candidates</button>`;
-  }
+function overviewView(){
+  const vis = visibleAssessments();
+  const rows = participantRows(PROG, match);
+  const counts = { ready:0, coach:0, priority:0 };
+  rows.forEach(r => counts[r.verdict] += 1);
+  const regions = regionRows(PROG, match);
+  const dims = dimensionMeans(PROG, match);
+  const mean = vis.length ? Math.round(vis.reduce((a, b) => a + b.overall, 0) / vis.length) : 0;
+  // Transfer rate has a denominator, and it is not "all assessments". A retest
+  // only happens where something failed, so sessions that held clean are out of
+  // the ratio entirely — counting them as passes would inflate the one number
+  // the programme is judged on.
+  const retested = vis.filter(a => a.transferred !== null);
+  const transferred = retested.filter(a => a.transferred).length;
 
   return `
   <div class="pageHead">
-    <div>
-      <span class="eyebrow">Signal in, DRAFT candidates out</span>
-      <h2>Derivation</h2>
-      <p>The mechanical half of authoring: classify, connect the tactic to a competency element, shape the objects, carry the surface profile through so the retest selector keeps working. That is most of the typing and none of the judgement.</p>
+    <span class="eyebrow">${rows.length} enrolled participants · ${vis.length} completed assessments</span>
+    <h2>Programme overview</h2>
+    <p>Who has been through a rehearsal, how they did, and who needs coaching next. Readiness
+      requires transfer — a participant who scores well and then fails an unfamiliar scenario
+      is someone who knows the rule, not someone who acted on it.</p>
+  </div>
+  ${filterBar()}
+  <div class="tiles">
+    <div class="tile"><div class="tileL">Participants</div><div class="tileV">${rows.length}</div>
+      <div class="tileS">Enrolled, with at least one completed rehearsal</div></div>
+    <div class="tile"><div class="tileL">Mean readiness</div><div class="tileV">${mean}</div>
+      <div class="tileS">Across ${vis.length} assessments</div></div>
+    <div class="tile vGood"><div class="tileL">Investor-ready</div><div class="tileV">${counts.ready}</div>
+      <div class="tileS">${pctOf(counts.ready, rows.length)}% — at or above ${READY_THRESHOLD}, no failed retest</div></div>
+    <div class="tile vWarn"><div class="tileL">Coaching recommended</div><div class="tileV">${counts.coach}</div>
+      <div class="tileS">${pctOf(counts.coach, rows.length)}% — one coached rehearsal booked</div></div>
+    <div class="tile vCrit"><div class="tileL">Priority coaching</div><div class="tileV">${counts.priority}</div>
+      <div class="tileS">${pctOf(counts.priority, rows.length)}% — within 14 days</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Readiness by region</h3>
+      <p class="cardNote">Mean across every assessment from that region. Ordered worst first —
+        this is a list to act on, not a leaderboard.</p>
+      ${regions.length ? regions.map(r => chartRow(
+        r.region,
+        `${r.jurisdiction} · ${r.participants} ${r.participants === 1 ? "person" : "people"} · ` +
+          `${r.sessions} ${r.sessions === 1 ? "session" : "sessions"}`,
+        r.mean, `<b>${esc(r.region)}</b><br>${r.sessions} ${r.sessions === 1 ? "assessment" : "assessments"} · ${r.ready}% investor-ready`
+      )).join("") : `<p class="empty">No assessments match these filters.</p>`}
+      ${regions.length ? chartLegend : ""}
     </div>
-    <div class="field" style="min-width:230px">
-      <label for="sigPick">Signal</label>
-      <select id="sigPick">${candidates.map(c =>
-        `<option value="${c.id}" ${c.id === sel ? "selected" : ""}>${c.id} — ${esc(c.title)}</option>`).join("")}</select>
+    <div class="card">
+      <h3>Where reasoning holds and breaks</h3>
+      <p class="cardNote">Mean score per dimension. The lowest is what the programme should
+        commission intelligence and rehearsal for next.</p>
+      ${dims.map(d => {
+        const def = DIMENSIONS.find(x => x.id === d.id);
+        return chartRow(d.label, "", d.mean, `<b>${esc(d.label)}</b><br>${esc(def ? def.note : "")}`);
+      }).join("")}
+      ${chartLegend}
     </div>
   </div>
-  <div class="panel">${inner}</div>`;
-}
 
-/* ── Authoring · gate ──────────────────────────────────────────────── */
+  <div class="note plain">
+    <b>Transfer rate ${pctOf(transferred, retested.length)}%.</b>
+    Something failed in ${retested.length} of these ${vis.length} assessments, and in
+    ${transferred} of those the coached behaviour survived a retest sharing no typology,
+    channel, persona or product class with the scenario it failed on. The other
+    ${vis.length - retested.length} assessments had nothing to retest, so they are outside
+    this ratio rather than counted as passes. Measured within one session — it is evidence
+    the coaching landed, not evidence of durable behaviour change.
+  </div>
 
-function gateView() {
-  if (!S.gateReport) {
-    return `
-    <div class="pageHead"><div>
-      <span class="eyebrow">Ten tests · seven blocking · no waive path</span>
-      <h2>Publish gate</h2>
-      <p>The same gate that governs the Knowledge Authority console, run here against the live AUREN library plus the candidates derived from the selected signal. Not a second copy of it — the same compiled tests.</p>
-    </div></div>
-    <div class="panel"><p class="empty">No report yet. Run the gate from the Derivation panel.</p></div>`;
-  }
-  const r = S.gateReport;
-  const verdict = (g) => !g.assessed ? ["vna", "n/a"] : g.passed ? ["vpass", "pass"] : g.severity === "hard" ? ["vfail", "blocked"] : ["vadv", "advisory"];
-
-  return `
-  <div class="pageHead"><div>
-    <span class="eyebrow">AUREN library + ${S.derivation ? S.derivation.objects.length : 0} derived candidates</span>
-    <h2>${r.releasable ? "Releasable." : "Blocked."}</h2>
-    <p>${r.hardFailures} hard failure${r.hardFailures === 1 ? "" : "s"} · ${r.advisoryFailures} advisory · ${r.effectiveCount} of ${r.totalCount} objects would be in the bundle.</p>
-  </div></div>
-  <div class="note quiet"><b>None of the derived candidates is in this bundle.</b>
-    They are DRAFT, and the resolver loads nothing but EFFECTIVE — so lodging intelligence
-    and deriving from it changed exactly nothing about what a learner meets today. That is
-    the system behaving correctly, and it is the part an intelligence feed wired straight
-    to a persona would get wrong.</div>
-  ${r.releasable ? "" : `<div class="note hard"><b>Release is disabled.</b> There is no waive path — not for a member authority and not for BYOND. A candidate derived from live intelligence is exactly the object most likely to be rushed, which is why the gate does not know the difference.</div>`}
-  <div class="panel">
-    ${r.results.map(g => {
-      const [cls, word] = verdict(g);
-      return `<div class="gRow">
-        <div class="gVerdict ${cls}">${word}</div>
-        <div style="flex:1;min-width:0">
-          <div class="gName">${esc(g.name)} <span class="mono" style="color:var(--ink-4)">${g.severity}</span></div>
-          <div class="gAsserts">${esc(g.asserts)}</div>
-          ${g.findings.map(f => `<div class="finding"><b>${esc(f.subject)}</b> — ${esc(f.detail)}</div>`).join("")}
-        </div>
-      </div>`;
-    }).join("")}
+  <div class="note plain">
+    <b>Two populations, and they cannot be joined.</b> This console shows
+    ${rows.length} people who enrolled through an authority's programme and consented at
+    enrolment to their sponsor reviewing readiness. A further
+    <b>${PROG.anonymousRehearsals.toLocaleString()}</b> rehearsals were completed by members of
+    the public who opened AUREN from a link — no account, no name, nothing retained that
+    identifies them. They are counted here and reachable nowhere, which is the property that
+    makes the public rehearsal safe to offer at all.
   </div>`;
 }
 
-/* ── Supervision ───────────────────────────────────────────────────── */
+function pctOf(n, d){ return d ? Math.round((n / d) * 100) : 0; }
 
-function ensureView() {
-  if (!S.records) S.records = buildRecords();
-  if (!S.view) S.view = buildSupervisoryView(S.records, S.signals, AS_OF);
-  return S.view;
-}
-
-function barCls(v) { return v < 30 ? "low" : v < 50 ? "mid" : ""; }
-
-function overviewView() {
-  const v = ensureView();
+function peopleView(){
+  const rows = participantRows(PROG, match);
   return `
-  <div class="pageHead"><div>
-    <span class="eyebrow">As at ${esc(v.generatedAt)} · ${v.cohortCount} cohorts</span>
-    <h2>Cohort overview</h2>
-    <p>Which tactics are currently defeating people, and whether we can rehearse against them yet. That second half is the question a supervisor cannot answer from incident reports alone.</p>
-    <p class="sub">Tactics, not people. Named participants and their individual assessments live
-      in the <a href="${CONSOLE_HREF}" ${CONSOLE_LOCAL ? "" : 'target="_blank" rel="noopener"'}>Supervision Console</a>, which reads a different
-      population under a different consent basis — the two are deliberately not joined.</p>
-  </div></div>
-
-  <div class="stats">
-    <div class="stat"><div class="statN">${v.reach.toLocaleString()}</div><div class="statL">Investors in programme</div></div>
-    <div class="stat"><div class="statN">${v.completed.toLocaleString()}</div><div class="statL">Sessions completed</div></div>
-    <div class="stat ${v.overallResistance < 45 ? "alarm" : ""}"><div class="statN">${v.overallResistance}%</div><div class="statL">Resisted the pressure first time</div></div>
-    <div class="stat"><div class="statN">${v.overallTransfer}%</div><div class="statL">Held after coaching, on a distant retest</div></div>
-    <div class="stat ${v.coverageGaps.length ? "alarm" : "good"}"><div class="statN">${v.coverageGaps.length}</div><div class="statL">Tactics we cannot yet rehearse</div></div>
+  <div class="pageHead">
+    <span class="eyebrow">Enrolled · consent captured at enrolment</span>
+    <h2>Participants</h2>
+    <p>One row per person, carrying their most recent verdict — not their best. Someone who
+      did well in week one and failed in week four is not ready, and a console that showed
+      their best score would say otherwise.</p>
   </div>
-
-  <div>
-    <div class="sectTitle">Emerging — recently observed and beating people more than the corpus average</div>
-    ${v.emerging.length ? `<div class="alerts">${v.emerging.map(t => `
-      <div class="alert">
-        <div class="alertName">${esc(t.label)}</div>
-        <div class="alertMeta">${t.resistanceRate}% resisted · ${t.exposures} exposures · first observed ${t.ageDays} days ago</div>
-        <div class="alertWhy">${t.rehearsable
-          ? "Released and in the field. Watch whether resistance moves over the next cohort."
-          : "<b>No released challenge.</b> We know how this works and cannot yet put anyone through it."}</div>
-      </div>`).join("")}</div>` : `<p class="empty">Nothing currently meets both conditions.</p>`}
-  </div>
-
-  <div>
-    <div class="sectTitle">Coverage gaps — intelligence exists, rehearsal does not</div>
-    ${v.coverageGaps.length ? `<div class="alerts">${v.coverageGaps.map(t => `
-      <div class="alert gapCard">
-        <div class="alertName">${esc(t.label)}</div>
-        <div class="alertMeta">first observed ${t.ageDays} days ago</div>
-        <div class="alertWhy">A signal describing this is in the corpus, but no challenge object has reached release. This is the publish gate's Coverage test, one level up: the programme knows about a tactic it cannot test anyone against.</div>
-      </div>`).join("")}</div>` : `<p class="empty">Every classified tactic in the corpus has a released challenge.</p>`}
-  </div>
-
-  <div class="note quiet"><b>Read this page carefully.</b> Every figure is cohort-level; no individual appears and none can be retrieved. “Held after coaching” means transfer measured inside a single session against a scenario sharing nothing with the one the learner failed. It is not evidence of durable behaviour change, and the programme does not claim it is.</div>`;
-}
-
-function tacticsView() {
-  const v = ensureView();
-  return `
-  <div class="pageHead"><div>
-    <span class="eyebrow">Ordered by resistance, worst first</span>
-    <h2>Tactic performance</h2>
-    <p>Resistance is the share who held the first time they met the tactic. Transfer is the share of those who failed and, after coaching, held on a scenario sharing no typology, channel, persona or product class with it.</p>
-  </div></div>
+  ${filterBar()}
   <div class="tw"><table>
-    <thead><tr><th>Tactic</th><th>Exposures</th><th>Resisted first time</th><th>Held after coaching</th><th>Rehearsable</th></tr></thead>
-    <tbody>${v.typologies.map(t => `<tr>
-      <td>${esc(t.label)}<span class="sub mono">${esc(t.typology)}${t.ageDays !== null ? ` · observed ${t.ageDays}d ago` : " · no signal in corpus"}</span></td>
-      <td class="num">${t.exposures}</td>
-      <td><span class="num">${t.exposures ? t.resistanceRate + "%" : "—"}</span>
-        ${t.exposures ? `<div class="bar"><div class="barFill ${barCls(t.resistanceRate)}" style="width:${t.resistanceRate}%"></div></div>` : ""}</td>
-      <td><span class="num">${t.exposures ? t.transferRate + "%" : "—"}</span>
-        ${t.exposures ? `<div class="bar"><div class="barFill ${barCls(t.transferRate)}" style="width:${t.transferRate}%"></div></div>` : ""}</td>
-      <td>${t.rehearsable ? `<span class="chip cRELEASED">released</span>` : `<span class="chip cDERIVED">not yet</span>`}</td>
-    </tr>`).join("")}</tbody>
+    <thead><tr>
+      <th style="width:190px">Participant</th><th style="width:170px">Region</th>
+      <th>Cohort</th><th style="width:78px">Sessions</th>
+      <th style="width:150px">Latest readiness</th><th style="width:190px">Verdict</th>
+    </tr></thead>
+    <tbody>${rows.length ? rows.map((r, i) => `<tr class="click" data-p="${i}">
+      <td><strong style="color:var(--ink)">${esc(r.participant.name)}</strong>
+        <span class="sub2">${esc(r.participant.segment)}</span></td>
+      <td>${esc(r.participant.region)}<span class="sub2 mono">${esc(r.participant.jurisdiction)}</span></td>
+      <td>${esc(r.participant.cohortName)}<span class="sub2 mono">${esc(r.participant.id)}</span></td>
+      <td class="num">${r.sessions}</td>
+      <td><div class="scoreCell">
+        <div class="mini"><div class="miniFill" style="width:${r.latest.overall}%;background:${seq(r.latest.overall)}"></div></div>
+        <span class="mono" style="color:var(--ink);font-weight:600">${r.latest.overall}</span></div></td>
+      <td>${tag(r.verdict)}</td>
+    </tr>`).join("") : `<tr><td colspan="6" class="empty">No participants match these filters.</td></tr>`}</tbody>
   </table></div>
-
-  <div class="sectTitle">Where reasoning breaks first</div>
-  <div class="tw"><table style="min-width:420px">
-    <thead><tr><th>Competency element</th><th>First failure</th><th>Share</th></tr></thead>
-    <tbody>${v.elementHeat.map(e => `<tr>
-      <td class="mono">${esc(e.elementId)}</td>
-      <td class="num">${e.failures}</td>
-      <td><span class="num">${e.share}%</span><div class="bar"><div class="barFill mid" style="width:${e.share}%"></div></div></td>
-    </tr>`).join("")}</tbody>
-  </table></div>
-  <p class="prose" style="color:var(--ink-3)">This table is what tells the network which intelligence it actually needs. A competency failing everywhere is a competency the corpus is under-serving.</p>`;
+  <p class="cardNote">Every row names a person because that person enrolled through this
+    programme and agreed their sponsor could review the result. ${esc(rows[0] ? rows[0].participant.consentBasis : "")}</p>`;
 }
 
-function contribView() {
-  const v = ensureView();
+function sessionsView(){
+  const rows = visibleAssessments().slice().sort((a, b) => b.overall - a.overall);
   return `
-  <div class="pageHead"><div>
-    <span class="eyebrow">Organisations, never individuals</span>
-    <h2>Contribution</h2>
-    <p>What each authority has put into the shared corpus, and what came out of it. Declines are shown because a network that only counts accepted signals teaches its members to lodge noise.</p>
-  </div></div>
-  <div class="tw"><table style="min-width:560px">
-    <thead><tr><th>Authority</th><th>Jurisdiction</th><th>Lodged</th><th>Released</th><th>Declined</th><th>Shares to network</th></tr></thead>
-    <tbody>${AUTHORITIES.map(a => {
-      const c = v.contributions.find(x => x.authorityId === a.id) || { submitted: 0, released: 0, declined: 0 };
-      return `<tr>
-        <td>${esc(a.name)}</td><td class="mono">${esc(a.jurisdiction)}</td>
-        <td class="num">${c.submitted}</td><td class="num">${c.released}</td><td class="num">${c.declined}</td>
-        <td>${a.sharesToNetwork ? `<span class="chip cRELEASED">yes</span>` : `<span class="chip cSUBMITTED">bilateral only</span>`}</td>
-      </tr>`;
-    }).join("")}</tbody>
+  <div class="pageHead">
+    <span class="eyebrow">Every row is a spoken rehearsal</span>
+    <h2>Assessments</h2>
+    <p>Open one to see the five dimensions scored from it, each carrying the participant's own
+      sentence, and the recommendation that follows from the result.</p>
+  </div>
+  ${filterBar()}
+  <div class="tw"><table>
+    <thead><tr>
+      <th style="width:180px">Participant</th><th>Tactic faced</th>
+      <th style="width:70px">Week</th><th style="width:78px">Turns</th>
+      <th style="width:130px">Transfer</th>
+      <th style="width:150px">Readiness</th><th style="width:190px">Verdict</th>
+    </tr></thead>
+    <tbody>${rows.length ? rows.map((a, i) => {
+      const p = BY_ID.get(a.participantId);
+      return `<tr class="click" data-a="${i}">
+        <td><strong style="color:var(--ink)">${esc(p.name)}</strong>
+          <span class="sub2 mono">${esc(a.id)}</span></td>
+        <td>${esc(label(TYPOLOGIES, a.typology))}
+          <span class="sub2">${esc(p.region)} · ${esc(p.jurisdiction)}</span></td>
+        <td class="num">${a.week}</td><td class="num">${a.turns}</td>
+        <td>${transferCell(a.transferred)}</td>
+        <td><div class="scoreCell">
+          <div class="mini"><div class="miniFill" style="width:${a.overall}%;background:${seq(a.overall)}"></div></div>
+          <span class="mono" style="color:var(--ink);font-weight:600">${a.overall}</span></div></td>
+        <td>${tag(a.verdict)}</td></tr>`;
+    }).join("") : `<tr><td colspan="7" class="empty">No assessments match these filters.</td></tr>`}</tbody>
   </table></div>
-  <div class="note"><b>Sharing marking governs who may see a signal. It does not govern whether objects derived from it may deploy.</b> A TLP:RED signal can still produce a released challenge, because the challenge no longer carries the source — which is the property that lets an authority contribute intelligence it could never publish.</div>`;
+  <p class="cardNote">Verdict is not a band on the score. A session can sit above another and
+    still be priority, because three failure signatures bound under pressure and the coached
+    behaviour did not hold on a distant retest. The score says how well they reasoned; the
+    transfer column says whether it survived contact.</p>`;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   WIRING
-   ═════════════════════════════════════════════════════════════════ */
+/* ── The individual assessment ────────────────────────────────────── */
+function openAssessment(a){
+  const p = BY_ID.get(a.participantId);
+  const tested = a.elements.filter(e => e.status !== "not-tested");
+  const held = tested.filter(e => e.status === "demonstrated");
+  const broke = tested.filter(e => e.status === "failed");
 
-function wire() {
+  $("dTitle").textContent = p.name;
+  $("dSub").textContent = `${a.id} · ${p.region} · ${p.jurisdiction} · week ${a.week}`;
+
+  $("dBody").innerHTML = `
+  <div style="margin-bottom:16px">${tag(a.verdict)}</div>
+
+  <div class="secHead">Session</div>
+  <dl class="kv">
+    <dt>Cohort</dt><dd>${esc(p.cohortName)}</dd>
+    <dt>Segment</dt><dd>${esc(p.segment)}</dd>
+    <dt>Tactic faced</dt><dd>${esc(label(TYPOLOGIES, a.typology))} <span class="mono">${esc(a.typology)}</span></dd>
+    <dt>Language</dt><dd>${esc(p.language)}</dd>
+    <dt>Duration</dt><dd>${a.minutes} min · ${a.turns} turns</dd>
+    <dt>Consent</dt><dd>${esc(p.consentBasis)}</dd>
+  </dl>
+
+  <div class="secHead">Readiness — ${a.overall} of 100 · threshold ${READY_THRESHOLD}</div>
+  ${DIMENSIONS.map(d => {
+    const v = a.dims[d.id];
+    const ev = a.elements.find(e => d.elements.includes(e.id) && e.quote);
+    return `<div class="dim">
+      <div class="dimHead"><span class="dimName">${esc(d.label)}</span><span class="dimScore">${v}</span></div>
+      <div class="track" style="margin-top:7px">
+        <div class="fill" style="width:${v}%;background:${seq(v)}"></div>
+        <span class="threshMark" style="left:${READY_THRESHOLD}%"></span>
+      </div>
+      <div class="dimNote">${esc(d.note)}</div>
+      ${ev ? `<div class="evid">“${esc(ev.quote)}”</div>` : `<div class="dimNote" style="font-style:italic">Not exercised in this session — scored from the elements that were, and marked as such rather than filled in.</div>`}
+    </div>`;
+  }).join("")}
+
+  <div class="secHead">What held</div>
+  ${held.length ? `<div class="elGrid">${held.map(e => `<div class="el pass">
+    <div class="elName">${esc(e.label)}</div><div class="elId">${esc(e.id)} · demonstrated</div></div>`).join("")}</div>`
+    : `<p class="empty">Nothing held under pressure in this session.</p>`}
+
+  <div class="secHead">What broke</div>
+  ${broke.length ? `<div class="elGrid">${broke.map(e => `<div class="el fail">
+    <div class="elName">${esc(e.label)}</div><div class="elId">${esc(e.id)} · failed</div></div>`).join("")}</div>`
+    : `<p class="empty">No element failed under pressure.</p>`}
+
+  ${a.signatures.length ? `<div class="secHead">Failure signatures, bound to what was said</div>
+    ${a.signatures.map(s => `<div class="note crit" style="margin-bottom:8px">
+      <b>${esc(s.label)}</b><br><span class="mono">${esc(s.id)}</span>
+      <div class="evid" style="border-left-color:var(--crit);margin-top:8px">“${esc(s.quote)}”</div>
+    </div>`).join("")}` : ""}
+
+  <div class="secHead">Transfer</div>
+  <div class="note ${a.transferred === false ? "crit" : ""}">
+    <b>${a.transferred === null
+      ? "Not tested — nothing failed."
+      : a.transferred ? "Held on an unfamiliar scenario." : "Did not transfer."}</b>
+    ${a.transferred === null
+      ? "A transfer retest exists to check whether coaching stuck, so it only runs where something broke. Nothing broke here, so there was nothing to re-test. Recorded as not tested, never scored as a pass."
+      : a.transferred
+        ? "After coaching, the behaviour survived a retest sharing no typology, channel, persona or product class with the one they failed. That is the only evidence the programme treats as transfer."
+        : "After coaching, the same reasoning failed again on a scenario sharing nothing with the first. Carried honestly rather than re-coached to a pass."}
+    <br><br>Within-session only. Nothing here claims durable behaviour change.
+  </div>
+
+  <div class="secHead">Recommendation</div>
+  <div class="note">
+    <b>${esc(a.recommendation.action)}.</b> ${esc(a.recommendation.why)}
+    <br><br>Next rehearsal: <b>${esc(label(TYPOLOGIES, a.recommendation.next))}</b> — it exercises
+    the weakest dimension and shares nothing with the tactic just faced.
+  </div>
+
+  <div class="secHead">Strengths and areas to improve</div>
+  <dl class="kv">
+    <dt>Strongest</dt><dd>${a.strengths.map(esc).join(" · ")}</dd>
+    <dt>To improve</dt><dd>${a.improve.map(esc).join(" · ")}</dd>
+  </dl>
+
+  <div class="note plain" style="margin-top:18px"><b>Why this is defensible.</b> Every score
+    above cites the participant's own sentence. A dimension the session never exercised says so
+    rather than being filled in with a plausible number.</div>`;
+
+  $("drawer").classList.add("on"); $("drawer").setAttribute("aria-hidden", "false");
+  $("scrim").classList.add("on");
+  $("dClose").focus();
+}
+function closeDrawer(){
+  $("drawer").classList.remove("on"); $("drawer").setAttribute("aria-hidden", "true");
+  $("scrim").classList.remove("on");
+}
+$("dClose").onclick = closeDrawer;
+$("scrim").onclick = closeDrawer;
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+
+/* ── Wiring ───────────────────────────────────────────────────────── */
+function wire(){
   const m = $("main");
+  const bind = (id, key) => {
+    const el = $(id);
+    if (el) el.onchange = () => { S.f[key] = el.value; render(); };
+  };
+  bind("fJur", "jur"); bind("fCoh", "cohort"); bind("fVer", "verdict");
 
-  m.querySelectorAll("[data-sig]").forEach(b => {
-    b.onclick = () => { S.selected = b.dataset.sig; render(); };
+  const rows = participantRows(PROG, match);
+  m.querySelectorAll("[data-p]").forEach(tr => {
+    tr.onclick = () => openAssessment(rows[+tr.dataset.p].latest);
   });
-  const close = m.querySelector("[data-close]");
-  if (close) close.onclick = () => { S.selected = null; render(); };
+  const list = visibleAssessments().slice().sort((a, b) => b.overall - a.overall);
+  m.querySelectorAll("[data-a]").forEach(tr => {
+    tr.onclick = () => openAssessment(list[+tr.dataset.a]);
+  });
 
-  const adv = m.querySelector("[data-adv]");
-  if (adv) adv.onclick = () => {
-    const s = S.signals.find(x => x.id === adv.dataset.adv);
-    const next = nextSignalStatus(s.status);
-    if (!next) return;
-    s.status = next;
-    // Deriving is the step that actually produces candidates, so it is the
-    // step that records them against the signal.
-    if (next === "DERIVED") {
-      const d = derive(s, deployedLanguages(), markets());
-      s.derivedObjectIds = d.objects.map(o => o.id);
-      S.derivation = d;
-    }
-    S.view = null;
-    render();
-  };
-
-  const dec = m.querySelector("[data-dec]");
-  if (dec) dec.onclick = () => {
-    const s = S.signals.find(x => x.id === dec.dataset.dec);
-    const why = prompt("Reason for declining. A decline without a reason is not a decision.");
-    if (!why || !why.trim()) return;
-    s.status = "DECLINED";
-    s.declineReason = why.trim();
-    S.view = null;
-    render();
-  };
-
-  const toAuthor = m.querySelector("[data-auth]");
-  if (toAuthor) toAuthor.onclick = () => {
-    S.selected = toAuthor.dataset.auth;
-    S.ws = "author"; S.panel = "derive";
-    document.querySelectorAll(".wsBtn").forEach(x => x.classList.toggle("wsOn", x.dataset.ws === "author"));
-    render();
-  };
-
-  const pick = $("sigPick");
-  if (pick) pick.onchange = () => { S.selected = pick.value; S.derivation = null; S.gateReport = null; render(); };
-
-  const runBtn = $("runGateBtn");
-  if (runBtn) runBtn.onclick = () => {
-    const objects = library("auren").concat(S.derivation ? S.derivation.objects : []);
-    S.gateReport = runGate(pack(), objects);
-    S.panel = "gate";
-    render();
-  };
-
-  const lodge = $("lodgeBtn");
-  if (lodge) lodge.onclick = () => {
-    const n = S.signals.length + 1;
-    const id = "SIG-2026-" + String(220 + n).padStart(4, "0");
-    const s = {
-      id,
-      title: $("fTitle").value.trim(),
-      authorityId: S.user.authorityId,
-      jurisdiction: (authority(S.user.authorityId) || {}).jurisdiction || "—",
-      observedFrom: AS_OF,
-      surface: {
-        typology: $("fTyp").value, channel: $("fCh").value,
-        persona: $("fPer").value, productClass: $("fPc").value,
-      },
-      method: $("fMethod").value.trim(),
-      indicators: $("fInd").value.split("\n").map(x => x.trim()).filter(Boolean),
-      targetProfile: "Retail — not yet segmented",
-      defeats: $("fDefeats").value.trim(),
-      confidence: $("fConf").value,
-      sharing: $("fShare").value,
-      status: "SUBMITTED",
-      derivedObjectIds: [],
-      declineReason: null,
-      supersededBy: null,
+  // Hover layer: an HTML chart is interactive, so every bar carries its own
+  // reading rather than making the eye estimate against the track.
+  const tip = $("tip");
+  m.querySelectorAll(".track[data-tip]").forEach(t => {
+    t.onmousemove = (e) => {
+      tip.innerHTML = t.dataset.tip;
+      tip.classList.add("on");
+      const pad = 14;
+      tip.style.left = Math.min(e.clientX + pad, window.innerWidth - 260) + "px";
+      tip.style.top = Math.max(8, e.clientY - 44) + "px";
     };
-    S.signals = [s].concat(S.signals);
-    S.selected = id;
-    S.panel = "queue";
-    S.view = null;
-    render();
-  };
+    t.onmouseleave = () => tip.classList.remove("on");
+  });
 }
 </script>

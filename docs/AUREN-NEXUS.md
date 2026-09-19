@@ -7,9 +7,11 @@
 
 | | |
 |---|---|
+| `/prototypes/auren-index.html` | The hub. Three doors: rehearsal, Nexus, Supervision Console. |
 | `/prototypes/auren-nexus.html` | Self-contained. Three workspaces, real derivation, the real publish gate. |
-| `src/lib/nexus/` | Vocabulary, signal model, derivation, corpus, supervisory analytics. |
-| `npm run nexus` | Compiles the library and the console's governance spine into the prototype. |
+| `/prototypes/auren-console.html` | The Supervision Console — named participants, individual assessments, verdicts. |
+| `src/lib/nexus/` | Vocabulary, signal model, derivation, corpus, cohort analytics, participants. |
+| `npm run nexus` | Compiles the library and the console's governance spine into **both** prototypes. |
 
 ---
 
@@ -89,13 +91,46 @@ learner meets today. That is the system behaving correctly.
 
 ### Supervision — the regulator's view
 
-Cohort-level only; no individual appears and none can be retrieved. Cohort
-membership arrives through the access code, which carries authority,
-jurisdiction and cohort — so the analytics dimensions are trustworthy without
-anyone self-declaring. That idea is lifted directly from the Beauty build's
-distributor analytics, where it solves the same problem.
+Supervision is **two surfaces over two populations**, and they are not joinable.
 
-The metrics that matter:
+| | Population | Grain | Where |
+|---|---|---|---|
+| Nexus · Supervision | Anyone who opened AUREN from a link — no account, no name | Cohort and tactic only | `auren-nexus.html?ws=super` |
+| Supervision Console | People enrolled through an authority's programme, consent captured at enrolment | Named individual, every assessment | `auren-console.html` |
+
+The public population is the larger one and is deliberately unreachable: nothing
+retained identifies anybody, which is the property that makes a public rehearsal
+safe to offer at all. Asking it "how did Nurul do" is not a permissions question
+with a stricter answer — the record does not exist.
+
+The enrolled population is the one a securities commission actually supervises,
+and there a name is not a leak but the point: the sponsor is arranging the
+coaching. Cohort membership still arrives through the access code, which carries
+authority, jurisdiction and cohort — so the analytics dimensions are trustworthy
+without anyone self-declaring. That idea is lifted directly from the Beauty
+build's distributor analytics, where it solves the same problem.
+
+The console's own rules, each of which is a decision rather than a default:
+
+- **Verdict comes from the latest assessment, not the best.** Someone who held in
+  week one and failed in week four is not ready, and a console showing their best
+  score would say the opposite.
+- **Readiness requires that nothing failed a retest** — at or above 78 *and* no
+  failed transfer. Transfer is only *measured* where something broke, so a
+  participant who held every element they met is recorded as **not tested**,
+  never scored as a pass and never penalised as a failure.
+- **Transfer rate has a denominator, and it is not "all assessments".** Sessions
+  with nothing to retest are outside the ratio. Counting them as passes would
+  inflate the single number the programme is judged on.
+- **Verdict is not a band on the score.** A session can sit above another and
+  still be priority, because three failure signatures bound and the coached
+  behaviour did not hold. The console says so on the page rather than letting a
+  supervisor read it as a bug.
+- **Every dimension score cites the participant's own sentence**, and a dimension
+  the session never exercised says so rather than being filled in with a
+  plausible number.
+
+The cohort metrics that matter, on the Nexus side:
 
 - **Resistance rate per tactic** — who held the first time they met it.
 - **Transfer rate** — of those who failed and were coached, who held on a
@@ -109,7 +144,7 @@ The metrics that matter:
   tells the network what intelligence to go and find.
 
 Transfer means transfer measured inside one session. It is not evidence of
-durable behaviour change and the dashboard says so where the number is.
+durable behaviour change and both dashboards say so where the number is.
 
 ---
 
@@ -148,6 +183,7 @@ and the supervisory view. Everything else was already load-bearing.
 
 | Absent | Why |
 |---|---|
+| **Consent withdrawal** | A participant consented at enrolment. Withdrawing it should remove them from the console, and there is no mechanism here — the corpus is append-only and the erasure path is a real design problem, not a checkbox. |
 | **The object editor** | Still the screen a reviewer lives in, still unbuilt, and now the bottleneck is visible: every gap in a derivation is a field someone has to fill somewhere. |
 | **Ingestion from real feeds** | Signals are lodged by hand here. Parsing an authority's alert bulletin is a real integration against a real format, not a guess. |
 | **Bilateral sharing enforcement** | `sharesToNetwork` is declared and displayed but nothing enforces it. Cross-border intelligence sharing agreements are legal instruments before they are code. |
