@@ -215,6 +215,7 @@ Worth writing down while it is still cheap to change.
 | `src/lib/tenant/ccu.ts` | Concurrency profiles, peak/p95, capacity readings |
 | `docs/AUREN-NEXUS.md` | The knowledge layer the corpus lever sells access to |
 | `docs/AUREN-ORCHESTRATION.md` | The governed layer around the model — the reason the corpus is worth access to |
+| `docs/AUREN-IMPACT.md` | The avoided-loss model, the claim ladder, and what an outcome-linked contract would have to measure |
 
 Nothing in this document is enforced in code, and nothing in those files
 mentions money. That separation is the point.

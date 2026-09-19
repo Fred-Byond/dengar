@@ -6231,6 +6231,671 @@ const DEMO_TURNS = [
     },
 ];
 
+/* ── lib/impact/baselines.js ─────────────────────────────────── */
+/**
+ * AUREN — loss baselines, and what each one is actually worth.
+ *
+ * THE DISCIPLINE THIS FILE ENFORCES.
+ *
+ * A market with no defensible aggregate loss figure gets `null`, not zero and
+ * not an extrapolation. That is the whole point of the file. The temptation in
+ * a deck is enormous — a blank cell next to Spain looks like a gap in the work,
+ * and a plausible-looking number looks like diligence. It is the reverse: the
+ * blank is the diligence, and the first regulator who asks where the number
+ * came from ends the conversation if the answer is "we scaled it from
+ * elsewhere".
+ *
+ * So `annualLoss: null` is a first-class state that propagates. Nothing
+ * downstream can compute an avoided loss for a market that has none, and the
+ * model returns a reason rather than a figure.
+ *
+ * THE THREE EVIDENCE GRADES, AND WHY THEY ARE NOT INTERCHANGEABLE.
+ *
+ *   published        A supervisory authority published it as a loss aggregate.
+ *   survey_estimate  Extrapolated from a sample. Real, useful, and not an
+ *                    audited record of transactions — the difference matters
+ *                    the moment somebody multiplies it by a percentage.
+ *   none_defensible  Incident counts, warning lists or partial data exist. A
+ *                    monetary aggregate does not.
+ *
+ * Incidents are not losses. A jurisdiction can publish a rising count of
+ * cyber-fraud reports and a list of unauthorised firms without ever publishing
+ * what was lost, and treating the first as a proxy for the second is the most
+ * common error in this category of analysis.
+ */
+const BASELINES = [
+    {
+        market: "MY",
+        label: "Malaysia",
+        annualLoss: 2_800_000_000,
+        currency: "MYR",
+        year: 2025,
+        status: "published",
+        source: "Bank Negara Malaysia Annual Report 2025",
+        scope: "Reported losses across telecommunications, e-commerce, loan, investment, romance, malware and phishing scams. Reported — so it is a floor, since under-reporting in this category is heavy and systematic.",
+        establishWith: [],
+    },
+    {
+        market: "GLOBAL",
+        label: "Global",
+        annualLoss: 442_000_000_000,
+        currency: "USD",
+        year: 2024,
+        status: "survey_estimate",
+        source: "Global State of Scams 2025 (≈46,000 adults across 42 markets)",
+        scope: "An estimate extrapolated from a sample, not an audited record of transactions. Usable as market context; not usable as the denominator of a contractual savings claim.",
+        establishWith: [],
+    },
+    {
+        market: "AE",
+        label: "United Arab Emirates",
+        annualLoss: null,
+        currency: "AED",
+        year: null,
+        status: "none_defensible",
+        source: "GASA UAE research — prevalence only",
+        scope: "Prevalence is well evidenced: roughly seven in ten residents encountered a scam, one in three of those lost money, 67% of victims were hit by investment scams, and victims averaged 2.8 scams in the year. None of that yields a national monetary aggregate.",
+        establishWith: [
+            "Participating-bank actual loss data, by scam category",
+            "Dubai and Abu Dhabi Police scam typologies with recorded amounts",
+            "Central Bank or securities-authority aggregation, if one exists unpublished",
+        ],
+    },
+    {
+        market: "ES",
+        label: "Spain",
+        annualLoss: null,
+        currency: "EUR",
+        year: null,
+        status: "none_defensible",
+        source: "Ministry of the Interior crime statistics · CNMV warning lists",
+        scope: "Cybercrime and online-fraud incident counts are published, and CNMV publishes warnings against unauthorised firms. Incident counts are not verified financial losses, and a warning list is not a loss ledger.",
+        establishWith: [
+            "A participating bank or a consortium's own loss book",
+            "CNMV case data where amounts are recorded",
+            "Ministry of the Interior figures, if a monetary series is ever published",
+        ],
+    },
+];
+function baseline(market) {
+    return BASELINES.find((b) => b.market === market);
+}
+/** True when this market can carry a monetary impact model at all. */
+function hasBaseline(market) {
+    const b = baseline(market);
+    return !!b && b.annualLoss !== null;
+}
+/**
+ * The naive headline, and the reason it is only a headline.
+ *
+ * "Every 1% of Malaysia's reported losses is RM28 million" is true arithmetic
+ * about the market and says nothing about what any deployment achieves. It is
+ * worth computing precisely so it can be shown next to the modelled figure —
+ * the gap between them is the argument for the model.
+ */
+function onePercentOfMarket(market) {
+    const b = baseline(market);
+    return b && b.annualLoss !== null ? b.annualLoss * 0.01 : null;
+}
+const FORMATS = {
+    MYR: { prefix: "RM", unitBn: "bn", unitM: "m" },
+    USD: { prefix: "US$", unitBn: "bn", unitM: "m" },
+    EUR: { prefix: "€", unitBn: "bn", unitM: "m" },
+    AED: { prefix: "AED ", unitBn: "bn", unitM: "m" },
+};
+function money(v, currency) {
+    const f = FORMATS[currency] ?? { prefix: currency + " ", unitBn: "bn", unitM: "m" };
+    if (Math.abs(v) >= 1_000_000_000)
+        return `${f.prefix}${(v / 1_000_000_000).toFixed(2)}${f.unitBn}`;
+    if (Math.abs(v) >= 1_000_000)
+        return `${f.prefix}${(v / 1_000_000).toFixed(1)}${f.unitM}`;
+    if (Math.abs(v) >= 1_000)
+        return `${f.prefix}${Math.round(v / 1_000)}k`;
+    return `${f.prefix}${Math.round(v)}`;
+}
+
+/* ── lib/impact/improvement.js ─────────────────────────────────── */
+/**
+ * AUREN — an improvement is never a bare percentage.
+ *
+ * THE TRAP.
+ *
+ * "AUREN delivered a 1% improvement" has two meanings that differ by a factor
+ * of five, and both are in circulation:
+ *
+ *   Failure 20% → 19%     one percentage POINT, a five percent RELATIVE fall
+ *   Failure 20% → 19.8%   0.2 percentage points, a one percent RELATIVE fall
+ *
+ * The first is a real result. The second is noise. They get written the same
+ * way in a deck, and the ambiguity always resolves in the vendor's favour —
+ * which is precisely why a procurement officer who has been burned once will
+ * discount both.
+ *
+ * SO THE TYPE MAKES IT IMPOSSIBLE.
+ *
+ * There is no function here that returns a number you can print. Improvements
+ * are constructed from a before and an after, and the only way to render one is
+ * `describe()`, which states both readings. Nothing in this codebase can emit
+ * "a 5% improvement" without saying of what.
+ *
+ * This is a small idea and it is the one most likely to survive contact with a
+ * contract, because it is the sentence a dispute is eventually about.
+ */
+/** Absolute difference, in percentage points. */
+function percentagePoints(i) {
+    return (i.from - i.to) * 100;
+}
+/** Proportional fall, as a percentage of the starting rate. */
+function relative(i) {
+    if (i.from === 0)
+        return 0;
+    return ((i.from - i.to) / i.from) * 100;
+}
+/** Events avoided per 10,000 exposed — the unit a loss book is actually kept in. */
+function per10k(i) {
+    return Math.round((i.from - i.to) * 10000);
+}
+/**
+ * The only renderer. Always states both readings, always states n.
+ *
+ * Deliberately verbose. A caller who wants a shorter string is a caller about
+ * to drop one of the two numbers, and which one they drop is not a formatting
+ * decision.
+ */
+function describe(i) {
+    const pp = percentagePoints(i);
+    const rel = relative(i);
+    return (`${i.measure} ${(i.from * 100).toFixed(1)}% → ${(i.to * 100).toFixed(1)}%: ` +
+        `${pp.toFixed(1)} percentage points, a ${rel.toFixed(1)}% relative reduction ` +
+        `(${per10k(i)} fewer per 10,000 exposed, n=${i.n.toLocaleString()})`);
+}
+function normalCdf(z) {
+    /* Abramowitz & Stegun 7.1.26 on the error function. */
+    const t = 1 / (1 + 0.3275911 * Math.abs(z) / Math.SQRT2);
+    const y = 1 -
+        ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t +
+            0.254829592) *
+            t *
+            Math.exp((-z * z) / 2);
+    return z >= 0 ? 0.5 * (1 + y) : 0.5 * (1 - y);
+}
+function significance(i, nControl) {
+    const p1 = i.from;
+    const p2 = i.to;
+    const n1 = nControl;
+    const n2 = i.n;
+    const pooled = (p1 * n1 + p2 * n2) / (n1 + n2);
+    const se = Math.sqrt(pooled * (1 - pooled) * (1 / n1 + 1 / n2));
+    const z = se === 0 ? 0 : (p1 - p2) / se;
+    const p = 2 * (1 - normalCdf(Math.abs(z)));
+    /* The usual rule of thumb: five expected events in each cell. */
+    const adequate = n1 * pooled >= 5 && n2 * pooled >= 5 && n1 * (1 - pooled) >= 5 && n2 * (1 - pooled) >= 5;
+    let note;
+    if (!adequate) {
+        note =
+            "Sample too small for the normal approximation to mean anything. Report the raw counts and say the trial is not yet powered — a p-value here would be decoration.";
+    }
+    else if (p < 0.05) {
+        note =
+            "The difference is unlikely to be chance at the conventional threshold. That is a statement about the sample, not yet about the world — it says the effect is real in these conditions, not that it persists or transfers.";
+    }
+    else {
+        note =
+            "Not distinguishable from chance. The honest report is 'no measured effect at this sample size', which is a finding and should be published as one rather than quietly re-run until it moves.";
+    }
+    return { z, p, significantAt05: p < 0.05 && adequate, adequateSample: adequate, note };
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   HOW BIG DOES THE TRIAL HAVE TO BE?
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * Participants per arm needed to detect an effect, at 80% power, α = 0.05.
+ *
+ * This is the calculation that should be run before a trial is designed rather
+ * than after it disappoints, because the answer is counter-intuitive by an
+ * order of magnitude:
+ *
+ *   20% → 19%  (1 point, 5% relative)   ≈ 24,600 per arm
+ *   20% → 17%  (3 points, 15% relative) ≈  2,600 per arm
+ *   20% → 15%  (5 points, 25% relative) ≈    900 per arm
+ *
+ * A pilot of a few hundred per arm can only detect a large effect. Run it
+ * against a one-point hypothesis and it returns "no significant difference"
+ * whatever happens — which reads as a failed product and is actually a failed
+ * design. The honest move is to power the trial for the effect the product
+ * claims: AUREN's premise is behaviour change under pressure, not a nudge, so
+ * it should be tested against a hypothesis worth detecting.
+ */
+function sampleSizePerArm(p1, p2, power = 0.8) {
+    if (p1 === p2)
+        return Infinity;
+    const zAlpha = 1.959964; // two-sided 0.05
+    const zBeta = power >= 0.9 ? 1.281552 : 0.841621;
+    const num = Math.pow(zAlpha + zBeta, 2) * (p1 * (1 - p1) + p2 * (1 - p2));
+    return Math.ceil(num / Math.pow(p1 - p2, 2));
+}
+/** What a given trial size can actually detect. The question asked backwards. */
+function detectableEffect(p1, nPerArm, power = 0.8) {
+    /* Solved numerically: walk p2 down until the required n fits. */
+    for (let pp = 0.1; pp <= p1 * 100; pp += 0.1) {
+        const p2 = p1 - pp / 100;
+        if (p2 <= 0)
+            break;
+        if (sampleSizePerArm(p1, p2, power) <= nPerArm)
+            return pp;
+    }
+    return NaN;
+}
+
+/* ── lib/impact/model.js ─────────────────────────────────── */
+/**
+ * AUREN — the avoided-loss model.
+ *
+ *   Annual avoided loss = L × A × C × R × F
+ *
+ *   L  baseline annual losses in the market or customer population
+ *   A  share of those losses AUREN can plausibly address
+ *   C  share of the target population actually reached
+ *   R  measured reduction in unsafe behaviour or loss within the reached group
+ *   F  attribution factor, so AUREN is not credited with everything
+ *
+ * TWO CORRECTIONS THIS FILE MAKES TO THE FORMULA AS USUALLY STATED.
+ *
+ * 1 · A POINT ESTIMATE IMPLIES A PRECISION THE INPUTS DO NOT HAVE.
+ *
+ * Five fractions multiplied together compound their uncertainty. If each of the
+ * four shares is known only to ±30% of its own value — generous, early in a
+ * deployment — the product is uncertain by roughly a factor of two in each
+ * direction. Reporting "RM11.2m" from those inputs is not conservative, it is
+ * false precision, and it is the number a sceptical CFO will attack first.
+ * So the model returns a range and labels the midpoint as a midpoint.
+ *
+ * 2 · F IS DOUBLE-DISCOUNTING ONCE R COMES FROM A CONTROL GROUP.
+ *
+ * The attribution factor exists because some of the improvement would have
+ * happened anyway — awareness campaigns, media coverage, the bank's own
+ * warnings, people simply getting more careful. That is exactly what a control
+ * arm measures and removes. So:
+ *
+ *   R from a pre/post comparison with no control  → F belongs, and belongs low.
+ *   R from a randomised control arm               → the counterfactual is
+ *                                                   already netted out, and
+ *                                                   applying F again halves a
+ *                                                   result that was already
+ *                                                   net of it.
+ *
+ * Under-claiming looks safe and is not free: a programme that reports half its
+ * real effect gets funded at half its real value, and the next renewal is argued
+ * against the smaller number. The model therefore takes the evidence grade as
+ * an input and says what F should be, rather than letting a spreadsheet carry
+ * 50% forever out of habit.
+ */
+
+const ATTRIBUTION = [
+    {
+        grade: "assumed",
+        suggested: 0.4,
+        rationale: "Nothing has been measured. F is doing the work of an error bar, and the figure is a planning assumption that must never leave the room described as a result.",
+    },
+    {
+        grade: "pre_post",
+        suggested: 0.5,
+        rationale: "Improvement measured without a control arm, so it contains everything else that was happening — campaigns, coverage, the institution's own warnings. Half is the conventional haircut and it is a guess about the size of the counterfactual.",
+    },
+    {
+        grade: "controlled",
+        suggested: 0.9,
+        rationale: "A randomised control arm already removes what would have happened anyway. Applying a further 50% discounts the counterfactual twice. The residual 10% covers spillover between arms and the gap between a simulated outcome and a real one.",
+    },
+    {
+        grade: "controlled_real",
+        suggested: 1.0,
+        rationale: "Control arm plus linked transaction outcomes. The counterfactual is measured and the outcome is the real thing, so there is nothing left for an attribution factor to correct. Discounting here is not caution, it is discarding evidence that was expensive to obtain.",
+    },
+];
+function attributionFor(grade) {
+    return ATTRIBUTION.find((a) => a.grade === grade) ?? ATTRIBUTION[0];
+}
+function computeImpact(inp) {
+    const b = baseline(inp.market);
+    const L = inp.lossOverride ?? b?.annualLoss ?? null;
+    const currency = inp.currencyOverride ?? b?.currency ?? "USD";
+    if (L === null) {
+        return {
+            ok: false,
+            refusal: `${b ? b.label : inp.market} has no defensible aggregate loss figure, so no avoided loss can be computed for it. ` +
+                `Incident counts and warning lists are not loss ledgers, and scaling a figure from another market is the thing that ends the conversation with the first regulator who asks where it came from. ` +
+                (b?.establishWith.length
+                    ? `Establish a baseline from: ${b.establishWith.join("; ")}.`
+                    : "Establish a baseline before modelling."),
+            currency,
+            central: 0,
+            low: 0,
+            high: 0,
+            naive: null,
+            attribution: 0,
+            guidance: attributionFor(inp.grade),
+            steps: [],
+            caveats: [],
+        };
+    }
+    const guidance = attributionFor(inp.grade);
+    const F = inp.attribution ?? guidance.suggested;
+    const u = inp.uncertainty ?? 0.3;
+    const central = L * inp.addressable * inp.coverage * inp.reduction * F;
+    /* Four shares, each uncertain by ±u of its own value. Compounding them is
+       what turns a comfortable ±30% per input into a factor of two overall —
+       which is the honest width, not a pessimistic one. */
+    const lowMul = Math.pow(1 - u, 4);
+    const highMul = Math.pow(1 + u, 4);
+    const caveats = [];
+    if (b?.status === "survey_estimate") {
+        caveats.push(`The baseline is a survey extrapolation, not an audited loss record. It carries market context well and should not be the denominator of a contractual savings claim.`);
+    }
+    if (b?.status === "published") {
+        caveats.push(`The baseline is reported losses, so it is a floor — under-reporting in this category is heavy and systematic, and the true pool is larger.`);
+    }
+    if (inp.grade === "assumed") {
+        caveats.push(`Nothing here has been measured. This is a planning figure and must not leave the room described as a result.`);
+    }
+    if (inp.attribution !== undefined && inp.grade === "controlled" && inp.attribution < 0.7) {
+        caveats.push(`Attribution is set to ${Math.round(inp.attribution * 100)}% against a controlled measurement. The control arm already removed the counterfactual, so this discounts it twice and argues the next renewal against half the real number.`);
+    }
+    return {
+        ok: true,
+        currency,
+        central,
+        low: central * lowMul,
+        high: central * highMul,
+        naive: L * 0.01,
+        attribution: F,
+        guidance,
+        steps: [
+            { label: "L · baseline losses", value: money(L, currency) },
+            { label: "A · addressable share", value: `${Math.round(inp.addressable * 100)}%` },
+            { label: "C · population reached", value: `${Math.round(inp.coverage * 100)}%` },
+            { label: "R · reduction in reached group", value: `${Math.round(inp.reduction * 100)}%` },
+            { label: "F · attribution", value: `${Math.round(F * 100)}%` },
+        ],
+        caveats,
+    };
+}
+/**
+ * Three shapes of deployment. Scenario models, not forecasts — the assumptions
+ * are placeholders for deployment evidence and are labelled as such everywhere
+ * they surface.
+ */
+const IMPACT_SCENARIOS = [
+    {
+        id: "pilot",
+        label: "Conservative pilot",
+        note: "One institution, one cohort, one scam family. The figure that should appear in a first proposal.",
+        inputs: { addressable: 0.3, coverage: 0.05, reduction: 0.05, grade: "assumed", attribution: 0.4 },
+    },
+    {
+        id: "national",
+        label: "National institutional rollout",
+        note: "Several institutions, a measured reduction, no control arm yet.",
+        inputs: { addressable: 0.4, coverage: 0.2, reduction: 0.1, grade: "pre_post", attribution: 0.5 },
+    },
+    {
+        id: "scaled",
+        label: "Scaled national programme",
+        note: "Population coverage with a controlled trial behind the reduction — which is what lets attribution rise.",
+        inputs: { addressable: 0.5, coverage: 0.5, reduction: 0.15, grade: "controlled", attribution: 0.9 },
+    },
+];
+const VALUE_LAYERS = [
+    {
+        id: "direct",
+        label: "Scam losses prevented",
+        note: "Transfers abandoned, deposits not made, credentials not disclosed.",
+        evidencedBy: "Loss book by category, before and after, with the control cohort alongside.",
+    },
+    {
+        id: "reimbursement",
+        label: "Reimbursement exposure reduced",
+        note: "Where the institution refunds, a prevented scam is a direct saving rather than a customer's saving.",
+        evidencedBy: "Reimbursement ledger. The cleanest line in the whole case, because it is already denominated in the institution's own money.",
+    },
+    {
+        id: "operational",
+        label: "Investigation and contact-centre cost",
+        note: "Fewer fraud calls, shorter investigations, better-quality incident reports when one does occur.",
+        evidencedBy: "Case handling time and call volumes on fraud lines, per 10,000 customers.",
+    },
+    {
+        id: "complaints",
+        label: "Complaints and ombudsman workload",
+        note: "Fewer disputes, and a stronger position in the ones that remain.",
+        evidencedBy: "Complaint volumes and outcomes, with rehearsal records attached to the defended cases.",
+    },
+    {
+        id: "regulatory",
+        label: "Demonstrable preventive action",
+        note: "Evidence that the institution acted before the loss — auditable completion, evidence-bound competency records, consistent approved messaging.",
+        evidencedBy: "The Investor Readiness Records themselves, which is what makes this layer unusual: the evidence is the product.",
+    },
+    {
+        id: "social",
+        label: "Customer and social value",
+        note: "Retained savings, reduced emotional harm, higher willingness to report, less repeat victimisation.",
+        evidencedBy: "Not monetisable honestly. It belongs in a government procurement case and should stay out of an ROI ratio, because a number invented here contaminates the ones that were real.",
+    },
+];
+
+/* ── lib/impact/measurement.js ─────────────────────────────────── */
+/**
+ * AUREN — what gets measured, and what may be claimed from it.
+ *
+ * THE FAILURE THIS REPLACES.
+ *
+ * Financial education reports participants, videos watched, quiz scores and
+ * completion rates. None of those is evidence that losses will fall, and
+ * everybody in the room knows it — which is why the category is procured on
+ * obligation rather than on outcome, and why it is priced accordingly.
+ *
+ * So the measurement runs as a chain, and the chain has a property worth being
+ * explicit about: **each level is strictly weaker evidence than the one below
+ * it, and every level above the one you have reached is a claim you may not
+ * make.** Most programmes measure level 1, report it in the language of level
+ * 7, and are believed until somebody checks.
+ */
+const CHAIN = [
+    {
+        n: 1, id: "reach", label: "Reach",
+        measures: "People assessed and rehearsed.",
+        limitation: "Counts exposure, not effect. It is the number most programmes report and the weakest one available.",
+    },
+    {
+        n: 2, id: "knowledge", label: "Knowledge",
+        measures: "Understanding of warnings, verification and the limits of AI claims.",
+        limitation: "Everyone knows the rules. Knowing them is uncorrelated with following them when someone is pushing, which is the entire premise of the product.",
+    },
+    {
+        n: 3, id: "demonstrated", label: "Demonstrated behaviour",
+        measures: "What the person actually did during a pressure simulation, bound to their own words.",
+        limitation: "One scenario. A person can learn the scenario rather than the behaviour, and from the inside the two look identical.",
+    },
+    {
+        n: 4, id: "transfer", label: "Transfer",
+        measures: "The same behaviour in a scenario sharing no typology, channel, persona or product class with the first.",
+        limitation: "Within one session. It shows the coaching landed; it says nothing about next week.",
+    },
+    {
+        n: 5, id: "persistence", label: "Persistence",
+        measures: "Whether the behaviour survives at 30, 60 and 90 days.",
+        limitation: "Still a simulation. A person can hold under rehearsed pressure and fold under a real one with their own money at stake.",
+    },
+    {
+        n: 6, id: "real_action", label: "Real-world action",
+        measures: "Register checks performed, transfers abandoned, approaches reported, the bank contacted before sending.",
+        limitation: "Observable only where an institution shares its own telemetry, which makes this the first level that requires a partner rather than a product.",
+    },
+    {
+        n: 7, id: "financial", label: "Financial outcome",
+        measures: "Loss-generating events and monetary losses avoided, against a control cohort.",
+        limitation: "The only level that closes the business case, and the slowest and most expensive to reach. Everything above it is a proxy for this.",
+    },
+];
+function level(id) {
+    return CHAIN.find((c) => c.id === id);
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   THE HEADLINE KPI
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * Verified Protective Action Rate.
+ *
+ *   The share of people who independently perform the required protective
+ *   action under UNFAMILIAR pressure.
+ *
+ * Three words are load-bearing and each excludes a way of inflating it.
+ * *Independently*: not after a prompt, not after the coach asked again.
+ * *Required*: the specific action the element names, not a general show of
+ * caution. *Unfamiliar*: a scenario with no surface in common with the one they
+ * were coached on, because the same scenario measures recall.
+ *
+ * Reported per 10,000 exposed, because that is the unit a loss book is kept in
+ * and it survives comparison across cohorts of different sizes.
+ */
+const PROTECTIVE_ACTIONS = [
+    { id: "register", label: "Checked the regulatory register independently", element: "E-VER-02" },
+    { id: "urgency", label: "Refused a deadline and kept verifying", element: "E-URG-01" },
+    { id: "channel", label: "Verified through a channel the other party did not supply", element: "E-VER-02" },
+    { id: "social", label: "Questioned social proof rather than treating it as evidence", element: "E-SOC-01" },
+    { id: "payment", label: "Inspected the payment destination and its registered name", element: "E-PAY-01" },
+    { id: "remote", label: "Refused remote-access software", element: "E-VER-02" },
+    { id: "report", label: "Reported the approach", element: "E-VER-02" },
+    { id: "bank", label: "Contacted the institution before transferring", element: "E-PAY-01" },
+];
+function vpar(i) {
+    const rate = i.retested ? i.performed / i.retested : 0;
+    return {
+        rate,
+        per10k: Math.round(rate * 10000),
+        retested: i.retested,
+        performed: i.performed,
+        statement: i.retested === 0
+            ? "No unfamiliar retest has run, so there is no protective action rate. A rate computed without a retest is a recall score wearing a different name."
+            : `${i.performed} of ${i.retested} performed the required action unprompted in a scenario sharing nothing with the one they were coached on — ${Math.round(rate * 1000) / 10}%, or ${Math.round(rate * 10000)} per 10,000. Measured within session; not evidence of durable change.`,
+    };
+}
+const CLAIM_LADDER = [
+    {
+        n: 1, id: "engagement",
+        claim: "N people completed a governed rehearsal, with an evidence-bound record each.",
+        requires: ["Completed sessions", "Records produced"],
+        blocks: "Says nothing about behaviour. Anybody can complete anything.",
+    },
+    {
+        n: 2, id: "simulated",
+        claim: "AUREN reduced unsafe decisions in unfamiliar simulated scams by X% relative to conventional investor education.",
+        requires: [
+            "A randomised control arm and a conventional-education arm",
+            "An unfamiliar scenario at surface distance 4",
+            "Improvement stated as both percentage points and relative change",
+            "A sample powered to distinguish the effect from chance",
+        ],
+        blocks: "Simulated outcomes only. It does not license any statement about money, because nobody's money was at stake.",
+    },
+    {
+        n: 3, id: "persisted",
+        claim: "The reduction was sustained at 90 days.",
+        requires: ["The level-2 evidence", "Retest at 30 and 90 days", "Attrition reported, not quietly dropped"],
+        blocks: "Still simulated. Persistence under rehearsal is not persistence under a real approach with real savings.",
+    },
+    {
+        n: 4, id: "real_action",
+        claim: "Rehearsed customers performed more protective actions in real conditions — checks run, transfers abandoned, approaches reported.",
+        requires: [
+            "Institutional telemetry linked to cohort membership",
+            "Consent covering that linkage, captured at enrolment",
+            "A control cohort in the same telemetry",
+        ],
+        blocks: "Actions are not outcomes. An abandoned transfer may have been abandoned for other reasons, and the attribution argument moves to the institution's data rather than AUREN's.",
+    },
+    {
+        n: 5, id: "financial",
+        claim: "AUREN reduced actual scam-loss events by X% and avoided Y in losses.",
+        requires: [
+            "Linked transaction outcomes over at least four quarters",
+            "A control cohort with matched exposure",
+            "Loss categories agreed before the trial, not chosen after",
+            "An independent party verifying the calculation",
+        ],
+        blocks: "Nothing above it. This is the claim the commercial case rests on, and it is the one that takes a year and a partner to earn.",
+    },
+];
+function rung(id) {
+    return CLAIM_LADDER.find((r) => r.id === id);
+}
+/**
+ * May this claim be made on this evidence?
+ *
+ * Deliberately blunt: a claim above the evidence is refused with the specific
+ * missing requirement named, because "we need more data" is the answer that
+ * gets waved through and "you do not have linked transaction outcomes" is not.
+ */
+function claimPermitted(evidenceRungId, claimRungId) {
+    const have = rung(evidenceRungId);
+    const want = rung(claimRungId);
+    if (!have || !want)
+        return { permitted: false, reason: "Unknown rung." };
+    if (want.n <= have.n) {
+        return { permitted: true, reason: `Evidence at rung ${have.n} supports a rung ${want.n} claim.` };
+    }
+    const missing = CLAIM_LADDER.filter((r) => r.n > have.n && r.n <= want.n)
+        .flatMap((r) => r.requires)
+        .filter((x, i, a) => a.indexOf(x) === i);
+    return {
+        permitted: false,
+        reason: `Rung ${want.n} claimed on rung ${have.n} evidence. Missing: ${missing.join("; ")}. ` +
+            `${have.blocks}`,
+    };
+}
+const TRIAL_ARMS = [
+    {
+        id: "control",
+        label: "Control",
+        receives: "Normal scam information — whatever the institution already sends.",
+        controlsFor: "Everything happening anyway: campaigns, media coverage, people simply getting more careful. This arm is what lets the attribution factor rise towards 1.",
+    },
+    {
+        id: "conventional",
+        label: "Conventional education",
+        receives: "Videos and quizzes, the current standard of care.",
+        controlsFor: "Attention and time-on-task. Without it, any effect is arguably just the hour spent thinking about scams, and that is the objection that matters — it is the cheaper alternative.",
+    },
+    {
+        id: "auren",
+        label: "AUREN",
+        receives: "Governed interview, rehearsal, coaching and surface-distant retest.",
+        controlsFor: "Nothing. This is the treatment.",
+    },
+];
+const TRIAL_POINTS = ["Immediately", "30 days", "90 days"];
+const TRIAL_MEASURES = [
+    "Unsafe-action rate in an unfamiliar scenario",
+    "Independent verification rate",
+    "Time to first verification step",
+    "Resistance sustained across escalating pressure",
+    "Reporting behaviour",
+    "Confidence calibration — whether certainty tracks correctness",
+    "Repeat-victimisation indicators",
+    "Actual suspicious-payment outcomes, where bank data permits",
+];
+/**
+ * Confidence calibration deserves a note, because it is the measure most often
+ * left out and the one most likely to embarrass a programme that omits it.
+ *
+ * An intervention can raise confidence without raising competence, and a
+ * confident victim transfers faster than an uncertain one. A programme that
+ * moves confidence and not behaviour has produced harm, and it will report as a
+ * success on every other measure in the list.
+ */
+const CALIBRATION_WARNING = "Confidence must be measured alongside competence. An intervention that raises confidence without raising competence produces a customer who transfers faster, and it scores as a success on every other measure here.";
+
 /* AUREN-NEXUS-END */
 
 /* ═══════════════════════════════════════════════════════════════════

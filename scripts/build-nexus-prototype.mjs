@@ -59,6 +59,10 @@ const ORDER = [
   "lib/orchestrator/gateway.js",
   "lib/orchestrator/factory.js",
   "lib/orchestrator/seed.js",
+  "lib/impact/baselines.js",
+  "lib/impact/improvement.js",
+  "lib/impact/model.js",
+  "lib/impact/measurement.js",
 ];
 
 const out = mkdtempSync(join(tmpdir(), "auren-nexus-"));
@@ -84,6 +88,7 @@ try {
         join(ROOT, "src/lib/nexus/**/*.ts"),
         join(ROOT, "src/lib/tenant/**/*.ts"),
         join(ROOT, "src/lib/orchestrator/**/*.ts"),
+        join(ROOT, "src/lib/impact/**/*.ts"),
       ],
     })
   );

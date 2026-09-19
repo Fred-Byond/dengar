@@ -20,6 +20,7 @@ been built out twice more, for investor protection and for the authorities super
 | **Knowledge Authority** | `/console` | The internal governance console: object registry, eight-state lifecycle, publish gate and release ledger across AUREN, Project Pioneer and Beauty Intelligence. Reconciles three papers that independently specified the same architecture. See [`docs/KNOWLEDGE-AUTHORITY.md`](docs/KNOWLEDGE-AUTHORITY.md). |
 | **AUREN orchestration** | `/prototypes/auren-nexus.html?ws=orch` | What powers the coach, and what stops it improvising: five governed libraries, the ten-stage Knowledge Factory, the per-mode generation permissions, the turn contract (run live — two returns admitted, six refused), persona manifests, the bounded role-play state machine, and the real-time trust gateway. See [`docs/AUREN-ORCHESTRATION.md`](docs/AUREN-ORCHESTRATION.md). |
 | **AUREN Nexus** | `/prototypes/auren-nexus.html` | The knowledge layer, with two intakes. Authorities lodge emerging **tactics** and upload their governed **training modules**; a signal produces challenges and failure signatures, a module produces competency elements and diagnostic questions, and both reach a learner only through the same ten-test publish gate. Cohort-level supervision. See [`docs/AUREN-NEXUS.md`](docs/AUREN-NEXUS.md). |
+| **AUREN impact model** | `/prototypes/auren-console.html` → Impact | Whether any of it works, in units a loss book is kept in: the Verified Protective Action Rate, the seven-level value chain, the claim ladder, and an avoided-loss model that returns a refusal rather than a figure for markets with no defensible baseline. See [`docs/AUREN-IMPACT.md`](docs/AUREN-IMPACT.md). |
 | **AUREN Supervision Console** | `/prototypes/auren-console.html` | What a securities commission sees after its programme has been put under pressure: enrolled participants by region and cohort, each individual's assessment across five dimensions with their own words as evidence, and the verdict — investor-ready, coaching, or priority. |
 | **AUREN hub** | `/prototypes/auren-index.html` | The three doors, in the Beauty programme's house treatment. |
 | **AUREN rehearsal** | `/auren` | Investor rehearsal loop for the AUREN programme — a second configuration of the same governed-interview method. Voice-first digital-human session in **English / Español / 中文 / العربية / 日本語**: understand → diagnose → stress → coach → retest → evidence chain. See [`docs/AUREN-ORDERING.md`](docs/AUREN-ORDERING.md). |
@@ -49,8 +50,10 @@ dengar/
 │   │   ├── nexus/              Vocabulary, signals, derivation, training modules, mapping,
 │   │   │                        corpus, cohort + participant analytics
 │   │   ├── tenant/             Multi-tenancy: kinds, entitlements, the scope rule, CCU
-│   │   └── orchestrator/       Libraries, factory, generation permissions, personas,
-│   │                            scenario graphs, trust gateway, provenance
+│   │   ├── orchestrator/       Libraries, factory, generation permissions, personas,
+│   │   │                        scenario graphs, trust gateway, provenance
+│   │   └── impact/             Loss baselines, the avoided-loss model, improvement
+│   │                            arithmetic, power calculation, the claim ladder
 │   └── lib/
 │       ├── types.ts            Domain model (Citizen, Slot, Booking, Session, Insight, AuditLog)
 │       ├── seed.ts             Deterministic session generator (feeds the Session Explorer)
@@ -85,7 +88,7 @@ dengar/
 │   ├── build-console-prototype.mjs `npm run console` — injects the console engine
 │   └── build-nexus-prototype.mjs   `npm run nexus`   — injects the Nexus engine into the
 │                                    Nexus *and* the Supervision Console, so the two cannot drift
-└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP · AUREN-ORDERING · AUREN-NEXUS · AUREN-ORCHESTRATION · AUREN-COMMERCIAL · KNOWLEDGE-AUTHORITY
+└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP · AUREN-ORDERING · AUREN-NEXUS · AUREN-ORCHESTRATION · AUREN-IMPACT · AUREN-COMMERCIAL · KNOWLEDGE-AUTHORITY
 ```
 
 > **Team taking this over?** Start at [`docs/ENGINEERING-HANDOFF.md`](docs/ENGINEERING-HANDOFF.md) —
