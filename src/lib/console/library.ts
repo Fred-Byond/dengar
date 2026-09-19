@@ -380,12 +380,12 @@ function beautyLibrary(): KnowledgeObject[] {
   ];
 }
 
-const LIBRARIES: Record<string, KnowledgeObject[]> = {
+const VERTICAL_LIBRARIES: Record<string, KnowledgeObject[]> = {
   auren: aurenLibrary(),
   pioneer: pioneerLibrary(),
   beauty: beautyLibrary(),
 };
 
 export function library(verticalId: string): KnowledgeObject[] {
-  return LIBRARIES[verticalId] ?? [];
+  return VERTICAL_LIBRARIES[verticalId] ?? [];
 }

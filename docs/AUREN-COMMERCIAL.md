@@ -214,6 +214,7 @@ Worth writing down while it is still cheap to change.
 | `src/lib/tenant/roster.ts` | The seeded tenants — regulators, banks, a ministry, two network bodies |
 | `src/lib/tenant/ccu.ts` | Concurrency profiles, peak/p95, capacity readings |
 | `docs/AUREN-NEXUS.md` | The knowledge layer the corpus lever sells access to |
+| `docs/AUREN-ORCHESTRATION.md` | The governed layer around the model — the reason the corpus is worth access to |
 
 Nothing in this document is enforced in code, and nothing in those files
 mentions money. That separation is the point.

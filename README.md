@@ -18,6 +18,7 @@ been built out twice more, for investor protection and for the authorities super
 | **Ministry intelligence** | `/dashboard` | DENGAR Intelligence — sentiment map, top issues, citizen suggestions, urgent review queue, action tracker. Two role views: **Minister** (the pulse) and **Secretary General** (assign, track, resolve). The enduring value and the recurring revenue. |
 | **Session Explorer** | `/sessions` | Dashboard view 5, **React-native**. Search/filter every session, open the CVIF Session Insight Record, read the transcript (original + English), work the urgent queue. PII masked by default; reveal is audit-logged. Wired to the real CVIF scorer. |
 | **Knowledge Authority** | `/console` | The internal governance console: object registry, eight-state lifecycle, publish gate and release ledger across AUREN, Project Pioneer and Beauty Intelligence. Reconciles three papers that independently specified the same architecture. See [`docs/KNOWLEDGE-AUTHORITY.md`](docs/KNOWLEDGE-AUTHORITY.md). |
+| **AUREN orchestration** | `/prototypes/auren-nexus.html?ws=orch` | What powers the coach, and what stops it improvising: five governed libraries, the ten-stage Knowledge Factory, the per-mode generation permissions, the turn contract (run live — two returns admitted, six refused), persona manifests, the bounded role-play state machine, and the real-time trust gateway. See [`docs/AUREN-ORCHESTRATION.md`](docs/AUREN-ORCHESTRATION.md). |
 | **AUREN Nexus** | `/prototypes/auren-nexus.html` | The knowledge layer, with two intakes. Authorities lodge emerging **tactics** and upload their governed **training modules**; a signal produces challenges and failure signatures, a module produces competency elements and diagnostic questions, and both reach a learner only through the same ten-test publish gate. Cohort-level supervision. See [`docs/AUREN-NEXUS.md`](docs/AUREN-NEXUS.md). |
 | **AUREN Supervision Console** | `/prototypes/auren-console.html` | What a securities commission sees after its programme has been put under pressure: enrolled participants by region and cohort, each individual's assessment across five dimensions with their own words as evidence, and the verdict — investor-ready, coaching, or priority. |
 | **AUREN hub** | `/prototypes/auren-index.html` | The three doors, in the Beauty programme's house treatment. |
@@ -47,7 +48,9 @@ dengar/
 │   │   ├── console/            Governance console: registry, gate, release ledger
 │   │   ├── nexus/              Vocabulary, signals, derivation, training modules, mapping,
 │   │   │                        corpus, cohort + participant analytics
-│   │   └── tenant/             Multi-tenancy: kinds, entitlements, the scope rule, CCU
+│   │   ├── tenant/             Multi-tenancy: kinds, entitlements, the scope rule, CCU
+│   │   └── orchestrator/       Libraries, factory, generation permissions, personas,
+│   │                            scenario graphs, trust gateway, provenance
 │   └── lib/
 │       ├── types.ts            Domain model (Citizen, Slot, Booking, Session, Insight, AuditLog)
 │       ├── seed.ts             Deterministic session generator (feeds the Session Explorer)
@@ -82,7 +85,7 @@ dengar/
 │   ├── build-console-prototype.mjs `npm run console` — injects the console engine
 │   └── build-nexus-prototype.mjs   `npm run nexus`   — injects the Nexus engine into the
 │                                    Nexus *and* the Supervision Console, so the two cannot drift
-└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP · AUREN-ORDERING · AUREN-NEXUS · AUREN-COMMERCIAL · KNOWLEDGE-AUTHORITY
+└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP · AUREN-ORDERING · AUREN-NEXUS · AUREN-ORCHESTRATION · AUREN-COMMERCIAL · KNOWLEDGE-AUTHORITY
 ```
 
 > **Team taking this over?** Start at [`docs/ENGINEERING-HANDOFF.md`](docs/ENGINEERING-HANDOFF.md) —

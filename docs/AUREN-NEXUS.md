@@ -10,7 +10,9 @@
 | `/prototypes/auren-index.html` | The hub. Three doors: rehearsal, Nexus, Supervision Console. |
 | `/prototypes/auren-nexus.html` | Self-contained. Three workspaces, real derivation, the real publish gate. |
 | `/prototypes/auren-console.html` | The Supervision Console — named participants, individual assessments, verdicts. |
+| `?ws=orch` | The orchestration layer: what powers the coach and what stops it improvising. [`AUREN-ORCHESTRATION.md`](AUREN-ORCHESTRATION.md) |
 | `src/lib/nexus/` | Vocabulary, signal model, derivation, training modules, mapping, corpus, cohort analytics, participants. |
+| `src/lib/orchestrator/` | Five libraries, Knowledge Factory, generation permissions, persona manifests, scenario graphs, trust gateway, provenance. |
 | `npm run nexus` | Compiles the library and the console's governance spine into **both** prototypes. |
 
 ---

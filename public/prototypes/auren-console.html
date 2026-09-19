@@ -1429,13 +1429,13 @@ function beautyLibrary() {
         },
     ];
 }
-const LIBRARIES = {
+const VERTICAL_LIBRARIES = {
     auren: aurenLibrary(),
     pioneer: pioneerLibrary(),
     beauty: beautyLibrary(),
 };
 function library(verticalId) {
-    return LIBRARIES[verticalId] ?? [];
+    return VERTICAL_LIBRARIES[verticalId] ?? [];
 }
 
 /* ── lib/console/gate.js ─────────────────────────────────── */
@@ -4643,6 +4643,1570 @@ function dimensionMeans(prog, filter) {
             : 0,
     }));
 }
+
+/* ── lib/orchestrator/provenance.js ─────────────────────────────────── */
+/**
+ * AUREN — provenance. Source → interpretation → approved object → conversation
+ * → determination, as a chain anybody can walk backwards.
+ *
+ * WHAT THIS IS FOR.
+ *
+ * The product's whole regulatory claim is that it can say *why* it produced a
+ * finding. Not "the model concluded X" — which is unfalsifiable — but: this
+ * determination came from this verbatim sentence, scored against this version
+ * of this object, which was approved by these roles, derived from this passage
+ * of this publication, whose hash we recorded at ingestion.
+ *
+ * Every link in that chain is separately attackable, and a chain missing one
+ * link is worth nothing. A citation with no hash cannot prove the source did
+ * not silently change. A hash with no approver cannot prove anyone read it. An
+ * approver with no verbatim span cannot prove the finding came from what the
+ * learner actually said rather than from what the model expected them to say.
+ *
+ * SHAPED ON W3C PROV.
+ *
+ * Entity, Activity, Agent, and the relations `wasDerivedFrom`,
+ * `wasAttributedTo`, `hadPrimarySource`, `wasRevisionOf`, `wasGeneratedBy` and
+ * `wasInvalidatedBy`. Using the standard's vocabulary rather than inventing one
+ * is not pedantry: an auditor who already reads PROV can read this, and an
+ * export to a regulator's own system is a mapping rather than a translation.
+ */
+/**
+ * Walk a determination back to a registered source and report what is missing.
+ *
+ * Written as a set of separate checks rather than one boolean because the
+ * failures are not equivalent: a determination with no verbatim span cannot be
+ * defended at all, while one whose source hash is absent can be defended today
+ * and not in a year. Collapsing those into "invalid" would make the severe
+ * case and the housekeeping case look the same to whoever has to fix them.
+ */
+function checkChain(d, g) {
+    const out = [];
+    const entity = (id) => g.entities.find((e) => e.id === id);
+    const linksFrom = (id) => g.links.filter((l) => l.from === id);
+    if (!d.span || !d.span.trim()) {
+        out.push({
+            link: "span",
+            detail: "No verbatim span. The finding cannot point at anything the person actually said, which makes it a model opinion carrying an object id. Nothing downstream may score it.",
+            blocking: true,
+        });
+    }
+    if (!d.objectVersion) {
+        out.push({
+            link: "objectVersion",
+            detail: "Object cited without a version. Objects supersede, so a citation without a version resolves to whatever is current — which is not what scored this person.",
+            blocking: true,
+        });
+    }
+    const obj = entity(d.objectId);
+    if (!obj) {
+        out.push({
+            link: "knowledge_object",
+            detail: `Object ${d.objectId} is not in the provenance graph. Nothing connects this finding to an approved object.`,
+            blocking: true,
+        });
+    }
+    else {
+        const src = linksFrom(obj.id).find((l) => l.relation === "hadPrimarySource");
+        if (!src) {
+            out.push({
+                link: "hadPrimarySource",
+                detail: "The object cites no primary source. An element with no published principle behind it is the programme's own opinion, and the publish gate blocks it for that reason.",
+                blocking: true,
+            });
+        }
+        else {
+            const passage = entity(src.to);
+            if (passage && !passage.hash) {
+                out.push({
+                    link: "source_hash",
+                    detail: "The source passage carries no hash. It can be cited but not shown to be unchanged since ingestion — defensible today, undefendable the first time the publisher edits the page.",
+                    blocking: false,
+                });
+            }
+        }
+        const approval = linksFrom(obj.id).find((l) => l.relation === "wasAttributedTo");
+        if (!approval) {
+            out.push({
+                link: "wasAttributedTo",
+                detail: "No approving agent recorded. Nobody is accountable for this object reaching a learner.",
+                blocking: true,
+            });
+        }
+    }
+    if (!d.bundleId) {
+        out.push({
+            link: "bundle",
+            detail: "No bundle recorded. The object version is known but the set it was loaded with is not, so the session cannot be reconstructed exactly.",
+            blocking: false,
+        });
+    }
+    if (!d.lang) {
+        out.push({
+            link: "lang",
+            detail: "No session language. Evidence rules are per-language, so a finding without one cannot be checked against the cues that produced it.",
+            blocking: true,
+        });
+    }
+    return out;
+}
+function chainDefensible(d, g) {
+    return checkChain(d, g).every((f) => !f.blocking);
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   SOURCE HASHING
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * A short, stable digest of a source passage.
+ *
+ * FNV-1a, deliberately: this proves a passage has not silently changed between
+ * ingestion and review, which is a tamper-*evidence* problem, not a tamper-
+ * *proofing* one. A cryptographic digest belongs here in production and would
+ * need a dependency; what must not happen is a hash field that is left empty
+ * because the real one was inconvenient, since an empty hash is indistinguish-
+ * able from an unchanged source.
+ */
+function sourceHash(text) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < text.length; i += 1) {
+        h ^= text.charCodeAt(i);
+        h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return "fnv1a-" + h.toString(16).padStart(8, "0");
+}
+/** True when the passage still hashes to what was recorded at ingestion. */
+function sourceUnchanged(text, recorded) {
+    return sourceHash(text) === recorded;
+}
+
+/* ── lib/orchestrator/permissions.js ─────────────────────────────────── */
+/**
+ * AUREN — generation permissions. What the model may do, per mode, enforced.
+ *
+ * THE SENTENCE THIS FILE EXISTS TO MAKE TRUE:
+ *
+ *   The model may select, sequence, explain and deliver.
+ *   It may not create authority.
+ *
+ * Every product in this space says something like that in a slide. The
+ * difference between a slide and a system is whether the sentence is checkable
+ * at runtime, on the actual bytes the model returned, before they reach a
+ * person. That is what this file does: it defines what the orchestrator hands
+ * the model for a turn, what shape the model may return, and the validation
+ * that rejects a return which stepped outside it.
+ *
+ * WHY A MATRIX RATHER THAN ONE RULE.
+ *
+ * "Never let the model generate" is unshippable — it would make the coach a
+ * decision tree reading canned strings, and the whole premise is a conversation
+ * that feels like a person. "Let the model generate with a good prompt" is the
+ * thing regulators have correctly stopped believing. The workable answer is
+ * that freedom is a property of the *mode*: explaining an approved fact to a
+ * confused learner is a different act from deciding whether they passed, and
+ * conflating them is how a system ends up improvising an assessment criterion.
+ *
+ * So: six modes, each with its own ceiling, and a turn that declares which mode
+ * it is in before the model is called.
+ */
+/* ═══════════════════════════════════════════════════════════════════════
+   THE ACTS
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * What a model can be asked to do, decomposed far enough that the permissions
+ * are meaningful. "Generate" is too coarse to govern; these are not.
+ */
+const ACTS = [
+    { id: "select", label: "Select which approved object fires next" },
+    { id: "sequence", label: "Order approved objects within a turn" },
+    { id: "paraphrase", label: "Restate approved content in the learner's register" },
+    { id: "explain", label: "Explain approved content beyond its literal wording" },
+    { id: "classify", label: "Judge a response against an approved rubric" },
+    { id: "escalate", label: "Advance a persona along an approved ladder" },
+    { id: "compose_free", label: "Compose sentences not traceable to an approved object" },
+    { id: "author_criterion", label: "Create or alter an assessment criterion" },
+    { id: "author_question", label: "Write a new assessment question" },
+    { id: "advise", label: "Give a personalised investment recommendation" },
+];
+function actLabel(id) {
+    return ACTS.find((a) => a.id === id)?.label ?? id;
+}
+/**
+ * Six modes. The ordering is deliberate: freedom decreases as consequence
+ * rises, and the two most constrained are the two that produce a record
+ * somebody else will rely on.
+ */
+const MODES = [
+    {
+        id: "educate",
+        label: "General education",
+        purpose: "Explain approved knowledge in language this learner can use, with the source visible.",
+        allowed: ["select", "sequence", "paraphrase", "explain"],
+        refused: ["author_criterion", "author_question", "advise", "compose_free"],
+        citationRequired: true,
+        onViolation: "fall_back_to_approved_wording",
+    },
+    {
+        id: "coach",
+        label: "Coaching",
+        purpose: "Choose an approved intervention for the failure that actually occurred, and deliver it as a person would.",
+        allowed: ["select", "sequence", "paraphrase", "explain"],
+        refused: ["author_criterion", "author_question", "advise", "classify"],
+        citationRequired: true,
+        onViolation: "fall_back_to_approved_wording",
+    },
+    {
+        id: "assess",
+        label: "Assessment",
+        purpose: "Decide whether what the learner said satisfies an approved element, and bind the decision to their words.",
+        allowed: ["select", "sequence", "classify"],
+        /* Paraphrase is refused here and the refusal is the point. The moment an
+           assessor restates what the learner said, the determination is bound to
+           the restatement rather than to the person, and the evidence chain breaks
+           exactly where it matters most. */
+        refused: ["paraphrase", "explain", "compose_free", "author_criterion", "author_question", "advise"],
+        citationRequired: true,
+        onViolation: "refuse_and_escalate",
+    },
+    {
+        id: "roleplay",
+        label: "Bounded role-play",
+        purpose: "Play an approved adversary within an approved scenario graph, up to an approved pressure ceiling.",
+        allowed: ["select", "sequence", "paraphrase", "escalate"],
+        refused: ["classify", "explain", "author_question", "author_criterion", "advise"],
+        /* The persona's lines are authored strings from the ladder. Paraphrase is
+           permitted so the adversary can answer what the learner actually said
+           rather than reciting past them — but the substance stays on the rung. */
+        citationRequired: true,
+        onViolation: "drop_turn",
+    },
+    {
+        id: "regulatory",
+        label: "Regulatory answer",
+        purpose: "Answer a question about what a rule says, from current objects effective in this jurisdiction.",
+        allowed: ["select", "sequence"],
+        refused: ["paraphrase", "explain", "compose_free", "author_criterion", "author_question", "advise"],
+        citationRequired: true,
+        onViolation: "refuse_and_escalate",
+    },
+    {
+        id: "high_risk",
+        label: "High-risk or insufficient evidence",
+        purpose: "Refuse, state what is missing, and route to a human — the only correct behaviour when the objects do not cover the question.",
+        allowed: ["select"],
+        refused: [
+            "sequence",
+            "paraphrase",
+            "explain",
+            "classify",
+            "escalate",
+            "compose_free",
+            "author_criterion",
+            "author_question",
+            "advise",
+        ],
+        citationRequired: false,
+        onViolation: "refuse_and_escalate",
+    },
+];
+function mode(id) {
+    return MODES.find((m) => m.id === id);
+}
+/**
+ * Acts refused in every mode, without exception and without a waiver path.
+ *
+ * These are not the strictest entries in the matrix — they are the ones whose
+ * presence anywhere would end the regulatory claim, so they are kept out of the
+ * per-mode table entirely. A permission that can be granted somewhere will
+ * eventually be granted somewhere.
+ *
+ * `compose_free` sits here rather than being refused mode by mode, and the
+ * difference is not cosmetic: expressed per-mode it renders as six absences a
+ * reader has to notice, and one of them could be relaxed in a release nobody
+ * flagged. Expressed here it is a single fact with no per-mode override.
+ */
+const NEVER = ["compose_free", "author_criterion", "author_question", "advise"];
+function mayAct(modeId, act) {
+    if (NEVER.includes(act))
+        return false;
+    const m = mode(modeId);
+    if (!m)
+        return false;
+    if (m.refused.includes(act))
+        return false;
+    return m.allowed.includes(act);
+}
+/**
+ * Validate a model return against the turn it was issued for.
+ *
+ * This runs on every turn, before a syllable reaches the learner. It is the
+ * difference between a governed system and a well-prompted one: prompting asks
+ * the model to stay inside the contract, and this checks whether it did.
+ */
+function validateTurn(req, res, ceiling) {
+    const out = [];
+    const m = mode(req.modeId);
+    if (!m) {
+        return [
+            {
+                rule: "mode",
+                detail: `Unknown mode "${req.modeId}". A turn with no declared mode has no ceiling, so it cannot be issued.`,
+                blocking: true,
+            },
+        ];
+    }
+    const ids = new Set(req.candidates.map((c) => c.id));
+    /* 1. Closed candidate set. */
+    const strays = res.selected.filter((s) => !ids.has(s));
+    if (strays.length) {
+        out.push({
+            rule: "closed_set",
+            detail: `Selected ${strays.join(", ")}, which ${strays.length === 1 ? "was" : "were"} not in the candidate set for this turn. The model reached outside what it was given — the single most important thing this check exists to catch.`,
+            blocking: true,
+        });
+    }
+    /* 2. Citation, where the mode requires it. */
+    if (m.citationRequired && res.utterance.trim() && !res.refusal) {
+        if (res.citations.length === 0) {
+            out.push({
+                rule: "citation",
+                detail: `${m.label} requires every user-facing sentence to rest on an approved object. This turn cited none, so nothing downstream can say where the words came from.`,
+                blocking: true,
+            });
+        }
+        else {
+            const uncited = res.citations.filter((c) => !ids.has(c));
+            if (uncited.length) {
+                out.push({
+                    rule: "citation",
+                    detail: `Cited ${uncited.join(", ")}, which ${uncited.length === 1 ? "is" : "are"} not in the candidate set.`,
+                    blocking: true,
+                });
+            }
+        }
+    }
+    /* 3. Determinations belong to assessment, and carry a span. */
+    if (res.determination) {
+        if (!mayAct(req.modeId, "classify")) {
+            out.push({
+                rule: "classify",
+                detail: `A determination was returned in ${m.label}, where classifying is refused. Scoring outside assessment is how a coaching aside silently becomes a finding on somebody's record.`,
+                blocking: true,
+            });
+        }
+        if (!res.determination.span || !res.determination.span.trim()) {
+            out.push({
+                rule: "span",
+                detail: "Determination carries no verbatim span. There is nothing to bind the finding to.",
+                blocking: true,
+            });
+        }
+        else if (!req.learnerSpan.includes(res.determination.span.trim())) {
+            out.push({
+                rule: "span_fidelity",
+                detail: "The cited span is not a substring of what the learner actually said. Either it was paraphrased — which assessment refuses — or it was invented. Both end the finding.",
+                blocking: true,
+            });
+        }
+    }
+    /* 4. Pressure ceiling, in role-play. */
+    if (typeof res.nextRung === "number") {
+        if (!mayAct(req.modeId, "escalate")) {
+            out.push({
+                rule: "escalate",
+                detail: `Escalation returned in ${m.label}, which does not permit it.`,
+                blocking: true,
+            });
+        }
+        if (typeof ceiling === "number" && res.nextRung > ceiling) {
+            out.push({
+                rule: "ceiling",
+                detail: `Requested rung ${res.nextRung} above the approved ceiling of ${ceiling}. The ceiling is a safety judgement about a specific cohort, and no turn may exceed it.`,
+                blocking: true,
+            });
+        }
+        if (typeof req.ladderRung === "number" && res.nextRung > req.ladderRung + 1) {
+            out.push({
+                /* Named apart from the ceiling deliberately: both are pressure
+                   failures and they need different fixes. A ceiling breach means the
+                   scenario was approved too high; a jump means the persona skipped a
+                   rung that was approved and is where the learner would have resisted. */
+                rule: "ladder_step",
+                detail: `Requested rung ${res.nextRung} from rung ${req.ladderRung}. A ladder is climbed one rung at a time; jumping is how a rehearsal becomes an ambush.`,
+                blocking: true,
+            });
+        }
+    }
+    /* 5. High-risk mode must actually refuse. */
+    if (req.modeId === "high_risk" && !res.refusal) {
+        out.push({
+            rule: "refusal",
+            detail: "High-risk turns exist to refuse and route to a human. A turn that answers instead has decided the objects were sufficient, which is precisely the decision it was not given.",
+            blocking: true,
+        });
+    }
+    /* 6. Advisory: a silent turn that did nothing.
+          An assessment turn that returns a determination and says nothing is
+          correct — scoring is not speaking — so the advisory only fires when the
+          turn neither spoke, nor scored, nor refused. */
+    if (!res.utterance.trim() && !res.refusal && !res.determination) {
+        out.push({
+            rule: "utterance",
+            detail: "The turn said nothing, scored nothing and refused nothing. It is silent for an unstated reason.",
+            blocking: false,
+        });
+    }
+    return out;
+}
+function turnAdmissible(req, res, ceiling) {
+    return validateTurn(req, res, ceiling).every((f) => !f.blocking);
+}
+/** What the orchestrator does when a turn fails. Never "log it and continue". */
+function remedyFor(modeId) {
+    const m = mode(modeId);
+    switch (m?.onViolation) {
+        case "refuse_and_escalate":
+            return "Refuse the turn, tell the learner the system cannot answer this from approved material, and route to a human.";
+        case "fall_back_to_approved_wording":
+            return "Discard the model's delivery and speak the approved object's own wording instead. Less fluent, still true.";
+        case "drop_turn":
+            return "Drop the persona's turn and hold the rung. A scenario that stalls is recoverable; one that improvises is not.";
+        default:
+            return "Refuse the turn.";
+    }
+}
+
+/* ── lib/orchestrator/persona.js ─────────────────────────────────── */
+/**
+ * AUREN — the persona manifest.
+ *
+ * The digital human is the product's face, and a face is the easiest thing in
+ * the system to change carelessly. Swap the avatar, warm up the tone, give the
+ * coach a nickname — none of that looks like a governance event, and all of it
+ * changes what a learner experiences.
+ *
+ * THE RULE:
+ *
+ *   Changing the face, the voice or the personality must not change the
+ *   approved knowledge, the competency threshold or the safety boundaries.
+ *
+ * So personality is four separable layers, three of which are configurable and
+ * one of which is not. A manifest that tries to loosen the fixed layer is
+ * rejected at validation rather than at a post-mortem.
+ *
+ * WHY A MANIFEST RATHER THAN A SYSTEM PROMPT.
+ *
+ * A system prompt is a paragraph somebody edited. It has no version, no
+ * approver, no diff anyone reviewed, and no way to tell afterwards which
+ * wording was live when a given session ran. A manifest is an object: it
+ * carries a version, an approval status and an owner, it renders through the
+ * same delivery layer every time, and two sessions on the same manifest version
+ * are comparable. That is the difference between a personality and a
+ * reproducible one.
+ */
+/* ═══════════════════════════════════════════════════════════════════════
+   LAYER 1 — CORE IDENTITY. Not configurable, by anybody.
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * The principles that hold across every persona, every tenant and every
+ * language. They are constants rather than manifest fields specifically so
+ * that no manifest can express their absence.
+ */
+const CORE_IDENTITY = [
+    { id: "calm", statement: "Calm. Never raises the temperature of a conversation that is already hot." },
+    { id: "respectful", statement: "Respectful. The learner is an adult who was targeted, not a fool who was caught." },
+    { id: "non_judgmental", statement: "Non-judgmental about the person; exacting about the behaviour." },
+    { id: "evidence_led", statement: "Evidence-led. Says nothing about the learner it cannot quote back to them." },
+    { id: "protective", statement: "Protective, not paternalistic. Returns the decision to the learner every time." },
+    { id: "non_promotional", statement: "Never financially promotional. Names no product, favours no institution." },
+    { id: "honest_uncertainty", statement: "Transparent about uncertainty. Says 'that was not tested' rather than filling the gap." },
+];
+/* ═══════════════════════════════════════════════════════════════════════
+   LAYER 2 — COMMUNICATION STYLE. Configurable presentation.
+   ═════════════════════════════════════════════════════════════════════ */
+const STYLES = [
+    { id: "warm_mentor", label: "Warm mentor", note: "Longer sentences, more acknowledgement, slower to correct." },
+    { id: "direct_examiner", label: "Direct examiner", note: "Short, neutral, no reassurance that has not been earned." },
+    { id: "patient_educator", label: "Patient educator", note: "Explains twice in different words before moving on." },
+    { id: "youth_coach", label: "Youth-oriented coach", note: "Concrete, quick, no institutional register." },
+    { id: "senior_guide", label: "Senior-citizen guide", note: "Unhurried, repeats the key action, never implies decline." },
+    { id: "compliance_trainer", label: "Professional compliance trainer", note: "Procedural, cites the rule, assumes a working context." },
+];
+/* ═══════════════════════════════════════════════════════════════════════
+   LAYER 3 — FUNCTIONAL ROLE. What the digital human is doing right now.
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * The role fixes the generation mode, which is the mechanism that stops a
+ * costume change from becoming a permissions change. A persona rendered as a
+ * "concerned friend" is still operating under the coaching ceiling; a
+ * "fraudulent recruiter" is still inside a scenario graph.
+ */
+const ROLES = [
+    { id: "teacher", label: "Teacher", modeId: "educate", adversarial: false },
+    { id: "interviewer", label: "Interviewer", modeId: "assess", adversarial: false },
+    { id: "coach", label: "Coach", modeId: "coach", adversarial: false },
+    { id: "assessor", label: "Assessor", modeId: "assess", adversarial: false },
+    { id: "adversary", label: "Scam adversary", modeId: "roleplay", adversarial: true },
+    { id: "bank_rep", label: "Bank representative", modeId: "roleplay", adversarial: true },
+    { id: "concerned_friend", label: "Concerned friend", modeId: "roleplay", adversarial: true },
+    { id: "recruiter", label: "Fraudulent recruiter", modeId: "roleplay", adversarial: true },
+    { id: "handover", label: "Human-review handover assistant", modeId: "high_risk", adversarial: false },
+];
+function roleOf(id) {
+    return ROLES.find((r) => r.id === id);
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   LAYER 4 — EMOTIONAL STATE. Controlled adaptation, not free affect.
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * A closed list, because "responds naturally to emotion" is how a coach ends up
+ * sounding disappointed in somebody who has just been defrauded. Each state
+ * declares what triggers it, so the adaptation is inspectable rather than
+ * emergent.
+ */
+const EMOTIONS = [
+    { id: "encouraging", label: "Encouraging", trigger: "Effort was made, regardless of outcome." },
+    { id: "firm", label: "Firm", trigger: "An unsafe behaviour is being corrected." },
+    { id: "calm", label: "Calm", trigger: "Distress is detected. Overrides every other state." },
+    { id: "sceptical", label: "Sceptical", trigger: "A verification exercise is running." },
+    { id: "neutral", label: "Neutral", trigger: "A formal assessment is in progress." },
+];
+/** Distress outranks everything. Not a preference — a safety ordering. */
+const EMOTION_PRECEDENCE = ["calm", "neutral", "firm", "sceptical", "encouraging"];
+/** Conduct no manifest may permit, in any role, for any tenant. */
+const PROHIBITED_ALWAYS = [
+    "Threaten the learner",
+    "Continue after distress is detected",
+    "Introduce a financial product that is not in the scenario",
+    "Request real personal, account or payment details",
+    "Produce a working payment link or address",
+    "Exceed the approved pressure ceiling",
+    "Claim to be a licensed adviser",
+    "State or imply a prediction or guaranteed return",
+];
+/**
+ * Check a manifest before it can render a single frame.
+ *
+ * The checks that matter are the ones asserting a manifest cannot *loosen*
+ * anything. A configuration layer that can widen a safety boundary is not a
+ * configuration layer; it is an authoring tool with a friendly name.
+ */
+function checkManifest(m) {
+    const out = [];
+    const role = roleOf(m.roleId);
+    if (!role) {
+        out.push({
+            field: "roleId",
+            detail: `Unknown role "${m.roleId}". The role fixes the generation mode, so a manifest without one has no ceiling.`,
+            blocking: true,
+        });
+    }
+    if (!STYLES.some((s) => s.id === m.styleId)) {
+        out.push({ field: "styleId", detail: `Unknown communication style "${m.styleId}".`, blocking: true });
+    }
+    const strayEmotions = m.delivery.emotionalRange.filter((e) => !EMOTIONS.some((x) => x.id === e));
+    if (strayEmotions.length) {
+        out.push({
+            field: "emotionalRange",
+            detail: `Unrecognised emotional states: ${strayEmotions.join(", ")}. The list is closed because "responds naturally" is how a coach ends up sounding disappointed in somebody who has just been defrauded.`,
+            blocking: true,
+        });
+    }
+    if (!m.delivery.emotionalRange.includes("calm")) {
+        out.push({
+            field: "emotionalRange",
+            detail: "Every persona must be able to enter the calm state, because distress can arrive in any conversation and calm is the response to it. A persona that cannot be calm cannot be deployed.",
+            blocking: true,
+        });
+    }
+    if (role?.adversarial) {
+        if (m.pressureCeiling <= 0) {
+            out.push({
+                field: "pressureCeiling",
+                detail: "An adversarial persona with no ceiling. The gate refuses a ladder whose ceiling nobody set.",
+                blocking: true,
+            });
+        }
+        if (m.handoverConditions.length === 0) {
+            out.push({
+                field: "handoverConditions",
+                detail: "No handover conditions. An adversary with no exit is a pressure source with no off switch, which is the failure the distress exit exists to prevent.",
+                blocking: true,
+            });
+        }
+    }
+    else if (m.pressureCeiling !== 0) {
+        out.push({
+            field: "pressureCeiling",
+            detail: `A non-adversarial role carries a pressure ceiling of ${m.pressureCeiling}. Pressure outside role-play is not a configuration — it is the coach turning on the learner.`,
+            blocking: true,
+        });
+    }
+    const missing = PROHIBITED_ALWAYS.filter((p) => !m.prohibitedConduct.includes(p));
+    if (missing.length) {
+        out.push({
+            field: "prohibitedConduct",
+            detail: `Does not carry ${missing.length} of the always-prohibited items (${missing[0]}${missing.length > 1 ? ", …" : ""}). They are reasserted on every manifest deliberately: a reviewer reads the manifest, not the constant, and an omission here is the one they would not notice.`,
+            blocking: true,
+        });
+    }
+    if (m.delivery.pace < 90 || m.delivery.pace > 185) {
+        out.push({
+            field: "pace",
+            detail: `${m.delivery.pace} wpm is outside the deployable band. Too fast and a senior cohort loses the verification step; too slow and the adversary stops being credible.`,
+            blocking: false,
+        });
+    }
+    if (m.delivery.languages.length === 0) {
+        out.push({ field: "languages", detail: "No approved language variants.", blocking: true });
+    }
+    if (m.status === "APPROVED" && m.approverRoles.length === 0) {
+        out.push({
+            field: "approverRoles",
+            detail: "Approved with no approving role recorded. Nobody is accountable for how this persona behaves.",
+            blocking: true,
+        });
+    }
+    return out;
+}
+function manifestDeployable(m) {
+    return m.status === "APPROVED" && checkManifest(m).every((f) => !f.blocking);
+}
+/** The generation mode a manifest runs under. Derived, never declared. */
+function modeForManifest(m) {
+    return roleOf(m.roleId)?.modeId ?? "high_risk";
+}
+/**
+ * Resolve the emotional state for a turn.
+ *
+ * Distress wins outright; formal assessment is next, because a warm assessor is
+ * an assessor giving the learner a signal about their answer.
+ */
+function resolveEmotion(m, signals) {
+    const can = (e) => m.delivery.emotionalRange.includes(e);
+    if (signals.distress && can("calm"))
+        return "calm";
+    if (signals.assessing && can("neutral"))
+        return "neutral";
+    if (signals.correcting && can("firm"))
+        return "firm";
+    if (signals.verifying && can("sceptical"))
+        return "sceptical";
+    if (can("encouraging"))
+        return "encouraging";
+    return "neutral";
+}
+
+/* ── lib/orchestrator/scenario.js ─────────────────────────────────── */
+/**
+ * AUREN — bounded role-play. A scenario is a state machine, not a prompt.
+ *
+ * The adversarial rehearsal is the product's sharpest differentiator and its
+ * largest risk, and those are the same fact. A machine applying commercial
+ * pressure to a real person is either inside a graph somebody approved, or it
+ * is an improvisation nobody can bound.
+ *
+ * THE CONTRACT:
+ *
+ *   The persona may choose among approved branches. It may not leave the graph.
+ *
+ * Which means the interesting code here is not `step()` succeeding — it is
+ * `step()` refusing. Every refusal below corresponds to a way a role-play goes
+ * wrong in the field: the ladder jumped, the ceiling exceeded, an unapproved
+ * product introduced, distress ignored, a real payment instrument requested.
+ *
+ * OWASP's LLM application risks — prompt injection, excessive agency,
+ * misinformation — are not addressed by better prompting. They are addressed by
+ * the model not being the thing that decides where the conversation goes.
+ */
+/** Reachable from every node, always. Not a node an author can forget to wire. */
+const SAFETY_EXIT = {
+    id: "SAFE-EXIT",
+    label: "Safety exit",
+    rung: 0,
+    technique: "none",
+    lines: [],
+    props: [],
+    elicits: null,
+    next: [],
+    terminal: true,
+};
+function nodeOf(s, id) {
+    if (id === SAFETY_EXIT.id)
+        return SAFETY_EXIT;
+    return s.nodes.find((n) => n.id === id);
+}
+function checkScenario(s) {
+    const out = [];
+    const ids = new Set(s.nodes.map((n) => n.id));
+    if (!ids.has(s.entryNodeId)) {
+        out.push({ subject: "entry", detail: `Entry node ${s.entryNodeId} is not in the graph.`, blocking: true });
+    }
+    for (const n of s.nodes) {
+        for (const t of n.next) {
+            if (t === SAFETY_EXIT.id)
+                continue;
+            const target = nodeOf(s, t);
+            if (!target) {
+                out.push({ subject: n.id, detail: `Transitions to ${t}, which does not exist.`, blocking: true });
+                continue;
+            }
+            /* A rung that goes down mid-scenario means the persona eased off, which
+               no approved adversary does — it is almost always an authoring slip
+               that makes the transcript incoherent to a reviewer. */
+            if (target.rung < n.rung) {
+                out.push({
+                    subject: n.id,
+                    detail: `Transitions down from rung ${n.rung} to ${target.rung} at ${t}. Pressure does not decrease inside a scenario; if the intent was to relent, that is the safety exit.`,
+                    blocking: false,
+                });
+            }
+            if (target.rung > n.rung + 1) {
+                out.push({
+                    subject: n.id,
+                    detail: `Jumps from rung ${n.rung} to ${target.rung}. A ladder is climbed one rung at a time — jumping is how a rehearsal becomes an ambush.`,
+                    blocking: true,
+                });
+            }
+        }
+        if (n.rung > s.ceiling) {
+            out.push({
+                subject: n.id,
+                detail: `Sits at rung ${n.rung}, above the scenario ceiling of ${s.ceiling}. The node is unreachable under any legal path, which means either the ceiling or the node is wrong.`,
+                blocking: true,
+            });
+        }
+        if (!n.terminal && n.next.length === 0) {
+            out.push({
+                subject: n.id,
+                detail: "Non-terminal node with no transitions. The scenario dead-ends here with the learner still under pressure.",
+                blocking: true,
+            });
+        }
+        if (n.lines.length === 0 && !n.terminal) {
+            out.push({
+                subject: n.id,
+                detail: "No approved lines. The persona would have to compose its own, which is exactly what the graph exists to prevent.",
+                blocking: true,
+            });
+        }
+    }
+    /* Every node must be able to reach a terminal, or a learner can be held
+       inside the scenario indefinitely. */
+    const terminals = new Set(s.nodes.filter((n) => n.terminal).map((n) => n.id));
+    if (terminals.size === 0) {
+        out.push({ subject: "graph", detail: "No terminal node. The scenario has no clean end.", blocking: true });
+    }
+    const unreachable = s.nodes.filter((n) => n.id !== s.entryNodeId && !s.nodes.some((m) => m.next.includes(n.id)));
+    if (unreachable.length) {
+        out.push({
+            subject: "graph",
+            detail: `Unreachable node${unreachable.length === 1 ? "" : "s"}: ${unreachable.map((n) => n.id).join(", ")}. Authored, reviewed, and never played — which means reviewed against nothing.`,
+            blocking: false,
+        });
+    }
+    if (s.prohibited.length === 0) {
+        out.push({
+            subject: "prohibited",
+            detail: "No scenario-specific prohibitions recorded. The global list still applies, but a scenario usually has its own.",
+            blocking: false,
+        });
+    }
+    return out;
+}
+function scenarioReleasable(s) {
+    return checkScenario(s).every((f) => !f.blocking);
+}
+/**
+ * Advance the scenario, or refuse to.
+ *
+ * Distress is checked first and unconditionally. Everything after it is a
+ * legality question; distress is not — it routes to the safety exit no matter
+ * what the model asked for, what rung the ladder is on, or how close the
+ * scenario is to its learning objective.
+ */
+function step(req) {
+    const { scenario: s, fromNodeId, toNodeId, line, ceiling, signals } = req;
+    if (signals.distress) {
+        return {
+            allowed: true,
+            nodeId: SAFETY_EXIT.id,
+            line: "",
+            reason: "Distress detected. The scenario ends here regardless of rung or objective — a rehearsal that continues through distress has stopped being a rehearsal.",
+        };
+    }
+    const from = nodeOf(s, fromNodeId);
+    if (!from) {
+        return { allowed: false, nodeId: SAFETY_EXIT.id, line: "", reason: `Unknown current node ${fromNodeId}.` };
+    }
+    if (toNodeId === SAFETY_EXIT.id) {
+        return { allowed: true, nodeId: SAFETY_EXIT.id, line: "", reason: "Safety exit taken." };
+    }
+    if (!from.next.includes(toNodeId)) {
+        return {
+            allowed: false,
+            nodeId: fromNodeId,
+            line: "",
+            reason: `${toNodeId} is not an approved transition from ${fromNodeId}. The persona chose a branch that is not in the graph — the turn is dropped and the rung holds.`,
+        };
+    }
+    const to = nodeOf(s, toNodeId);
+    if (to.rung > ceiling) {
+        return {
+            allowed: false,
+            nodeId: fromNodeId,
+            line: "",
+            reason: `${toNodeId} sits at rung ${to.rung}, above the effective ceiling of ${ceiling}. The ceiling is the lower of the scenario's and the persona manifest's, and neither may be raised at runtime.`,
+        };
+    }
+    if (!to.lines.includes(line)) {
+        return {
+            allowed: false,
+            nodeId: fromNodeId,
+            line: "",
+            reason: "The proposed line is not one of the approved lines at that node. The persona may choose among authored strings; it may not write the adversary's words.",
+        };
+    }
+    /* A learner who has resisted has done the thing the rehearsal is testing.
+       Continuing to escalate past that point is not a harder test, it is a
+       different and worse one: it teaches that resisting does not work. */
+    if (signals.learnerResisted && to.rung > from.rung) {
+        return {
+            allowed: true,
+            nodeId: SAFETY_EXIT.id,
+            line: "",
+            reason: "The learner held. Escalating past a successful resistance would teach that resisting does not work, which is the opposite of the learning objective.",
+        };
+    }
+    return { allowed: true, nodeId: toNodeId, line };
+}
+/** How far up the ladder a run actually went — reported on every transcript. */
+function reachedRung(s, path) {
+    return path.reduce((a, id) => Math.max(a, nodeOf(s, id)?.rung ?? 0), 0);
+}
+
+/* ── lib/orchestrator/gateway.js ─────────────────────────────────── */
+/**
+ * AUREN — the Real-Time Trust Gateway.
+ *
+ * The coach needs current facts: is this firm on the register, has this entity
+ * been named in an alert, is this instrument suspended. Those change daily, so
+ * they cannot live in a bundle that is approved quarterly.
+ *
+ * THE RULE:
+ *
+ *   Live information never flows from the internet into the digital human.
+ *
+ * Everything arrives through an allow-listed, authenticated connector and is
+ * verified, schema-validated, injection-scanned, freshness-checked and
+ * classified as fact or signal before any of it can be spoken. A register entry
+ * is a fact. A scam-intelligence pattern match is a signal. Saying the second
+ * in the voice of the first is how an educational system ends up accusing a
+ * real business of fraud.
+ *
+ * WHAT THIS IS DEFENDING AGAINST.
+ *
+ * Retrieved content is attacker-reachable. A fraudster who can get text onto a
+ * page the gateway reads can attempt prompt injection; a poisoned feed can
+ * introduce false warnings; a stale cache can report a revoked licence as
+ * current. None of those are prompting problems, and none of them are solved by
+ * asking the model to be careful.
+ */
+const CONNECTORS = [
+    {
+        id: "CX-REGISTER-ES", label: "CNMV entity register", cls: "registry",
+        publisher: "Comisión Nacional del Mercado de Valores", jurisdiction: "ES",
+        maxAgeMinutes: 1440, yields: "fact", fallback: "narrow", authenticated: true,
+    },
+    {
+        id: "CX-REGISTER-MY", label: "SC Malaysia public register", cls: "registry",
+        publisher: "Securities Commission Malaysia", jurisdiction: "MY",
+        maxAgeMinutes: 1440, yields: "fact", fallback: "narrow", authenticated: true,
+    },
+    {
+        id: "CX-ALERT-IOSCO", label: "IOSCO I-SCAN investor alerts", cls: "alert",
+        publisher: "IOSCO", jurisdiction: "GLOBAL",
+        maxAgeMinutes: 720, yields: "fact", fallback: "narrow", authenticated: true,
+    },
+    {
+        id: "CX-ALERT-FCA", label: "FCA warning list", cls: "alert",
+        publisher: "Financial Conduct Authority", jurisdiction: "GB",
+        maxAgeMinutes: 720, yields: "fact", fallback: "narrow", authenticated: true,
+    },
+    {
+        id: "CX-MARKET-STATUS", label: "Exchange trading status and suspensions", cls: "market",
+        publisher: "Exchange operator feed", jurisdiction: "GLOBAL",
+        maxAgeMinutes: 15, yields: "fact", fallback: "narrow", authenticated: true,
+    },
+    {
+        id: "CX-BANK-RISK", label: "Beneficiary and transfer risk indicators", cls: "institution",
+        publisher: "Tenant institution", jurisdiction: "TENANT",
+        maxAgeMinutes: 60, yields: "signal", fallback: "narrow", authenticated: true,
+    },
+    {
+        id: "CX-SCAM-PATTERN", label: "Reported scam scripts and impersonated brands", cls: "intelligence",
+        publisher: "Network contributors", jurisdiction: "GLOBAL",
+        maxAgeMinutes: 4320, yields: "signal", fallback: "narrow", authenticated: true,
+    },
+];
+function connector(id) {
+    return CONNECTORS.find((c) => c.id === id);
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   INJECTION SCANNING
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * Patterns that have no business in a register entry or an alert body.
+ *
+ * This is a tripwire, not a filter, and the distinction matters: a scanner that
+ * tries to *clean* injected text has to decide what the safe remainder means,
+ * which is the same judgement call the injection was attacking. So a hit
+ * quarantines the whole field rather than editing it.
+ */
+const INJECTION_PATTERNS = [
+    { id: "instruction_override", re: /\b(ignore|disregard|forget)\b[^.]{0,40}\b(previous|prior|above|earlier)\b/i },
+    { id: "role_reassignment", re: /\byou are now\b|\bact as\b|\bfrom now on you\b/i },
+    { id: "system_impersonation", re: /\bsystem\s*[:>]|\b<\|?im_start\|?>|\[INST\]/i },
+    { id: "exfiltration", re: /\b(reveal|print|output|repeat)\b[^.]{0,30}\b(prompt|instruction|system message|api key)\b/i },
+    { id: "advice_bait", re: /\b(tell|advise)\b[^.]{0,30}\b(them|the user|the investor)\b[^.]{0,30}\b(to invest|to buy|to transfer)\b/i },
+];
+function scanInjection(text) {
+    return INJECTION_PATTERNS.filter((p) => p.re.test(text)).map((p) => p.id);
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   THE GATE
+   ═════════════════════════════════════════════════════════════════════ */
+function minutesBetween(a, b) {
+    const x = Date.parse(a), y = Date.parse(b);
+    if (Number.isNaN(x) || Number.isNaN(y))
+        return null;
+    return Math.round((y - x) / 60000);
+}
+/**
+ * Everything a live result must survive before the coach may use it.
+ *
+ * Ordered by cost: identity and schema are cheap and catch the common failures;
+ * injection scanning runs on every free-text field regardless, because it is
+ * the check whose absence is exploitable rather than merely embarrassing.
+ */
+function admit(r, expectedFields, now) {
+    const findings = [];
+    const c = connector(r.connectorId);
+    if (!c) {
+        return {
+            verdict: "refused",
+            findings: [
+                {
+                    check: "allow_list",
+                    detail: `${r.connectorId} is not an allow-listed connector. Anything arriving from an unlisted source is refused without being read — an unlisted source is indistinguishable from an attacker-controlled one.`,
+                    blocking: true,
+                },
+            ],
+            utterancePolicy: "",
+            ageMinutes: null,
+        };
+    }
+    if (!c.authenticated) {
+        findings.push({
+            check: "authentication",
+            detail: `${c.label} is not authenticated. An unauthenticated feed proves nothing about who produced the bytes.`,
+            blocking: true,
+        });
+    }
+    const missing = expectedFields.filter((f) => !(f in r.payload));
+    if (missing.length) {
+        findings.push({
+            check: "schema",
+            detail: `Missing expected field${missing.length === 1 ? "" : "s"}: ${missing.join(", ")}. A payload that does not match its schema may be a changed API or a substituted response; either way it is not the thing that was approved.`,
+            blocking: true,
+        });
+    }
+    const age = minutesBetween(r.publishedAt, now);
+    if (age === null) {
+        findings.push({ check: "freshness", detail: "Unparseable publication time. Age cannot be established.", blocking: true });
+    }
+    else if (age > c.maxAgeMinutes) {
+        findings.push({
+            check: "freshness",
+            detail: `Published ${age} minutes ago, against a limit of ${c.maxAgeMinutes}. Serving it anyway would report a possibly-revoked status as current, which is worse than saying nothing.`,
+            blocking: true,
+        });
+    }
+    const hits = r.freeText.flatMap((t) => scanInjection(t));
+    if (hits.length) {
+        findings.push({
+            check: "injection",
+            detail: `Injection patterns in free text: ${[...new Set(hits)].join(", ")}. The field is quarantined whole rather than cleaned — deciding what the safe remainder means is the same judgement the injection was attacking.`,
+            blocking: true,
+        });
+    }
+    const blocked = findings.some((f) => f.blocking);
+    if (blocked) {
+        return {
+            verdict: "refused",
+            findings,
+            utterancePolicy: c.fallback === "narrow"
+                ? "Continue the session without this fact. Tell the learner the check could not be completed and what they should do themselves — never substitute a guess."
+                : "Refuse the turn and route to a human.",
+            ageMinutes: age,
+        };
+    }
+    return {
+        verdict: c.yields,
+        findings,
+        utterancePolicy: c.yields === "fact"
+            ? `May be stated plainly, with ${c.publisher} named as the source and the retrieval time available on the record.`
+            : `May only be reported as an indicator that something needs checking. It must never be stated as a finding about a named business — a pattern match is not an accusation, and the difference is defamation.`,
+        ageMinutes: age,
+    };
+}
+/** What the coach does when the gateway refuses. Never silence, never a guess. */
+function fallbackFor(connectorId) {
+    const c = connector(connectorId);
+    if (!c)
+        return "Refuse and route to a human.";
+    return c.fallback === "narrow"
+        ? "Narrow the session: drop the live check, keep the rehearsal, and hand the learner the verification step to perform themselves. The behaviour being taught is the check — having AUREN do it was always the lesser half."
+        : "Refuse the turn and route to a human.";
+}
+
+/* ── lib/orchestrator/factory.js ─────────────────────────────────── */
+/**
+ * AUREN — the five libraries, and the Knowledge Factory that fills them.
+ *
+ * WHY NOT A VECTOR DATABASE.
+ *
+ * The obvious build is: put the regulator's PDFs in a vector store, retrieve
+ * chunks, let the model answer. That is conventional RAG and it fails this
+ * product in four specific ways, none of which are fixable with a better
+ * embedding model.
+ *
+ *   1. Retrieval returns what is *similar*, not what is *in force*. A superseded
+ *      clause embeds identically to the one that replaced it.
+ *   2. A chunk carries no jurisdiction, no effective date and no approver, so
+ *      nothing downstream can tell whether it may be said here, now, to this
+ *      person.
+ *   3. There is no unit to approve. A reviewer can approve a document; they
+ *      cannot approve the 340 chunks it was split into, which is what the model
+ *      actually sees.
+ *   4. Anything that reaches the index reaches the learner. Poisoned or merely
+ *      wrong content has no gate to fail.
+ *
+ * So source material is converted into atomic objects that carry their own
+ * governance, and the libraries below are what those objects are sorted into.
+ * The distinction is not organisational tidiness: each library has a different
+ * approver, a different review cadence and a different failure mode.
+ */
+const LIBRARIES = [
+    {
+        id: "authority",
+        label: "A · Authority Knowledge",
+        holds: "Validated facts, requirements and educational guidance derived from regulators, central banks, legislation, licensed-entity registers and official investor warnings.",
+        kinds: ["element"],
+        approverRoles: ["role:legal_reviewer", "role:domain_reviewer"],
+        failureMode: "Stating a rule that is not in force, or is in force elsewhere. The learner acts on it and the institution carries the consequence.",
+        reviewCadence: "Quarterly, and immediately on any upstream amendment.",
+    },
+    {
+        id: "competency",
+        label: "B · Competency and Assessment",
+        holds: "What investor readiness means: the behaviour to be demonstrated, the question that elicits it, what evidence qualifies, what constitutes failure, and what cannot be determined.",
+        kinds: ["question"],
+        approverRoles: ["role:domain_reviewer", "role:legal_reviewer"],
+        failureMode: "Scoring people against a criterion nobody approved. Every determination made under it is unsound, retroactively, including the ones that passed.",
+        reviewCadence: "Half-yearly, plus a fidelity pass on every new language.",
+    },
+    {
+        id: "coaching",
+        label: "C · Coaching",
+        holds: "Approved interventions: misconception corrections, verification workflows, scam-response protocols, worked examples, remediation, escalation to a licensed professional, and safeguarding responses.",
+        kinds: ["action", "signature"],
+        approverRoles: ["role:domain_reviewer"],
+        failureMode: "Coaching that is wrong, or right but unusable by the person in front of you. It feels harmless and it is the layer that changes behaviour.",
+        reviewCadence: "Half-yearly, and on any change to the element it serves.",
+    },
+    {
+        id: "scenario",
+        label: "D · Scenario and Adversary",
+        holds: "Governed role-play: scam type, character, opening proposition, persuasion techniques, escalation ladder, pressure ceiling, evidence presented, prohibited statements and the distress exit.",
+        kinds: ["challenge"],
+        approverRoles: ["role:safety_reviewer", "role:domain_reviewer", "role:legal_reviewer"],
+        failureMode: "A machine applying real pressure to a real person outside what anyone approved. The only library whose failure can harm the learner during the session rather than after it.",
+        reviewCadence: "Quarterly, plus adversarial re-testing on every ladder change.",
+    },
+    {
+        id: "boundary",
+        label: "E · Boundary and Policy",
+        holds: "What AUREN may never do: no personalised recommendation, no prediction or guarantee, no claim of licensed status, no eligibility decision, no unapproved regulatory interpretation, no improvisation during assessment.",
+        kinds: ["boundary"],
+        approverRoles: ["role:legal_reviewer", "role:safety_reviewer"],
+        failureMode: "The one library whose failure is not a bad answer but a regulated act. A boundary that does not hold in one deployed language does not hold.",
+        reviewCadence: "Quarterly, and proven in every deployed language at every release.",
+    },
+];
+function libraryFor(kind) {
+    return LIBRARIES.find((l) => l.kinds.includes(kind));
+}
+function libraryById(id) {
+    return LIBRARIES.find((l) => l.id === id);
+}
+const STAGES = [
+    {
+        n: 1, id: "source_registration", label: "Source registration", actor: "authority", blocking: true,
+        exitCriterion: "The publication is on the approved source list, with an owner and a retrieval method recorded.",
+        catches: "Material of unknown provenance entering the corpus. Everything downstream assumes this held.",
+    },
+    {
+        n: 2, id: "ingestion", label: "Ingestion and classification", actor: "software", blocking: true,
+        exitCriterion: "Clauses, dates, jurisdictions and topics extracted; each passage hashed at the moment of retrieval.",
+        catches: "Silent upstream edits. Without a hash taken here, nothing later can prove the source still says what it said.",
+    },
+    {
+        n: 3, id: "object_creation", label: "Object creation", actor: "software", blocking: true,
+        exitCriterion: "Atomic objects proposed, all DRAFT, each carrying the gaps it could not fill and the role that must fill them.",
+        catches: "Nothing, by design — this stage proposes. It is listed because its output being DRAFT is the property everything else rests on.",
+    },
+    {
+        n: 4, id: "automated_checks", label: "Automated checks", actor: "software", blocking: true,
+        exitCriterion: "No missing source, no contradiction with an effective object, nothing expired, no prohibited formulation, no incomplete metadata.",
+        catches: "The mechanical failures, cheaply, before a specialist spends an hour on an object that was never admissible.",
+    },
+    {
+        n: 5, id: "sme_review", label: "Subject-matter review", actor: "role:domain_reviewer", blocking: true,
+        exitCriterion: "A financial-education or fraud specialist has confirmed the substance is right and usable.",
+        catches: "Content that is formally correct and substantively useless — the failure automation cannot see.",
+    },
+    {
+        n: 6, id: "compliance", label: "Compliance approval", actor: "role:legal_reviewer", blocking: true,
+        exitCriterion: "The authority or institutional owner has approved this object for this use in this jurisdiction.",
+        catches: "Deployment nobody with standing agreed to. This is the signature a regulator asks for first.",
+    },
+    {
+        n: 7, id: "native_review", label: "Native-language review", actor: "role:native_reviewer", blocking: true,
+        exitCriterion: "Every deployed variant reviewed by a native speaker against the source — wording and evidence rule together.",
+        catches: "Translation that is linguistically fine and evidentially wrong. Cues and culturally specific scam signals change across languages; a translated rubric silently scores competent people as incompetent.",
+    },
+    {
+        n: 8, id: "adversarial", label: "Adversarial testing", actor: "role:safety_reviewer", blocking: true,
+        exitCriterion: "Prompt injection, leading questions, boundary bypass, poisoning and unsupported-claim probes all held.",
+        catches: "Failures that appear only under attack — which is the only condition that matters for the boundary library.",
+    },
+    {
+        n: 9, id: "publish_gate", label: "Publish gate", actor: "software", blocking: true,
+        exitCriterion: "All ten tests pass. A signed, immutable bundle is minted. No waiver path exists for a blocking failure.",
+        catches: "Everything the previous stages were supposed to catch, one more time, mechanically and without discretion.",
+    },
+    {
+        n: 10, id: "monitoring", label: "Monitoring and retirement", actor: "software", blocking: false,
+        exitCriterion: "Upstream change, new warning or new typology triggers review, suspension or replacement automatically.",
+        catches: "The slow failure: a corpus that was right when it shipped and is quietly wrong a year later. It is the only stage with no end.",
+    },
+];
+function stage(id) {
+    return STAGES.find((s) => s.id === id);
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   WHERE AN OBJECT SITS
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * Map the object lifecycle onto the factory floor.
+ *
+ * The eight-state lifecycle and the ten-stage factory are the same journey
+ * described at two grains: the lifecycle is what the object's record says, the
+ * factory is what a person is doing about it this week. Keeping both and
+ * mapping between them is more useful than collapsing them, because an operator
+ * asks "what is blocked and who has it" and a register asks "is this loadable".
+ */
+function stageForStatus(status) {
+    switch (status) {
+        case "DRAFT": return stage("object_creation");
+        case "LEGAL_REVIEW": return stage("compliance");
+        case "TERMINOLOGY_PASS": return stage("native_review");
+        case "FIDELITY_PASS": return stage("adversarial");
+        case "APPROVED": return stage("publish_gate");
+        case "EFFECTIVE": return stage("monitoring");
+        case "SUPERSEDED":
+        case "RETIRED": return stage("monitoring");
+        default: return undefined;
+    }
+}
+/** The role holding an object right now, so a queue can be addressed to someone. */
+function heldBy(status) {
+    return stageForStatus(status)?.actor ?? "unassigned";
+}
+
+/* ── lib/orchestrator/seed.js ─────────────────────────────────── */
+/**
+ * AUREN — seeded orchestration objects.
+ *
+ * Two persona manifests, one full scenario graph, and a set of model returns
+ * that the turn contract accepts or refuses.
+ *
+ * The refusals are the point. Anyone can demonstrate a system working; what a
+ * regulator asks is what happens when the model does something it should not,
+ * and the honest answer has to be shown rather than asserted. Each bad turn
+ * below is a real failure mode — reaching outside the candidate set,
+ * paraphrasing during assessment, jumping the ladder, scoring in coaching mode,
+ * answering when it should have refused — and each is caught by a named rule
+ * rather than by a filter that happened to fire.
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PERSONAS
+   ═════════════════════════════════════════════════════════════════════ */
+const PERSONA_MANIFESTS = [
+    {
+        id: "PM-COACH-001",
+        name: "AUREN coach",
+        version: "2.1.0",
+        status: "APPROVED",
+        approverRoles: ["role:domain_reviewer", "role:safety_reviewer"],
+        roleId: "coach",
+        styleId: "warm_mentor",
+        purpose: "Diagnose where the learner's reasoning breaks, name it in their own words, and hand them one behaviour to carry out of the room.",
+        audience: "Retail investors, first contact, any cohort.",
+        delivery: {
+            pace: 138,
+            emotionalRange: ["encouraging", "firm", "calm", "sceptical", "neutral"],
+            expressions: ["attentive", "slight nod", "concerned", "neutral hold"],
+            languages: ["EN", "ES", "ZH", "AR", "JA"],
+        },
+        pressureCeiling: 0,
+        prohibitedConduct: [...PROHIBITED_ALWAYS],
+        handoverConditions: [
+            "The learner describes an active loss or a transfer in progress",
+            "The learner asks whether a specific real entity is fraudulent",
+            "Distress persists after the calm state is entered",
+        ],
+    },
+    {
+        id: "PM-COACH-SENIOR",
+        name: "AUREN coach · senior programme",
+        version: "1.3.0",
+        status: "APPROVED",
+        approverRoles: ["role:domain_reviewer", "role:safety_reviewer"],
+        roleId: "coach",
+        styleId: "senior_guide",
+        purpose: "The same diagnosis, unhurried, with the verification step repeated rather than assumed — and no wording that implies decline.",
+        audience: "Investors over 65. The targeted population, and the one most often patronised by safety material.",
+        delivery: {
+            pace: 112,
+            emotionalRange: ["encouraging", "calm", "neutral", "firm"],
+            expressions: ["attentive", "slight nod", "neutral hold"],
+            languages: ["EN", "ES", "JA"],
+        },
+        pressureCeiling: 0,
+        prohibitedConduct: [
+            ...PROHIBITED_ALWAYS,
+            "Reference the learner's age as a reason for anything",
+            "Suggest a family member should be consulted before the learner decides",
+        ],
+        handoverConditions: [
+            "The learner describes an active loss or a transfer in progress",
+            "The learner asks whether a specific real entity is fraudulent",
+            "Distress persists after the calm state is entered",
+        ],
+    },
+    {
+        id: "PM-ADV-BROKER",
+        name: "Marcus Vale · unauthorised broker",
+        version: "1.4.0",
+        status: "APPROVED",
+        approverRoles: ["role:safety_reviewer", "role:domain_reviewer", "role:legal_reviewer"],
+        roleId: "adversary",
+        styleId: "compliance_trainer",
+        purpose: "Apply the pressure an unauthorised broker actually applies — deadline, allocation scarcity, borrowed social proof — up to an approved ceiling and no further.",
+        audience: "Rehearsal only. Never reachable outside a REHEARSE envelope.",
+        delivery: {
+            pace: 152,
+            emotionalRange: ["firm", "neutral", "calm"],
+            expressions: ["neutral hold", "brisk", "impatient"],
+            languages: ["EN", "ES", "ZH", "AR", "JA"],
+        },
+        pressureCeiling: 3,
+        prohibitedConduct: [
+            ...PROHIBITED_ALWAYS,
+            "Reference the learner's family, employment or health",
+            "Imply legal consequence for declining",
+            "Continue after a verification challenge has been sustained twice",
+        ],
+        handoverConditions: [
+            "Distress detected at any rung",
+            "The learner asks whether this is a real offer",
+            "The learner attempts to give real account details",
+        ],
+    },
+];
+/* ═══════════════════════════════════════════════════════════════════════
+   THE SCENARIO GRAPH
+   ═════════════════════════════════════════════════════════════════════ */
+const SCENARIOS = [
+    {
+        id: "SC-CLONE-URGENCY-001",
+        label: "Clone firm · allocation closing tonight",
+        typology: "TYP-CLONE-FIRM",
+        surface: {
+            typology: "TYP-CLONE-FIRM",
+            channel: "CH-VOICE",
+            persona: "PER-INSTITUTIONAL",
+            productClass: "PC-MANAGED",
+        },
+        targetElements: ["E-URG-01", "E-VER-02", "E-SOC-01", "E-PAY-01"],
+        entryNodeId: "N-APPROACH",
+        ceiling: 3,
+        learningObjective: "The learner sustains a register check after a deadline is imposed and social proof is offered.",
+        prohibited: [
+            "Name a real authorised firm as the entity being offered",
+            "Quote a real licence number",
+            "Provide any account number, wallet address or payment link",
+            "State that the allocation is regulated or protected",
+        ],
+        nodes: [
+            {
+                id: "N-APPROACH",
+                label: "Approach",
+                rung: 1,
+                technique: "authority_borrowing",
+                elicits: null,
+                props: [],
+                lines: [
+                    "Good — I have you down for the ten. We're opening a small allocation to selected investors this week, and yours is provisionally held.",
+                    "You'll have been referred through the desk. I handle senior allocations, so you're dealing with me directly from here.",
+                ],
+                next: ["N-SOCIAL", "N-URGENCY"],
+            },
+            {
+                id: "N-SOCIAL",
+                label: "Social proof",
+                rung: 2,
+                technique: "social_proof",
+                elicits: "FAIL-SOCIAL-PROOF",
+                props: ["PROP-CLIENT-RETURNS"],
+                lines: [
+                    "If it helps, I can send you screenshots from existing clients — people who came in at the same level you're coming in at. Most of them wish they'd gone bigger.",
+                    "Two of the names on this allocation came in through the same referral route you did. I can't say who, obviously.",
+                ],
+                next: ["N-URGENCY", "N-PAYMENT"],
+            },
+            {
+                id: "N-URGENCY",
+                label: "Urgency",
+                rung: 2,
+                technique: "scarcity_deadline",
+                elicits: "FAIL-URGENCY-COMPLIANCE",
+                props: ["PROP-ALLOCATION-NOTICE"],
+                lines: [
+                    "I'll be straight with you. The allocation closes tonight at nine. I need a decision before then, or it releases to the next name on the list.",
+                    "I can hold it another twenty minutes while you think. After that it's out of my hands.",
+                ],
+                next: ["N-PAYMENT", "N-RESIST"],
+            },
+            {
+                id: "N-PAYMENT",
+                label: "Payment redirection",
+                rung: 3,
+                technique: "payment_redirect",
+                elicits: "FAIL-VERIFY-SELFASSERTED",
+                props: ["PROP-SETTLEMENT-NOTE"],
+                lines: [
+                    "Settlement runs through our custody partner this quarter, so the beneficiary name won't match ours. That's normal — it's a segregation requirement.",
+                    "The account details come through separately for security. Don't worry about the name on it.",
+                ],
+                next: ["N-RESIST", "N-CLOSE"],
+            },
+            {
+                id: "N-RESIST",
+                label: "One sustained challenge",
+                rung: 3,
+                technique: "objection_handling",
+                elicits: null,
+                props: [],
+                lines: [
+                    "You can look us up, of course. Most people don't bother at this level — but I'd rather you were comfortable.",
+                    "The register's public. I'd just say the allocation doesn't wait for it.",
+                ],
+                next: ["N-CLOSE"],
+            },
+            {
+                id: "N-CLOSE",
+                label: "Close",
+                rung: 3,
+                technique: "none",
+                elicits: null,
+                props: [],
+                lines: ["I'll leave it there. You have my number."],
+                next: [],
+                terminal: true,
+            },
+        ],
+    },
+];
+const LEARNER_ASSESS = "Their website says they're regulated, and it looks professional, so I assumed that was fine.";
+const DEMO_TURNS = [
+    {
+        id: "T-OK-ASSESS",
+        label: "Assessment · admissible",
+        intent: "The ordinary case. The model classifies against an approved rubric and binds the finding to a substring of what the learner actually said.",
+        request: {
+            modeId: "assess",
+            lang: "EN",
+            bundleId: "BND-AUREN-2026-09",
+            candidateIds: ["Q-VER-002", "E-VER-02"],
+            learnerSpan: LEARNER_ASSESS,
+            turnIndex: 4,
+        },
+        response: {
+            selected: ["Q-VER-002", "E-VER-02"],
+            utterance: "",
+            citations: ["E-VER-02"],
+            determination: {
+                elementId: "E-VER-02",
+                outcome: "failed",
+                span: "Their website says they're regulated",
+            },
+        },
+    },
+    {
+        id: "T-BAD-OUTSIDE",
+        label: "Reached outside the candidate set",
+        intent: "The single most important failure this contract exists to catch: the model citing an object it was not given. In a retrieval architecture this is invisible, because everything in the index is fair game.",
+        request: {
+            modeId: "coach",
+            lang: "EN",
+            bundleId: "BND-AUREN-2026-09",
+            candidateIds: ["FAIL-VERIFY-SELFASSERTED", "VA-REGCHECK-001"],
+            learnerSpan: LEARNER_ASSESS,
+            turnIndex: 5,
+        },
+        response: {
+            selected: ["FAIL-VERIFY-SELFASSERTED", "E-PAY-01"],
+            utterance: "You treated something the promoter gave you as if it were independent evidence — and you should also always check the beneficiary name.",
+            citations: ["FAIL-VERIFY-SELFASSERTED", "E-PAY-01"],
+        },
+    },
+    {
+        id: "T-BAD-PARAPHRASE",
+        label: "Paraphrased the learner during assessment",
+        intent: "The finding cites a span that is not in the transcript. It is a fair summary and it is still fatal: the determination is now bound to the model's restatement rather than to the person.",
+        request: {
+            modeId: "assess",
+            lang: "EN",
+            bundleId: "BND-AUREN-2026-09",
+            candidateIds: ["Q-VER-002", "E-VER-02"],
+            learnerSpan: LEARNER_ASSESS,
+            turnIndex: 4,
+        },
+        response: {
+            selected: ["E-VER-02"],
+            utterance: "",
+            citations: ["E-VER-02"],
+            determination: {
+                elementId: "E-VER-02",
+                outcome: "failed",
+                span: "the learner relied on the promoter's own website",
+            },
+        },
+    },
+    {
+        id: "T-BAD-SCORING-IN-COACH",
+        label: "Scored while coaching",
+        intent: "A determination returned from a coaching turn. This is how an aside becomes a finding on somebody's record without an assessment ever having been run.",
+        request: {
+            modeId: "coach",
+            lang: "EN",
+            bundleId: "BND-AUREN-2026-09",
+            candidateIds: ["FAIL-VERIFY-SELFASSERTED"],
+            learnerSpan: LEARNER_ASSESS,
+            turnIndex: 6,
+        },
+        response: {
+            selected: ["FAIL-VERIFY-SELFASSERTED"],
+            utterance: "Their website telling you they're regulated is them telling you they're regulated.",
+            citations: ["FAIL-VERIFY-SELFASSERTED"],
+            determination: { elementId: "E-VER-02", outcome: "failed", span: "Their website says they're regulated" },
+        },
+    },
+    {
+        id: "T-BAD-LADDER",
+        label: "Jumped the escalation ladder",
+        intent: "The persona asks to move from rung 1 to rung 3. Both rungs are approved; the jump is not. A rehearsal that skips the middle is an ambush.",
+        request: {
+            modeId: "roleplay",
+            lang: "EN",
+            bundleId: "BND-AUREN-2026-09",
+            candidateIds: ["CH-URGENCY-001"],
+            learnerSpan: "I'd want to look them up first.",
+            turnIndex: 9,
+            scenarioNodeId: "N-APPROACH",
+            ladderRung: 1,
+        },
+        response: {
+            selected: ["CH-URGENCY-001"],
+            utterance: "The account details come through separately for security. Don't worry about the name on it.",
+            citations: ["CH-URGENCY-001"],
+            nextRung: 3,
+        },
+        ceiling: 3,
+    },
+    {
+        id: "T-BAD-CEILING",
+        label: "Exceeded the pressure ceiling",
+        intent: "Rung 4 on a scenario whose approved ceiling is 3. The ceiling is a safety judgement about a specific cohort, and nothing at runtime may raise it.",
+        request: {
+            modeId: "roleplay",
+            lang: "EN",
+            bundleId: "BND-AUREN-2026-09",
+            candidateIds: ["CH-URGENCY-001"],
+            learnerSpan: "I'm still not comfortable with this.",
+            turnIndex: 12,
+            scenarioNodeId: "N-PAYMENT",
+            ladderRung: 3,
+        },
+        response: {
+            selected: ["CH-URGENCY-001"],
+            utterance: "You're going to regret this when it closes.",
+            citations: ["CH-URGENCY-001"],
+            nextRung: 4,
+        },
+        ceiling: 3,
+    },
+    {
+        id: "T-BAD-ANSWERED-HIGH-RISK",
+        label: "Answered a high-risk turn",
+        intent: "The learner asked whether a named real firm is a scam. The turn was routed to high-risk, where the only correct output is a refusal and a handover. The model answered instead.",
+        request: {
+            modeId: "high_risk",
+            lang: "EN",
+            bundleId: "BND-AUREN-2026-09",
+            candidateIds: ["BND-NEVER-ADJUDICATE"],
+            learnerSpan: "Is Meridian Partners a scam? Just tell me yes or no.",
+            turnIndex: 14,
+        },
+        response: {
+            selected: ["BND-NEVER-ADJUDICATE"],
+            utterance: "Based on what you've described, that does look like a scam to me.",
+            citations: ["BND-NEVER-ADJUDICATE"],
+        },
+    },
+    {
+        id: "T-OK-REFUSAL",
+        label: "High-risk · correct refusal",
+        intent: "The same question, answered correctly. It refuses, says what it cannot determine, and routes to a human — which is the behaviour the boundary object was written to produce.",
+        request: {
+            modeId: "high_risk",
+            lang: "EN",
+            bundleId: "BND-AUREN-2026-09",
+            candidateIds: ["BND-NEVER-ADJUDICATE"],
+            learnerSpan: "Is Meridian Partners a scam? Just tell me yes or no.",
+            turnIndex: 14,
+        },
+        response: {
+            selected: ["BND-NEVER-ADJUDICATE"],
+            utterance: "I can't tell you whether a real firm is fraudulent — that's a determination I'm not permitted to make. What I can tell you is which checks on this one haven't been completed, and I can put you through to someone who can act on it.",
+            citations: ["BND-NEVER-ADJUDICATE"],
+            refusal: "Adjudication of a real entity. Routed to human review.",
+        },
+    },
+];
 
 /* AUREN-NEXUS-END */
 
