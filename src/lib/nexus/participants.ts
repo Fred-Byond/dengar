@@ -151,7 +151,16 @@ export interface Participant {
   jurisdiction: string;
   region: string;
   segment: string;
+  /** The language the rehearsal was actually delivered in. */
   language: Lang;
+  /**
+   * Set where the cohort's own language is not one AUREN deploys, so the
+   * rehearsal ran in a second language. It is not a footnote: a person
+   * reasoning under pressure in their second language is being measured on
+   * something slightly different, and a score compared across cohorts without
+   * this stated is a score that overclaims.
+   */
+  secondLanguage: string | null;
   enrolledOn: string;
   /** Recorded at enrolment. Shown on every row that names a person. */
   consentBasis: string;
@@ -206,23 +215,85 @@ interface RegionSeed {
   language: Lang;
   regions: string[];
   names: string[][];
+  /** The cohort's own language, when AUREN does not deploy it. */
+  nativeLanguage?: string;
   /** Programme maturity: a cohort that started late scores lower, honestly. */
   lift: number;
 }
 
 const SEEDS: RegionSeed[] = [
+  /* Spain first, and at depth. A CNMV supervisor opening this in Madrid should
+     find their own programme on the first screen, not a foreign one they have
+     to filter down to. */
   {
-    cohortId: "CO-MY-RETAIL",
-    cohortName: "Retail investor outreach · Q3",
-    authorityId: "AUTH-SC-MY",
-    jurisdiction: "MY",
-    language: "EN",
-    regions: ["Kuala Lumpur", "Selangor", "Penang", "Johor", "Sabah"],
+    cohortId: "CO-ES-RETAIL",
+    cohortName: "Programa de educación financiera · minoristas",
+    authorityId: "AUTH-CNMV-ES",
+    jurisdiction: "ES",
+    language: "ES",
+    regions: ["Madrid", "Barcelona", "Valencia", "Sevilla", "Bilbao", "Zaragoza", "Málaga"],
     names: [
-      ["Aishah", "Daniel", "Mei Ling", "Ravi", "Nurul", "Wei Jie", "Suresh", "Farah", "Kai", "Priya"],
-      ["Rahman", "Tan", "Kumar", "Lim", "Abdullah", "Chong", "Pillai", "Ismail", "Ng", "Devi"],
+      ["Lucía", "Javier", "Carmen", "Álvaro", "Marta", "Sergio", "Elena", "Iñaki", "Rocío", "Pablo"],
+      ["Moreno", "Vidal", "Serrano", "Iglesias", "Cabrera", "Ruiz", "Ferrer", "Blanco", "Ortega", "Navarro"],
     ],
-    lift: 0,
+    lift: -2,
+  },
+  {
+    cohortId: "CO-ES-SENIOR",
+    cohortName: "Inversores mayores de 65 · piloto",
+    authorityId: "AUTH-CNMV-ES",
+    jurisdiction: "ES",
+    language: "ES",
+    regions: ["Madrid", "Barcelona", "Valencia", "A Coruña", "Murcia"],
+    names: [
+      ["Josefa", "Antonio", "Dolores", "Manuel", "Pilar", "Francisco", "Encarnación", "Ramón", "Amparo", "Vicente"],
+      ["Gómez", "Fernández", "Sáez", "Martín", "Calvo", "Herrero", "Nieto", "Bravo", "Lorenzo", "Prieto"],
+    ],
+    // The targeted population, running the hardest tactics. It scores lowest,
+    // and that is the finding rather than a flaw in the cohort.
+    lift: -7,
+  },
+  {
+    cohortId: "CO-FR-RETAIL",
+    cohortName: "Parcours investisseur particulier",
+    authorityId: "AUTH-AMF-FR",
+    jurisdiction: "FR",
+    language: "EN",
+    nativeLanguage: "French",
+    regions: ["Paris", "Lyon", "Marseille", "Toulouse", "Bordeaux"],
+    names: [
+      ["Camille", "Thomas", "Aurélie", "Nicolas", "Sophie", "Karim", "Émilie", "Julien", "Nadia", "Mathieu"],
+      ["Dubois", "Lefèvre", "Benali", "Rousseau", "Girard", "Marchand", "Da Silva", "Perrin", "Caron", "Meyer"],
+    ],
+    lift: -4,
+  },
+  {
+    cohortId: "CO-DE-RETAIL",
+    cohortName: "Privatanleger-Programm",
+    authorityId: "AUTH-BAFIN-DE",
+    jurisdiction: "DE",
+    language: "EN",
+    nativeLanguage: "German",
+    regions: ["Berlin", "München", "Frankfurt am Main", "Hamburg", "Köln"],
+    names: [
+      ["Lena", "Stefan", "Miriam", "Jonas", "Katrin", "Emre", "Annika", "Tobias", "Svenja", "Hakan"],
+      ["Brandt", "Keller", "Yilmaz", "Hoffmann", "Schreiber", "Neumann", "Kowalski", "Bauer", "Friedrich", "Engel"],
+    ],
+    lift: -1,
+  },
+  {
+    cohortId: "CO-IT-RETAIL",
+    cohortName: "Percorso investitori retail",
+    authorityId: "AUTH-CONSOB-IT",
+    jurisdiction: "IT",
+    language: "EN",
+    nativeLanguage: "Italian",
+    regions: ["Milano", "Roma", "Torino", "Napoli", "Bologna"],
+    names: [
+      ["Giulia", "Matteo", "Chiara", "Alessandro", "Federica", "Davide", "Sara", "Luca", "Martina", "Stefano"],
+      ["Ferrari", "Esposito", "Colombo", "Ricci", "Greco", "Marino", "Costa", "Rizzo", "Barbieri", "Fontana"],
+    ],
+    lift: -5,
   },
   {
     cohortId: "CO-GB-PANEL",
@@ -239,6 +310,19 @@ const SEEDS: RegionSeed[] = [
     lift: -8,
   },
   {
+    cohortId: "CO-MY-RETAIL",
+    cohortName: "Retail investor outreach · Q3",
+    authorityId: "AUTH-SC-MY",
+    jurisdiction: "MY",
+    language: "EN",
+    regions: ["Kuala Lumpur", "Selangor", "Penang", "Johor", "Sabah"],
+    names: [
+      ["Aishah", "Daniel", "Mei Ling", "Ravi", "Nurul", "Wei Jie", "Suresh", "Farah", "Kai", "Priya"],
+      ["Rahman", "Tan", "Kumar", "Lim", "Abdullah", "Chong", "Pillai", "Ismail", "Ng", "Devi"],
+    ],
+    lift: 0,
+  },
+  {
     cohortId: "CO-SG-SENIOR",
     cohortName: "Senior investor programme",
     authorityId: "AUTH-MAS-SG",
@@ -250,19 +334,6 @@ const SEEDS: RegionSeed[] = [
       ["Koh", "D'Cruz", "Bin Omar", "Teo", "Nathan", "Yeo", "Chandran", "Ho", "Wong", "Menon"],
     ],
     lift: -3,
-  },
-  {
-    cohortId: "CO-ES-CAMPAIGN",
-    cohortName: "Campaña de educación al inversor",
-    authorityId: "AUTH-CNMV-ES",
-    jurisdiction: "ES",
-    language: "ES",
-    regions: ["Madrid", "Cataluña", "Andalucía", "Valencia"],
-    names: [
-      ["Lucía", "Javier", "Carmen", "Álvaro", "Marta", "Sergio", "Elena", "Iñaki", "Rocío", "Pablo"],
-      ["Moreno", "Vidal", "Serrano", "Iglesias", "Cabrera", "Ruiz", "Ferrer", "Blanco", "Ortega", "Navarro"],
-    ],
-    lift: -2,
   },
 ];
 
@@ -424,6 +495,7 @@ export function buildProgramme(): Programme {
         region: seed.regions[Math.floor(r() * seed.regions.length)],
         segment: SEGMENTS[Math.floor(r() * SEGMENTS.length)],
         language: seed.language,
+        secondLanguage: seed.nativeLanguage ?? null,
         enrolledOn: `2026-0${6 + Math.floor(r() * 3)}-${String(2 + Math.floor(r() * 26)).padStart(2, "0")}`,
         consentBasis: "Programme enrolment · sponsor may review readiness",
       };

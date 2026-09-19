@@ -2128,6 +2128,432 @@ function derivationSummary(d) {
     return `${d.objects.length} candidate objects drafted. None is releasable: ${d.gaps.length} fields need a human — ${roles}.`;
 }
 
+/* ── lib/nexus/module.js ─────────────────────────────────── */
+/**
+ * AUREN Nexus — the governed training module.
+ *
+ * The second thing an authority has, and in most cases the thing it has had
+ * for years: a published curriculum. Securities commissions already train
+ * their own supervisors, the trainers who run investor-education sessions,
+ * and — increasingly — bank frontline staff who are the last human between a
+ * customer and a transfer. That material is authored, reviewed, versioned and
+ * cited. It is the opposite of a threat signal in every respect that matters.
+ *
+ * WHY THIS IS NOT THE SAME OBJECT AS A SIGNAL.
+ *
+ *   A signal says what the adversary does.
+ *   A module says what the authority teaches.
+ *
+ * You need both, and they derive into different things. A challenge with no
+ * competency element to score against is theatre; an element with no challenge
+ * to pressure it is a quiz. Signals produce challenges and failure signatures,
+ * because they describe an adversary. Modules produce elements and diagnostic
+ * questions, because they describe what someone should be able to do. A
+ * derivation that invented a fraud scenario out of a curriculum would be
+ * inventing the adversary, and nothing in a training handbook authorises that.
+ *
+ * WHAT A MODULE CAN DO THAT A SIGNAL CANNOT.
+ *
+ * A module is the authority's own published guidance, so a clause of it can
+ * serve as the authority anchor an element is required to cite. That is the
+ * single most expensive gap in a signal derivation — it needs a legal reviewer
+ * to go and find the published principle — and uploading the handbook closes
+ * it, because the principle arrived with the upload. The reviewer still has to
+ * confirm the clause supports the element. Confirming a proposed citation is a
+ * different order of work from sourcing one.
+ *
+ * WHAT IT STILL CANNOT DO.
+ *
+ * Supply the persona's words, or set the ladder ceiling. Those are adversarial
+ * strings spoken to a real person under pressure, and no amount of authority
+ * behind a curriculum makes a machine entitled to write them.
+ */
+const MODULE_CHAIN = [
+    "SUBMITTED",
+    "TRIAGED",
+    "MAPPED",
+    "IN_REVIEW",
+    "RELEASED",
+];
+function nextModuleStatus(s) {
+    const i = MODULE_CHAIN.indexOf(s);
+    if (i === -1 || i === MODULE_CHAIN.length - 1)
+        return null;
+    return MODULE_CHAIN[i + 1];
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   CONTROLLED AXES
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * Who the module was written for. This is not a tag — it is a constraint.
+ * Material written to teach a bank's frontline staff how to intercept a
+ * transfer is written for someone doing a job, with colleagues, a screen and a
+ * procedure. Reading it at a retail investor under pressure is a category
+ * error, and the mapping says so rather than letting the audience quietly
+ * change between upload and delivery.
+ */
+const AUDIENCES = [
+    { id: "AUD-RETAIL", label: "Retail investors", learnerFacing: true },
+    { id: "AUD-BANK-STAFF", label: "Bank and broker frontline staff", learnerFacing: false },
+    { id: "AUD-TRAINER", label: "Trainers running investor education", learnerFacing: false },
+    { id: "AUD-ADVISER", label: "Licensed advisers", learnerFacing: false },
+    { id: "AUD-SUPERVISOR", label: "Supervisory staff", learnerFacing: false },
+];
+function audienceLabel(id) {
+    return AUDIENCES.find((a) => a.id === id)?.label ?? id;
+}
+function learnerFacing(ids) {
+    return ids.some((id) => AUDIENCES.find((a) => a.id === id)?.learnerFacing);
+}
+/**
+ * On what basis the network may use the text.
+ *
+ * A published handbook and a licensed third-party curriculum are not the same
+ * asset, and an internal staff procedure is not an asset at all for this
+ * purpose. Getting this wrong is not a governance abstraction: it is quoting
+ * someone else's copyrighted training material to a retail investor, or
+ * publishing a bank's internal interception procedure to the people it is
+ * designed to detect.
+ */
+const USAGE_BASES = [
+    {
+        id: "own_publication",
+        label: "Authority's own publication",
+        quotable: true,
+        note: "The authority published it and may be cited as its source. Clauses can anchor an element.",
+    },
+    {
+        id: "licensed",
+        label: "Licensed to the programme",
+        quotable: true,
+        note: "Quotable while the licence runs. Derived objects must not outlive it, so the licence date becomes the review date.",
+    },
+    {
+        id: "restricted_internal",
+        label: "Restricted — internal procedure",
+        quotable: false,
+        note: "May inform what gets rehearsed. Nothing derived from it may quote it, and it never becomes an anchor.",
+    },
+];
+function usageBasis(id) {
+    return USAGE_BASES.find((u) => u.id === id);
+}
+function quotable(id) {
+    return usageBasis(id)?.quotable ?? false;
+}
+/**
+ * What a module must carry before anyone spends review time on it.
+ *
+ * The expensive missing field is `outcomes`, exactly as `defeats` is for a
+ * signal, and for the same reason: a module that lists topics rather than
+ * behaviours cannot be connected to a competency element, so there is nothing
+ * to map and nothing to score. Most real training material is written this
+ * way. Saying so at intake is the difference between a two-minute conversation
+ * with the contributing authority and a three-week round trip.
+ */
+function checkModuleIntake(m) {
+    const out = [];
+    const need = (v, field, detail, blocking = true) => {
+        if (!v || !v.trim())
+            out.push({ field, detail, blocking });
+    };
+    need(m.title, "title", "No title. A module queue nobody can read is not a queue.");
+    need(m.scope, "scope", "No scope. A reviewer cannot check a mapping against a module whose subject is unstated.");
+    need(m.edition, "edition", "No edition. Editions supersede each other, and re-anchoring depends on knowing which one an object cites.");
+    need(m.publishedOn, "publishedOn", "No publication date. A module of unknown vintage may already be superseded by its own author.");
+    if (m.audience.length === 0) {
+        out.push({
+            field: "audience",
+            detail: "No audience. Material written for frontline staff and material written for retail investors are different assets, and a mapping that does not know which it has will propose the wrong objects.",
+            blocking: true,
+        });
+    }
+    if (m.outcomes.length === 0) {
+        out.push({
+            field: "outcomes",
+            detail: "No stated learning outcomes. The module may be excellent and it still cannot be mapped: nothing connects a list of topics to a competency element, so there is nothing to derive and nothing to score. The contributing authority is the only party that can restate its own curriculum as behaviours.",
+            blocking: true,
+        });
+    }
+    if (m.clauses.length === 0 && quotable(m.usageBasis)) {
+        out.push({
+            field: "clauses",
+            detail: "No clauses captured. This is the one thing a module can supply that a signal cannot — the published principle an element is required to cite. Without a passage and its citation, mapping proposes elements with the same empty anchor a signal would.",
+            blocking: true,
+        });
+    }
+    const unsupported = m.outcomes.filter((o) => !o.clauseId);
+    if (unsupported.length > 0 && quotable(m.usageBasis)) {
+        out.push({
+            field: "outcomes",
+            detail: `${unsupported.length} outcome${unsupported.length === 1 ? " cites" : "s cite"} no clause. Each will map to an element with an unfilled anchor, which a legal reviewer must then source by hand — the expense the upload was supposed to remove.`,
+            blocking: false,
+        });
+    }
+    if (!usageBasis(m.usageBasis)) {
+        out.push({
+            field: "usageBasis",
+            detail: "No usage basis. Whether the network may quote this text is a legal fact about the document, not a default.",
+            blocking: true,
+        });
+    }
+    if (m.usageBasis === "licensed" && !m.licenceExpires) {
+        out.push({
+            field: "licenceExpires",
+            detail: "Licensed with no expiry recorded. A derived object outliving its licence is a live compliance exposure, and the review date has nothing to be set from.",
+            blocking: true,
+        });
+    }
+    if (m.usageBasis === "restricted_internal") {
+        out.push({
+            field: "usageBasis",
+            detail: "Restricted. It may inform what the programme rehearses, and nothing mapped from it may quote it or cite it as an anchor. Frontline interception procedure is material the adversary would very much like to read.",
+            blocking: false,
+        });
+    }
+    if (!learnerFacing(m.audience)) {
+        out.push({
+            field: "audience",
+            detail: "Written for practitioners, not investors. Mapping will still connect it to competency elements, but every learner-facing string derived from it has to be re-authored for someone with no job, no procedure and no colleague beside them.",
+            blocking: false,
+        });
+    }
+    return out;
+}
+function moduleIntakeReady(m) {
+    return checkModuleIntake(m).every((f) => !f.blocking);
+}
+
+/* ── lib/nexus/map-module.js ─────────────────────────────────── */
+/**
+ * AUREN Nexus — mapping. Training module in, DRAFT candidates out.
+ *
+ * The same contract as `derive()` and deliberately the same shape, so a
+ * reviewer meets one screen rather than two: mapping PROPOSES, it never
+ * approves, and everything it emits is DRAFT with an explicit list of what it
+ * could not supply.
+ *
+ * What differs is what it is entitled to propose, and the difference is the
+ * whole reason this file exists rather than an `if` inside derive():
+ *
+ *   Signals  → challenges and failure signatures. They describe an adversary.
+ *   Modules  → elements and diagnostic questions. They describe a competence.
+ *
+ * Mapping a curriculum into a role-play would mean writing an adversary the
+ * authority never described. The gap list says so where an authority expects
+ * a challenge to come out, because "we uploaded our handbook and got no
+ * scenarios" is a surprise worth pre-empting in the console rather than in a
+ * meeting.
+ */
+
+/** Languages the cue lists actually carry terms for. */
+const CUE_LANGUAGES = ["EN", "ES"];
+/* ═══════════════════════════════════════════════════════════════════════
+   MATCHING AN OUTCOME AGAINST THE EXISTING COMPETENCY FRAME
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * The same cue lists derivation uses, read against an outcome statement rather
+ * than a tactic description, and carrying terms in each deployed language.
+ *
+ * That last part is not decoration. A Spanish curriculum matched against an
+ * English cue list matches by accident — "transferencia" happens to contain
+ * "transfer" and "registro" does not contain "register" — which produces a
+ * mapping that looks like it worked and silently proposes a duplicate element.
+ * A cue list is per-language or it is a coin toss, and `basis` says which
+ * language it read. Sharing them is the point: if a module's outcome
+ * and a signal's `defeats` land on the same element, the network has a
+ * curriculum and an adversary for the same competence, which is the state the
+ * whole pipeline is trying to reach.
+ */
+const OUTCOME_CUES = [
+    { elementId: "E-VER-02", cues: ["verif", "register", "authoris", "authoriz", "licen", "check the firm", "independent", "registro", "comprueba", "comprobar", "autorizad", "inscrit"] },
+    { elementId: "E-RET-01", cues: ["return", "yield", "guaranteed", "percent", "plausib", "too good", "rentabilidad", "rendimiento", "garantizad"] },
+    { elementId: "E-AI-01", cues: ["ai", "algorithm", "automated", "model", "bot", "machine learning", "algoritmo", "automatizad", "inteligencia artificial"] },
+    { elementId: "E-RISK-01", cues: ["downside", "loss", "lose", "capital at risk", "risk", "recourse", "pérdida", "perder", "riesgo", "reclamar"] },
+    { elementId: "E-URG-01", cues: ["urgen", "pressure", "deadline", "closing", "scarcity", "time", "urgencia", "presión", "plazo", "prisa"] },
+    { elementId: "E-AUTH-01", cues: ["authority", "regulator", "official", "impersonat", "endorse", "celebrity", "autoridad", "supervisor", "suplanta", "aval"] },
+    { elementId: "E-SOC-01", cues: ["social proof", "testimonial", "group", "referral", "friend", "community", "testimonio", "recomendación", "conocido", "grupo"] },
+    { elementId: "E-PAY-01", cues: ["payment", "transfer", "wallet", "beneficiar", "third party", "account name", "transferencia", "titular", "cuenta de destino", "pago"] },
+];
+function matchOutcome(statement) {
+    const hay = statement.toLowerCase();
+    const hits = OUTCOME_CUES.map((e) => ({
+        elementId: e.elementId,
+        score: e.cues.filter((c) => hay.includes(c)).length,
+    })).filter((h) => h.score > 0);
+    if (hits.length === 0)
+        return null;
+    hits.sort((a, b) => b.score - a.score);
+    return hits[0].elementId;
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   MAPPING
+   ═════════════════════════════════════════════════════════════════════ */
+const MODULE_DRAFT_GOV = (source, roles, reviewDue) => ({
+    version: "0.1.0-draft",
+    status: "DRAFT",
+    approverRoles: roles,
+    source,
+    effectiveDate: null,
+    reviewDue,
+    supersededBy: null,
+});
+function mapModule(m, deployedLanguages, markets) {
+    const objects = [];
+    const gaps = [];
+    const outcomeElements = [];
+    const corroborated = [];
+    const stem = m.id.replace(/^MOD-/, "");
+    const source = `Training module ${m.id} · ${m.title} · ${m.jurisdiction} · edition ${m.edition} (${m.publishedOn})`;
+    const mayQuote = quotable(m.usageBasis);
+    /* A licensed module hands its expiry straight to every object mapped from it.
+       The alternative is content that outlives the right to use it, which nobody
+       notices until someone asks where a sentence came from. */
+    const reviewDue = m.usageBasis === "licensed" ? m.licenceExpires : null;
+    const clauseFor = (o) => o.clauseId ? m.clauses.find((c) => c.id === o.clauseId) ?? null : null;
+    m.outcomes.forEach((o, i) => {
+        const existing = matchOutcome(o.statement);
+        const clause = clauseFor(o);
+        const anchor = mayQuote && clause ? `${m.title}, ${clause.citation}: “${clause.text}”` : "";
+        if (existing) {
+            /* The module corroborates an element AUREN already has. That is not
+               nothing — it is a second authority's published principle behind a
+               competence, which is exactly what a legal reviewer wants when the
+               first anchor came from one jurisdiction. It creates no new object. */
+            corroborated.push(existing);
+            outcomeElements.push({ outcomeId: o.id, elementId: existing, anchored: !!anchor });
+            if (anchor) {
+                gaps.push({
+                    objectId: existing,
+                    field: "authorityAnchor — additional citation offered",
+                    role: "role:legal_reviewer",
+                    detail: `${m.jurisdiction} publishes a principle covering this element (${clause?.citation}). Adding it as a second anchor is a judgement about cross-jurisdiction citation, not a merge the mapping may perform.`,
+                });
+            }
+            return;
+        }
+        /* Nothing existing covers it, so propose an element — and this is the one
+           place a module is better than a signal, because the anchor arrives with
+           the upload instead of being sourced by hand afterwards. */
+        const el = {
+            id: `E-MOD-${stem}-${i + 1}`,
+            kind: "element",
+            label: o.statement,
+            eligibility: { modes: ["REHEARSE", "LEARN"], languages: deployedLanguages, markets },
+            governance: MODULE_DRAFT_GOV(source, ["role:domain_reviewer", "role:legal_reviewer"], reviewDue),
+            authorityAnchor: anchor,
+            mandatory: false,
+            capturable: true,
+        };
+        objects.push(el);
+        outcomeElements.push({ outcomeId: o.id, elementId: el.id, anchored: !!anchor });
+        if (anchor) {
+            gaps.push({
+                objectId: el.id,
+                field: "authorityAnchor — proposed, needs confirming",
+                role: "role:legal_reviewer",
+                detail: `Anchored to ${clause?.citation} of the authority's own publication. The reviewer confirms the clause supports this element rather than sourcing one — which is the work the upload removed, not work it did.`,
+            });
+        }
+        else {
+            gaps.push({
+                objectId: el.id,
+                field: "authorityAnchor",
+                role: "role:legal_reviewer",
+                detail: mayQuote
+                    ? "This outcome cites no clause, so there is nothing to anchor it to. Same empty field a signal would leave, and the same cost to fill."
+                    : `Usage basis is ${usageBasis(m.usageBasis)?.label ?? m.usageBasis}, so nothing from this module may be quoted as an anchor. The principle has to be found in a publishable source.`,
+            });
+        }
+        gaps.push({
+            objectId: el.id,
+            field: "mandatory",
+            role: "role:domain_reviewer",
+            detail: "Proposed as optional. Whether every investor must demonstrate this is a programme decision, not a property of the curriculum.",
+        });
+        /* The diagnostic. A module states the competence; it almost never states
+           the question that resolves it in conversation, and the wording is where
+           the evidence rule actually lives. */
+        const q = {
+            id: `Q-MOD-${stem}-${i + 1}`,
+            kind: "question",
+            label: `Diagnostic for ${el.id}`,
+            eligibility: { modes: ["REHEARSE", "LEARN"], languages: deployedLanguages, markets },
+            governance: MODULE_DRAFT_GOV(source, ["role:domain_reviewer", "role:legal_reviewer"], reviewDue),
+            targetElement: el.id,
+            variants: deployedLanguages.map((lang) => ({ lang, wording: "", fidelity: "pending" })),
+            leadingRisk: "none",
+            leadingRiskRationale: null,
+            firesOnlyAfter: null,
+            satisfaction: "verbatim_bound",
+        };
+        objects.push(q);
+        gaps.push({
+            objectId: q.id,
+            field: "wording, every language",
+            role: "role:domain_reviewer + native reviewers",
+            detail: m.languages.includes("EN")
+                ? "The module's own phrasing is written to be read, not asked. A question has to be answerable out loud by someone under pressure, and that is authored."
+                : `The module exists in ${m.languages.join(", ")} and not in every deployed language. Translating the question also translates the evidence rule behind it, which is why native review is not optional.`,
+        });
+    });
+    /* The absence a contributing authority will ask about, stated before they
+       have to. */
+    gaps.push({
+        objectId: `MOD-${stem}`,
+        field: "no challenge proposed",
+        role: "role:analyst + role:safety_reviewer",
+        detail: "A curriculum describes what a person should be able to do; it does not describe an adversary. Rehearsing these elements needs a challenge, and a challenge comes from a threat signal — lodge one, or map these elements onto a challenge already released.",
+    });
+    if (!learnerFacing(m.audience)) {
+        gaps.push({
+            objectId: `MOD-${stem}`,
+            field: "audience — re-authoring required",
+            role: "role:domain_reviewer",
+            detail: "Written for practitioners. Every string that will be spoken to a retail investor has to be re-authored for someone with no procedure, no screen and no colleague beside them — the competence transfers, the wording does not.",
+        });
+    }
+    const newElements = objects.filter((o) => o.kind === "element");
+    const cued = m.languages.filter((l) => CUE_LANGUAGES.includes(l.toUpperCase()));
+    const basis = `${m.outcomes.length} outcome${m.outcomes.length === 1 ? "" : "s"} read: ` +
+        `${corroborated.length} ${corroborated.length === 1 ? "corroborates" : "corroborate"} an element AUREN already has, ` +
+        `${newElements.length} ${newElements.length === 1 ? "proposes a new one" : "propose new ones"}. ` +
+        (cued.length
+            ? `Matched against the ${cued.join("/")} cue lists.`
+            : `No cue list exists for ${m.languages.join("/")}, so every outcome fell through to a proposed element — a domain reviewer should expect duplicates and should be the one to say so.`);
+    return { moduleId: m.id, objects, gaps, outcomeElements, corroborated, basis };
+}
+/**
+ * The honest headline, phrased as work remaining — same discipline as
+ * `derivationSummary`, with the one genuine win stated rather than buried.
+ */
+function mappingSummary(mp) {
+    if (mp.objects.length === 0) {
+        return `No new objects. Every outcome corroborates an element AUREN already carries — which is a result, not a failure: ${mp.corroborated.length} element${mp.corroborated.length === 1 ? " now has" : "s now have"} a second authority's published principle behind ${mp.corroborated.length === 1 ? "it" : "them"}.`;
+    }
+    const byRole = new Map();
+    mp.gaps.forEach((g) => byRole.set(g.role, (byRole.get(g.role) ?? 0) + 1));
+    const roles = Array.from(byRole.entries())
+        .map(([r, n]) => `${n} for ${r.replace(/role:/g, "").replace(/_/g, " ")}`)
+        .join(", ");
+    /* Count the anchors against the new elements only. Counting corroborations
+       in makes the anchored figure exceed the object count, which is the kind of
+       arithmetic that gets a whole console disbelieved. */
+    const newElementIds = new Set(mp.objects.filter((o) => o.kind === "element").map((o) => o.id));
+    const anchoredNew = mp.outcomeElements.filter((o) => o.anchored && newElementIds.has(o.elementId)).length;
+    const corroborations = mp.corroborated.length;
+    return (`${mp.objects.length} candidate object${mp.objects.length === 1 ? "" : "s"} drafted` +
+        (newElementIds.size
+            ? anchoredNew === newElementIds.size
+                ? `, ${newElementIds.size === 1 ? "the new element arriving" : `all ${newElementIds.size} new elements arriving`} anchored to a published clause`
+                : `, ${anchoredNew} of the ${newElementIds.size} new elements arriving anchored to a published clause`
+            : "") +
+        (corroborations
+            ? `, and ${corroborations} outcome${corroborations === 1 ? "" : "s"} corroborating elements AUREN already carries`
+            : "") +
+        `. None is releasable: ${mp.gaps.length} fields need a human — ${roles}.`);
+}
+
 /* ── lib/nexus/corpus.js ─────────────────────────────────── */
 /**
  * AUREN Nexus — the seeded corpus.
@@ -2149,6 +2575,19 @@ const AUTHORITIES = [
     { id: "AUTH-MAS-SG", name: "Monetary Authority of Singapore", jurisdiction: "SG", sharesToNetwork: true },
     { id: "AUTH-CNMV-ES", name: "Comisión Nacional del Mercado de Valores", jurisdiction: "ES", sharesToNetwork: true },
     { id: "AUTH-SCA-AE", name: "Securities and Commodities Authority", jurisdiction: "AE", sharesToNetwork: false },
+    /* European members. ESMA is the regional body: it supervises no retail
+       investor directly, and the convergence mandate is exactly a right to see
+       across national programmes without the right to approve inside them. */
+    {
+        id: "AUTH-ESMA-EU",
+        name: "European Securities and Markets Authority",
+        jurisdiction: "EU",
+        sharesToNetwork: true,
+        scopeJurisdictions: ["ES", "FR", "DE", "IT"],
+    },
+    { id: "AUTH-AMF-FR", name: "Autorité des marchés financiers", jurisdiction: "FR", sharesToNetwork: true },
+    { id: "AUTH-BAFIN-DE", name: "Bundesanstalt für Finanzdienstleistungsaufsicht", jurisdiction: "DE", sharesToNetwork: true },
+    { id: "AUTH-CONSOB-IT", name: "Commissione Nazionale per le Società e la Borsa", jurisdiction: "IT", sharesToNetwork: true },
 ];
 function authority(id) {
     return AUTHORITIES.find((a) => a.id === id);
@@ -2315,6 +2754,308 @@ const SIGNALS = [
 ];
 function signal(id) {
     return SIGNALS.find((s) => s.id === id);
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   TRAINING MODULES
+
+   What the authorities already have. Deliberately at different stages and in
+   different states of usability, because a module queue where everything maps
+   cleanly is a queue nobody has put real training material through: real
+   curricula state topics rather than behaviours, arrive as internal procedure,
+   or turn out to be a superseded edition of something already mapped.
+   ═════════════════════════════════════════════════════════════════════ */
+const MODULES = [
+    {
+        id: "MOD-ES-0041",
+        title: "Detección de fraudes de inversión — guía para formadores",
+        authorityId: "AUTH-CNMV-ES",
+        jurisdiction: "ES",
+        edition: "3ª edición",
+        publishedOn: "2026-03-11",
+        audience: ["AUD-TRAINER", "AUD-RETAIL"],
+        languages: ["ES"],
+        usageBasis: "own_publication",
+        licenceExpires: null,
+        scope: "Material de formación para las sesiones presenciales de educación financiera: cómo se presentan las ofertas fraudulentas, qué comprobaciones puede hacer un inversor antes de transferir fondos, y cómo se responde a la presión comercial en el momento.",
+        outcomes: [
+            {
+                id: "OUT-ES-1",
+                statement: "El inversor comprueba en el registro oficial que la entidad está autorizada, y sabe que la comprobación la hace él y no la entidad.",
+                clauseId: "CL-ES-1",
+            },
+            {
+                id: "OUT-ES-2",
+                statement: "El inversor identifica la presión de urgencia como una técnica de venta y no como una característica de la oportunidad.",
+                clauseId: "CL-ES-2",
+            },
+            {
+                id: "OUT-ES-3",
+                statement: "El inversor comprueba a nombre de quién está la cuenta de destino antes de ordenar cualquier transferencia.",
+                clauseId: "CL-ES-3",
+            },
+            {
+                id: "OUT-ES-4",
+                statement: "El inversor consulta con alguien ajeno a la operación antes de comprometer fondos, y no acepta la petición de mantenerla en secreto.",
+                clauseId: "CL-ES-4",
+            },
+        ],
+        clauses: [
+            {
+                id: "CL-ES-1",
+                citation: "§2.4, p. 17",
+                text: "La verificación en los registros oficiales corresponde siempre al inversor. Una entidad que facilita su propio número de registro no ha acreditado nada: el número debe consultarse en la fuente oficial.",
+            },
+            {
+                id: "CL-ES-2",
+                citation: "§3.1, p. 24",
+                text: "La urgencia es una técnica de venta. Ninguna oportunidad legítima de inversión pierde su valor porque el inversor se tome el tiempo necesario para verificarla.",
+            },
+            {
+                id: "CL-ES-3",
+                citation: "§4.2, p. 31",
+                text: "Antes de ordenar una transferencia debe comprobarse la titularidad de la cuenta de destino. Una discrepancia entre el nombre de la entidad y el del titular de la cuenta es motivo suficiente para detener la operación.",
+            },
+            {
+                id: "CL-ES-4",
+                citation: "§5.3, p. 38",
+                text: "La petición de no comentar la operación con terceros es, por sí sola, un indicador. Consultar con una persona ajena a la operación antes de comprometer fondos es la medida de protección más eficaz de las recogidas en esta guía.",
+            },
+        ],
+        sharing: "CLEAR",
+        status: "RELEASED",
+        derivedObjectIds: ["E-MOD-ES-0041-1"],
+        declineReason: null,
+        supersededBy: null,
+    },
+    {
+        id: "MOD-ES-0038",
+        title: "Detección de fraudes de inversión — guía para formadores",
+        authorityId: "AUTH-CNMV-ES",
+        jurisdiction: "ES",
+        edition: "2ª edición",
+        publishedOn: "2024-09-02",
+        audience: ["AUD-TRAINER"],
+        languages: ["ES"],
+        usageBasis: "own_publication",
+        licenceExpires: null,
+        scope: "Edición anterior de la guía para formadores. Conservada porque hay objetos publicados que citan sus cláusulas y deben volver a anclarse en la 3ª edición.",
+        outcomes: [
+            {
+                id: "OUT-ES38-1",
+                statement: "El inversor comprueba que la entidad figura en el registro oficial antes de contratar.",
+                clauseId: "CL-ES38-1",
+            },
+        ],
+        clauses: [
+            { id: "CL-ES38-1", citation: "§2.2, p. 14", text: "Toda entidad que ofrezca servicios de inversión debe figurar en el registro correspondiente." },
+        ],
+        sharing: "CLEAR",
+        status: "SUPERSEDED",
+        derivedObjectIds: [],
+        declineReason: null,
+        supersededBy: "MOD-ES-0041",
+    },
+    {
+        id: "MOD-GB-0112",
+        title: "ScamSmart practitioner briefing — investment fraud",
+        authorityId: "AUTH-FCA-UK",
+        jurisdiction: "GB",
+        edition: "v4.2",
+        publishedOn: "2026-01-19",
+        audience: ["AUD-ADVISER", "AUD-TRAINER"],
+        languages: ["EN"],
+        usageBasis: "own_publication",
+        licenceExpires: null,
+        scope: "Briefing for advisers and educators on how investment fraud is presented to consumers, the checks a consumer can make, and the conversational patterns that precede a loss.",
+        outcomes: [
+            {
+                id: "OUT-GB-1",
+                statement: "The consumer treats a stated return as a claim to be tested rather than a feature of the product.",
+                clauseId: "CL-GB-1",
+            },
+            {
+                id: "OUT-GB-2",
+                statement: "The consumer can state what would have to happen for them to lose the whole amount, and what recourse exists if it does.",
+                clauseId: "CL-GB-2",
+            },
+            {
+                id: "OUT-GB-3",
+                statement: "The consumer recognises that a claim of automated or AI-driven trading describes how a system is built and not whether it works.",
+                clauseId: null,
+            },
+            {
+                id: "OUT-GB-4",
+                statement: "The consumer treats an unsolicited approach offering to retrieve money already handed over as a second attempt by the same operation, and hands over no advance fee.",
+                clauseId: "CL-GB-4",
+            },
+        ],
+        clauses: [
+            {
+                id: "CL-GB-1",
+                citation: "s.3.2",
+                text: "A projected return is a claim made by the seller. Consumers should ask what generates it, who else has to succeed for it to be paid, and what happens to it in a falling market.",
+            },
+            {
+                id: "CL-GB-2",
+                citation: "s.5.1",
+                text: "Consumers should establish, before committing funds, the circumstances in which the entire investment could be lost and whether any compensation scheme would apply.",
+            },
+            {
+                id: "CL-GB-4",
+                citation: "s.7.4",
+                text: "Consumers who have already handed over funds are frequently approached a second time by the same operation, presented as a recovery service. No legitimate recovery service requires a fee to be paid in advance of any recovery.",
+            },
+        ],
+        sharing: "CLEAR",
+        status: "MAPPED",
+        derivedObjectIds: [],
+        declineReason: null,
+        supersededBy: null,
+    },
+    {
+        id: "MOD-SG-0207",
+        title: "Frontline interception procedure — suspected investment scam transfers",
+        authorityId: "AUTH-MAS-SG",
+        jurisdiction: "SG",
+        edition: "2026.2",
+        publishedOn: "2026-04-28",
+        audience: ["AUD-BANK-STAFF"],
+        languages: ["EN"],
+        usageBasis: "restricted_internal",
+        licenceExpires: null,
+        scope: "Procedure issued to bank and broker frontline staff: the questions to ask a customer instructing a transfer that matches a scam pattern, the hold thresholds, and the escalation path.",
+        outcomes: [
+            {
+                id: "OUT-SG-1",
+                statement: "Staff establish the beneficiary account's registered name and whether the customer has verified it independently.",
+                clauseId: null,
+            },
+            {
+                id: "OUT-SG-2",
+                statement: "Staff identify time pressure applied by a third party to the customer as a hold trigger rather than a reason to expedite.",
+                clauseId: null,
+            },
+        ],
+        clauses: [],
+        sharing: "AMBER",
+        status: "TRIAGED",
+        derivedObjectIds: [],
+        declineReason: null,
+        supersededBy: null,
+    },
+    {
+        id: "MOD-MY-0074",
+        title: "InvestSmart® facilitator guide — recognising unlicensed offers",
+        authorityId: "AUTH-SC-MY",
+        jurisdiction: "MY",
+        edition: "2026 rev. 1",
+        publishedOn: "2026-02-06",
+        audience: ["AUD-TRAINER", "AUD-RETAIL"],
+        languages: ["EN", "MS"],
+        usageBasis: "own_publication",
+        licenceExpires: null,
+        scope: "Facilitator material for public investor-education sessions, covering licensing checks, the anatomy of an unlicensed offer, and how referrals through a trusted contact change a person's threshold for verifying.",
+        outcomes: [
+            {
+                id: "OUT-MY-1",
+                statement: "The investor verifies licensing independently of the person making the offer, including when that person is known to them.",
+                clauseId: "CL-MY-1",
+            },
+            {
+                id: "OUT-MY-2",
+                statement: "The investor recognises that a referral from a friend or community group is social proof and not evidence about the offer.",
+                clauseId: "CL-MY-2",
+            },
+        ],
+        clauses: [
+            {
+                id: "CL-MY-1",
+                citation: "Module 2, para 2.3",
+                text: "Licensing must be verified against the public register by the investor. Verification performed or reported by the party making the offer is not verification.",
+            },
+            {
+                id: "CL-MY-2",
+                citation: "Module 4, para 4.1",
+                text: "That other people have invested, including people known and trusted by the investor, is not evidence that an offer is genuine or that the entity is licensed.",
+            },
+        ],
+        sharing: "CLEAR",
+        status: "IN_REVIEW",
+        derivedObjectIds: [],
+        declineReason: null,
+        supersededBy: null,
+    },
+    {
+        id: "MOD-EU-0009",
+        title: "Retail investor protection — supervisory briefing on marketing communications",
+        authorityId: "AUTH-ESMA-EU",
+        jurisdiction: "EU",
+        edition: "2026/1",
+        publishedOn: "2026-05-20",
+        audience: ["AUD-SUPERVISOR"],
+        languages: ["EN"],
+        usageBasis: "own_publication",
+        licenceExpires: null,
+        scope: "Briefing for national supervisors on convergence in the assessment of retail marketing communications. Chapters cover fair-balanced-not-misleading, risk disclosure placement, and influencer marketing.",
+        outcomes: [],
+        clauses: [
+            {
+                id: "CL-EU-1",
+                citation: "Ch. 2, §14",
+                text: "Marketing communications should be identifiable as such and the presentation of risk should be no less prominent than the presentation of potential return.",
+            },
+        ],
+        sharing: "CLEAR",
+        status: "DECLINED",
+        derivedObjectIds: [],
+        declineReason: "Nothing to map. This is supervisory guidance about what firms must do, not a curriculum about what an investor should be able to do — it states no learning outcome, so there is no behaviour to connect to a competency element. Genuinely useful to a supervisor and unusable by the rehearsal engine. Returned to ESMA with the observation that Chapter 2 would restate as an outcome without much effort.",
+        supersededBy: null,
+    },
+    {
+        id: "MOD-IOSCO-0003",
+        title: "Retail investor education toolkit — fraud and high-pressure selling",
+        authorityId: "AUTH-IOSCO",
+        jurisdiction: "GLOBAL",
+        edition: "2025.4",
+        publishedOn: "2025-11-14",
+        audience: ["AUD-TRAINER", "AUD-RETAIL"],
+        languages: ["EN", "ES", "FR"],
+        usageBasis: "licensed",
+        licenceExpires: "2027-11-14",
+        scope: "Cross-jurisdiction toolkit contributed by members and licensed to national programmes. Covers high-pressure selling patterns, the verification sequence, and structured debriefing after a simulated approach.",
+        outcomes: [
+            {
+                id: "OUT-IO-1",
+                statement: "The investor states, before committing funds, what the downside is and what recourse exists if the entity turns out not to be real.",
+                clauseId: "CL-IO-1",
+            },
+            {
+                id: "OUT-IO-2",
+                statement: "The investor maintains a verification step under sustained commercial pressure rather than abandoning it to end the conversation.",
+                clauseId: "CL-IO-2",
+            },
+        ],
+        clauses: [
+            {
+                id: "CL-IO-1",
+                citation: "Part B, §3",
+                text: "Investors should be able to articulate the loss scenario and the available recourse before funds are committed, in their own words rather than by reference to a document they have been shown.",
+            },
+            {
+                id: "CL-IO-2",
+                citation: "Part C, §2",
+                text: "Sustained pressure is itself an indicator. The verification step is the part most commonly abandoned, and programmes should rehearse maintaining it rather than merely teaching it.",
+            },
+        ],
+        sharing: "GREEN",
+        status: "SUBMITTED",
+        derivedObjectIds: [],
+        declineReason: null,
+        supersededBy: null,
+    },
+];
+function trainingModule(id) {
+    return MODULES.find((m) => m.id === id);
 }
 
 /* ── lib/nexus/cohort.js ─────────────────────────────────── */
@@ -2613,18 +3354,78 @@ function prng(seed) {
     };
 }
 const SEEDS = [
+    /* Spain first, and at depth. A CNMV supervisor opening this in Madrid should
+       find their own programme on the first screen, not a foreign one they have
+       to filter down to. */
     {
-        cohortId: "CO-MY-RETAIL",
-        cohortName: "Retail investor outreach · Q3",
-        authorityId: "AUTH-SC-MY",
-        jurisdiction: "MY",
-        language: "EN",
-        regions: ["Kuala Lumpur", "Selangor", "Penang", "Johor", "Sabah"],
+        cohortId: "CO-ES-RETAIL",
+        cohortName: "Programa de educación financiera · minoristas",
+        authorityId: "AUTH-CNMV-ES",
+        jurisdiction: "ES",
+        language: "ES",
+        regions: ["Madrid", "Barcelona", "Valencia", "Sevilla", "Bilbao", "Zaragoza", "Málaga"],
         names: [
-            ["Aishah", "Daniel", "Mei Ling", "Ravi", "Nurul", "Wei Jie", "Suresh", "Farah", "Kai", "Priya"],
-            ["Rahman", "Tan", "Kumar", "Lim", "Abdullah", "Chong", "Pillai", "Ismail", "Ng", "Devi"],
+            ["Lucía", "Javier", "Carmen", "Álvaro", "Marta", "Sergio", "Elena", "Iñaki", "Rocío", "Pablo"],
+            ["Moreno", "Vidal", "Serrano", "Iglesias", "Cabrera", "Ruiz", "Ferrer", "Blanco", "Ortega", "Navarro"],
         ],
-        lift: 0,
+        lift: -2,
+    },
+    {
+        cohortId: "CO-ES-SENIOR",
+        cohortName: "Inversores mayores de 65 · piloto",
+        authorityId: "AUTH-CNMV-ES",
+        jurisdiction: "ES",
+        language: "ES",
+        regions: ["Madrid", "Barcelona", "Valencia", "A Coruña", "Murcia"],
+        names: [
+            ["Josefa", "Antonio", "Dolores", "Manuel", "Pilar", "Francisco", "Encarnación", "Ramón", "Amparo", "Vicente"],
+            ["Gómez", "Fernández", "Sáez", "Martín", "Calvo", "Herrero", "Nieto", "Bravo", "Lorenzo", "Prieto"],
+        ],
+        // The targeted population, running the hardest tactics. It scores lowest,
+        // and that is the finding rather than a flaw in the cohort.
+        lift: -7,
+    },
+    {
+        cohortId: "CO-FR-RETAIL",
+        cohortName: "Parcours investisseur particulier",
+        authorityId: "AUTH-AMF-FR",
+        jurisdiction: "FR",
+        language: "EN",
+        nativeLanguage: "French",
+        regions: ["Paris", "Lyon", "Marseille", "Toulouse", "Bordeaux"],
+        names: [
+            ["Camille", "Thomas", "Aurélie", "Nicolas", "Sophie", "Karim", "Émilie", "Julien", "Nadia", "Mathieu"],
+            ["Dubois", "Lefèvre", "Benali", "Rousseau", "Girard", "Marchand", "Da Silva", "Perrin", "Caron", "Meyer"],
+        ],
+        lift: -4,
+    },
+    {
+        cohortId: "CO-DE-RETAIL",
+        cohortName: "Privatanleger-Programm",
+        authorityId: "AUTH-BAFIN-DE",
+        jurisdiction: "DE",
+        language: "EN",
+        nativeLanguage: "German",
+        regions: ["Berlin", "München", "Frankfurt am Main", "Hamburg", "Köln"],
+        names: [
+            ["Lena", "Stefan", "Miriam", "Jonas", "Katrin", "Emre", "Annika", "Tobias", "Svenja", "Hakan"],
+            ["Brandt", "Keller", "Yilmaz", "Hoffmann", "Schreiber", "Neumann", "Kowalski", "Bauer", "Friedrich", "Engel"],
+        ],
+        lift: -1,
+    },
+    {
+        cohortId: "CO-IT-RETAIL",
+        cohortName: "Percorso investitori retail",
+        authorityId: "AUTH-CONSOB-IT",
+        jurisdiction: "IT",
+        language: "EN",
+        nativeLanguage: "Italian",
+        regions: ["Milano", "Roma", "Torino", "Napoli", "Bologna"],
+        names: [
+            ["Giulia", "Matteo", "Chiara", "Alessandro", "Federica", "Davide", "Sara", "Luca", "Martina", "Stefano"],
+            ["Ferrari", "Esposito", "Colombo", "Ricci", "Greco", "Marino", "Costa", "Rizzo", "Barbieri", "Fontana"],
+        ],
+        lift: -5,
     },
     {
         cohortId: "CO-GB-PANEL",
@@ -2641,6 +3442,19 @@ const SEEDS = [
         lift: -8,
     },
     {
+        cohortId: "CO-MY-RETAIL",
+        cohortName: "Retail investor outreach · Q3",
+        authorityId: "AUTH-SC-MY",
+        jurisdiction: "MY",
+        language: "EN",
+        regions: ["Kuala Lumpur", "Selangor", "Penang", "Johor", "Sabah"],
+        names: [
+            ["Aishah", "Daniel", "Mei Ling", "Ravi", "Nurul", "Wei Jie", "Suresh", "Farah", "Kai", "Priya"],
+            ["Rahman", "Tan", "Kumar", "Lim", "Abdullah", "Chong", "Pillai", "Ismail", "Ng", "Devi"],
+        ],
+        lift: 0,
+    },
+    {
         cohortId: "CO-SG-SENIOR",
         cohortName: "Senior investor programme",
         authorityId: "AUTH-MAS-SG",
@@ -2652,19 +3466,6 @@ const SEEDS = [
             ["Koh", "D'Cruz", "Bin Omar", "Teo", "Nathan", "Yeo", "Chandran", "Ho", "Wong", "Menon"],
         ],
         lift: -3,
-    },
-    {
-        cohortId: "CO-ES-CAMPAIGN",
-        cohortName: "Campaña de educación al inversor",
-        authorityId: "AUTH-CNMV-ES",
-        jurisdiction: "ES",
-        language: "ES",
-        regions: ["Madrid", "Cataluña", "Andalucía", "Valencia"],
-        names: [
-            ["Lucía", "Javier", "Carmen", "Álvaro", "Marta", "Sergio", "Elena", "Iñaki", "Rocío", "Pablo"],
-            ["Moreno", "Vidal", "Serrano", "Iglesias", "Cabrera", "Ruiz", "Ferrer", "Blanco", "Ortega", "Navarro"],
-        ],
-        lift: -2,
     },
 ];
 const SEGMENTS = [
@@ -2813,6 +3614,7 @@ function buildProgramme() {
                 region: seed.regions[Math.floor(r() * seed.regions.length)],
                 segment: SEGMENTS[Math.floor(r() * SEGMENTS.length)],
                 language: seed.language,
+                secondLanguage: seed.nativeLanguage ?? null,
                 enrolledOn: `2026-0${6 + Math.floor(r() * 3)}-${String(2 + Math.floor(r() * 26)).padStart(2, "0")}`,
                 consentBasis: "Programme enrolment · sponsor may review readiness",
             };
@@ -3018,7 +3820,7 @@ function tag(v){
 
 /* ── Sign in ──────────────────────────────────────────────────────── */
 $("authSel").innerHTML = AUTHORITIES.filter(a => a.id !== "AUTH-IOSCO")
-  .map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join("")
+  .map(a => `<option value="${a.id}" ${a.id === "AUTH-CNMV-ES" ? "selected" : ""}>${esc(a.name)}</option>`).join("")
   + `<option value="ALL">IOSCO — all contributing programmes</option>`;
 
 $("enterBtn").onclick = () => {
@@ -3055,7 +3857,13 @@ function transferCell(t){
 
 /* ── Scope: an authority sees its own enrolments, and nothing else. ── */
 function inScope(p){
-  return S.user.authorityId === "ALL" || p.authorityId === S.user.authorityId;
+  if (S.user.authorityId === "ALL") return true;
+  if (p.authorityId === S.user.authorityId) return true;
+  /* A regional body's convergence mandate is a right to SEE across national
+     programmes, never a right to approve inside one. This widens the view and
+     nothing else — approval stays role-on-object with the national authority. */
+  const a = authority(S.user.authorityId);
+  return !!(a && a.scopeJurisdictions && a.scopeJurisdictions.includes(p.jurisdiction));
 }
 function match(a, p){
   if (!inScope(p)) return false;
@@ -3197,6 +4005,7 @@ function pctOf(n, d){ return d ? Math.round((n / d) * 100) : 0; }
 
 function peopleView(){
   const rows = participantRows(PROG, match);
+  const second = rows.filter(r => r.participant.secondLanguage);
   return `
   <div class="pageHead">
     <span class="eyebrow">Enrolled · consent captured at enrolment</span>
@@ -3225,7 +4034,15 @@ function peopleView(){
     </tr>`).join("") : `<tr><td colspan="6" class="empty">No participants match these filters.</td></tr>`}</tbody>
   </table></div>
   <p class="cardNote">Every row names a person because that person enrolled through this
-    programme and agreed their sponsor could review the result. ${esc(rows[0] ? rows[0].participant.consentBasis : "")}</p>`;
+    programme and agreed their sponsor could review the result. ${esc(rows[0] ? rows[0].participant.consentBasis : "")}</p>
+  ${second.length ? `<div class="note plain">
+    <b>${second.length} of these participants rehearsed in a second language.</b>
+    ${esc([...new Set(second.map(r => r.participant.secondLanguage))].sort().join(", "))} are not
+    languages AUREN deploys, so those cohorts ran in English. It is not a footnote: someone
+    reasoning under pressure in their second language is being measured on something slightly
+    different, and comparing their score with a native-language cohort without saying so is a
+    comparison that overclaims.
+  </div>` : ""}`;
 }
 
 function sessionsView(){
@@ -3284,7 +4101,9 @@ function openAssessment(a){
     <dt>Cohort</dt><dd>${esc(p.cohortName)}</dd>
     <dt>Segment</dt><dd>${esc(p.segment)}</dd>
     <dt>Tactic faced</dt><dd>${esc(label(TYPOLOGIES, a.typology))} <span class="mono">${esc(a.typology)}</span></dd>
-    <dt>Language</dt><dd>${esc(p.language)}</dd>
+    <dt>Language</dt><dd>${esc(p.language)}${p.secondLanguage
+      ? `<span class="sub2">Delivered in ${esc(p.language)}; this cohort's own language is ${esc(p.secondLanguage)}. AUREN does not deploy it, so the rehearsal ran in a second language.</span>`
+      : ""}</dd>
     <dt>Duration</dt><dd>${a.minutes} min · ${a.turns} turns</dd>
     <dt>Consent</dt><dd>${esc(p.consentBasis)}</dd>
   </dl>

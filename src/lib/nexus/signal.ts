@@ -64,6 +64,13 @@ export interface ContributingAuthority {
   jurisdiction: string;
   /** Whether this authority's submissions are visible to the whole network. */
   sharesToNetwork: boolean;
+  /**
+   * Jurisdictions this authority supervises beyond its own — set only for a
+   * regional body whose mandate is convergence across national regulators.
+   * It widens what they may *see*; it never widens what they may approve,
+   * because approval is role-on-object and stays with the national authority.
+   */
+  scopeJurisdictions?: string[];
 }
 
 export interface ThreatSignal {

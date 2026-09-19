@@ -10,7 +10,7 @@
 | `/prototypes/auren-index.html` | The hub. Three doors: rehearsal, Nexus, Supervision Console. |
 | `/prototypes/auren-nexus.html` | Self-contained. Three workspaces, real derivation, the real publish gate. |
 | `/prototypes/auren-console.html` | The Supervision Console — named participants, individual assessments, verdicts. |
-| `src/lib/nexus/` | Vocabulary, signal model, derivation, corpus, cohort analytics, participants. |
+| `src/lib/nexus/` | Vocabulary, signal model, derivation, training modules, mapping, corpus, cohort analytics, participants. |
 | `npm run nexus` | Compiles the library and the console's governance spine into **both** prototypes. |
 
 ---
@@ -33,6 +33,7 @@ a serum to a fraud typology.
 
 ```
 SIGNAL → TRIAGE → DERIVE → REVIEW → PUBLISH GATE → BUNDLE → RUNTIME → RECORDS
+MODULE → TRIAGE → MAP ────┘                                               │
    ↑                                                                      │
    └──────────────  what is defeating people, and what we lack  ──────────┘
 ```
@@ -41,6 +42,78 @@ The arrow back is the point. A supervisory dashboard that only reports how
 learners did is a report. One that reports **which tactics are beating people
 and which of those we cannot yet rehearse against** tells the network what
 intelligence it actually needs next. That loop is the asset.
+
+---
+
+## Two intakes, one rule
+
+An authority has two things, and only one of them is intelligence.
+
+> **A signal says what the adversary does. A module says what the authority teaches.**
+
+Securities commissions have had curricula for years — facilitator guides for
+investor-education sessions, practitioner briefings for advisers, frontline
+procedure for the bank staff who are the last human between a customer and a
+transfer. That material is authored, reviewed, versioned and cited. It is the
+opposite of a threat report in every respect that matters, and feeding it
+through an intake built for threat reports would lose exactly what makes it
+valuable.
+
+They derive into different things, and the asymmetry is the argument for
+carrying both:
+
+| | Produces | Because |
+|---|---|---|
+| Threat signal | Challenge + failure signature | It describes an adversary |
+| Training module | Competency element + diagnostic question | It describes a competence |
+
+A challenge with no element to score against is theatre. An element with no
+challenge to pressure it is a quiz. **Neither intake alone produces a
+rehearsal.** That is the clearest statement of why the Nexus is a network
+asset rather than a document store.
+
+### What a module can do that a signal cannot
+
+Anchor an element. A competency element is required to cite the published
+principle it derives from, and the gate blocks release without one. For a
+signal that is the most expensive gap in the set — a legal reviewer has to go
+and *find* the principle. A module **is** the authority's published guidance,
+so a clause of it arrives as the anchor. The reviewer confirms that the clause
+supports the element rather than sourcing one, which is a different order of
+work. The console says so in those words: it is the work the upload removed,
+not work the upload did.
+
+Where an outcome lands on an element AUREN already carries, the mapping creates
+nothing and says so — and that is a result rather than a failure, because a
+second authority's published principle now stands behind a competence whose
+first anchor came from one jurisdiction.
+
+### What it still cannot do
+
+Supply the persona's words, or set the ladder ceiling. Those are adversarial
+strings spoken to a real person under pressure, and no amount of authority
+behind a curriculum makes a machine entitled to write them.
+
+It also cannot produce a scenario. **No challenge comes out of a module** — a
+handbook describes a competence, not an adversary, and inventing the adversary
+is not something a mapping is entitled to do. The gap list says this before a
+contributing authority has to ask, because "we uploaded our handbook and got no
+scenarios" is a conversation better had in the console than in a meeting.
+
+### What the intake insists on
+
+| Field | Why it blocks |
+|---|---|
+| **Learning outcomes**, stated as behaviours | The exact analogue of a signal's `defeats`. A module listing *topics covered* cannot be connected to a competency element, so there is nothing to map and nothing to score. Most real training material is written this way, and only the contributing authority can restate its own curriculum. |
+| **Clauses** — verbatim text plus citation | The Nexus stores text, never an opaque file. An anchor reading "see the handbook" is not an anchor, and a reviewer confirming a mapping needs the sentence in front of them. |
+| **Usage basis** | Own publication, licensed, or restricted internal. Not a tag: getting it wrong means quoting someone else's copyrighted curriculum to a retail investor, or publishing a bank's interception procedure to the people it is designed to detect. A licensed module's expiry becomes the review date of everything mapped from it, because content outliving its licence is a live exposure nobody notices until someone asks where a sentence came from. |
+| **Audience** | Material written for frontline staff assumes a job, a screen, a procedure and a colleague. Every learner-facing string derived from it has to be re-authored for someone who has none of those. |
+
+Cue matching is **per language**. A Spanish curriculum read against an English
+cue list matches by accident — *transferencia* happens to contain *transfer*
+and *registro* does not contain *register* — which produces a mapping that
+looks like it worked while silently proposing a duplicate element. The console
+names the language it read.
 
 ---
 
@@ -64,7 +137,7 @@ intelligence it could never publish.
 Contributors are organisations, never individuals — Pioneer's resolution, for
 Pioneer's reason.
 
-### Authoring — derivation proposes, humans dispose
+### Authoring — derivation and mapping propose, humans dispose
 
 `derive()` does the mechanical half: classify, map the tactic onto a competency
 element, shape the candidate objects, carry the surface profile through, and
@@ -97,6 +170,20 @@ Supervision is **two surfaces over two populations**, and they are not joinable.
 |---|---|---|---|
 | Nexus · Supervision | Anyone who opened AUREN from a link — no account, no name | Cohort and tactic only | `auren-nexus.html?ws=super` |
 | Supervision Console | People enrolled through an authority's programme, consent captured at enrolment | Named individual, every assessment | `auren-console.html` |
+
+Eight cohorts across seven jurisdictions: Spain (two — a retail programme and
+a pilot for investors over 65), France, Germany, Italy, the UK, Malaysia and
+Singapore. **ESMA is modelled as a regional body**, and its scope is exactly
+what a convergence mandate is: a right to *see* across the national programmes
+it covers, never a right to approve inside one. Approval stays role-on-object
+with the national authority, which is the same separation the object lifecycle
+already enforces and the reason it can be granted safely.
+
+Where a cohort's own language is not one AUREN deploys — French, German,
+Italian — the console says the rehearsal ran in English and says why that
+matters. Someone reasoning under pressure in their second language is being
+measured on something slightly different, and comparing that score with a
+native-language cohort without stating it is a comparison that overclaims.
 
 The public population is the larger one and is deliberately unreachable: nothing
 retained identifies anybody, which is the property that makes a public rehearsal
@@ -184,6 +271,8 @@ and the supervisory view. Everything else was already load-bearing.
 | Absent | Why |
 |---|---|
 | **Consent withdrawal** | A participant consented at enrolment. Withdrawing it should remove them from the console, and there is no mechanism here — the corpus is append-only and the erasure path is a real design problem, not a checkbox. |
+| **Document ingestion** | Clauses are pasted, not extracted. Parsing a PDF handbook into citable passages is a real integration against real formats, and a mis-extracted clause becomes a wrong anchor on a released object — which is worse than no extraction. |
+| **Edition re-anchoring** | A module supersedes its own earlier edition, and objects anchored to the old one keep citing it. The corpus records the supersession; nothing yet walks the released objects and asks a legal reviewer to re-anchor them. |
 | **The object editor** | Still the screen a reviewer lives in, still unbuilt, and now the bottleneck is visible: every gap in a derivation is a field someone has to fill somewhere. |
 | **Ingestion from real feeds** | Signals are lodged by hand here. Parsing an authority's alert bulletin is a real integration against a real format, not a guess. |
 | **Bilateral sharing enforcement** | `sharesToNetwork` is declared and displayed but nothing enforces it. Cross-border intelligence sharing agreements are legal instruments before they are code. |

@@ -12,6 +12,7 @@
  * everything is clean is a corpus nobody has used.
  */
 
+import type { TrainingModule } from "./module";
 import type { ContributingAuthority, ThreatSignal } from "./signal";
 
 export const AUTHORITIES: ContributingAuthority[] = [
@@ -21,6 +22,19 @@ export const AUTHORITIES: ContributingAuthority[] = [
   { id: "AUTH-MAS-SG", name: "Monetary Authority of Singapore", jurisdiction: "SG", sharesToNetwork: true },
   { id: "AUTH-CNMV-ES", name: "Comisión Nacional del Mercado de Valores", jurisdiction: "ES", sharesToNetwork: true },
   { id: "AUTH-SCA-AE", name: "Securities and Commodities Authority", jurisdiction: "AE", sharesToNetwork: false },
+  /* European members. ESMA is the regional body: it supervises no retail
+     investor directly, and the convergence mandate is exactly a right to see
+     across national programmes without the right to approve inside them. */
+  {
+    id: "AUTH-ESMA-EU",
+    name: "European Securities and Markets Authority",
+    jurisdiction: "EU",
+    sharesToNetwork: true,
+    scopeJurisdictions: ["ES", "FR", "DE", "IT"],
+  },
+  { id: "AUTH-AMF-FR", name: "Autorité des marchés financiers", jurisdiction: "FR", sharesToNetwork: true },
+  { id: "AUTH-BAFIN-DE", name: "Bundesanstalt für Finanzdienstleistungsaufsicht", jurisdiction: "DE", sharesToNetwork: true },
+  { id: "AUTH-CONSOB-IT", name: "Commissione Nazionale per le Società e la Borsa", jurisdiction: "IT", sharesToNetwork: true },
 ];
 
 export function authority(id: string): ContributingAuthority | undefined {
@@ -202,4 +216,326 @@ export const SIGNALS: ThreatSignal[] = [
 
 export function signal(id: string): ThreatSignal | undefined {
   return SIGNALS.find((s) => s.id === id);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TRAINING MODULES
+
+   What the authorities already have. Deliberately at different stages and in
+   different states of usability, because a module queue where everything maps
+   cleanly is a queue nobody has put real training material through: real
+   curricula state topics rather than behaviours, arrive as internal procedure,
+   or turn out to be a superseded edition of something already mapped.
+   ═════════════════════════════════════════════════════════════════════ */
+
+export const MODULES: TrainingModule[] = [
+  {
+    id: "MOD-ES-0041",
+    title: "Detección de fraudes de inversión — guía para formadores",
+    authorityId: "AUTH-CNMV-ES",
+    jurisdiction: "ES",
+    edition: "3ª edición",
+    publishedOn: "2026-03-11",
+    audience: ["AUD-TRAINER", "AUD-RETAIL"],
+    languages: ["ES"],
+    usageBasis: "own_publication",
+    licenceExpires: null,
+    scope:
+      "Material de formación para las sesiones presenciales de educación financiera: cómo se presentan las ofertas fraudulentas, qué comprobaciones puede hacer un inversor antes de transferir fondos, y cómo se responde a la presión comercial en el momento.",
+    outcomes: [
+      {
+        id: "OUT-ES-1",
+        statement:
+          "El inversor comprueba en el registro oficial que la entidad está autorizada, y sabe que la comprobación la hace él y no la entidad.",
+        clauseId: "CL-ES-1",
+      },
+      {
+        id: "OUT-ES-2",
+        statement:
+          "El inversor identifica la presión de urgencia como una técnica de venta y no como una característica de la oportunidad.",
+        clauseId: "CL-ES-2",
+      },
+      {
+        id: "OUT-ES-3",
+        statement:
+          "El inversor comprueba a nombre de quién está la cuenta de destino antes de ordenar cualquier transferencia.",
+        clauseId: "CL-ES-3",
+      },
+      {
+        id: "OUT-ES-4",
+        statement:
+          "El inversor consulta con alguien ajeno a la operación antes de comprometer fondos, y no acepta la petición de mantenerla en secreto.",
+        clauseId: "CL-ES-4",
+      },
+    ],
+    clauses: [
+      {
+        id: "CL-ES-1",
+        citation: "§2.4, p. 17",
+        text: "La verificación en los registros oficiales corresponde siempre al inversor. Una entidad que facilita su propio número de registro no ha acreditado nada: el número debe consultarse en la fuente oficial.",
+      },
+      {
+        id: "CL-ES-2",
+        citation: "§3.1, p. 24",
+        text: "La urgencia es una técnica de venta. Ninguna oportunidad legítima de inversión pierde su valor porque el inversor se tome el tiempo necesario para verificarla.",
+      },
+      {
+        id: "CL-ES-3",
+        citation: "§4.2, p. 31",
+        text: "Antes de ordenar una transferencia debe comprobarse la titularidad de la cuenta de destino. Una discrepancia entre el nombre de la entidad y el del titular de la cuenta es motivo suficiente para detener la operación.",
+      },
+      {
+        id: "CL-ES-4",
+        citation: "§5.3, p. 38",
+        text: "La petición de no comentar la operación con terceros es, por sí sola, un indicador. Consultar con una persona ajena a la operación antes de comprometer fondos es la medida de protección más eficaz de las recogidas en esta guía.",
+      },
+    ],
+    sharing: "CLEAR",
+    status: "RELEASED",
+    derivedObjectIds: ["E-MOD-ES-0041-1"],
+    declineReason: null,
+    supersededBy: null,
+  },
+  {
+    id: "MOD-ES-0038",
+    title: "Detección de fraudes de inversión — guía para formadores",
+    authorityId: "AUTH-CNMV-ES",
+    jurisdiction: "ES",
+    edition: "2ª edición",
+    publishedOn: "2024-09-02",
+    audience: ["AUD-TRAINER"],
+    languages: ["ES"],
+    usageBasis: "own_publication",
+    licenceExpires: null,
+    scope:
+      "Edición anterior de la guía para formadores. Conservada porque hay objetos publicados que citan sus cláusulas y deben volver a anclarse en la 3ª edición.",
+    outcomes: [
+      {
+        id: "OUT-ES38-1",
+        statement: "El inversor comprueba que la entidad figura en el registro oficial antes de contratar.",
+        clauseId: "CL-ES38-1",
+      },
+    ],
+    clauses: [
+      { id: "CL-ES38-1", citation: "§2.2, p. 14", text: "Toda entidad que ofrezca servicios de inversión debe figurar en el registro correspondiente." },
+    ],
+    sharing: "CLEAR",
+    status: "SUPERSEDED",
+    derivedObjectIds: [],
+    declineReason: null,
+    supersededBy: "MOD-ES-0041",
+  },
+  {
+    id: "MOD-GB-0112",
+    title: "ScamSmart practitioner briefing — investment fraud",
+    authorityId: "AUTH-FCA-UK",
+    jurisdiction: "GB",
+    edition: "v4.2",
+    publishedOn: "2026-01-19",
+    audience: ["AUD-ADVISER", "AUD-TRAINER"],
+    languages: ["EN"],
+    usageBasis: "own_publication",
+    licenceExpires: null,
+    scope:
+      "Briefing for advisers and educators on how investment fraud is presented to consumers, the checks a consumer can make, and the conversational patterns that precede a loss.",
+    outcomes: [
+      {
+        id: "OUT-GB-1",
+        statement: "The consumer treats a stated return as a claim to be tested rather than a feature of the product.",
+        clauseId: "CL-GB-1",
+      },
+      {
+        id: "OUT-GB-2",
+        statement: "The consumer can state what would have to happen for them to lose the whole amount, and what recourse exists if it does.",
+        clauseId: "CL-GB-2",
+      },
+      {
+        id: "OUT-GB-3",
+        statement: "The consumer recognises that a claim of automated or AI-driven trading describes how a system is built and not whether it works.",
+        clauseId: null,
+      },
+      {
+        id: "OUT-GB-4",
+        statement:
+          "The consumer treats an unsolicited approach offering to retrieve money already handed over as a second attempt by the same operation, and hands over no advance fee.",
+        clauseId: "CL-GB-4",
+      },
+    ],
+    clauses: [
+      {
+        id: "CL-GB-1",
+        citation: "s.3.2",
+        text: "A projected return is a claim made by the seller. Consumers should ask what generates it, who else has to succeed for it to be paid, and what happens to it in a falling market.",
+      },
+      {
+        id: "CL-GB-2",
+        citation: "s.5.1",
+        text: "Consumers should establish, before committing funds, the circumstances in which the entire investment could be lost and whether any compensation scheme would apply.",
+      },
+      {
+        id: "CL-GB-4",
+        citation: "s.7.4",
+        text: "Consumers who have already handed over funds are frequently approached a second time by the same operation, presented as a recovery service. No legitimate recovery service requires a fee to be paid in advance of any recovery.",
+      },
+    ],
+    sharing: "CLEAR",
+    status: "MAPPED",
+    derivedObjectIds: [],
+    declineReason: null,
+    supersededBy: null,
+  },
+  {
+    id: "MOD-SG-0207",
+    title: "Frontline interception procedure — suspected investment scam transfers",
+    authorityId: "AUTH-MAS-SG",
+    jurisdiction: "SG",
+    edition: "2026.2",
+    publishedOn: "2026-04-28",
+    audience: ["AUD-BANK-STAFF"],
+    languages: ["EN"],
+    usageBasis: "restricted_internal",
+    licenceExpires: null,
+    scope:
+      "Procedure issued to bank and broker frontline staff: the questions to ask a customer instructing a transfer that matches a scam pattern, the hold thresholds, and the escalation path.",
+    outcomes: [
+      {
+        id: "OUT-SG-1",
+        statement: "Staff establish the beneficiary account's registered name and whether the customer has verified it independently.",
+        clauseId: null,
+      },
+      {
+        id: "OUT-SG-2",
+        statement: "Staff identify time pressure applied by a third party to the customer as a hold trigger rather than a reason to expedite.",
+        clauseId: null,
+      },
+    ],
+    clauses: [],
+    sharing: "AMBER",
+    status: "TRIAGED",
+    derivedObjectIds: [],
+    declineReason: null,
+    supersededBy: null,
+  },
+  {
+    id: "MOD-MY-0074",
+    title: "InvestSmart® facilitator guide — recognising unlicensed offers",
+    authorityId: "AUTH-SC-MY",
+    jurisdiction: "MY",
+    edition: "2026 rev. 1",
+    publishedOn: "2026-02-06",
+    audience: ["AUD-TRAINER", "AUD-RETAIL"],
+    languages: ["EN", "MS"],
+    usageBasis: "own_publication",
+    licenceExpires: null,
+    scope:
+      "Facilitator material for public investor-education sessions, covering licensing checks, the anatomy of an unlicensed offer, and how referrals through a trusted contact change a person's threshold for verifying.",
+    outcomes: [
+      {
+        id: "OUT-MY-1",
+        statement:
+          "The investor verifies licensing independently of the person making the offer, including when that person is known to them.",
+        clauseId: "CL-MY-1",
+      },
+      {
+        id: "OUT-MY-2",
+        statement:
+          "The investor recognises that a referral from a friend or community group is social proof and not evidence about the offer.",
+        clauseId: "CL-MY-2",
+      },
+    ],
+    clauses: [
+      {
+        id: "CL-MY-1",
+        citation: "Module 2, para 2.3",
+        text: "Licensing must be verified against the public register by the investor. Verification performed or reported by the party making the offer is not verification.",
+      },
+      {
+        id: "CL-MY-2",
+        citation: "Module 4, para 4.1",
+        text: "That other people have invested, including people known and trusted by the investor, is not evidence that an offer is genuine or that the entity is licensed.",
+      },
+    ],
+    sharing: "CLEAR",
+    status: "IN_REVIEW",
+    derivedObjectIds: [],
+    declineReason: null,
+    supersededBy: null,
+  },
+  {
+    id: "MOD-EU-0009",
+    title: "Retail investor protection — supervisory briefing on marketing communications",
+    authorityId: "AUTH-ESMA-EU",
+    jurisdiction: "EU",
+    edition: "2026/1",
+    publishedOn: "2026-05-20",
+    audience: ["AUD-SUPERVISOR"],
+    languages: ["EN"],
+    usageBasis: "own_publication",
+    licenceExpires: null,
+    scope:
+      "Briefing for national supervisors on convergence in the assessment of retail marketing communications. Chapters cover fair-balanced-not-misleading, risk disclosure placement, and influencer marketing.",
+    outcomes: [],
+    clauses: [
+      {
+        id: "CL-EU-1",
+        citation: "Ch. 2, §14",
+        text: "Marketing communications should be identifiable as such and the presentation of risk should be no less prominent than the presentation of potential return.",
+      },
+    ],
+    sharing: "CLEAR",
+    status: "DECLINED",
+    derivedObjectIds: [],
+    declineReason:
+      "Nothing to map. This is supervisory guidance about what firms must do, not a curriculum about what an investor should be able to do — it states no learning outcome, so there is no behaviour to connect to a competency element. Genuinely useful to a supervisor and unusable by the rehearsal engine. Returned to ESMA with the observation that Chapter 2 would restate as an outcome without much effort.",
+    supersededBy: null,
+  },
+  {
+    id: "MOD-IOSCO-0003",
+    title: "Retail investor education toolkit — fraud and high-pressure selling",
+    authorityId: "AUTH-IOSCO",
+    jurisdiction: "GLOBAL",
+    edition: "2025.4",
+    publishedOn: "2025-11-14",
+    audience: ["AUD-TRAINER", "AUD-RETAIL"],
+    languages: ["EN", "ES", "FR"],
+    usageBasis: "licensed",
+    licenceExpires: "2027-11-14",
+    scope:
+      "Cross-jurisdiction toolkit contributed by members and licensed to national programmes. Covers high-pressure selling patterns, the verification sequence, and structured debriefing after a simulated approach.",
+    outcomes: [
+      {
+        id: "OUT-IO-1",
+        statement:
+          "The investor states, before committing funds, what the downside is and what recourse exists if the entity turns out not to be real.",
+        clauseId: "CL-IO-1",
+      },
+      {
+        id: "OUT-IO-2",
+        statement:
+          "The investor maintains a verification step under sustained commercial pressure rather than abandoning it to end the conversation.",
+        clauseId: "CL-IO-2",
+      },
+    ],
+    clauses: [
+      {
+        id: "CL-IO-1",
+        citation: "Part B, §3",
+        text: "Investors should be able to articulate the loss scenario and the available recourse before funds are committed, in their own words rather than by reference to a document they have been shown.",
+      },
+      {
+        id: "CL-IO-2",
+        citation: "Part C, §2",
+        text: "Sustained pressure is itself an indicator. The verification step is the part most commonly abandoned, and programmes should rehearse maintaining it rather than merely teaching it.",
+      },
+    ],
+    sharing: "GREEN",
+    status: "SUBMITTED",
+    derivedObjectIds: [],
+    declineReason: null,
+    supersededBy: null,
+  },
+];
+
+export function trainingModule(id: string): TrainingModule | undefined {
+  return MODULES.find((m) => m.id === id);
 }

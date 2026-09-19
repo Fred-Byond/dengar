@@ -18,7 +18,7 @@ been built out twice more, for investor protection and for the authorities super
 | **Ministry intelligence** | `/dashboard` | DENGAR Intelligence — sentiment map, top issues, citizen suggestions, urgent review queue, action tracker. Two role views: **Minister** (the pulse) and **Secretary General** (assign, track, resolve). The enduring value and the recurring revenue. |
 | **Session Explorer** | `/sessions` | Dashboard view 5, **React-native**. Search/filter every session, open the CVIF Session Insight Record, read the transcript (original + English), work the urgent queue. PII masked by default; reveal is audit-logged. Wired to the real CVIF scorer. |
 | **Knowledge Authority** | `/console` | The internal governance console: object registry, eight-state lifecycle, publish gate and release ledger across AUREN, Project Pioneer and Beauty Intelligence. Reconciles three papers that independently specified the same architecture. See [`docs/KNOWLEDGE-AUTHORITY.md`](docs/KNOWLEDGE-AUTHORITY.md). |
-| **AUREN Nexus** | `/prototypes/auren-nexus.html` | The scam-intelligence layer. Authorities lodge emerging tactics; derivation proposes DRAFT objects and names the gaps it cannot fill; the same ten-test publish gate decides release. Cohort-level supervision. See [`docs/AUREN-NEXUS.md`](docs/AUREN-NEXUS.md). |
+| **AUREN Nexus** | `/prototypes/auren-nexus.html` | The knowledge layer, with two intakes. Authorities lodge emerging **tactics** and upload their governed **training modules**; a signal produces challenges and failure signatures, a module produces competency elements and diagnostic questions, and both reach a learner only through the same ten-test publish gate. Cohort-level supervision. See [`docs/AUREN-NEXUS.md`](docs/AUREN-NEXUS.md). |
 | **AUREN Supervision Console** | `/prototypes/auren-console.html` | What a securities commission sees after its programme has been put under pressure: enrolled participants by region and cohort, each individual's assessment across five dimensions with their own words as evidence, and the verdict — investor-ready, coaching, or priority. |
 | **AUREN hub** | `/prototypes/auren-index.html` | The three doors, in the Beauty programme's house treatment. |
 | **AUREN rehearsal** | `/auren` | Investor rehearsal loop for the AUREN programme — a second configuration of the same governed-interview method. Voice-first digital-human session in **English / Español / 中文 / العربية**: understand → diagnose → stress → coach → retest → evidence chain. See [`docs/AUREN-ORDERING.md`](docs/AUREN-ORDERING.md). |
@@ -45,7 +45,8 @@ dengar/
 │   │   ├── SessionExplorer.tsx React-native view over the CVIF scorer
 │   │   ├── auren/              Stage router, Reasoning Map rail, coach beats, scorecard
 │   │   ├── console/            Governance console: registry, gate, release ledger
-│   │   └── nexus/              Vocabulary, signals, derivation, cohort + participant analytics
+│   │   └── nexus/              Vocabulary, signals, derivation, training modules, mapping,
+│   │                            corpus, cohort + participant analytics
 │   └── lib/
 │       ├── types.ts            Domain model (Citizen, Slot, Booking, Session, Insight, AuditLog)
 │       ├── seed.ts             Deterministic session generator (feeds the Session Explorer)
@@ -72,7 +73,7 @@ dengar/
 │   ├── national-pulse.html
 │   ├── auren-rehearsal.html    Voice-first AUREN loop, 4 languages (no SDK key needed)
 │   ├── auren-index.html        The AUREN hub — three doors
-│   ├── auren-nexus.html        Scam-intelligence layer: intake → derive → gate → cohort view
+│   ├── auren-nexus.html        Knowledge layer: signals + training modules → gate → cohort view
 │   ├── auren-console.html      Supervision Console: participants, assessments, verdicts
 │   └── knowledge-authority.html    Governance console, standalone (real gate, real libraries)
 ├── scripts/

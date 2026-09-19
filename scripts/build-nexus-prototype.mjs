@@ -44,6 +44,8 @@ const ORDER = [
   "lib/nexus/vocabulary.js",
   "lib/nexus/signal.js",
   "lib/nexus/derive.js",
+  "lib/nexus/module.js",
+  "lib/nexus/map-module.js",
   "lib/nexus/corpus.js",
   "lib/nexus/cohort.js",
   "lib/nexus/participants.js",
