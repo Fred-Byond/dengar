@@ -41,6 +41,9 @@ const ORDER = [
   "lib/console/library.js",
   "lib/console/gate.js",
   "lib/console/release.js",
+  "lib/tenant/tenant.js",
+  "lib/tenant/roster.js",
+  "lib/tenant/ccu.js",
   "lib/nexus/vocabulary.js",
   "lib/nexus/signal.js",
   "lib/nexus/derive.js",
@@ -72,6 +75,7 @@ try {
         join(ROOT, "src/lib/console/**/*.ts"),
         join(ROOT, "src/lib/auren/**/*.ts"),
         join(ROOT, "src/lib/nexus/**/*.ts"),
+        join(ROOT, "src/lib/tenant/**/*.ts"),
       ],
     })
   );

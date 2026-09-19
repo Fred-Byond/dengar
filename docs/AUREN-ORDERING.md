@@ -166,7 +166,10 @@ the result.
 
 ## Languages
 
-Four variants ship: **English, Spanish, Chinese, Arabic** — text *and* voice.
+Five variants ship: **English, Spanish, Chinese, Arabic, Japanese** — text *and*
+voice. 205 governed strings per language: every UI string, every diagnostic
+question, every escalation ladder, every failure-signature coaching line, and
+the satisfaction cues that decide whether an element passed.
 
 Paper III §10.2 makes language a first-class dimension of every scored
 determination, not a display setting. So the localisation reaches all the way
@@ -180,6 +183,18 @@ into the engine:
 | **Satisfaction cues** | **The critical one.** A Spanish answer is evaluated against Spanish cues. Ship English cues only, and every element silently fails for every non-English learner while the UI looks perfectly translated. |
 | **Resistance detection** | Per-language patterns, because "I want to verify that myself" is not a translation exercise — it is the behaviour the retest measures. |
 | **AILS explainability** | Composed from record fields in the learner's language. |
+
+Adding Japanese did something worth recording: it **broke the publish gate**.
+Deploying a fifth language made the boundary-refusal test fail, because the
+refusal was proven in four languages and a boundary that has not been proven in
+a language it will be spoken in is not a boundary. Supplying the Japanese probe
+closed it. That is the gate doing its job — a language is not a setting, it is
+a dimension every released object has to be complete in, and the honest cost of
+reach is that reach re-opens the governance work.
+
+Japanese ships at `fidelity: review-pending`, exactly as Spanish, Chinese and
+Arabic do. The gate reports it as an advisory finding on every variant and the
+learner-facing screen says so. Only English has passed native review.
 
 ### One source, two builds
 

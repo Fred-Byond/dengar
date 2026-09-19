@@ -171,19 +171,57 @@ Supervision is **two surfaces over two populations**, and they are not joinable.
 | Nexus · Supervision | Anyone who opened AUREN from a link — no account, no name | Cohort and tactic only | `auren-nexus.html?ws=super` |
 | Supervision Console | People enrolled through an authority's programme, consent captured at enrolment | Named individual, every assessment | `auren-console.html` |
 
-Eight cohorts across seven jurisdictions: Spain (two — a retail programme and
-a pilot for investors over 65), France, Germany, Italy, the UK, Malaysia and
-Singapore. **ESMA is modelled as a regional body**, and its scope is exactly
-what a convergence mandate is: a right to *see* across the national programmes
-it covers, never a right to approve inside one. Approval stays role-on-object
-with the national authority, which is the same separation the object lifecycle
-already enforces and the reason it can be granted safely.
+Fourteen cohorts across ten jurisdictions and five delivery languages: Spain
+(three — a retail programme, a pilot for investors over 65, and a bank),
+Japan (two), Hong Kong (two), the UAE, France, Germany, Italy, the UK, Malaysia
+and Singapore.
+
+**The console is multi-tenant, and the scope decision is made once.**
+`src/lib/tenant/` holds it: `scopeOf(viewer, subject)` returns a *grain* —
+`individual`, `aggregate` or `none` — rather than a boolean, because the real
+question has no yes/no answer. May an ESMA supervisor see Spanish
+participants? They may see how the Spanish cohort is doing and they may not see
+who anyone in it is. A boolean forces that to be answered wrongly in one
+direction, in a hundred call sites instead of one.
+
+| Viewer | Subject | Grain |
+|---|---|---|
+| Any tenant | Itself | Individual (except a network body, which has no members) |
+| Network body | A tenant in its network jurisdictions | Aggregate |
+| Regulator | A bank that reports to it | **Aggregate** — it regulates the market, not the customer relationship |
+| Anyone | Anyone else | None |
+
+That third row is the one that matters commercially. A bank will not deploy
+into a platform where its supervisor can read its customer list, and "we filter
+it in the UI" is not an answer — it is the same query with a cosmetic layer on
+top. A network body opening Participants gets a cohort roll-up with the absence
+stated, not an empty table: an empty table reads as a bug, and a refusal reads
+as a design decision, which is what it is.
+
+Tenant kinds also carry the vocabulary: a bank has **customers**, a ministry
+has **residents**, a regulator has **participants**. Printing "participants" at
+a bank is a small thing that tells a reviewer the product was built for
+somebody else. The consent basis comes from the tenant too, because a bank's
+duty of care and a regulator's programme enrolment are different bases and one
+sentence for both would misdescribe the stronger of them.
+
+Five languages are deployed — **English, Spanish, Chinese, Arabic, Japanese** —
+and the console shows which one each assessment ran in, because an element
+passes on satisfaction cues authored in that language. Two people with the same
+score were scored by different governed strings, and a table that hides that is
+hiding the thing a fidelity reviewer needs.
 
 Where a cohort's own language is not one AUREN deploys — French, German,
 Italian — the console says the rehearsal ran in English and says why that
 matters. Someone reasoning under pressure in their second language is being
 measured on something slightly different, and comparing that score with a
 native-language cohort without stating it is a comparison that overclaims.
+
+Delivery languages are also an **entitlement**, not a price. A language a
+tenant is not licensed for cannot be selected — for a governance reason, since
+an unreviewed variant scoring a real person is the failure the fidelity rule
+exists to prevent, and that constraint must never be quietly converted into an
+upsell. See [`AUREN-COMMERCIAL.md`](AUREN-COMMERCIAL.md).
 
 The public population is the larger one and is deliberately unreachable: nothing
 retained identifies anybody, which is the property that makes a public rehearsal

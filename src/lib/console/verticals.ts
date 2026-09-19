@@ -17,7 +17,7 @@ export const VERTICALS: VerticalPack[] = [
     source: "AUREN Paper III v1.1 · Paper IV v1.0",
     doctrine: "dual",
     modes: ["LEARN", "REHEARSE", "PROTECT"],
-    languages: ["EN", "ES", "ZH", "AR"],
+    languages: ["EN", "ES", "ZH", "AR", "JA"],
     markets: ["GLOBAL"],
     anchorAuthority: "IOSCO investor-education principles · OECD/INFE competence framework",
     outputObject: "Investor Readiness Record",

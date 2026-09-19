@@ -31,6 +31,7 @@
  */
 
 import type { Lang } from "../auren/i18n";
+import { tenantById } from "../tenant/roster";
 
 /* ═══════════════════════════════════════════════════════════════════════
    WHAT IS SCORED
@@ -147,6 +148,9 @@ export interface Participant {
   name: string;
   cohortId: string;
   cohortName: string;
+  /** The organisation that enrolled this person and may see them by name. */
+  tenantId: string;
+  /** The body that supervises the market — not necessarily the same tenant. */
   authorityId: string;
   jurisdiction: string;
   region: string;
@@ -210,6 +214,9 @@ function prng(seed: number): () => number {
 interface RegionSeed {
   cohortId: string;
   cohortName: string;
+  /** The organisation that enrolled this person and may see them by name. */
+  tenantId: string;
+  /** The body that supervises the market — not necessarily the same tenant. */
   authorityId: string;
   jurisdiction: string;
   language: Lang;
@@ -217,6 +224,12 @@ interface RegionSeed {
   names: string[][];
   /** The cohort's own language, when AUREN does not deploy it. */
   nativeLanguage?: string;
+  /**
+   * How a full name is written here. Printing 幸子 木村 at a Japanese bank, or
+   * 嘉欣 陳 in Hong Kong, is a small thing that tells a reviewer the product
+   * was localised by translating strings and not by looking at a form.
+   */
+  nameOrder?: "given-family" | "family-given" | "family-given-joined";
   /** Programme maturity: a cohort that started late scores lower, honestly. */
   lift: number;
 }
@@ -228,6 +241,7 @@ const SEEDS: RegionSeed[] = [
   {
     cohortId: "CO-ES-RETAIL",
     cohortName: "Programa de educación financiera · minoristas",
+    tenantId: "AUTH-CNMV-ES",
     authorityId: "AUTH-CNMV-ES",
     jurisdiction: "ES",
     language: "ES",
@@ -241,6 +255,7 @@ const SEEDS: RegionSeed[] = [
   {
     cohortId: "CO-ES-SENIOR",
     cohortName: "Inversores mayores de 65 · piloto",
+    tenantId: "AUTH-CNMV-ES",
     authorityId: "AUTH-CNMV-ES",
     jurisdiction: "ES",
     language: "ES",
@@ -256,6 +271,7 @@ const SEEDS: RegionSeed[] = [
   {
     cohortId: "CO-FR-RETAIL",
     cohortName: "Parcours investisseur particulier",
+    tenantId: "AUTH-AMF-FR",
     authorityId: "AUTH-AMF-FR",
     jurisdiction: "FR",
     language: "EN",
@@ -270,6 +286,7 @@ const SEEDS: RegionSeed[] = [
   {
     cohortId: "CO-DE-RETAIL",
     cohortName: "Privatanleger-Programm",
+    tenantId: "AUTH-BAFIN-DE",
     authorityId: "AUTH-BAFIN-DE",
     jurisdiction: "DE",
     language: "EN",
@@ -284,6 +301,7 @@ const SEEDS: RegionSeed[] = [
   {
     cohortId: "CO-IT-RETAIL",
     cohortName: "Percorso investitori retail",
+    tenantId: "AUTH-CONSOB-IT",
     authorityId: "AUTH-CONSOB-IT",
     jurisdiction: "IT",
     language: "EN",
@@ -295,9 +313,103 @@ const SEEDS: RegionSeed[] = [
     ],
     lift: -5,
   },
+  /* Japanese, Chinese and Arabic delivery — each with the regulator running a
+     national programme and, where one exists, a bank putting its own customers
+     through the same engine under a different consent basis. */
+  {
+    cohortId: "CO-JP-RETAIL",
+    cohortName: "個人投資家向け演習プログラム",
+    tenantId: "AUTH-FSA-JP",
+    authorityId: "AUTH-FSA-JP",
+    jurisdiction: "JP",
+    language: "JA",
+    regions: ["東京", "大阪", "名古屋", "福岡", "札幌", "横浜"],
+    names: [
+      ["陽菜", "健太", "美咲", "翔太", "さくら", "大輔", "結衣", "拓海", "彩香", "涼介"],
+      ["佐藤", "鈴木", "高橋", "田中", "渡辺", "伊藤", "山本", "中村", "小林", "加藤"],
+    ],
+    nameOrder: "family-given",
+    lift: 1,
+  },
+  {
+    cohortId: "CO-JP-NOZOMI",
+    cohortName: "のぞみ信託銀行 · 資産運用相談のお客さま",
+    tenantId: "BANK-NOZOMI-JP",
+    authorityId: "AUTH-FSA-JP",
+    jurisdiction: "JP",
+    language: "JA",
+    regions: ["東京", "横浜", "大阪", "神戸", "仙台"],
+    names: [
+      ["和子", "正雄", "久美子", "隆之", "節子", "浩二", "幸子", "雅彦", "京子", "誠一"],
+      ["松本", "井上", "木村", "斎藤", "清水", "山口", "森田", "池田", "橋本", "石川"],
+    ],
+    // Pre-retirement customers referred by advisers — the targeted population.
+    nameOrder: "family-given",
+    lift: -6,
+  },
+  {
+    cohortId: "CO-HK-RETAIL",
+    cohortName: "散戶投資者演練計劃",
+    tenantId: "AUTH-SFC-HK",
+    authorityId: "AUTH-SFC-HK",
+    jurisdiction: "HK",
+    language: "ZH",
+    regions: ["中西區", "灣仔", "觀塘", "沙田", "屯門", "元朗"],
+    names: [
+      ["嘉欣", "俊傑", "詩雅", "志強", "婉婷", "家豪", "曉彤", "偉明", "美玲", "浩然"],
+      ["陳", "李", "黃", "張", "梁", "何", "周", "吳", "劉", "鄭"],
+    ],
+    nameOrder: "family-given-joined",
+    lift: -2,
+  },
+  {
+    cohortId: "CO-HK-HARBOUR",
+    cohortName: "維港銀行 · 財富管理客戶",
+    tenantId: "BANK-HARBOUR-HK",
+    authorityId: "AUTH-SFC-HK",
+    jurisdiction: "HK",
+    language: "ZH",
+    regions: ["中西區", "油尖旺", "荃灣", "將軍澳"],
+    names: [
+      ["淑芬", "建華", "秀英", "永強", "麗珍", "國榮", "月娥", "德明", "玉蘭", "成業"],
+      ["馮", "曾", "許", "林", "蔡", "謝", "羅", "高", "潘", "袁"],
+    ],
+    // Rehearsing only against its own uploaded corpus. It shows.
+    nameOrder: "family-given-joined",
+    lift: -9,
+  },
+  {
+    cohortId: "CO-AE-CITIZEN",
+    cohortName: "برنامج توعية المستثمرين — المجتمع",
+    tenantId: "GOV-EMIRATES-AE",
+    authorityId: "AUTH-SCA-AE",
+    jurisdiction: "AE",
+    language: "AR",
+    regions: ["أبوظبي", "دبي", "الشارقة", "العين", "رأس الخيمة", "الفجيرة"],
+    names: [
+      ["فاطمة", "محمد", "عائشة", "خالد", "مريم", "سلطان", "نورة", "عبدالله", "هند", "راشد"],
+      ["المنصوري", "الشامسي", "النعيمي", "الظاهري", "الحمادي", "البلوشي", "الكعبي", "السويدي", "المرزوقي", "الزعابي"],
+    ],
+    lift: -5,
+  },
+  {
+    cohortId: "CO-ES-IBERICO",
+    cohortName: "Banco Ibérico · clientes de asesoramiento",
+    tenantId: "BANK-IBERIA-ES",
+    authorityId: "AUTH-CNMV-ES",
+    jurisdiction: "ES",
+    language: "ES",
+    regions: ["Madrid", "Barcelona", "Valencia", "Sevilla", "Bilbao", "Palma"],
+    names: [
+      ["Beatriz", "Andrés", "Nuria", "Óscar", "Silvia", "Gonzalo", "Irene", "Rubén", "Cristina", "Daniel"],
+      ["Salas", "Peña", "Roldán", "Bustos", "Gallardo", "Carrasco", "Mendoza", "Aguirre", "Castaño", "Esteban"],
+    ],
+    lift: -3,
+  },
   {
     cohortId: "CO-GB-PANEL",
     cohortName: "Consumer panel · pre-campaign baseline",
+    tenantId: "AUTH-FCA-UK",
     authorityId: "AUTH-FCA-UK",
     jurisdiction: "GB",
     language: "EN",
@@ -312,6 +424,7 @@ const SEEDS: RegionSeed[] = [
   {
     cohortId: "CO-MY-RETAIL",
     cohortName: "Retail investor outreach · Q3",
+    tenantId: "AUTH-SC-MY",
     authorityId: "AUTH-SC-MY",
     jurisdiction: "MY",
     language: "EN",
@@ -325,6 +438,7 @@ const SEEDS: RegionSeed[] = [
   {
     cohortId: "CO-SG-SENIOR",
     cohortName: "Senior investor programme",
+    tenantId: "AUTH-MAS-SG",
     authorityId: "AUTH-MAS-SG",
     jurisdiction: "SG",
     language: "EN",
@@ -485,11 +599,18 @@ export function buildProgramme(): Programme {
         if (!taken.has(`${first} ${last}`)) break;
       }
       taken.add(`${first} ${last}`);
+      const fullName =
+        seed.nameOrder === "family-given-joined"
+          ? `${last}${first}`
+          : seed.nameOrder === "family-given"
+            ? `${last} ${first}`
+            : `${first} ${last}`;
       const p: Participant = {
         id: `AUR-P-${pid++}`,
-        name: `${first} ${last}`,
+        name: fullName,
         cohortId: seed.cohortId,
         cohortName: seed.cohortName,
+        tenantId: seed.tenantId,
         authorityId: seed.authorityId,
         jurisdiction: seed.jurisdiction,
         region: seed.regions[Math.floor(r() * seed.regions.length)],
@@ -497,7 +618,11 @@ export function buildProgramme(): Programme {
         language: seed.language,
         secondLanguage: seed.nativeLanguage ?? null,
         enrolledOn: `2026-0${6 + Math.floor(r() * 3)}-${String(2 + Math.floor(r() * 26)).padStart(2, "0")}`,
-        consentBasis: "Programme enrolment · sponsor may review readiness",
+        /* The consent basis belongs to the organisation that enrolled the
+           person, not to AUREN. A bank's duty of care and a regulator's
+           programme enrolment are different bases, and a console that printed
+           one sentence for both would be misdescribing the stronger of them. */
+        consentBasis: tenantById(seed.tenantId)?.consentBasis ?? "Programme enrolment",
       };
       participants.push(p);
 

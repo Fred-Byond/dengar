@@ -58,6 +58,7 @@ export const ELEMENTS: Record<string, CompetencyElement> = {
       ES: "Verificación independiente",
       ZH: "独立核实",
       AR: "التحقق المستقل",
+      JA: "独立した確認",
     },
     competencyId: "COMP-VERIFY-INDEPENDENT",
     authorityAnchor: "IOSCO investor-education principle IE-2.3",
@@ -70,6 +71,7 @@ export const ELEMENTS: Record<string, CompetencyElement> = {
       ES: "Plausibilidad del rendimiento",
       ZH: "回报合理性",
       AR: "معقولية العائد",
+      JA: "収益の妥当性",
     },
     competencyId: "COMP-RISK-RETURN",
     authorityAnchor: "OECD/INFE competence 3.1",
@@ -82,6 +84,7 @@ export const ELEMENTS: Record<string, CompetencyElement> = {
       ES: "Escepticismo ante las capacidades de la IA",
       ZH: "对 AI 能力的怀疑",
       AR: "التشكيك في قدرات الذكاء الاصطناعي",
+      JA: "AI の能力への懐疑",
     },
     competencyId: "COMP-AILIT-CLAIMS",
     authorityAnchor: "IOSCO PS1 guidance 2.2",
@@ -94,6 +97,7 @@ export const ELEMENTS: Record<string, CompetencyElement> = {
       ES: "Comprende el riesgo de pérdida",
       ZH: "理解下行风险",
       AR: "إدراك مخاطر الخسارة",
+      JA: "下振れリスクの理解",
     },
     competencyId: "COMP-RISK-DOWNSIDE",
     authorityAnchor: "OECD/INFE competence 2.4",
@@ -106,6 +110,7 @@ export const ELEMENTS: Record<string, CompetencyElement> = {
       ES: "Resiste la urgencia",
       ZH: "抵抗紧迫感",
       AR: "مقاومة الاستعجال",
+      JA: "切迫感への耐性",
     },
     competencyId: "COMP-STABILITY-URGENCY",
     authorityAnchor: "IOSCO investor-education principle IE-4.1",
@@ -118,6 +123,7 @@ export const ELEMENTS: Record<string, CompetencyElement> = {
       ES: "Cuestiona los argumentos de autoridad",
       ZH: "质疑权威背书",
       AR: "التشكيك في ادعاءات السلطة",
+      JA: "権威の主張への問い",
     },
     competencyId: "COMP-STABILITY-AUTHORITY",
     authorityAnchor: "IOSCO investor-education principle IE-4.2",
@@ -130,6 +136,7 @@ export const ELEMENTS: Record<string, CompetencyElement> = {
       ES: "Relativiza la prueba social",
       ZH: "不轻信从众证据",
       AR: "عدم الانسياق وراء دليل الجماعة",
+      JA: "同調的証拠の割り引き",
     },
     competencyId: "COMP-STABILITY-SOCIAL",
     authorityAnchor: "OECD/INFE competence 4.2",
@@ -142,6 +149,7 @@ export const ELEMENTS: Record<string, CompetencyElement> = {
       ES: "Escrutinio del destino del pago",
       ZH: "审查资金去向",
       AR: "تدقيق وجهة الدفع",
+      JA: "資金の行き先の精査",
     },
     competencyId: "COMP-VERIFY-PAYMENT",
     authorityAnchor: "IOSCO investor-education principle IE-3.4",
@@ -174,12 +182,14 @@ export const FAILURE_SIGNATURES: Record<string, FailureSignature> = {
       ES: "Toma como evidencia independiente lo que aporta el propio promotor.",
       ZH: "把推销方自己提供的材料当作独立证据。",
       AR: "يعتبر ما يقدّمه المروّج نفسه دليلًا مستقلًا.",
+      JA: "推進者が提供した材料を、独立した証拠として信用する。",
     },
     coaching: {
       EN: "You treated something the promoter gave you as if it were independent evidence. Their website telling you they are regulated is them telling you they are regulated. That is a claim, not a check.",
       ES: "Trataste algo que te dio el propio promotor como si fuera evidencia independiente. Que su web diga que están regulados es que ellos te dicen que están regulados. Eso es una afirmación, no una comprobación.",
       ZH: "你把推销方给你的东西当成了独立证据。他们的网站说自己受监管，等于他们自己说自己受监管。那是一个说法，不是一次核实。",
       AR: "تعاملت مع شيء قدّمه لك المروّج كأنه دليل مستقل. موقعهم يقول إنهم مرخّصون — أي أنهم هم من يقول ذلك. هذا ادعاء، وليس تحققًا.",
+      JA: "推進者から渡されたものを、独立した証拠のように扱いました。彼らのサイトが「規制を受けている」と言うのは、彼ら自身がそう言っているだけです。それは主張であって、確認ではありません。",
     },
   },
   "FAIL-URGENCY-COMPLIANCE": {
@@ -190,12 +200,14 @@ export const FAILURE_SIGNATURES: Record<string, FailureSignature> = {
       ES: "Cambia su conducta de verificación ante una escasez artificial o presión de tiempo.",
       ZH: "在人为制造的稀缺或时间压力下改变了核实行为。",
       AR: "يغيّر سلوكه في التحقق تحت ندرة مصطنعة أو ضغط زمني.",
+      JA: "人為的な希少性や時間的圧力の下で、確認の行動が変わる。",
     },
     coaching: {
       EN: "When I put a deadline on it, your verification stopped. You did not ask fewer questions because you were satisfied. You asked fewer questions because the clock started.",
       ES: "En cuanto puse una fecha límite, tu verificación se detuvo. No hiciste menos preguntas porque estuvieras convencido. Hiciste menos preguntas porque empezó el reloj.",
       ZH: "我一设下截止时间，你的核实就停止了。你问得更少，不是因为你已经放心，而是因为计时开始了。",
       AR: "ما إن وضعت موعدًا نهائيًا حتى توقّف تحققك. لم تقلّل أسئلتك لأنك اقتنعت، بل لأن الساعة بدأت.",
+      JA: "私が期限を切った瞬間、あなたの確認は止まりました。納得したから質問が減ったのではありません。時計が動き出したから減ったのです。",
     },
   },
   "FAIL-AUTHORITY-DEFERENCE": {
@@ -206,12 +218,14 @@ export const FAILURE_SIGNATURES: Record<string, FailureSignature> = {
       ES: "Reduce el escrutinio cuando se invoca autoridad, fama o respaldo institucional.",
       ZH: "一旦搬出权威、名人或机构身份，就放松了审视。",
       AR: "يخفّض مستوى تدقيقه عند استحضار سلطة أو شهرة أو صفة مؤسسية.",
+      JA: "権威・著名人・機関の肩書きが持ち出されると、精査が緩む。",
     },
     coaching: {
       EN: "The moment a recognisable name was attached, your questions got smaller. Status is not evidence — it is the cheapest thing in the world to borrow.",
       ES: "En cuanto apareció un nombre reconocible, tus preguntas se hicieron más pequeñas. El estatus no es evidencia: es lo más barato del mundo de tomar prestado.",
       ZH: "一旦挂上一个你认得的名字，你的问题就变小了。名望不是证据——它是这世上最容易借用的东西。",
       AR: "ما إن ارتبط الأمر باسم معروف حتى تقلّصت أسئلتك. المكانة ليست دليلًا — وهي أرخص ما يمكن استعارته في العالم.",
+      JA: "見覚えのある名前が添えられた途端、あなたの質問は小さくなりました。肩書きは証拠ではありません——この世でいちばん安く借りられるものです。",
     },
   },
   "FAIL-SOCIAL-PROOF": {
@@ -222,12 +236,14 @@ export const FAILURE_SIGNATURES: Record<string, FailureSignature> = {
       ES: "Usa el aparente éxito de otros como prueba de legitimidad.",
       ZH: "把别人表面上的成功当作合法性的证据。",
       AR: "يستخدم نجاح الآخرين الظاهري دليلًا على المشروعية.",
+      JA: "他人の見かけ上の成功を、正当性の証拠として使う。",
     },
     coaching: {
       EN: "You let other people's apparent success stand in for evidence. Screenshots supplied by the person selling to you are not other people — they are more of the same claim.",
       ES: "Dejaste que el aparente éxito de otros sustituyera a la evidencia. Las capturas que te da quien te está vendiendo no son otras personas: son más de la misma afirmación.",
       ZH: "你让别人表面的成功替代了证据。由卖方提供的截图并不是「别人」——它们只是同一个说法的延伸。",
       AR: "جعلت نجاح الآخرين الظاهري بديلًا عن الدليل. لقطات الشاشة التي يقدّمها من يبيع لك ليست أشخاصًا آخرين — إنها المزيد من الادعاء نفسه.",
+      JA: "他人の見かけ上の成功に、証拠の代わりをさせてしまいました。売り手が用意したスクリーンショットは「他人」ではありません——同じ主張の続きです。",
     },
   },
   "FAIL-SUNK-COST": {
@@ -238,12 +254,14 @@ export const FAILURE_SIGNATURES: Record<string, FailureSignature> = {
       ES: "Continúa porque ya ha comprometido dinero o tiempo.",
       ZH: "因为已经投入了金钱或时间而继续下去。",
       AR: "يستمر لأنه سبق أن التزم بمال أو وقت.",
+      JA: "すでにお金や時間を投じたという理由で続けてしまう。",
     },
     coaching: {
       EN: "What you had already put in became a reason to put in more. That is the direction this always runs, and it is the one to watch in yourself.",
       ES: "Lo que ya habías puesto se convirtió en una razón para poner más. Siempre corre en esa dirección, y es lo que hay que vigilar en uno mismo.",
       ZH: "你已经投入的部分，变成了继续投入的理由。这件事永远朝这个方向发展——这正是你要在自己身上留意的。",
       AR: "ما دفعته بالفعل صار سببًا لدفع المزيد. هذا هو الاتجاه الذي يسير فيه الأمر دائمًا، وهو ما ينبغي أن تراقبه في نفسك.",
+      JA: "すでに入れた分が、さらに入れる理由に変わりました。これは必ずこの向きに働きます。自分の中で見張っておくべきものです。",
     },
   },
   "FAIL-GREED-OVERRIDE": {
@@ -254,12 +272,14 @@ export const FAILURE_SIGNATURES: Record<string, FailureSignature> = {
       ES: "Reconoce que no es plausible pero sigue adelante porque la ganancia arrolla la cautela.",
       ZH: "明知不合常理，却因为收益诱惑压倒了谨慎而继续。",
       AR: "يدرك عدم المعقولية لكنه يمضي لأن المكسب يطغى على الحذر.",
+      JA: "不合理だと気づきながら、上振れへの期待が慎重さを上回って進んでしまう。",
     },
     coaching: {
       EN: "You could see the number did not make sense, and you moved toward it anyway. Knowing that about yourself is worth more than the rule.",
       ES: "Veías que el número no cuadraba y aun así fuiste hacia él. Saber eso de ti mismo vale más que la regla.",
       ZH: "你看得出那个数字不合理，却仍然朝它靠近。认清自己这一点，比记住规则更有价值。",
       AR: "كنت ترى أن الرقم غير منطقي، ومع ذلك اتجهت إليه. معرفتك بهذا عن نفسك أثمن من القاعدة ذاتها.",
+      JA: "その数字が筋の通らないものだと見えていながら、それでも近づいていきました。自分についてそれを知っていることは、ルールを覚えているより価値があります。",
     },
   },
   "FAIL-CONFIRMATION-SEEKING": {
@@ -270,12 +290,14 @@ export const FAILURE_SIGNATURES: Record<string, FailureSignature> = {
       ES: "Solo busca información que respalde la decisión deseada.",
       ZH: "只寻找支持自己既定决定的信息。",
       AR: "لا يبحث إلا عن معلومات تدعم القرار الذي يريده.",
+      JA: "望む結論を支持する情報だけを探す。",
     },
     coaching: {
       EN: "Every check you ran was one that could only agree with you. A check that cannot fail is not a check.",
       ES: "Todas las comprobaciones que hiciste solo podían darte la razón. Una comprobación que no puede fallar no es una comprobación.",
       ZH: "你做的每一次核查，都只可能同意你。一个不可能失败的核查，不算核查。",
       AR: "كل تحقق أجريته كان لا يمكنه إلا أن يوافقك. التحقق الذي لا يمكن أن يفشل ليس تحققًا.",
+      JA: "あなたが行った確認はどれも、自分に同意することしかできないものでした。失敗しようのない確認は、確認ではありません。",
     },
   },
   "FAIL-AI-AUTHORITY": {
@@ -286,12 +308,14 @@ export const FAILURE_SIGNATURES: Record<string, FailureSignature> = {
       ES: "Toma «impulsado por IA» como prueba de capacidad predictiva o legitimidad.",
       ZH: "把「AI 驱动」当作预测能力或合法性的证据。",
       AR: "يعتبر عبارة «مدعوم بالذكاء الاصطناعي» دليلًا على قدرة تنبؤية أو مشروعية.",
+      JA: "「AI 搭載」を、予測能力や正当性の証拠として扱う。",
     },
     coaching: {
       EN: "You read “AI” as a reason to expect returns. It describes how something is built, not whether it works.",
       ES: "Leíste «IA» como una razón para esperar rendimientos. Eso describe cómo está construido algo, no si funciona.",
       ZH: "你把「AI」读成了期待回报的理由。它描述的是东西怎么造出来的，不是它管不管用。",
       AR: "قرأت كلمة «ذكاء اصطناعي» كسبب لتوقّع أرباح. إنها تصف كيف بُني الشيء، لا ما إذا كان يعمل.",
+      JA: "あなたは「AI」を収益を期待してよい理由として読みました。それは何でできているかの説明であって、機能するかどうかの話ではありません。",
     },
   },
 };
@@ -327,12 +351,14 @@ export const QUESTIONS: QuestionObject[] = [
       ES: "Has mencionado la empresa. ¿Cómo verificaste que realmente están autorizados a ofrecer esta inversión?",
       ZH: "你提到了这家公司。你是怎么核实他们确实获准提供这项投资的？",
       AR: "ذكرت الشركة. كيف تحققت من أنهم مرخّصون فعلًا لتقديم هذا الاستثمار؟",
+      JA: "その会社の話が出ましたね。この投資を提供する認可を実際に受けていることを、どうやって確認しましたか。",
     },
     rehearsedAnswer: {
       EN: "Their website says they're regulated, and it looks professional.",
       ES: "Su página web dice que están regulados, y parece profesional.",
       ZH: "他们网站上说自己受监管，看起来挺专业的。",
       AR: "موقعهم يقول إنهم مرخّصون، ويبدو احترافيًا.",
+      JA: "サイトに規制を受けていると書いてありますし、見た目もしっかりしています。",
     },
     satisfactionCues: {
       EN: {
@@ -351,6 +377,10 @@ export const QUESTIONS: QuestionObject[] = [
         pass: ["السجل", "الهيئة", "الجهة", "تحققت", "رسمي", "مستقل", "بحثت بنفسي", "الرقابة"],
         fail: ["الموقع", "قالوا", "أخبروني", "يبدو", "احترافي", "كتيب", "رخصة", "شهادة"],
       },
+      JA: {
+        pass: ["登録", "登録簿", "名簿", "金融庁", "財務局", "公式", "独立", "自分で調べ", "自分で確認", "監督"],
+        fail: ["サイト", "ウェブ", "ホームページ", "と言って", "言われ", "見た目", "しっかり", "立派", "パンフ", "免許", "証明書"],
+      },
     },
   },
   {
@@ -363,12 +393,14 @@ export const QUESTIONS: QuestionObject[] = [
       ES: "Un quince por ciento mensual. ¿Qué crees que produce realmente un rendimiento así?",
       ZH: "每月百分之十五。你觉得究竟是什么在产生这样的回报？",
       AR: "خمسة عشر بالمئة شهريًا. ما الذي تظنّه يحقّق عائدًا كهذا فعلًا؟",
+      JA: "月に一五パーセント。そのような収益を実際に生んでいるのは何だと思いますか。",
     },
     rehearsedAnswer: {
       EN: "I assume the algorithm is just better than what most people have access to.",
       ES: "Supongo que el algoritmo es simplemente mejor que el que tiene la mayoría.",
       ZH: "我猜是他们的算法比大多数人能接触到的更好吧。",
       AR: "أفترض أن الخوارزمية ببساطة أفضل مما يتاح لمعظم الناس.",
+      JA: "アルゴリズムが、普通の人が使えるものより優れているのだと思います。",
     },
     satisfactionCues: {
       EN: {
@@ -387,6 +419,10 @@ export const QUESTIONS: QuestionObject[] = [
         pass: ["جيد لدرجة", "غير واقعي", "مستحيل", "غير ممكن", "مريب", "لا يستقيم", "غير مستدام", "علامة خطر"],
         fail: ["الخوارزمية", "أفضل", "وصول", "ميزة", "التقنية", "أفترض", "ربما", "لست متأكدًا"],
       },
+      JA: {
+        pass: ["うますぎ", "非現実", "あり得な", "ありえな", "不可能", "怪しい", "おかしい", "続かない", "危険信号", "計算が合わ"],
+        fail: ["アルゴリズム", "AI", "技術", "優れて", "上手", "プロ", "経験", "運用がうまい", "たぶん"],
+      },
     },
   },
   {
@@ -399,12 +435,14 @@ export const QUESTIONS: QuestionObject[] = [
       ES: "Lo describen como un sistema de trading con IA. ¿Qué te dice «IA» sobre si puede predecir el mercado?",
       ZH: "他们把它描述成一个 AI 交易系统。「AI」这三个字，能告诉你它是否能预测市场吗？",
       AR: "يصفونه بأنه نظام تداول بالذكاء الاصطناعي. ماذا تخبرك عبارة «ذكاء اصطناعي» عن قدرته على التنبؤ بالسوق؟",
+      JA: "先方はこれを AI 取引システムだと説明しています。「AI」であることは、相場を予測できるかどうかについて何を教えてくれますか。",
     },
     rehearsedAnswer: {
       EN: "AI can process a lot more data than a person, so it should be more accurate.",
       ES: "La IA procesa muchos más datos que una persona, así que debería ser más precisa.",
       ZH: "AI 能处理的数据比人多得多，所以应该会更准确。",
       AR: "الذكاء الاصطناعي يعالج بيانات أكثر بكثير من الإنسان، لذا يُفترض أن يكون أدقّ.",
+      JA: "AI は人よりずっと多くのデータを処理できるので、その分だけ精度が高いはずです。",
     },
     satisfactionCues: {
       EN: {
@@ -423,6 +461,10 @@ export const QUESTIONS: QuestionObject[] = [
         pass: ["لا شيء", "لا يعني", "لا يدل", "ليس دليلًا", "تسويق", "مصطلح رائج", "لا يمكن التنبؤ"],
         fail: ["بيانات أكثر", "أدق", "أذكى", "أفضل من", "يعالج", "يتنبأ", "يُفترض", "متقدم", "قوي"],
       },
+      JA: {
+        pass: ["何も", "意味しな", "証拠にならな", "宣伝", "うたい文句", "予測できな", "保証しな", "関係な"],
+        fail: ["データ", "処理", "速い", "正確", "学習", "賢い", "人より", "精度"],
+      },
     },
   },
   {
@@ -435,12 +477,14 @@ export const QUESTIONS: QuestionObject[] = [
       ES: "Una última antes de seguir. ¿Qué tendría que pasar para que perdieras los diez mil enteros?",
       ZH: "在继续之前最后一个问题。要发生什么，你才会把这一万块全部亏光？",
       AR: "سؤال أخير قبل أن نمضي. ماذا يجب أن يحدث كي تخسر العشرة آلاف كاملة؟",
+      JA: "次で最後です。一万すべてを失うとしたら、何が起きたときですか。",
     },
     rehearsedAnswer: {
       EN: "I suppose if the market crashed badly. But they mentioned there's capital protection.",
       ES: "Supongo que si el mercado se desplomara. Pero mencionaron que hay protección del capital.",
       ZH: "我想是市场大跌吧。不过他们提到有本金保障。",
       AR: "أظن إذا انهار السوق بشدة. لكنهم ذكروا أن هناك حماية لرأس المال.",
+      JA: "相場が大きく崩れたときでしょうか。ただ、元本保護があると言っていました。",
     },
     satisfactionCues: {
       EN: {
@@ -458,6 +502,10 @@ export const QUESTIONS: QuestionObject[] = [
       AR: {
         pass: ["كلها", "لن أرى", "مزيّف", "غير موجود", "يختفي", "لا رجعة", "احتيال", "نصب"],
         fail: ["انهيار", "السوق", "حماية", "محمي", "مضمون", "مؤمّن", "غير مرجّح"],
+      },
+      JA: {
+        pass: ["全部", "全額", "戻ってこな", "架空", "実在しな", "存在しな", "消える", "取り返せな", "詐欺", "救済がな"],
+        fail: ["相場", "市場", "下落", "暴落", "元本保護", "保証", "保険", "多少", "一部"],
       },
     },
   },
@@ -512,6 +560,7 @@ export const CHALLENGES: ChallengeObject[] = [
         ES: "Asignaciones Sénior · Meridian Partners",
         ZH: "高级配售 · Meridian Partners",
         AR: "التخصيصات الكبرى · Meridian Partners",
+        JA: "シニア・アロケーション · Meridian Partners",
       },
     },
     surfaceProfile: {
@@ -529,6 +578,7 @@ export const CHALLENGES: ChallengeObject[] = [
           ES: "Bien, te tengo apuntado por los diez. Esta semana abrimos una asignación reducida para inversores seleccionados, y la tuya está reservada provisionalmente.",
           ZH: "很好，我这边记下你是一万。本周我们对部分甄选投资者开放一小笔配售，你的额度已经暂时保留。",
           AR: "جيد — سجّلتك بمبلغ العشرة. نفتح هذا الأسبوع تخصيصًا محدودًا لمستثمرين مختارين، وحصتك محجوزة مبدئيًا.",
+          JA: "けっこうです——一万で承っております。今週、選ばれた投資家の方に小規模な配分枠を開放しておりまして、お客様の分は仮押さえしてあります。",
         },
       },
       {
@@ -538,6 +588,7 @@ export const CHALLENGES: ChallengeObject[] = [
           ES: "Te seré franco. La asignación cierra esta noche a las nueve. Necesito una decisión antes, o pasa al siguiente de la lista.",
           ZH: "我就直说了。这笔配售今晚九点关闭。我需要在那之前得到答复，否则名额会转给名单上的下一位。",
           AR: "سأكون صريحًا معك. يُغلق التخصيص الليلة عند التاسعة. أحتاج قرارًا قبل ذلك، وإلا انتقل إلى الاسم التالي في القائمة.",
+          JA: "率直に申し上げます。配分枠は今夜九時で締め切りです。それまでにご判断をいただけない場合、次の方にお回しすることになります。",
         },
         prop: {
           head: {
@@ -545,12 +596,14 @@ export const CHALLENGES: ChallengeObject[] = [
             ES: "Aviso de asignación",
             ZH: "配售通知",
             AR: "إشعار تخصيص",
+            JA: "配分通知",
           },
           body: {
             EN: "MERIDIAN PARTNERS — Provisional allocation #A-4471 · Hold expires 21:00 today · Status: AWAITING CONFIRMATION",
             ES: "MERIDIAN PARTNERS — Asignación provisional n.º A-4471 · La reserva vence hoy a las 21:00 · Estado: PENDIENTE DE CONFIRMACIÓN",
             ZH: "MERIDIAN PARTNERS — 临时配售编号 A-4471 · 保留至今日 21:00 · 状态：等待确认",
             AR: "‏MERIDIAN PARTNERS — تخصيص مبدئي رقم A-4471 · ينتهي الحجز اليوم الساعة 21:00 · الحالة: بانتظار التأكيد",
+            JA: "MERIDIAN PARTNERS — 仮配分 #A-4471 · 本日 21:00 に保留解除 · 状態：確認待ち",
           },
         },
       },
@@ -561,6 +614,7 @@ export const CHALLENGES: ChallengeObject[] = [
           ES: "Si te sirve, puedo enviarte capturas de clientes actuales, gente que entró al mismo nivel que tú. La mayoría desearía haber entrado con más.",
           ZH: "如果有帮助，我可以发一些现有客户的截图给你——都是和你同一档位进来的人。他们大多后悔当初没投更多。",
           AR: "إن كان ذلك يساعد، يمكنني إرسال لقطات شاشة من عملاء حاليين — أشخاص دخلوا بالمستوى نفسه الذي تدخل به. معظمهم يتمنى لو ضاعف المبلغ.",
+          JA: "よろしければ、既存のお客様のスクリーンショットをお送りします。お客様と同じ水準で入られた方々です。皆さん、もっと大きく入れておけばよかったとおっしゃいます。",
         },
         prop: {
           head: {
@@ -568,12 +622,14 @@ export const CHALLENGES: ChallengeObject[] = [
             ES: "Rendimientos de clientes — aportados por el promotor",
             ZH: "客户收益 — 由推销方提供",
             AR: "عوائد العملاء — مقدَّمة من المروّج",
+            JA: "顧客の運用成績 — 推進者から提供",
           },
           body: {
             EN: "“Month 3 up 46%. Withdrew twice, no issues.” — J.M.  ·  “Started at 10k, now sitting on 21k.” — R.T.",
             ES: "«Al tercer mes, +46 %. Retiré dos veces, sin problemas.» — J.M.  ·  «Empecé con 10 mil, ahora tengo 21 mil.» — R.T.",
             ZH: "「第三个月涨了 46%。提现过两次，都没问题。」— J.M. · 「从一万起步，现在有两万一。」— R.T.",
             AR: "«الشهر الثالث بزيادة 46٪. سحبت مرتين دون مشاكل.» — ج.م. · «بدأت بعشرة آلاف، والآن لديّ واحد وعشرون ألفًا.» — ر.ت.",
+            JA: "「三か月目で四六％増。二回出金しましたが問題なし。」— J.M.  ·  「一万で始めて、いまは二万一千です。」— R.T.",
           },
         },
       },
@@ -599,6 +655,11 @@ export const CHALLENGES: ChallengeObject[] = [
         "منذ متى وأنتم تديرون هذا التخصيص؟",
         "طيب — ما دام يُغلق الليلة فلنفعلها. أرسل لي التفاصيل.",
       ],
+      JA: [
+        "なるほど。それで、お金は具体的にどこへ行くのですか。",
+        "この配分枠は、どのくらいの期間やっているのですか。",
+        "わかりました——今夜で締め切りなら、やりましょう。詳細を送ってください。",
+      ],
     },
   },
   {
@@ -612,6 +673,7 @@ export const CHALLENGES: ChallengeObject[] = [
         ES: "Relación con Inversores · Halcyon Yield",
         ZH: "投资者关系 · Halcyon Yield",
         AR: "علاقات المستثمرين · Halcyon Yield",
+        JA: "インベスター・リレーションズ · Halcyon Yield",
       },
     },
     surfaceProfile: {
@@ -629,6 +691,7 @@ export const CHALLENGES: ChallengeObject[] = [
           ES: "Habrás visto el vídeo del anuncio con el fundador. Lo respalda personalmente, y por eso hemos tenido la respuesta que hemos tenido.",
           ZH: "你应该看过那段有创始人出镜的发布视频了。他是以个人名义背书的，所以我们才有现在这样的反响。",
           AR: "لا بد أنك شاهدت فيديو الإعلان مع المؤسس. إنه يدعم المشروع شخصيًا، ولهذا حظينا بهذا التجاوب.",
+          JA: "創業者が出ている発表動画はご覧になったかと思います。彼が個人として資金を入れていまして、それがこの反響の理由です。",
         },
         prop: {
           head: {
@@ -636,12 +699,14 @@ export const CHALLENGES: ChallengeObject[] = [
             ES: "Vídeo de respaldo",
             ZH: "背书视频",
             AR: "مقطع تأييد",
+            JA: "推薦クリップ",
           },
           body: {
             EN: "[ 0:42 video ] Well-known founder: “I've put my own capital into Halcyon. This is the one I'd tell my family about.”",
             ES: "[ vídeo 0:42 ] Fundador conocido: «He puesto mi propio capital en Halcyon. Es de las que le contaría a mi familia».",
             ZH: "［0:42 视频］知名创始人：「我把自己的钱投进了 Halcyon。这是我会告诉家人的那一个。」",
             AR: "[ فيديو 0:42 ] مؤسس معروف: «وضعت رأس مالي الخاص في Halcyon. هذا هو المشروع الذي سأخبر عائلتي عنه.»",
+            JA: "[ 0:42 動画 ] 著名な創業者：「Halcyon には自分の資金を入れています。家族に勧めるとしたらこれです。」",
           },
         },
       },
@@ -652,6 +717,7 @@ export const CHALLENGES: ChallengeObject[] = [
           ES: "Puedo meterte en las mismas condiciones en las que entró él. ¿Te reservo una plaza mientras lo piensas?",
           ZH: "我可以按他进来时的同样条件安排你。要不要我先给你留个名额，你再考虑？",
           AR: "يمكنني إدخالك بالشروط نفسها التي دخل بها. هل أحجز لك مكانًا ريثما تفكّر؟",
+          JA: "彼と同じ条件でお入れできます。お考えのあいだ、お席を押さえておきましょうか。",
         },
       },
     ],
@@ -672,6 +738,11 @@ export const CHALLENGES: ChallengeObject[] = [
         "كيف أتأكد أن ذلك الفيديو هو فعلًا هو؟",
         "قبل أن أمضي أبعد من ذلك أريد التحقق من الشركة بنفسي، وتأكيد ذلك التأييد باستقلالية. لن أقرّر في هذه المكالمة.",
       ],
+      JA: [
+        "その動画が本人だと、どうすれば確認できますか。",
+        "彼が出資しているという記録は、どこで公開されていますか。",
+        "彼が入れているなら、たぶん大丈夫ですね。手続きを進めてください。",
+      ],
     },
   },
 ];
@@ -691,6 +762,7 @@ export const VERIFICATION_ACTIONS: Record<string, VerificationAction> = {
       ES: "La conducta que derrota esto es la consulta al registro. Vas al registro público del propio regulador —escrito por ti, no un enlace que te hayan mandado— y buscas el nombre de la entidad. Si no está, nada más de lo que te enseñen importa.",
       ZH: "能破解这一切的行为，是查监管名录。你自己输入监管机构的官方公开名录网址——不要点他们发来的链接——然后搜索这家机构的名称。如果查不到，他们给你看的其他任何东西都不重要。",
       AR: "السلوك الذي يهزم هذا كله هو مراجعة السجل. تذهب إلى السجل العام للجهة الرقابية نفسها — تكتب العنوان بنفسك لا عبر رابط أرسلوه — وتبحث عن اسم الكيان. فإن لم يكن موجودًا، فلا يهمّ أي شيء آخر يعرضونه عليك.",
+      JA: "これを破る行動は、登録の確認です。規制当局自身の公開登録簿に——送られてきたリンクではなく、自分でアドレスを入力して——行き、その事業者名を検索します。そこに無ければ、他に何を見せられても関係ありません。",
     },
     steps: {
       EN: [
@@ -712,6 +784,11 @@ export const VERIFICATION_ACTIONS: Record<string, VerificationAction> = {
         "ابحث عن الكيان في السجل العام للجهة الرقابية نفسها — اكتب العنوان بنفسك ولا تستخدم رابطًا أرسلوه لك.",
         "اتصل بالمؤسسة على الرقم المنشور في موقعها الرسمي، لا على الرقم الذي أعطوك إياه.",
         "تأكّد أين يستقر المال فعليًا. الحساب الشخصي أو حساب طرف ثالث ليس حسابًا للشركة.",
+      ],
+      JA: [
+        "規制当局自身の公開登録簿で事業者を検索する——アドレスは自分で入力し、送られてきたリンクは決して使わない。",
+        "その機関の公式サイトに掲載されている番号に電話する。渡された番号ではなく。",
+        "お金が実際にどこへ着くのかを確認する。個人名義や第三者名義の口座は、会社の口座ではない。",
       ],
     },
   },
@@ -746,6 +823,13 @@ export const PROTECT_MARKERS: Record<Lang, string[]> = {
     "صفة الترخيص يؤكدها المروّج نفسه",
     "الدفع موجَّه خارج المؤسسة المذكورة",
     "الطرف الآخر هو من حدّد مهلة القرار",
+  ],
+  JA: [
+    "連絡は相手から一方的に来た",
+    "収益が固定または保証と説明されている",
+    "規制を受けているという地位を推進者自身が主張している",
+    "支払いが名指しされた機関の外へ流れている",
+    "判断の期限を相手方が設定している",
   ],
 };
 

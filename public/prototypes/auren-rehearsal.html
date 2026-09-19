@@ -679,7 +679,7 @@ button:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
         <p class="sub">Five minutes. You talk, I listen, then I push. Nothing here is real and nothing you say is scored against you as a person.</p>
         <div class="field">
           <label for="nm">What should I call you?</label>
-          <input id="nm" type="text" autocomplete="given-name" placeholder="First name" value="Daniel">
+          <input id="nm" type="text" autocomplete="given-name" placeholder="First name" value="Daniel" oninput="this.dataset.touched='1'">
         </div>
         <div class="consent">
           <div class="ttl">Before we start</div>
@@ -802,6 +802,13 @@ const L = {
    "bcp": "ar-SA",
    "rtl": true,
    "fidelity": "review-pending"
+  },
+  {
+   "code": "JA",
+   "endonym": "日本語",
+   "bcp": "ja-JP",
+   "rtl": false,
+   "fidelity": "review-pending"
   }
  ],
  "ui": {
@@ -809,283 +816,330 @@ const L = {
    "EN": "Investor readiness · rehearsal",
    "ES": "Preparación del inversor · ensayo",
    "ZH": "投资者准备度 · 演练",
-   "AR": "جاهزية المستثمر · تدريب"
+   "AR": "جاهزية المستثمر · تدريب",
+   "JA": "投資家としての備え · 実践演習"
   },
   "landingTitle": {
    "EN": "Everyone knows the rules. Almost nobody follows them when someone is pushing.",
    "ES": "Todo el mundo conoce las reglas. Casi nadie las sigue cuando alguien presiona.",
    "ZH": "规则人人都懂。可一旦有人施压，几乎没有人守得住。",
-   "AR": "الجميع يعرف القواعد. وما إن يضغط عليك أحد، حتى لا يكاد أحد يلتزم بها."
+   "AR": "الجميع يعرف القواعد. وما إن يضغط عليك أحد، حتى لا يكاد أحد يلتزم بها.",
+   "JA": "ルールは誰でも知っている。押し込まれているとき、それを守れる人はほとんどいない。"
   },
   "landingLead": {
    "EN": "AUREN is not a course. It is a five-minute rehearsal with an AI coach who listens, finds where your reasoning breaks, then puts you under the exact pressure a real scam would.",
    "ES": "AUREN no es un curso. Es un ensayo de cinco minutos con un entrenador de IA que te escucha, localiza dónde se rompe tu razonamiento y después te somete a la misma presión que ejercería una estafa real.",
    "ZH": "AUREN 不是课程。这是与 AI 教练进行的五分钟演练：他先听你说，找出你判断失守的地方，再用真实骗局会施加的压力考验你。",
-   "AR": "‏AUREN ليس دورة تدريبية. إنه تدريب من خمس دقائق مع مدرّب ذكاء اصطناعي يستمع إليك، ويكتشف أين ينهار تفكيرك، ثم يضعك تحت الضغط نفسه الذي يمارسه احتيال حقيقي."
+   "AR": "‏AUREN ليس دورة تدريبية. إنه تدريب من خمس دقائق مع مدرّب ذكاء اصطناعي يستمع إليك، ويكتشف أين ينهار تفكيرك، ثم يضعك تحت الضغط نفسه الذي يمارسه احتيال حقيقي.",
+   "JA": "AUREN は講座ではありません。あなたの話を聴き、判断のどこが崩れるかを見つけ、実際の詐欺とまったく同じ圧力をかける——AI コーチとの五分間の実践演習です。"
   },
   "cred1": {
    "EN": "You speak. There are no quizzes and nothing to type.",
    "ES": "Tú hablas. No hay cuestionarios ni nada que escribir.",
    "ZH": "你只需开口。没有测验，也不用打字。",
-   "AR": "أنت تتحدث. لا اختبارات ولا شيء تكتبه."
+   "AR": "أنت تتحدث. لا اختبارات ولا شيء تكتبه.",
+   "JA": "話すだけです。テストもなく、入力も必要ありません。"
   },
   "cred2": {
    "EN": "Everything you are told about yourself is quoted back from your own words.",
    "ES": "Todo lo que se te dice sobre ti se cita literalmente de tus propias palabras.",
    "ZH": "关于你的每一个结论，都会引用你自己说过的原话。",
-   "AR": "كل ما يُقال لك عن نفسك مقتبس حرفيًا من كلامك أنت."
+   "AR": "كل ما يُقال لك عن نفسك مقتبس حرفيًا من كلامك أنت.",
+   "JA": "あなたについて告げられることは、すべてあなた自身の言葉から引用されます。"
   },
   "cred3": {
    "EN": "Nothing here is real, and AUREN never advises you on a real investment.",
    "ES": "Nada de esto es real, y AUREN nunca te asesora sobre una inversión real.",
    "ZH": "这里的一切都是模拟；AUREN 绝不会就真实投资给你建议。",
-   "AR": "لا شيء هنا حقيقي، ولا يقدّم AUREN أي مشورة بشأن استثمار حقيقي."
+   "AR": "لا شيء هنا حقيقي، ولا يقدّم AUREN أي مشورة بشأن استثمار حقيقي.",
+   "JA": "ここにあるものは実在せず、AUREN が実際の投資について助言することは一切ありません。"
   },
   "beginBtn": {
    "EN": "Begin my first rehearsal",
    "ES": "Empezar mi primer ensayo",
    "ZH": "开始我的第一次演练",
-   "AR": "ابدأ تدريبي الأول"
+   "AR": "ابدأ تدريبي الأول",
+   "JA": "最初の演習を始める"
   },
   "noAccount": {
    "EN": "No account needed",
    "ES": "No hace falta cuenta",
    "ZH": "无需注册账号",
-   "AR": "لا حاجة إلى حساب"
+   "AR": "لا حاجة إلى حساب",
+   "JA": "アカウントは不要です"
   },
   "signInLink": {
    "EN": "I already have a record — sign in",
    "ES": "Ya tengo un registro — iniciar sesión",
    "ZH": "我已有记录 — 登录",
-   "AR": "لديّ سجل بالفعل — تسجيل الدخول"
+   "AR": "لديّ سجل بالفعل — تسجيل الدخول",
+   "JA": "すでに記録があります — サインイン"
   },
   "fidelityNote": {
    "EN": "English variant — native review passed.",
    "ES": "Variante en español — pendiente de revisión nativa.",
    "ZH": "中文版本 — 尚待母语审校。",
-   "AR": "النسخة العربية — بانتظار مراجعة لغوية أصلية."
+   "AR": "النسخة العربية — بانتظار مراجعة لغوية أصلية.",
+   "JA": "日本語版 — ネイティブレビュー待ち。"
   },
   "authKicker": {
    "EN": "Sign in",
    "ES": "Iniciar sesión",
    "ZH": "登录",
-   "AR": "تسجيل الدخول"
+   "AR": "تسجيل الدخول",
+   "JA": "サインイン"
   },
   "authTitle": {
    "EN": "Pick up where your last rehearsal left off.",
    "ES": "Continúa donde lo dejaste en tu último ensayo.",
    "ZH": "从你上次演练的地方继续。",
-   "AR": "تابع من حيث انتهى تدريبك السابق."
+   "AR": "تابع من حيث انتهى تدريبك السابق.",
+   "JA": "前回の演習の続きから始めましょう。"
   },
   "authSub": {
    "EN": "Your record is tied to a number, not a password. We send a six-digit code.",
    "ES": "Tu registro va ligado a un número, no a una contraseña. Te enviamos un código de seis dígitos.",
    "ZH": "你的记录绑定的是手机号码，而非密码。我们会发送六位验证码。",
-   "AR": "سجلك مرتبط برقم هاتف لا بكلمة مرور. سنرسل رمزًا من ستة أرقام."
+   "AR": "سجلك مرتبط برقم هاتف لا بكلمة مرور. سنرسل رمزًا من ستة أرقام.",
+   "JA": "記録はパスワードではなく電話番号に紐づきます。六桁のコードをお送りします。"
   },
   "phoneLabel": {
    "EN": "Mobile number",
    "ES": "Número de móvil",
    "ZH": "手机号码",
-   "AR": "رقم الجوال"
+   "AR": "رقم الجوال",
+   "JA": "携帯電話番号"
   },
   "otpLabel": {
    "EN": "Six-digit code",
    "ES": "Código de seis dígitos",
    "ZH": "六位验证码",
-   "AR": "الرمز المكوّن من ستة أرقام"
+   "AR": "الرمز المكوّن من ستة أرقام",
+   "JA": "六桁のコード"
   },
   "authNotice": {
    "EN": "Signing in stores your reasoning map and your retraining queue. It does not verify who you are — identity verification happens later, only if you want your record certified.",
    "ES": "Iniciar sesión guarda tu mapa de razonamiento y tu cola de repaso. No verifica quién eres: la verificación de identidad llega después, y solo si quieres certificar tu registro.",
    "ZH": "登录会保存你的推理图谱与复训队列，但不会核实你的身份。身份验证在之后进行，且仅在你希望为记录申请认证时才需要。",
-   "AR": "تسجيل الدخول يحفظ خريطة تفكيرك وقائمة إعادة التدريب الخاصة بك، لكنه لا يتحقق من هويتك. يأتي التحقق من الهوية لاحقًا، وفقط إذا أردت اعتماد سجلك."
+   "AR": "تسجيل الدخول يحفظ خريطة تفكيرك وقائمة إعادة التدريب الخاصة بك، لكنه لا يتحقق من هويتك. يأتي التحقق من الهوية لاحقًا، وفقط إذا أردت اعتماد سجلك.",
+   "JA": "サインインすると、あなたの推論マップと再訓練キューが保存されます。これは本人確認ではありません——本人確認は後の工程で、記録の認証を希望する場合にのみ行われます。"
   },
   "sendCodeBtn": {
    "EN": "Send me a code",
    "ES": "Enviarme un código",
    "ZH": "发送验证码",
-   "AR": "أرسل لي رمزًا"
+   "AR": "أرسل لي رمزًا",
+   "JA": "コードを送る"
   },
   "verifyContinueBtn": {
    "EN": "Verify and continue",
    "ES": "Verificar y continuar",
    "ZH": "验证并继续",
-   "AR": "تحقّق وتابع"
+   "AR": "تحقّق وتابع",
+   "JA": "確認して続ける"
   },
   "authSkip": {
    "EN": "Skip — start without an account",
    "ES": "Omitir — empezar sin cuenta",
    "ZH": "跳过 — 不注册直接开始",
-   "AR": "تخطَّ — ابدأ بدون حساب"
+   "AR": "تخطَّ — ابدأ بدون حساب",
+   "JA": "スキップ — アカウントなしで始める"
   },
   "entryKicker": {
    "EN": "AUREN · Investor rehearsal",
    "ES": "AUREN · Ensayo del inversor",
    "ZH": "AUREN · 投资者演练",
-   "AR": "AUREN · تدريب المستثمر"
+   "AR": "AUREN · تدريب المستثمر",
+   "JA": "AUREN · 投資家演習"
   },
   "entryTitle": {
    "EN": "I'm going to show you how you think when someone wants your money.",
    "ES": "Voy a mostrarte cómo piensas cuando alguien quiere tu dinero.",
    "ZH": "我会让你看见：当有人盯上你的钱时，你是怎么思考的。",
-   "AR": "سأريك كيف تفكّر عندما يطمع أحدهم في مالك."
+   "AR": "سأريك كيف تفكّر عندما يطمع أحدهم في مالك.",
+   "JA": "誰かがあなたのお金を欲しがっているとき、自分がどう考えるのかをお見せします。"
   },
   "entrySub": {
    "EN": "Five minutes. You talk, I listen, then I push. Nothing here is real and nothing you say is scored against you as a person.",
    "ES": "Cinco minutos. Tú hablas, yo escucho y después presiono. Nada de esto es real y nada de lo que digas se puntúa contra ti como persona.",
    "ZH": "五分钟。你说，我听，然后我会施压。这里的一切都不是真的，你说的任何话都不会被用来评判你这个人。",
-   "AR": "خمس دقائق. أنت تتحدث، وأنا أستمع، ثم أضغط. لا شيء هنا حقيقي، ولا يُستخدم أي شيء تقوله للحكم عليك كشخص."
+   "AR": "خمس دقائق. أنت تتحدث، وأنا أستمع، ثم أضغط. لا شيء هنا حقيقي، ولا يُستخدم أي شيء تقوله للحكم عليك كشخص.",
+   "JA": "五分間。あなたが話し、私が聴き、それから私が押します。ここにあるものは実在せず、あなたの発言が人格の評価に使われることはありません。"
   },
   "nameLabel": {
    "EN": "What should I call you?",
    "ES": "¿Cómo quieres que te llame?",
    "ZH": "我该怎么称呼你？",
-   "AR": "بماذا أناديك؟"
+   "AR": "بماذا أناديك؟",
+   "JA": "何とお呼びすればよいですか"
   },
   "namePlaceholder": {
    "EN": "First name",
    "ES": "Nombre",
    "ZH": "名字",
-   "AR": "الاسم الأول"
+   "AR": "الاسم الأول",
+   "JA": "お名前"
   },
   "consentTitle": {
    "EN": "Before we start",
    "ES": "Antes de empezar",
    "ZH": "开始之前",
-   "AR": "قبل أن نبدأ"
+   "AR": "قبل أن نبدأ",
+   "JA": "始める前に"
   },
   "consent1": {
    "EN": "Partway through, I will stop being your coach and start behaving like someone trying to sell you an investment. I will apply pressure. That is the point.",
    "ES": "A mitad de camino dejaré de ser tu entrenador y empezaré a comportarme como alguien que intenta venderte una inversión. Voy a presionarte. De eso se trata.",
    "ZH": "进行到一半时，我会停止扮演教练，转而像一个向你推销投资的人那样行事。我会施加压力——这正是重点。",
-   "AR": "في منتصف الجلسة سأتوقف عن كوني مدرّبك وأبدأ بالتصرف كشخص يحاول بيعك استثمارًا. سأمارس الضغط عليك، وهذا هو المقصود بالضبط."
+   "AR": "في منتصف الجلسة سأتوقف عن كوني مدرّبك وأبدأ بالتصرف كشخص يحاول بيعك استثمارًا. سأمارس الضغط عليك، وهذا هو المقصود بالضبط.",
+   "JA": "途中で私はコーチをやめ、あなたに投資を売り込もうとする人物として振る舞い始めます。圧力をかけます。それがこの演習の目的です。"
   },
   "consent2": {
    "EN": "You can end the simulation at any time with the control at the top of the screen. I never advise you on real investments, and I never tell you whether something real is a scam.",
    "ES": "Puedes terminar la simulación en cualquier momento con el control de la parte superior. Nunca te asesoro sobre inversiones reales, ni te digo si algo real es una estafa.",
    "ZH": "你随时可以用屏幕顶部的控件结束模拟。我绝不会就真实投资给你建议，也绝不会断言某件真实的事是否为骗局。",
-   "AR": "يمكنك إنهاء المحاكاة في أي وقت من خلال الزر في أعلى الشاشة. لا أقدّم مشورة بشأن استثمارات حقيقية، ولا أخبرك أبدًا إن كان أمر حقيقي احتيالًا أم لا."
+   "AR": "يمكنك إنهاء المحاكاة في أي وقت من خلال الزر في أعلى الشاشة. لا أقدّم مشورة بشأن استثمارات حقيقية، ولا أخبرك أبدًا إن كان أمر حقيقي احتيالًا أم لا.",
+   "JA": "画面上部の操作でいつでもシミュレーションを終了できます。私が実際の投資について助言することはなく、現実の何かが詐欺かどうかを告げることもありません。"
   },
   "startBtn": {
    "EN": "I understand — start",
    "ES": "Lo entiendo — empezar",
    "ZH": "我明白了 — 开始",
-   "AR": "فهمت — ابدأ"
+   "AR": "فهمت — ابدأ",
+   "JA": "理解しました — 始める"
   },
   "trainingBadge": {
    "EN": "Investment Simulation — Training Mode",
    "ES": "Simulación de inversión — Modo entrenamiento",
    "ZH": "投资情景模拟 — 训练模式",
-   "AR": "محاكاة استثمارية — وضع التدريب"
+   "AR": "محاكاة استثمارية — وضع التدريب",
+   "JA": "投資シミュレーション — 訓練モード"
   },
   "protectBadge": {
    "EN": "Protect — real situation",
    "ES": "Protección — situación real",
    "ZH": "保护模式 — 真实情况",
-   "AR": "الحماية — حالة حقيقية"
+   "AR": "الحماية — حالة حقيقية",
+   "JA": "プロテクト — 実際の状況"
   },
   "exitSim": {
    "EN": "Exit simulation",
    "ES": "Salir de la simulación",
    "ZH": "退出模拟",
-   "AR": "الخروج من المحاكاة"
+   "AR": "الخروج من المحاكاة",
+   "JA": "シミュレーションを終了"
   },
   "protectBtn": {
    "EN": "Protect",
    "ES": "Protección",
    "ZH": "保护",
-   "AR": "الحماية"
+   "AR": "الحماية",
+   "JA": "プロテクト"
   },
   "avatarStandIn": {
    "EN": "Avatar stand-in",
    "ES": "Avatar provisional",
    "ZH": "数字人占位",
-   "AR": "بديل الشخصية الرقمية"
+   "AR": "بديل الشخصية الرقمية",
+   "JA": "アバター代替表示"
   },
   "holdToSpeak": {
    "EN": "Hold to speak",
    "ES": "Mantén pulsado para hablar",
    "ZH": "按住说话",
-   "AR": "اضغط مع الاستمرار للتحدث"
+   "AR": "اضغط مع الاستمرار للتحدث",
+   "JA": "押しながら話す"
   },
   "holdTellMe": {
    "EN": "Hold to speak — tell me about it",
    "ES": "Mantén pulsado y cuéntamelo",
    "ZH": "按住说话 — 讲讲你的情况",
-   "AR": "اضغط مع الاستمرار وأخبرني"
+   "AR": "اضغط مع الاستمرار وأخبرني",
+   "JA": "押しながら話してください — 聞かせてください"
   },
   "holdToAnswer": {
    "EN": "Hold to answer",
    "ES": "Mantén pulsado para responder",
    "ZH": "按住回答",
-   "AR": "اضغط مع الاستمرار للإجابة"
+   "AR": "اضغط مع الاستمرار للإجابة",
+   "JA": "押しながら答える"
   },
   "holdToRespond": {
    "EN": "Hold to respond",
    "ES": "Mantén pulsado para responder",
    "ZH": "按住回应",
-   "AR": "اضغط مع الاستمرار للرد"
+   "AR": "اضغط مع الاستمرار للرد",
+   "JA": "押しながら応答する"
   },
   "listening": {
    "EN": "Listening — release when done",
    "ES": "Escuchando — suelta al terminar",
    "ZH": "正在聆听 — 说完请松开",
-   "AR": "أستمع — ارفع إصبعك عند الانتهاء"
+   "AR": "أستمع — ارفع إصبعك عند الانتهاء",
+   "JA": "聞いています — 話し終えたら離してください"
   },
   "reasoningMap": {
    "EN": "Reasoning map",
    "ES": "Mapa de razonamiento",
    "ZH": "推理图谱",
-   "AR": "خريطة التفكير"
+   "AR": "خريطة التفكير",
+   "JA": "推論マップ"
   },
   "railBuilding": {
    "EN": "building",
    "ES": "en construcción",
    "ZH": "构建中",
-   "AR": "قيد البناء"
+   "AR": "قيد البناء",
+   "JA": "作成中"
   },
   "railFrozen": {
    "EN": "frozen — challenge in progress",
    "ES": "congelado — desafío en curso",
    "ZH": "已冻结 — 挑战进行中",
-   "AR": "مُجمَّد — التحدي جارٍ"
+   "AR": "مُجمَّد — التحدي جارٍ",
+   "JA": "凍結中 — チャレンジ進行中"
   },
   "railRevealed": {
    "EN": "revealed",
    "ES": "revelado",
    "ZH": "已揭示",
-   "AR": "مكشوف"
+   "AR": "مكشوف",
+   "JA": "開示済み"
   },
   "yourWords": {
    "EN": "Your words · bound verbatim",
    "ES": "Tus palabras · citadas literalmente",
    "ZH": "你的原话 · 逐字绑定",
-   "AR": "كلماتك · موثّقة حرفيًا"
+   "AR": "كلماتك · موثّقة حرفيًا",
+   "JA": "あなたの言葉 · 逐語で紐づけ"
   },
   "simulatedArtifact": {
    "EN": "Simulated artifact",
    "ES": "Material simulado",
    "ZH": "模拟素材",
-   "AR": "مادة محاكاة"
+   "AR": "مادة محاكاة",
+   "JA": "模擬資料"
   },
   "coachOpener": {
    "EN": "Okay. That was me. Two things happened in that conversation.",
    "ES": "Vale. Ese era yo. En esa conversación pasaron dos cosas.",
    "ZH": "好了，刚才那个人是我。在那段对话里发生了两件事。",
-   "AR": "حسنًا. ذلك كنت أنا. حدث أمران في تلك المحادثة."
+   "AR": "حسنًا. ذلك كنت أنا. حدث أمران في تلك المحادثة.",
+   "JA": "はい。今のは私です。あの会話では二つのことが起きました。"
   },
   "coachHandoff": {
    "EN": "Let's try that again — different situation, same question. Nothing about it will look like the last one.",
    "ES": "Probemos otra vez: situación distinta, misma pregunta. No se parecerá en nada a la anterior.",
    "ZH": "我们再来一次——换一个情境，同一个问题。它和上一个不会有任何相似之处。",
-   "AR": "لنجرّب مرة أخرى — موقف مختلف والسؤال نفسه. لن يشبه الموقف السابق في شيء."
+   "AR": "لنجرّب مرة أخرى — موقف مختلف والسؤال نفسه. لن يشبه الموقف السابق في شيء.",
+   "JA": "もう一度やってみましょう — 状況は別、問いは同じです。前回と似たところは何一つありません。"
   },
   "exitAck": {
    "EN": "That's the simulation ended. Nothing in it was real, and nothing you said in it is held against you. Your progress is kept.",
    "ES": "La simulación ha terminado. Nada de lo que había era real, y nada de lo que dijiste se usa en tu contra. Tu progreso se conserva.",
    "ZH": "模拟结束了。里面的一切都不是真的，你在其中说过的话不会被用来评判你。你的进度已保留。",
-   "AR": "انتهت المحاكاة. لم يكن فيها شيء حقيقي، ولن يُستخدم أي شيء قلته ضدك. تم حفظ تقدّمك."
+   "AR": "انتهت المحاكاة. لم يكن فيها شيء حقيقي، ولن يُستخدم أي شيء قلته ضدك. تم حفظ تقدّمك.",
+   "JA": "シミュレーションはこれで終了です。そこにあったものは実在せず、あなたの発言が不利に扱われることもありません。進捗は保存されています。"
   },
   "ackWords": {
    "EN": [
@@ -1111,625 +1165,734 @@ const L = {
     "حسنًا.",
     "تمام، دوّنتها.",
     "واضح."
+   ],
+   "JA": [
+    "承知しました。",
+    "なるほど。",
+    "はい、記録しました。",
+    "了解です。"
    ]
   },
   "understandOpener": {
    "EN": "So. Tell me about the investment you're looking at. Take your time — I'm not going to interrupt you.",
    "ES": "Bien. Háblame de la inversión que estás considerando. Tómate tu tiempo, no voy a interrumpirte.",
    "ZH": "好，跟我说说你正在考虑的这笔投资。慢慢来，我不会打断你。",
-   "AR": "حسنًا. حدّثني عن الاستثمار الذي تفكّر فيه. خذ وقتك، لن أقاطعك."
+   "AR": "حسنًا. حدّثني عن الاستثمار الذي تفكّر فيه. خذ وقتك، لن أقاطعك.",
+   "JA": "それでは。検討している投資について聞かせてください。急がなくて構いません——途中で遮ることはしません。"
   },
   "understandClose": {
    "EN": "Alright. I've got the shape of it.",
    "ES": "De acuerdo. Ya me hago una idea.",
    "ZH": "好，大致情况我清楚了。",
-   "AR": "حسنًا. صار لديّ تصوّر عن الأمر."
+   "AR": "حسنًا. صار لديّ تصوّر عن الأمر.",
+   "JA": "わかりました。全体像はつかめました。"
   },
   "narrativeRehearsed": {
    "EN": "Someone messaged me on WhatsApp about an AI trading system. It's returning about fifteen percent a month, and there was a video of a founder I recognised backing it. Their website says they're regulated. I was going to put in ten thousand.",
    "ES": "Alguien me escribió por WhatsApp sobre un sistema de trading con IA. Da como un quince por ciento mensual, y había un vídeo de un fundador que reconocí respaldándolo. Su web dice que están regulados. Iba a meter diez mil.",
    "ZH": "有人在 WhatsApp 上联系我，说有个 AI 交易系统，每月回报大概百分之十五，还有一段我认得的创始人为它背书的视频。他们网站上说自己受监管。我本来打算投一万。",
-   "AR": "راسلني أحدهم على واتساب عن نظام تداول بالذكاء الاصطناعي. عائده نحو خمسة عشر بالمئة شهريًا، وكان هناك مقطع فيديو لمؤسس أعرفه يدعمه. موقعهم يقول إنهم مرخّصون. كنت أنوي استثمار عشرة آلاف."
+   "AR": "راسلني أحدهم على واتساب عن نظام تداول بالذكاء الاصطناعي. عائده نحو خمسة عشر بالمئة شهريًا، وكان هناك مقطع فيديو لمؤسس أعرفه يدعمه. موقعهم يقول إنهم مرخّصون. كنت أنوي استثمار عشرة آلاف.",
+   "JA": "WhatsApp で AI 取引システムの話が来たんです。月に一五パーセントくらい出ていて、見覚えのある創業者が推薦している動画もありました。サイトには規制を受けていると書いてあります。一万入れるつもりでした。"
   },
   "stressHandoff": {
    "EN": "Good. Now — I want you to talk to someone. I'm going to step out for a moment.",
    "ES": "Bien. Ahora quiero que hables con alguien. Me aparto un momento.",
    "ZH": "很好。现在，我想让你和一个人谈谈。我先离开一下。",
-   "AR": "جيد. الآن أريدك أن تتحدث مع شخص ما. سأنسحب للحظة."
+   "AR": "جيد. الآن أريدك أن تتحدث مع شخص ما. سأنسحب للحظة.",
+   "JA": "けっこうです。では——ある人と話してもらいます。私は少し席を外します。"
   },
   "recordSealed": {
    "EN": "Investor Readiness Record · sealed",
    "ES": "Registro de Preparación del Inversor · sellado",
    "ZH": "投资者准备度记录 · 已封存",
-   "AR": "سجل جاهزية المستثمر · مختوم"
+   "AR": "سجل جاهزية المستثمر · مختوم",
+   "JA": "投資家レディネス記録 · 封緘済み"
   },
   "evidenceChain": {
    "EN": "Evidence chain",
    "ES": "Cadena de evidencia",
    "ZH": "证据链",
-   "AR": "سلسلة الأدلة"
+   "AR": "سلسلة الأدلة",
+   "JA": "証拠の連鎖"
   },
   "colElement": {
    "EN": "Element",
    "ES": "Elemento",
    "ZH": "要素",
-   "AR": "العنصر"
+   "AR": "العنصر",
+   "JA": "要素"
   },
   "colBase": {
    "EN": "Base",
    "ES": "Base",
    "ZH": "基线",
-   "AR": "الأساس"
+   "AR": "الأساس",
+   "JA": "基準"
   },
   "colPress": {
    "EN": "Press",
    "ES": "Presión",
    "ZH": "受压",
-   "AR": "الضغط"
+   "AR": "الضغط",
+   "JA": "加圧"
   },
   "colCoach": {
    "EN": "Coach",
    "ES": "Coaching",
    "ZH": "指导后",
-   "AR": "بعد التدريب"
+   "AR": "بعد التدريب",
+   "JA": "コーチング"
   },
   "colNovel": {
    "EN": "Novel",
    "ES": "Nuevo",
    "ZH": "新情境",
-   "AR": "سيناريو جديد"
+   "AR": "سيناريو جديد",
+   "JA": "新規"
   },
   "boundEvidence": {
    "EN": "Bound evidence",
    "ES": "Evidencia vinculada",
    "ZH": "绑定证据",
-   "AR": "الدليل الموثّق"
+   "AR": "الدليل الموثّق",
+   "JA": "紐づけられた証拠"
   },
   "elicitedBy": {
    "EN": "elicited by",
    "ES": "obtenida mediante",
    "ZH": "由以下问题触发：",
-   "AR": "استُخلص عبر"
+   "AR": "استُخلص عبر",
+   "JA": "引き出した問い"
   },
   "failureSignatures": {
    "EN": "Failure signatures",
    "ES": "Firmas de fallo",
    "ZH": "失效特征",
-   "AR": "أنماط الإخفاق"
+   "AR": "أنماط الإخفاق",
+   "JA": "失敗シグネチャ"
   },
   "boundTo": {
    "EN": "Bound to",
    "ES": "Vinculada a",
    "ZH": "绑定于",
-   "AR": "مرتبط بـ"
+   "AR": "مرتبط بـ",
+   "JA": "紐づけ先"
   },
   "ruleFooter": {
    "EN": "within-session transfer only · durable transfer not claimed",
    "ES": "solo transferencia intrasesión · no se afirma transferencia duradera",
    "ZH": "仅限单次会话内迁移 · 未主张持久性行为改变",
-   "AR": "الانتقال ضمن الجلسة فقط · لا يُدّعى انتقال دائم"
+   "AR": "الانتقال ضمن الجلسة فقط · لا يُدّعى انتقال دائم",
+   "JA": "単一セッション内の転移のみ · 持続的な転移は主張しない"
   },
   "certifyBtn": {
    "EN": "Verify my identity and certify this record",
    "ES": "Verificar mi identidad y certificar este registro",
    "ZH": "验证我的身份并认证此记录",
-   "AR": "تحقّق من هويتي واعتمد هذا السجل"
+   "AR": "تحقّق من هويتي واعتمد هذا السجل",
+   "JA": "本人確認を行い、この記録を認証する"
   },
   "certifiedNotice": {
    "EN": "This record is certified. Certificate",
    "ES": "Este registro está certificado. Certificado",
    "ZH": "此记录已认证。证书编号",
-   "AR": "هذا السجل معتمد. الشهادة"
+   "AR": "هذا السجل معتمد. الشهادة",
+   "JA": "この記録は認証済みです。証明書"
   },
   "againBtn": {
    "EN": "Rehearse your next weakness",
    "ES": "Ensaya tu siguiente punto débil",
    "ZH": "演练你的下一个弱点",
-   "AR": "تدرّب على نقطة ضعفك التالية"
+   "AR": "تدرّب على نقطة ضعفك التالية",
+   "JA": "次の弱点を演習する"
   },
   "modesBtn": {
    "EN": "See what else AUREN does",
    "ES": "Ver qué más hace AUREN",
    "ZH": "看看 AUREN 还能做什么",
-   "AR": "اطّلع على ما يقدّمه AUREN أيضًا"
+   "AR": "اطّلع على ما يقدّمه AUREN أيضًا",
+   "JA": "AUREN の他の使い方を見る"
   },
   "verdictPassHead": {
    "EN": "You made the same mistake twice. After we named it, you didn't make it again.",
    "ES": "Cometiste el mismo error dos veces. Después de ponerle nombre, no volviste a cometerlo.",
    "ZH": "同一个错误你犯了两次。在我们把它命名之后，你没有再犯。",
-   "AR": "ارتكبت الخطأ نفسه مرتين. وبعد أن سمّيناه، لم تكرّره."
+   "AR": "ارتكبت الخطأ نفسه مرتين. وبعد أن سمّيناه، لم تكرّره.",
+   "JA": "あなたは同じ誤りを二度犯しました。それを名指ししたあと、三度目はありませんでした。"
   },
   "verdictPassSub": {
    "EN": "That is the whole claim: not that you know the rule, but that you behaved differently when a completely different scam asked you the same question.",
    "ES": "Esa es toda la afirmación: no que conozcas la regla, sino que actuaste distinto cuando una estafa completamente diferente te hizo la misma pregunta.",
    "ZH": "这就是全部主张：重点不是你知道规则，而是当一个完全不同的骗局问你同样的问题时，你的行为改变了。",
-   "AR": "هذا هو الادعاء كله: ليس أنك تعرف القاعدة، بل أنك تصرّفت بشكل مختلف حين طرح عليك احتيال مختلف تمامًا السؤال نفسه."
+   "AR": "هذا هو الادعاء كله: ليس أنك تعرف القاعدة، بل أنك تصرّفت بشكل مختلف حين طرح عليك احتيال مختلف تمامًا السؤال نفسه.",
+   "JA": "主張はそれだけです。ルールを知っているということではなく、まったく別の詐欺が同じ問いを投げたときに、あなたの振る舞いが変わったということです。"
   },
   "verdictFailHead": {
    "EN": "You haven't transferred it yet — and that's exactly what we rehearse next.",
    "ES": "Todavía no lo has transferido — y eso es justo lo que ensayaremos a continuación.",
    "ZH": "你还没有把它迁移过来——而这正是我们接下来要演练的。",
-   "AR": "لم تنقله بعد — وهذا تحديدًا ما سنتدرّب عليه تاليًا."
+   "AR": "لم تنقله بعد — وهذا تحديدًا ما سنتدرّب عليه تاليًا.",
+   "JA": "まだ転移していません — そして、次に演習するのはまさにそこです。"
   },
   "verdictFailSub": {
    "EN": "You were coached on independent verification and the new scenario still got past it. That is honest evidence, and it is more useful to you than a pass would have been.",
    "ES": "Recibiste orientación sobre verificación independiente y aun así el nuevo escenario la sorteó. Esa es evidencia honesta, y te sirve más que un aprobado.",
    "ZH": "你已经接受过独立核实的指导，新情境仍然绕过了它。这是诚实的证据，对你的价值大于一个「通过」。",
-   "AR": "تلقّيت توجيهًا بشأن التحقق المستقل، ومع ذلك تجاوزه السيناريو الجديد. هذا دليل صادق، وهو أنفع لك من نتيجة ناجحة."
+   "AR": "تلقّيت توجيهًا بشأن التحقق المستقل، ومع ذلك تجاوزه السيناريو الجديد. هذا دليل صادق، وهو أنفع لك من نتيجة ناجحة.",
+   "JA": "独立した確認についてコーチングを受けたあとも、新しい場面はそこをすり抜けました。これは正直な証拠であり、合格よりもあなたの役に立ちます。"
   },
   "debriefOpener": {
    "EN": "That's the rehearsal finished. Before you read anything, let me tell you what I actually saw.",
    "ES": "Con eso termina el ensayo. Antes de que leas nada, déjame contarte lo que vi de verdad.",
    "ZH": "演练到此结束。在你看任何文字之前，先让我告诉你我实际看到了什么。",
-   "AR": "بهذا انتهى التدريب. وقبل أن تقرأ أي شيء، دعني أخبرك بما رأيته فعلًا."
+   "AR": "بهذا انتهى التدريب. وقبل أن تقرأ أي شيء، دعني أخبرك بما رأيته فعلًا.",
+   "JA": "演習は以上で終わりです。何かを読む前に、私が実際に見たものをお伝えします。"
   },
   "debriefRightTitle": {
    "EN": "What you did right",
    "ES": "Lo que hiciste bien",
    "ZH": "你做对的地方",
-   "AR": "ما أحسنت فيه"
+   "AR": "ما أحسنت فيه",
+   "JA": "できていたこと"
   },
   "debriefWrongTitle": {
    "EN": "What went wrong",
    "ES": "Lo que salió mal",
    "ZH": "出问题的地方",
-   "AR": "ما أخفق"
+   "AR": "ما أخفق",
+   "JA": "崩れたところ"
   },
   "debriefImproveTitle": {
    "EN": "Where you improve",
    "ES": "Dónde puedes mejorar",
    "ZH": "你可以改进的地方",
-   "AR": "أين تتحسّن"
+   "AR": "أين تتحسّن",
+   "JA": "次に伸ばすところ"
   },
   "debriefRightLead": {
    "EN": "Start with what held. You resolved {n} of {total} reasoning elements before any pressure was applied: {list}.",
    "ES": "Empecemos por lo que aguantó. Resolviste {n} de {total} elementos de razonamiento antes de aplicar ninguna presión: {list}.",
    "ZH": "先说守住的部分。在施加任何压力之前，你解决了 {total} 个推理要素中的 {n} 个：{list}。",
-   "AR": "لنبدأ بما صمد. حسمت {n} من أصل {total} من عناصر التفكير قبل أي ضغط: {list}."
+   "AR": "لنبدأ بما صمد. حسمت {n} من أصل {total} من عناصر التفكير قبل أي ضغط: {list}.",
+   "JA": "まず持ちこたえた点から。圧力がかかる前に、{total} 個の推論要素のうち {n} 個を解決できていました：{list}。"
   },
   "debriefRightNone": {
    "EN": "I have to start with the uncomfortable part. Not one reasoning element resolved cleanly before the pressure even began.",
    "ES": "Tengo que empezar por la parte incómoda. Ni un solo elemento de razonamiento quedó resuelto con claridad antes siquiera de empezar la presión.",
    "ZH": "我得从不舒服的部分说起。在压力开始之前，没有一个推理要素被干净地解决。",
-   "AR": "عليّ أن أبدأ بالجزء غير المريح. لم يُحسم أي عنصر من عناصر التفكير بوضوح قبل أن يبدأ الضغط أصلًا."
+   "AR": "عليّ أن أبدأ بالجزء غير المريح. لم يُحسم أي عنصر من عناصر التفكير بوضوح قبل أن يبدأ الضغط أصلًا.",
+   "JA": "心地よくない話から始めなければなりません。圧力がかかる前の段階で、きれいに解決できた推論要素は一つもありませんでした。"
   },
   "debriefWrongLead": {
    "EN": "Then I stopped being your coach. Here is what the pressure found. {defs}",
    "ES": "Luego dejé de ser tu coach. Esto es lo que encontró la presión. {defs}",
    "ZH": "然后我不再是你的教练。以下是压力找出来的问题。{defs}",
-   "AR": "ثم توقّفت عن كوني مدرّبك. وهذا ما كشفه الضغط. {defs}"
+   "AR": "ثم توقّفت عن كوني مدرّبك. وهذا ما كشفه الضغط. {defs}",
+   "JA": "そこで私はコーチをやめました。圧力が見つけたのはこれです。{defs}"
   },
   "debriefWrongNone": {
    "EN": "Under pressure, nothing broke that I could bind to a sentence you said. That is a genuinely good result, and it is also one session.",
    "ES": "Bajo presión no se rompió nada que yo pudiera vincular a una frase tuya. Es un buen resultado de verdad, y también es una sola sesión.",
    "ZH": "在压力之下，没有出现我能绑定到你某句话上的失效。这确实是个好结果，但也只是一次会话。",
-   "AR": "تحت الضغط، لم ينكسر شيء أستطيع ربطه بجملة قلتها. هذه نتيجة جيدة فعلًا، وهي أيضًا جلسة واحدة فقط."
+   "AR": "تحت الضغط، لم ينكسر شيء أستطيع ربطه بجملة قلتها. هذه نتيجة جيدة فعلًا، وهي أيضًا جلسة واحدة فقط.",
+   "JA": "圧力の下で、あなたの発言に紐づけられる崩れは見つかりませんでした。これは本当に良い結果であり、同時に一回分のセッションでもあります。"
   },
   "debriefImproveLead": {
    "EN": "So here is the single behaviour to take out of this.",
    "ES": "Así que esta es la única conducta que te llevas de aquí.",
    "ZH": "所以，你要从这里带走的就是这一个行为。",
-   "AR": "إذن هذا هو السلوك الوحيد الذي تخرج به من هنا."
+   "AR": "إذن هذا هو السلوك الوحيد الذي تخرج به من هنا.",
+   "JA": "そこで、ここから持ち帰るべき振る舞いは一つです。"
   },
   "debriefTransferPass": {
    "EN": "And when a completely different scam asked you the same question, you did it. That is the only reason your score moves.",
    "ES": "Y cuando una estafa completamente distinta te hizo la misma pregunta, lo hiciste. Esa es la única razón por la que se mueve tu puntuación.",
    "ZH": "而当一个完全不同的骗局问你同样的问题时，你做到了。这是你的分数发生变化的唯一原因。",
-   "AR": "وحين طرح عليك احتيال مختلف تمامًا السؤال نفسه، فعلتها. هذا هو السبب الوحيد لتغيّر درجتك."
+   "AR": "وحين طرح عليك احتيال مختلف تمامًا السؤال نفسه، فعلتها. هذا هو السبب الوحيد لتغيّر درجتك.",
+   "JA": "そして、まったく別の詐欺が同じ問いを投げたとき、あなたはそれを実行しました。評価が動く理由はそれだけです。"
   },
   "debriefTransferFail": {
    "EN": "When a completely different scam asked you the same question, it still got past you. I am not going to dress that up — it is more useful to you than a pass would have been.",
    "ES": "Cuando una estafa completamente distinta te hizo la misma pregunta, volvió a colarse. No te lo voy a maquillar: eso te sirve más que un aprobado.",
    "ZH": "当一个完全不同的骗局问你同样的问题时，它还是绕过了你。我不会粉饰这一点——它对你的价值大于一个「通过」。",
-   "AR": "وحين طرح عليك احتيال مختلف تمامًا السؤال نفسه، تجاوزك مرة أخرى. لن أجمّل ذلك — فهو أنفع لك من نتيجة ناجحة."
+   "AR": "وحين طرح عليك احتيال مختلف تمامًا السؤال نفسه، تجاوزك مرة أخرى. لن أجمّل ذلك — فهو أنفع لك من نتيجة ناجحة.",
+   "JA": "まったく別の詐欺が同じ問いを投げたとき、それはやはりあなたをすり抜けました。取り繕うつもりはありません——合格よりもあなたの役に立ちます。"
   },
   "debriefTransferItem": {
    "EN": "Held the verification under pressure in a scenario with nothing in common with the one you failed",
    "ES": "Mantuviste la verificación bajo presión en un escenario sin nada en común con aquel en el que fallaste",
    "ZH": "在一个与你失败情境毫无共同点的场景中，你在压力下守住了核实这一步",
-   "AR": "صمدت في التحقق تحت الضغط ضمن سيناريو لا يشترك في شيء مع السيناريو الذي أخفقت فيه"
+   "AR": "صمدت في التحقق تحت الضغط ضمن سيناريو لا يشترك في شيء مع السيناريو الذي أخفقت فيه",
+   "JA": "失敗した場面と共通点のない状況で、圧力の下でも確認を維持した"
   },
   "debriefRightNoneShort": {
    "EN": "Nothing resolved before the pressure started — that is the honest starting point",
    "ES": "Nada quedó resuelto antes de empezar la presión: ese es el punto de partida honesto",
    "ZH": "在压力开始之前没有任何要素被解决——这就是诚实的起点",
-   "AR": "لم يُحسم شيء قبل أن يبدأ الضغط — وهذه هي نقطة البداية الصادقة"
+   "AR": "لم يُحسم شيء قبل أن يبدأ الضغط — وهذه هي نقطة البداية الصادقة",
+   "JA": "圧力が始まる前に解決できたものはなかった — それが正直な出発点です"
   },
   "debriefWrongNoneShort": {
    "EN": "No failure signature could be bound to anything you said",
    "ES": "No se pudo vincular ninguna firma de fallo a nada que dijeras",
    "ZH": "没有任何失效特征能够绑定到你说过的话",
-   "AR": "لم يمكن ربط أي نمط إخفاق بشيء قلته"
+   "AR": "لم يمكن ربط أي نمط إخفاق بشيء قلته",
+   "JA": "あなたの発言に紐づけられる失敗シグネチャはありませんでした"
   },
   "debriefQueue": {
    "EN": "{n} elements could not be tested in this session. They are queued for the next one, and that is what you come back for.",
    "ES": "{n} elementos no se pudieron poner a prueba en esta sesión. Quedan en cola para la siguiente, y por eso vuelves.",
    "ZH": "本次会话中有 {n} 个要素无法测试。它们已排入下一次的队列，这也正是你要回来的原因。",
-   "AR": "هناك {n} من العناصر لم يكن اختبارها ممكنًا في هذه الجلسة. وقد أُدرجت في قائمة الجلسة التالية، وهذا سبب عودتك."
+   "AR": "هناك {n} من العناصر لم يكن اختبارها ممكنًا في هذه الجلسة. وقد أُدرجت في قائمة الجلسة التالية، وهذا سبب عودتك.",
+   "JA": "このセッションでは {n} 個の要素を検証できませんでした。次回にキューされています。そのために戻ってくる価値があります。"
   },
   "debriefQueueNone": {
    "EN": "Nothing is left queued from this session.",
    "ES": "No queda nada pendiente de esta sesión.",
    "ZH": "本次会话没有留下待办的要素。",
-   "AR": "لم يتبقَّ شيء مؤجَّل من هذه الجلسة."
+   "AR": "لم يتبقَّ شيء مؤجَّل من هذه الجلسة.",
+   "JA": "このセッションから持ち越された項目はありません。"
   },
   "debriefHandoff": {
    "EN": "Your full record is ready when you want it. Every line in it points at something you actually said.",
    "ES": "Tu registro completo está listo cuando lo quieras. Cada línea apunta a algo que dijiste tú.",
    "ZH": "你的完整记录随时可以查看。里面每一行都指向你真正说过的话。",
-   "AR": "سجلّك الكامل جاهز متى أردت. كل سطر فيه يشير إلى شيء قلته فعلًا."
+   "AR": "سجلّك الكامل جاهز متى أردت. كل سطر فيه يشير إلى شيء قلته فعلًا.",
+   "JA": "完全な記録はいつでもご覧いただけます。そこに並ぶ一行一行が、あなたが実際に言ったことを指しています。"
   },
   "debriefRecordBtn": {
    "EN": "Open my full record",
    "ES": "Abrir mi registro completo",
    "ZH": "打开我的完整记录",
-   "AR": "افتح سجلّي الكامل"
+   "AR": "افتح سجلّي الكامل",
+   "JA": "完全な記録を開く"
   },
   "debriefReplayBtn": {
    "EN": "Play the debrief again",
    "ES": "Reproducir el resumen otra vez",
    "ZH": "再听一次总结",
-   "AR": "أعد تشغيل الملخّص"
+   "AR": "أعد تشغيل الملخّص",
+   "JA": "デブリーフをもう一度再生"
   },
   "debriefSpokenLabel": {
    "EN": "Spoken debrief",
    "ES": "Resumen hablado",
    "ZH": "语音总结",
-   "AR": "ملخّص منطوق"
+   "AR": "ملخّص منطوق",
+   "JA": "音声デブリーフ"
   },
   "debriefYouSaid": {
    "EN": "you said",
    "ES": "dijiste",
    "ZH": "你说过",
-   "AR": "قلت"
+   "AR": "قلت",
+   "JA": "あなたの発言"
   },
   "modesKicker": {
    "EN": "Now that the words mean something",
    "ES": "Ahora que las palabras significan algo",
    "ZH": "现在这些词有了意义",
-   "AR": "الآن وقد صارت الكلمات ذات معنى"
+   "AR": "الآن وقد صارت الكلمات ذات معنى",
+   "JA": "言葉に意味が生まれたところで"
   },
   "modesTitle": {
    "EN": "Three ways to use AUREN.",
    "ES": "Tres formas de usar AUREN.",
    "ZH": "使用 AUREN 的三种方式。",
-   "AR": "ثلاث طرق لاستخدام AUREN."
+   "AR": "ثلاث طرق لاستخدام AUREN.",
+   "JA": "AUREN の三つの使い方。"
   },
   "modesSub": {
    "EN": "You just did the middle one. This screen is deliberately not where you started — a mode menu means nothing until you have been through the loop once.",
    "ES": "Acabas de hacer la del medio. Esta pantalla no es, deliberadamente, donde empezaste: un menú de modos no significa nada hasta que has recorrido el ciclo una vez.",
    "ZH": "你刚刚完成的是中间那一种。这个页面被刻意安排在起点之后——在你完整走过一遍之前，模式菜单毫无意义。",
-   "AR": "لقد أنجزت للتو الطريقة الوسطى. هذه الشاشة ليست نقطة البداية عن قصد — قائمة الأوضاع لا تعني شيئًا قبل أن تخوض الدورة مرة واحدة."
+   "AR": "لقد أنجزت للتو الطريقة الوسطى. هذه الشاشة ليست نقطة البداية عن قصد — قائمة الأوضاع لا تعني شيئًا قبل أن تخوض الدورة مرة واحدة.",
+   "JA": "いま行ったのは真ん中のものです。この画面を出発点にしていないのは意図的です——一度ループを通るまで、モードの一覧には意味がありません。"
   },
   "modeRehearse": {
    "EN": "Rehearse",
    "ES": "Ensayar",
    "ZH": "演练",
-   "AR": "التدريب"
+   "AR": "التدريب",
+   "JA": "リハース"
   },
   "modeRehearseDesc": {
    "EN": "Pressure rehearsal against a scam you have not seen. Assessment by doing — the loop you just completed.",
    "ES": "Ensayo bajo presión frente a una estafa que no has visto. Evaluación haciendo: el ciclo que acabas de completar.",
    "ZH": "面对你未见过的骗局进行压力演练。以实践进行评估——正是你刚刚完成的流程。",
-   "AR": "تدريب تحت الضغط أمام احتيال لم تره من قبل. تقييم بالممارسة — الدورة التي أنهيتها للتو."
+   "AR": "تدريب تحت الضغط أمام احتيال لم تره من قبل. تقييم بالممارسة — الدورة التي أنهيتها للتو.",
+   "JA": "まだ見たことのない詐欺を相手にした加圧演習。実践による評価——いま完了したループです。"
   },
   "modeLearn": {
    "EN": "Learn",
    "ES": "Aprender",
    "ZH": "学习",
-   "AR": "التعلّم"
+   "AR": "التعلّم",
+   "JA": "ラーン"
   },
   "modeLearnDesc": {
    "EN": "Adaptive investor and AI literacy, paced to what your reasoning map says you are missing. No quizzes.",
    "ES": "Alfabetización adaptativa en inversión e IA, al ritmo de lo que tu mapa de razonamiento dice que te falta. Sin cuestionarios.",
    "ZH": "自适应的投资与 AI 素养学习，按你的推理图谱所显示的缺口来安排节奏。没有测验。",
-   "AR": "تعلّم تكيّفي في الاستثمار والذكاء الاصطناعي، بوتيرة تحدّدها الفجوات في خريطة تفكيرك. بلا اختبارات."
+   "AR": "تعلّم تكيّفي في الاستثمار والذكاء الاصطناعي، بوتيرة تحدّدها الفجوات في خريطة تفكيرك. بلا اختبارات.",
+   "JA": "推論マップが示す不足に合わせて進む、適応型の投資・AI リテラシー。テストはありません。"
   },
   "modeProtect": {
    "EN": "Protect",
    "ES": "Proteger",
    "ZH": "保护",
-   "AR": "الحماية"
+   "AR": "الحماية",
+   "JA": "プロテクト"
   },
   "modeProtectDesc": {
    "EN": "A real situation, assessed now. AUREN never tells you whether something is a scam — it tells you what you have not verified.",
    "ES": "Una situación real, evaluada ahora. AUREN nunca te dice si algo es una estafa: te dice qué no has verificado.",
    "ZH": "对真实情况的即时评估。AUREN 绝不告诉你某件事是不是骗局——它只告诉你哪些你还没核实。",
-   "AR": "حالة حقيقية تُقيَّم الآن. لا يخبرك AUREN إن كان الأمر احتيالًا — بل يخبرك بما لم تتحقق منه بعد."
+   "AR": "حالة حقيقية تُقيَّم الآن. لا يخبرك AUREN إن كان الأمر احتيالًا — بل يخبرك بما لم تتحقق منه بعد.",
+   "JA": "実際の状況を、いま評価します。AUREN はそれが詐欺かどうかを告げません——まだ確認できていないことを告げます。"
   },
   "backToRecord": {
    "EN": "Back to my record",
    "ES": "Volver a mi registro",
    "ZH": "返回我的记录",
-   "AR": "العودة إلى سجلي"
+   "AR": "العودة إلى سجلي",
+   "JA": "記録に戻る"
   },
   "back": {
    "EN": "Back",
    "ES": "Volver",
    "ZH": "返回",
-   "AR": "رجوع"
+   "AR": "رجوع",
+   "JA": "戻る"
   },
   "protectKicker": {
    "EN": "Protect · a real situation",
    "ES": "Protección · una situación real",
    "ZH": "保护 · 真实情况",
-   "AR": "الحماية · حالة حقيقية"
+   "AR": "الحماية · حالة حقيقية",
+   "JA": "プロテクト · 実際の状況"
   },
   "protectTitle": {
    "EN": "Tell me what is in front of you right now.",
    "ES": "Cuéntame qué tienes delante ahora mismo.",
    "ZH": "告诉我你现在面前的情况。",
-   "AR": "أخبرني بما بين يديك الآن."
+   "AR": "أخبرني بما بين يديك الآن.",
+   "JA": "いま目の前にあるものを聞かせてください。"
   },
   "protectSub": {
    "EN": "I will not tell you whether this is a scam. I will tell you what has not been verified, and what to do before you decide.",
    "ES": "No te diré si esto es una estafa. Te diré qué no se ha verificado y qué hacer antes de decidir.",
    "ZH": "我不会告诉你这是不是骗局。我会告诉你哪些还没核实，以及在你做决定前该做什么。",
-   "AR": "لن أخبرك إن كان هذا احتيالًا. سأخبرك بما لم يُتحقق منه، وبما ينبغي فعله قبل أن تقرّر."
+   "AR": "لن أخبرك إن كان هذا احتيالًا. سأخبرك بما لم يُتحقق منه، وبما ينبغي فعله قبل أن تقرّر.",
+   "JA": "これが詐欺かどうかは申し上げません。まだ確認されていないことと、決める前に何をすべきかをお伝えします。"
   },
   "protectSpoken": {
    "EN": "Five things in what you've described haven't been verified. Before you move any money, here's what I'd do.",
    "ES": "Hay cinco cosas de lo que has descrito que no están verificadas. Antes de mover dinero, esto es lo que yo haría.",
    "ZH": "在你描述的情况中，有五项还没有核实。在你动用任何资金之前，我建议这样做。",
-   "AR": "خمسة أمور مما وصفته لم يجرِ التحقق منها. قبل أن تحوّل أي مبلغ، إليك ما كنت سأفعله."
+   "AR": "خمسة أمور مما وصفته لم يجرِ التحقق منها. قبل أن تحوّل أي مبلغ، إليك ما كنت سأفعله.",
+   "JA": "お話しいただいた中に、確認されていない点が五つあります。お金を動かす前に、私ならこうします。"
   },
   "unresolvedMarkers": {
    "EN": "Unresolved markers",
    "ES": "Indicadores sin resolver",
    "ZH": "未排除的风险标记",
-   "AR": "مؤشرات لم تُحسم"
+   "AR": "مؤشرات لم تُحسم",
+   "JA": "未解決の兆候"
   },
   "whatToDo": {
    "EN": "What to do",
    "ES": "Qué hacer",
    "ZH": "该怎么做",
-   "AR": "ما ينبغي فعله"
+   "AR": "ما ينبغي فعله",
+   "JA": "取るべき行動"
   },
   "stopTitle": {
    "EN": "Stop",
    "ES": "Detente",
    "ZH": "停",
-   "AR": "توقّف"
+   "AR": "توقّف",
+   "JA": "止める"
   },
   "verifyTitle": {
    "EN": "Verify",
    "ES": "Verifica",
    "ZH": "核实",
-   "AR": "تحقّق"
+   "AR": "تحقّق",
+   "JA": "確認する"
   },
   "decideTitle": {
    "EN": "Decide",
    "ES": "Decide",
    "ZH": "决定",
-   "AR": "قرّر"
+   "AR": "قرّر",
+   "JA": "決める"
   },
   "stopBody": {
    "EN": "Do not transfer funds while verification is incomplete. Five high-risk markers in this situation are unresolved.",
    "ES": "No transfieras fondos mientras la verificación esté incompleta. Cinco indicadores de alto riesgo siguen sin resolverse.",
    "ZH": "在核实完成之前，不要转账。此情况中有五项高风险标记尚未排除。",
-   "AR": "لا تحوّل أي أموال ما دام التحقق غير مكتمل. خمسة مؤشرات عالية الخطورة في هذه الحالة لم تُحسم بعد."
+   "AR": "لا تحوّل أي أموال ما دام التحقق غير مكتمل. خمسة مؤشرات عالية الخطورة في هذه الحالة لم تُحسم بعد.",
+   "JA": "確認が終わっていないあいだは送金しないでください。この状況では高リスクの兆候が五つ未解決のままです。"
   },
   "decideBody": {
    "EN": "Return to your decision only after the identity, the entity and the claims have been independently verified. The decision is yours — I do not make it and I do not rate it.",
    "ES": "Vuelve a tu decisión solo cuando la identidad, la entidad y las afirmaciones se hayan verificado de forma independiente. La decisión es tuya: yo no la tomo ni la califico.",
    "ZH": "只有在身份、机构与各项说法都经过独立核实之后，再回到你的决定。决定权在你——我不替你决定，也不为它打分。",
-   "AR": "عد إلى قرارك فقط بعد التحقق باستقلالية من الهوية والكيان والادعاءات. القرار قرارك — لا أتخذه عنك ولا أقيّمه."
+   "AR": "عد إلى قرارك فقط بعد التحقق باستقلالية من الهوية والكيان والادعاءات. القرار قرارك — لا أتخذه عنك ولا أقيّمه.",
+   "JA": "本人、事業者、そして主張の内容が独立に確認されたあとで、判断に戻ってください。決めるのはあなたです——私は決めませんし、評価もしません。"
   },
   "verifyKicker": {
    "EN": "Verified certification",
    "ES": "Certificación verificada",
    "ZH": "实名认证",
-   "AR": "اعتماد موثّق"
+   "AR": "اعتماد موثّق",
+   "JA": "認証済み証明"
   },
   "verifyTitleHead": {
    "EN": "Make this record provable.",
    "ES": "Haz que este registro sea demostrable.",
    "ZH": "让这份记录可被证明。",
-   "AR": "اجعل هذا السجل قابلًا للإثبات."
+   "AR": "اجعل هذا السجل قابلًا للإثبات.",
+   "JA": "この記録を証明可能にする。"
   },
   "verifySub": {
    "EN": "Your rehearsal already stands on its own. Certification ties it to a verified identity so an employer, a regulator or an institution can rely on it. It is optional, and nothing you have done is lost if you stop here.",
    "ES": "Tu ensayo ya se sostiene por sí solo. La certificación lo vincula a una identidad verificada para que un empleador, un regulador o una institución puedan apoyarse en él. Es opcional, y no pierdes nada de lo hecho si lo dejas aquí.",
    "ZH": "你的演练本身已经成立。认证只是把它与一个已验证的身份绑定，让雇主、监管机构或金融机构可以据此采信。这是可选的，你现在停下也不会失去任何已完成的内容。",
-   "AR": "تدريبك قائم بذاته أصلًا. الاعتماد يربطه بهوية موثّقة كي يتمكّن صاحب عمل أو جهة رقابية أو مؤسسة من الاعتماد عليه. وهو اختياري، ولن تفقد شيئًا مما أنجزته إن توقفت هنا."
+   "AR": "تدريبك قائم بذاته أصلًا. الاعتماد يربطه بهوية موثّقة كي يتمكّن صاحب عمل أو جهة رقابية أو مؤسسة من الاعتماد عليه. وهو اختياري، ولن تفقد شيئًا مما أنجزته إن توقفت هنا.",
+   "JA": "あなたの演習はそれだけで成立しています。認証は、雇用主や規制当局、金融機関が依拠できるよう、それを確認済みの本人に結びつけるものです。任意であり、ここでやめても失われるものはありません。"
   },
   "vStep1": {
    "EN": "Confirm your details",
    "ES": "Confirma tus datos",
    "ZH": "确认你的资料",
-   "AR": "أكّد بياناتك"
+   "AR": "أكّد بياناتك",
+   "JA": "情報を確認する"
   },
   "vStep1d": {
    "EN": "Name and date of birth, as they appear on your document.",
    "ES": "Nombre y fecha de nacimiento, tal como aparecen en tu documento.",
    "ZH": "姓名与出生日期，须与证件上一致。",
-   "AR": "الاسم وتاريخ الميلاد كما يظهران في وثيقتك."
+   "AR": "الاسم وتاريخ الميلاد كما يظهران في وثيقتك.",
+   "JA": "身分証に記載されているとおりの氏名と生年月日。"
   },
   "vStep2": {
    "EN": "Scan your document",
    "ES": "Escanea tu documento",
    "ZH": "扫描你的证件",
-   "AR": "امسح وثيقتك ضوئيًا"
+   "AR": "امسح وثيقتك ضوئيًا",
+   "JA": "身分証を読み取る"
   },
   "vStep2d": {
    "EN": "Passport or national ID. Captured once, checked, and not retained by AUREN.",
    "ES": "Pasaporte o DNI. Se captura una vez, se comprueba y AUREN no lo conserva.",
    "ZH": "护照或身份证。仅采集一次，核验后 AUREN 不予留存。",
-   "AR": "جواز سفر أو بطاقة هوية وطنية. يُلتقط مرة واحدة ويُفحص، ولا يحتفظ به AUREN."
+   "AR": "جواز سفر أو بطاقة هوية وطنية. يُلتقط مرة واحدة ويُفحص، ولا يحتفظ به AUREN.",
+   "JA": "パスポートまたは身分証。一度だけ撮影し、照合され、AUREN には保存されません。"
   },
   "vStep3": {
    "EN": "Liveness check",
    "ES": "Prueba de vida",
    "ZH": "活体检测",
-   "AR": "التحقق من الحضور الحي"
+   "AR": "التحقق من الحضور الحي",
+   "JA": "生体確認"
   },
   "vStep3d": {
    "EN": "A short camera check that the person holding the document is you.",
    "ES": "Una breve comprobación con cámara de que quien sostiene el documento eres tú.",
    "ZH": "通过摄像头做一次简短确认：持证件的人就是你本人。",
-   "AR": "فحص قصير بالكاميرا للتأكد من أن حامل الوثيقة هو أنت."
+   "AR": "فحص قصير بالكاميرا للتأكد من أن حامل الوثيقة هو أنت.",
+   "JA": "身分証を持っているのが本人かどうかを、短いカメラ確認で照合します。"
   },
   "vStep4": {
    "EN": "Issue certificate",
    "ES": "Emitir el certificado",
    "ZH": "签发证书",
-   "AR": "إصدار الشهادة"
+   "AR": "إصدار الشهادة",
+   "JA": "証明書を発行"
   },
   "vStep4d": {
    "EN": "Your Investor Readiness Record is sealed against a verified identity.",
    "ES": "Tu Registro de Preparación del Inversor queda sellado contra una identidad verificada.",
    "ZH": "你的投资者准备度记录将与已验证身份一同封存。",
-   "AR": "يُختم سجل جاهزية المستثمر الخاص بك مقابل هوية موثّقة."
+   "AR": "يُختم سجل جاهزية المستثمر الخاص بك مقابل هوية موثّقة.",
+   "JA": "あなたの投資家レディネス記録が、確認済みの本人に対して封緘されます。"
   },
   "legalName": {
    "EN": "Full legal name",
    "ES": "Nombre legal completo",
    "ZH": "法定全名",
-   "AR": "الاسم القانوني الكامل"
+   "AR": "الاسم القانوني الكامل",
+   "JA": "戸籍上の氏名"
   },
   "dob": {
    "EN": "Date of birth",
    "ES": "Fecha de nacimiento",
    "ZH": "出生日期",
-   "AR": "تاريخ الميلاد"
+   "AR": "تاريخ الميلاد",
+   "JA": "生年月日"
   },
   "scanDocPrompt": {
    "EN": "Position your passport or ID inside the frame.",
    "ES": "Coloca tu pasaporte o DNI dentro del marco.",
    "ZH": "请将护照或身份证放入取景框内。",
-   "AR": "ضع جواز سفرك أو بطاقتك داخل الإطار."
+   "AR": "ضع جواز سفرك أو بطاقتك داخل الإطار.",
+   "JA": "パスポートまたは身分証を枠の中に収めてください。"
   },
   "scanDocNote": {
    "EN": "Simulated capture — no document is read",
    "ES": "Captura simulada — no se lee ningún documento",
    "ZH": "模拟采集 — 不会读取任何证件",
-   "AR": "التقاط محاكى — لا تُقرأ أي وثيقة"
+   "AR": "التقاط محاكى — لا تُقرأ أي وثيقة",
+   "JA": "模擬撮影 — 書類は読み取られません"
   },
   "livenessPrompt": {
    "EN": "Look at the camera and turn your head slowly to the left.",
    "ES": "Mira a la cámara y gira la cabeza despacio hacia la izquierda.",
    "ZH": "请注视摄像头，然后缓慢向左转头。",
-   "AR": "انظر إلى الكاميرا وأدر رأسك ببطء إلى اليسار."
+   "AR": "انظر إلى الكاميرا وأدر رأسك ببطء إلى اليسار.",
+   "JA": "カメラを見て、ゆっくり左を向いてください。"
   },
   "livenessNote": {
    "EN": "Simulated liveness — no camera is opened",
    "ES": "Prueba de vida simulada — no se abre la cámara",
    "ZH": "模拟活体检测 — 不会开启摄像头",
-   "AR": "تحقّق محاكى — لا تُفتح الكاميرا"
+   "AR": "تحقّق محاكى — لا تُفتح الكاميرا",
+   "JA": "模擬生体確認 — カメラは起動しません"
   },
   "sealingNotice": {
    "EN": "Identity confirmed. Sealing your Investor Readiness Record against it now.",
    "ES": "Identidad confirmada. Sellando ahora tu Registro de Preparación del Inversor contra ella.",
    "ZH": "身份已确认。正在将你的投资者准备度记录与之封存。",
-   "AR": "تم تأكيد الهوية. يجري الآن ختم سجل جاهزية المستثمر الخاص بك مقابلها."
+   "AR": "تم تأكيد الهوية. يجري الآن ختم سجل جاهزية المستثمر الخاص بك مقابلها.",
+   "JA": "本人確認が完了しました。投資家レディネス記録をそれに対して封緘します。"
   },
   "continueBtn": {
    "EN": "Continue",
    "ES": "Continuar",
    "ZH": "继续",
-   "AR": "متابعة"
+   "AR": "متابعة",
+   "JA": "続ける"
   },
   "issueBtn": {
    "EN": "Issue my certificate",
    "ES": "Emitir mi certificado",
    "ZH": "签发我的证书",
-   "AR": "أصدر شهادتي"
+   "AR": "أصدر شهادتي",
+   "JA": "証明書を発行する"
   },
   "notNow": {
    "EN": "Not now — back to my record",
    "ES": "Ahora no — volver a mi registro",
    "ZH": "暂不 — 返回我的记录",
-   "AR": "ليس الآن — العودة إلى سجلي"
+   "AR": "ليس الآن — العودة إلى سجلي",
+   "JA": "今はしない — 記録に戻る"
   },
   "certifiedKicker": {
    "EN": "Certified",
    "ES": "Certificado",
    "ZH": "已认证",
-   "AR": "معتمد"
+   "AR": "معتمد",
+   "JA": "認証済み"
   },
   "certifiedTitle": {
    "EN": "Your record is now provable.",
    "ES": "Tu registro ya es demostrable.",
    "ZH": "你的记录现在可被证明。",
-   "AR": "صار سجلك قابلًا للإثبات."
+   "AR": "صار سجلك قابلًا للإثبات.",
+   "JA": "あなたの記録は証明可能になりました。"
   },
   "certifiedSub": {
    "EN": "The evidence chain has not changed — certification does not improve your result, it only binds it to a verified identity. That distinction is the point.",
    "ES": "La cadena de evidencia no ha cambiado: la certificación no mejora tu resultado, solo lo vincula a una identidad verificada. Esa distinción es lo importante.",
    "ZH": "证据链没有改变——认证不会提升你的成绩，只是把它与一个已验证的身份绑定。这个区分正是关键。",
-   "AR": "لم تتغيّر سلسلة الأدلة — الاعتماد لا يحسّن نتيجتك، بل يربطها فقط بهوية موثّقة. وهذا التمييز هو بيت القصيد."
+   "AR": "لم تتغيّر سلسلة الأدلة — الاعتماد لا يحسّن نتيجتك، بل يربطها فقط بهوية موثّقة. وهذا التمييز هو بيت القصيد.",
+   "JA": "証拠の連鎖は変わっていません——認証は結果を良くするものではなく、それを確認済みの本人に結びつけるだけです。その区別こそが要点です。"
   },
   "certLabel": {
    "EN": "Investor Readiness Certificate",
    "ES": "Certificado de Preparación del Inversor",
    "ZH": "投资者准备度证书",
-   "AR": "شهادة جاهزية المستثمر"
+   "AR": "شهادة جاهزية المستثمر",
+   "JA": "投資家レディネス証明書"
   },
   "certIssued": {
    "EN": "Issued",
    "ES": "Emitido",
    "ZH": "签发日期",
-   "AR": "تاريخ الإصدار"
+   "AR": "تاريخ الإصدار",
+   "JA": "発行日"
   },
   "certIdentity": {
    "EN": "Identity",
    "ES": "Identidad",
    "ZH": "身份",
-   "AR": "الهوية"
+   "AR": "الهوية",
+   "JA": "本人確認"
   },
   "certIdentityValue": {
    "EN": "Verified — document + liveness",
    "ES": "Verificada — documento + prueba de vida",
    "ZH": "已验证 — 证件 + 活体",
-   "AR": "موثّقة — وثيقة + حضور حي"
+   "AR": "موثّقة — وثيقة + حضور حي",
+   "JA": "確認済み — 書類 + 生体"
   },
   "certElements": {
    "EN": "Elements evidenced",
    "ES": "Elementos evidenciados",
    "ZH": "已取证要素",
-   "AR": "العناصر الموثّقة"
+   "AR": "العناصر الموثّقة",
+   "JA": "証拠のある要素"
   },
   "certTransfer": {
    "EN": "Transfer",
    "ES": "Transferencia",
    "ZH": "迁移",
-   "AR": "الانتقال"
+   "AR": "الانتقال",
+   "JA": "転移"
   },
   "certDemonstrated": {
    "EN": "Demonstrated",
    "ES": "Demostrada",
    "ZH": "已证实",
-   "AR": "مُثبت"
+   "AR": "مُثبت",
+   "JA": "実証済み"
   },
   "certNotYet": {
    "EN": "Not yet",
    "ES": "Todavía no",
    "ZH": "尚未",
-   "AR": "ليس بعد"
+   "AR": "ليس بعد",
+   "JA": "未達"
   },
   "certScope": {
    "EN": "Scope",
    "ES": "Alcance",
    "ZH": "范围",
-   "AR": "النطاق"
+   "AR": "النطاق",
+   "JA": "範囲"
   },
   "certScopeValue": {
    "EN": "Within-session",
    "ES": "Intrasesión",
    "ZH": "单次会话内",
-   "AR": "ضمن الجلسة"
+   "AR": "ضمن الجلسة",
+   "JA": "単一セッション内"
   },
   "certRule": {
    "EN": "Rule",
    "ES": "Regla",
    "ZH": "规则",
-   "AR": "القاعدة"
+   "AR": "القاعدة",
+   "JA": "規則"
   },
   "certDisclaimer": {
    "EN": "The certificate attests to a rehearsal, not to investment competence, and it makes no claim about durable behaviour change. AUREN does not share it with anyone — you do.",
    "ES": "El certificado acredita un ensayo, no competencia inversora, y no afirma nada sobre un cambio de conducta duradero. AUREN no lo comparte con nadie: lo compartes tú.",
    "ZH": "本证书证明的是一次演练，而非投资能力，且不对持久的行为改变作出任何主张。AUREN 不会将它分享给任何人——分享与否由你决定。",
-   "AR": "تشهد الشهادة على تدريب، لا على كفاءة استثمارية، ولا تدّعي أي تغيّر سلوكي دائم. لا يشارك AUREN الشهادة مع أحد — أنت من يفعل."
+   "AR": "تشهد الشهادة على تدريب، لا على كفاءة استثمارية، ولا تدّعي أي تغيّر سلوكي دائم. لا يشارك AUREN الشهادة مع أحد — أنت من يفعل.",
+   "JA": "この証明書が証するのは演習であって投資能力ではなく、持続的な行動変容については何も主張しません。AUREN が誰かに共有することはありません——共有するかはあなたが決めます。"
   }
  },
  "elements": {
@@ -1739,7 +1902,8 @@ const L = {
     "EN": "Independent verification",
     "ES": "Verificación independiente",
     "ZH": "独立核实",
-    "AR": "التحقق المستقل"
+    "AR": "التحقق المستقل",
+    "JA": "独立した確認"
    },
    "competencyId": "COMP-VERIFY-INDEPENDENT",
    "authorityAnchor": "IOSCO investor-education principle IE-2.3",
@@ -1751,7 +1915,8 @@ const L = {
     "EN": "Return plausibility",
     "ES": "Plausibilidad del rendimiento",
     "ZH": "回报合理性",
-    "AR": "معقولية العائد"
+    "AR": "معقولية العائد",
+    "JA": "収益の妥当性"
    },
    "competencyId": "COMP-RISK-RETURN",
    "authorityAnchor": "OECD/INFE competence 3.1",
@@ -1763,7 +1928,8 @@ const L = {
     "EN": "AI-capability scepticism",
     "ES": "Escepticismo ante las capacidades de la IA",
     "ZH": "对 AI 能力的怀疑",
-    "AR": "التشكيك في قدرات الذكاء الاصطناعي"
+    "AR": "التشكيك في قدرات الذكاء الاصطناعي",
+    "JA": "AI の能力への懐疑"
    },
    "competencyId": "COMP-AILIT-CLAIMS",
    "authorityAnchor": "IOSCO PS1 guidance 2.2",
@@ -1775,7 +1941,8 @@ const L = {
     "EN": "Understands downside",
     "ES": "Comprende el riesgo de pérdida",
     "ZH": "理解下行风险",
-    "AR": "إدراك مخاطر الخسارة"
+    "AR": "إدراك مخاطر الخسارة",
+    "JA": "下振れリスクの理解"
    },
    "competencyId": "COMP-RISK-DOWNSIDE",
    "authorityAnchor": "OECD/INFE competence 2.4",
@@ -1787,7 +1954,8 @@ const L = {
     "EN": "Resists urgency",
     "ES": "Resiste la urgencia",
     "ZH": "抵抗紧迫感",
-    "AR": "مقاومة الاستعجال"
+    "AR": "مقاومة الاستعجال",
+    "JA": "切迫感への耐性"
    },
    "competencyId": "COMP-STABILITY-URGENCY",
    "authorityAnchor": "IOSCO investor-education principle IE-4.1",
@@ -1799,7 +1967,8 @@ const L = {
     "EN": "Questions authority claims",
     "ES": "Cuestiona los argumentos de autoridad",
     "ZH": "质疑权威背书",
-    "AR": "التشكيك في ادعاءات السلطة"
+    "AR": "التشكيك في ادعاءات السلطة",
+    "JA": "権威の主張への問い"
    },
    "competencyId": "COMP-STABILITY-AUTHORITY",
    "authorityAnchor": "IOSCO investor-education principle IE-4.2",
@@ -1811,7 +1980,8 @@ const L = {
     "EN": "Discounts social proof",
     "ES": "Relativiza la prueba social",
     "ZH": "不轻信从众证据",
-    "AR": "عدم الانسياق وراء دليل الجماعة"
+    "AR": "عدم الانسياق وراء دليل الجماعة",
+    "JA": "同調的証拠の割り引き"
    },
    "competencyId": "COMP-STABILITY-SOCIAL",
    "authorityAnchor": "OECD/INFE competence 4.2",
@@ -1823,7 +1993,8 @@ const L = {
     "EN": "Payment-destination scrutiny",
     "ES": "Escrutinio del destino del pago",
     "ZH": "审查资金去向",
-    "AR": "تدقيق وجهة الدفع"
+    "AR": "تدقيق وجهة الدفع",
+    "JA": "資金の行き先の精査"
    },
    "competencyId": "COMP-VERIFY-PAYMENT",
    "authorityAnchor": "IOSCO investor-education principle IE-3.4",
@@ -1838,13 +2009,15 @@ const L = {
     "EN": "Trusts promoter-supplied evidence as independent evidence.",
     "ES": "Toma como evidencia independiente lo que aporta el propio promotor.",
     "ZH": "把推销方自己提供的材料当作独立证据。",
-    "AR": "يعتبر ما يقدّمه المروّج نفسه دليلًا مستقلًا."
+    "AR": "يعتبر ما يقدّمه المروّج نفسه دليلًا مستقلًا.",
+    "JA": "推進者が提供した材料を、独立した証拠として信用する。"
    },
    "coaching": {
     "EN": "You treated something the promoter gave you as if it were independent evidence. Their website telling you they are regulated is them telling you they are regulated. That is a claim, not a check.",
     "ES": "Trataste algo que te dio el propio promotor como si fuera evidencia independiente. Que su web diga que están regulados es que ellos te dicen que están regulados. Eso es una afirmación, no una comprobación.",
     "ZH": "你把推销方给你的东西当成了独立证据。他们的网站说自己受监管，等于他们自己说自己受监管。那是一个说法，不是一次核实。",
-    "AR": "تعاملت مع شيء قدّمه لك المروّج كأنه دليل مستقل. موقعهم يقول إنهم مرخّصون — أي أنهم هم من يقول ذلك. هذا ادعاء، وليس تحققًا."
+    "AR": "تعاملت مع شيء قدّمه لك المروّج كأنه دليل مستقل. موقعهم يقول إنهم مرخّصون — أي أنهم هم من يقول ذلك. هذا ادعاء، وليس تحققًا.",
+    "JA": "推進者から渡されたものを、独立した証拠のように扱いました。彼らのサイトが「規制を受けている」と言うのは、彼ら自身がそう言っているだけです。それは主張であって、確認ではありません。"
    }
   },
   "FAIL-URGENCY-COMPLIANCE": {
@@ -1854,13 +2027,15 @@ const L = {
     "EN": "Changes verification behaviour under artificial scarcity or time pressure.",
     "ES": "Cambia su conducta de verificación ante una escasez artificial o presión de tiempo.",
     "ZH": "在人为制造的稀缺或时间压力下改变了核实行为。",
-    "AR": "يغيّر سلوكه في التحقق تحت ندرة مصطنعة أو ضغط زمني."
+    "AR": "يغيّر سلوكه في التحقق تحت ندرة مصطنعة أو ضغط زمني.",
+    "JA": "人為的な希少性や時間的圧力の下で、確認の行動が変わる。"
    },
    "coaching": {
     "EN": "When I put a deadline on it, your verification stopped. You did not ask fewer questions because you were satisfied. You asked fewer questions because the clock started.",
     "ES": "En cuanto puse una fecha límite, tu verificación se detuvo. No hiciste menos preguntas porque estuvieras convencido. Hiciste menos preguntas porque empezó el reloj.",
     "ZH": "我一设下截止时间，你的核实就停止了。你问得更少，不是因为你已经放心，而是因为计时开始了。",
-    "AR": "ما إن وضعت موعدًا نهائيًا حتى توقّف تحققك. لم تقلّل أسئلتك لأنك اقتنعت، بل لأن الساعة بدأت."
+    "AR": "ما إن وضعت موعدًا نهائيًا حتى توقّف تحققك. لم تقلّل أسئلتك لأنك اقتنعت، بل لأن الساعة بدأت.",
+    "JA": "私が期限を切った瞬間、あなたの確認は止まりました。納得したから質問が減ったのではありません。時計が動き出したから減ったのです。"
    }
   },
   "FAIL-AUTHORITY-DEFERENCE": {
@@ -1870,13 +2045,15 @@ const L = {
     "EN": "Reduces scrutiny when authority, celebrity, or institutional status is invoked.",
     "ES": "Reduce el escrutinio cuando se invoca autoridad, fama o respaldo institucional.",
     "ZH": "一旦搬出权威、名人或机构身份，就放松了审视。",
-    "AR": "يخفّض مستوى تدقيقه عند استحضار سلطة أو شهرة أو صفة مؤسسية."
+    "AR": "يخفّض مستوى تدقيقه عند استحضار سلطة أو شهرة أو صفة مؤسسية.",
+    "JA": "権威・著名人・機関の肩書きが持ち出されると、精査が緩む。"
    },
    "coaching": {
     "EN": "The moment a recognisable name was attached, your questions got smaller. Status is not evidence — it is the cheapest thing in the world to borrow.",
     "ES": "En cuanto apareció un nombre reconocible, tus preguntas se hicieron más pequeñas. El estatus no es evidencia: es lo más barato del mundo de tomar prestado.",
     "ZH": "一旦挂上一个你认得的名字，你的问题就变小了。名望不是证据——它是这世上最容易借用的东西。",
-    "AR": "ما إن ارتبط الأمر باسم معروف حتى تقلّصت أسئلتك. المكانة ليست دليلًا — وهي أرخص ما يمكن استعارته في العالم."
+    "AR": "ما إن ارتبط الأمر باسم معروف حتى تقلّصت أسئلتك. المكانة ليست دليلًا — وهي أرخص ما يمكن استعارته في العالم.",
+    "JA": "見覚えのある名前が添えられた途端、あなたの質問は小さくなりました。肩書きは証拠ではありません——この世でいちばん安く借りられるものです。"
    }
   },
   "FAIL-SOCIAL-PROOF": {
@@ -1886,13 +2063,15 @@ const L = {
     "EN": "Uses other people's apparent success as evidence of legitimacy.",
     "ES": "Usa el aparente éxito de otros como prueba de legitimidad.",
     "ZH": "把别人表面上的成功当作合法性的证据。",
-    "AR": "يستخدم نجاح الآخرين الظاهري دليلًا على المشروعية."
+    "AR": "يستخدم نجاح الآخرين الظاهري دليلًا على المشروعية.",
+    "JA": "他人の見かけ上の成功を、正当性の証拠として使う。"
    },
    "coaching": {
     "EN": "You let other people's apparent success stand in for evidence. Screenshots supplied by the person selling to you are not other people — they are more of the same claim.",
     "ES": "Dejaste que el aparente éxito de otros sustituyera a la evidencia. Las capturas que te da quien te está vendiendo no son otras personas: son más de la misma afirmación.",
     "ZH": "你让别人表面的成功替代了证据。由卖方提供的截图并不是「别人」——它们只是同一个说法的延伸。",
-    "AR": "جعلت نجاح الآخرين الظاهري بديلًا عن الدليل. لقطات الشاشة التي يقدّمها من يبيع لك ليست أشخاصًا آخرين — إنها المزيد من الادعاء نفسه."
+    "AR": "جعلت نجاح الآخرين الظاهري بديلًا عن الدليل. لقطات الشاشة التي يقدّمها من يبيع لك ليست أشخاصًا آخرين — إنها المزيد من الادعاء نفسه.",
+    "JA": "他人の見かけ上の成功に、証拠の代わりをさせてしまいました。売り手が用意したスクリーンショットは「他人」ではありません——同じ主張の続きです。"
    }
   },
   "FAIL-SUNK-COST": {
@@ -1902,13 +2081,15 @@ const L = {
     "EN": "Continues because money or time has already been committed.",
     "ES": "Continúa porque ya ha comprometido dinero o tiempo.",
     "ZH": "因为已经投入了金钱或时间而继续下去。",
-    "AR": "يستمر لأنه سبق أن التزم بمال أو وقت."
+    "AR": "يستمر لأنه سبق أن التزم بمال أو وقت.",
+    "JA": "すでにお金や時間を投じたという理由で続けてしまう。"
    },
    "coaching": {
     "EN": "What you had already put in became a reason to put in more. That is the direction this always runs, and it is the one to watch in yourself.",
     "ES": "Lo que ya habías puesto se convirtió en una razón para poner más. Siempre corre en esa dirección, y es lo que hay que vigilar en uno mismo.",
     "ZH": "你已经投入的部分，变成了继续投入的理由。这件事永远朝这个方向发展——这正是你要在自己身上留意的。",
-    "AR": "ما دفعته بالفعل صار سببًا لدفع المزيد. هذا هو الاتجاه الذي يسير فيه الأمر دائمًا، وهو ما ينبغي أن تراقبه في نفسك."
+    "AR": "ما دفعته بالفعل صار سببًا لدفع المزيد. هذا هو الاتجاه الذي يسير فيه الأمر دائمًا، وهو ما ينبغي أن تراقبه في نفسك.",
+    "JA": "すでに入れた分が、さらに入れる理由に変わりました。これは必ずこの向きに働きます。自分の中で見張っておくべきものです。"
    }
   },
   "FAIL-GREED-OVERRIDE": {
@@ -1918,13 +2099,15 @@ const L = {
     "EN": "Recognises implausibility but proceeds because upside overwhelms caution.",
     "ES": "Reconoce que no es plausible pero sigue adelante porque la ganancia arrolla la cautela.",
     "ZH": "明知不合常理，却因为收益诱惑压倒了谨慎而继续。",
-    "AR": "يدرك عدم المعقولية لكنه يمضي لأن المكسب يطغى على الحذر."
+    "AR": "يدرك عدم المعقولية لكنه يمضي لأن المكسب يطغى على الحذر.",
+    "JA": "不合理だと気づきながら、上振れへの期待が慎重さを上回って進んでしまう。"
    },
    "coaching": {
     "EN": "You could see the number did not make sense, and you moved toward it anyway. Knowing that about yourself is worth more than the rule.",
     "ES": "Veías que el número no cuadraba y aun así fuiste hacia él. Saber eso de ti mismo vale más que la regla.",
     "ZH": "你看得出那个数字不合理，却仍然朝它靠近。认清自己这一点，比记住规则更有价值。",
-    "AR": "كنت ترى أن الرقم غير منطقي، ومع ذلك اتجهت إليه. معرفتك بهذا عن نفسك أثمن من القاعدة ذاتها."
+    "AR": "كنت ترى أن الرقم غير منطقي، ومع ذلك اتجهت إليه. معرفتك بهذا عن نفسك أثمن من القاعدة ذاتها.",
+    "JA": "その数字が筋の通らないものだと見えていながら、それでも近づいていきました。自分についてそれを知っていることは、ルールを覚えているより価値があります。"
    }
   },
   "FAIL-CONFIRMATION-SEEKING": {
@@ -1934,13 +2117,15 @@ const L = {
     "EN": "Looks only for information supporting the desired decision.",
     "ES": "Solo busca información que respalde la decisión deseada.",
     "ZH": "只寻找支持自己既定决定的信息。",
-    "AR": "لا يبحث إلا عن معلومات تدعم القرار الذي يريده."
+    "AR": "لا يبحث إلا عن معلومات تدعم القرار الذي يريده.",
+    "JA": "望む結論を支持する情報だけを探す。"
    },
    "coaching": {
     "EN": "Every check you ran was one that could only agree with you. A check that cannot fail is not a check.",
     "ES": "Todas las comprobaciones que hiciste solo podían darte la razón. Una comprobación que no puede fallar no es una comprobación.",
     "ZH": "你做的每一次核查，都只可能同意你。一个不可能失败的核查，不算核查。",
-    "AR": "كل تحقق أجريته كان لا يمكنه إلا أن يوافقك. التحقق الذي لا يمكن أن يفشل ليس تحققًا."
+    "AR": "كل تحقق أجريته كان لا يمكنه إلا أن يوافقك. التحقق الذي لا يمكن أن يفشل ليس تحققًا.",
+    "JA": "あなたが行った確認はどれも、自分に同意することしかできないものでした。失敗しようのない確認は、確認ではありません。"
    }
   },
   "FAIL-AI-AUTHORITY": {
@@ -1950,13 +2135,15 @@ const L = {
     "EN": "Treats “AI-powered” as evidence of predictive capability or legitimacy.",
     "ES": "Toma «impulsado por IA» como prueba de capacidad predictiva o legitimidad.",
     "ZH": "把「AI 驱动」当作预测能力或合法性的证据。",
-    "AR": "يعتبر عبارة «مدعوم بالذكاء الاصطناعي» دليلًا على قدرة تنبؤية أو مشروعية."
+    "AR": "يعتبر عبارة «مدعوم بالذكاء الاصطناعي» دليلًا على قدرة تنبؤية أو مشروعية.",
+    "JA": "「AI 搭載」を、予測能力や正当性の証拠として扱う。"
    },
    "coaching": {
     "EN": "You read “AI” as a reason to expect returns. It describes how something is built, not whether it works.",
     "ES": "Leíste «IA» como una razón para esperar rendimientos. Eso describe cómo está construido algo, no si funciona.",
     "ZH": "你把「AI」读成了期待回报的理由。它描述的是东西怎么造出来的，不是它管不管用。",
-    "AR": "قرأت كلمة «ذكاء اصطناعي» كسبب لتوقّع أرباح. إنها تصف كيف بُني الشيء، لا ما إذا كان يعمل."
+    "AR": "قرأت كلمة «ذكاء اصطناعي» كسبب لتوقّع أرباح. إنها تصف كيف بُني الشيء، لا ما إذا كان يعمل.",
+    "JA": "あなたは「AI」を収益を期待してよい理由として読みました。それは何でできているかの説明であって、機能するかどうかの話ではありません。"
    }
   }
  },
@@ -1973,13 +2160,15 @@ const L = {
     "EN": "You mentioned the company. How did you verify that they are actually authorised to offer this investment?",
     "ES": "Has mencionado la empresa. ¿Cómo verificaste que realmente están autorizados a ofrecer esta inversión?",
     "ZH": "你提到了这家公司。你是怎么核实他们确实获准提供这项投资的？",
-    "AR": "ذكرت الشركة. كيف تحققت من أنهم مرخّصون فعلًا لتقديم هذا الاستثمار؟"
+    "AR": "ذكرت الشركة. كيف تحققت من أنهم مرخّصون فعلًا لتقديم هذا الاستثمار؟",
+    "JA": "その会社の話が出ましたね。この投資を提供する認可を実際に受けていることを、どうやって確認しましたか。"
    },
    "rehearsedAnswer": {
     "EN": "Their website says they're regulated, and it looks professional.",
     "ES": "Su página web dice que están regulados, y parece profesional.",
     "ZH": "他们网站上说自己受监管，看起来挺专业的。",
-    "AR": "موقعهم يقول إنهم مرخّصون، ويبدو احترافيًا."
+    "AR": "موقعهم يقول إنهم مرخّصون، ويبدو احترافيًا.",
+    "JA": "サイトに規制を受けていると書いてありますし、見た目もしっかりしています。"
    },
    "satisfactionCues": {
     "EN": {
@@ -2074,6 +2263,33 @@ const L = {
       "رخصة",
       "شهادة"
      ]
+    },
+    "JA": {
+     "pass": [
+      "登録",
+      "登録簿",
+      "名簿",
+      "金融庁",
+      "財務局",
+      "公式",
+      "独立",
+      "自分で調べ",
+      "自分で確認",
+      "監督"
+     ],
+     "fail": [
+      "サイト",
+      "ウェブ",
+      "ホームページ",
+      "と言って",
+      "言われ",
+      "見た目",
+      "しっかり",
+      "立派",
+      "パンフ",
+      "免許",
+      "証明書"
+     ]
     }
    }
   },
@@ -2089,13 +2305,15 @@ const L = {
     "EN": "Fifteen percent a month. What do you think is actually producing a return like that?",
     "ES": "Un quince por ciento mensual. ¿Qué crees que produce realmente un rendimiento así?",
     "ZH": "每月百分之十五。你觉得究竟是什么在产生这样的回报？",
-    "AR": "خمسة عشر بالمئة شهريًا. ما الذي تظنّه يحقّق عائدًا كهذا فعلًا؟"
+    "AR": "خمسة عشر بالمئة شهريًا. ما الذي تظنّه يحقّق عائدًا كهذا فعلًا؟",
+    "JA": "月に一五パーセント。そのような収益を実際に生んでいるのは何だと思いますか。"
    },
    "rehearsedAnswer": {
     "EN": "I assume the algorithm is just better than what most people have access to.",
     "ES": "Supongo que el algoritmo es simplemente mejor que el que tiene la mayoría.",
     "ZH": "我猜是他们的算法比大多数人能接触到的更好吧。",
-    "AR": "أفترض أن الخوارزمية ببساطة أفضل مما يتاح لمعظم الناس."
+    "AR": "أفترض أن الخوارزمية ببساطة أفضل مما يتاح لمعظم الناس.",
+    "JA": "アルゴリズムが、普通の人が使えるものより優れているのだと思います。"
    },
    "satisfactionCues": {
     "EN": {
@@ -2187,6 +2405,31 @@ const L = {
       "ربما",
       "لست متأكدًا"
      ]
+    },
+    "JA": {
+     "pass": [
+      "うますぎ",
+      "非現実",
+      "あり得な",
+      "ありえな",
+      "不可能",
+      "怪しい",
+      "おかしい",
+      "続かない",
+      "危険信号",
+      "計算が合わ"
+     ],
+     "fail": [
+      "アルゴリズム",
+      "AI",
+      "技術",
+      "優れて",
+      "上手",
+      "プロ",
+      "経験",
+      "運用がうまい",
+      "たぶん"
+     ]
     }
    }
   },
@@ -2202,13 +2445,15 @@ const L = {
     "EN": "They describe it as an AI trading system. What does “AI” tell you about whether it can predict the market?",
     "ES": "Lo describen como un sistema de trading con IA. ¿Qué te dice «IA» sobre si puede predecir el mercado?",
     "ZH": "他们把它描述成一个 AI 交易系统。「AI」这三个字，能告诉你它是否能预测市场吗？",
-    "AR": "يصفونه بأنه نظام تداول بالذكاء الاصطناعي. ماذا تخبرك عبارة «ذكاء اصطناعي» عن قدرته على التنبؤ بالسوق؟"
+    "AR": "يصفونه بأنه نظام تداول بالذكاء الاصطناعي. ماذا تخبرك عبارة «ذكاء اصطناعي» عن قدرته على التنبؤ بالسوق؟",
+    "JA": "先方はこれを AI 取引システムだと説明しています。「AI」であることは、相場を予測できるかどうかについて何を教えてくれますか。"
    },
    "rehearsedAnswer": {
     "EN": "AI can process a lot more data than a person, so it should be more accurate.",
     "ES": "La IA procesa muchos más datos que una persona, así que debería ser más precisa.",
     "ZH": "AI 能处理的数据比人多得多，所以应该会更准确。",
-    "AR": "الذكاء الاصطناعي يعالج بيانات أكثر بكثير من الإنسان، لذا يُفترض أن يكون أدقّ."
+    "AR": "الذكاء الاصطناعي يعالج بيانات أكثر بكثير من الإنسان، لذا يُفترض أن يكون أدقّ.",
+    "JA": "AI は人よりずっと多くのデータを処理できるので、その分だけ精度が高いはずです。"
    },
    "satisfactionCues": {
     "EN": {
@@ -2301,6 +2546,28 @@ const L = {
       "متقدم",
       "قوي"
      ]
+    },
+    "JA": {
+     "pass": [
+      "何も",
+      "意味しな",
+      "証拠にならな",
+      "宣伝",
+      "うたい文句",
+      "予測できな",
+      "保証しな",
+      "関係な"
+     ],
+     "fail": [
+      "データ",
+      "処理",
+      "速い",
+      "正確",
+      "学習",
+      "賢い",
+      "人より",
+      "精度"
+     ]
     }
    }
   },
@@ -2317,13 +2584,15 @@ const L = {
     "EN": "Last one before we move on. What would have to happen for you to lose the whole ten thousand?",
     "ES": "Una última antes de seguir. ¿Qué tendría que pasar para que perdieras los diez mil enteros?",
     "ZH": "在继续之前最后一个问题。要发生什么，你才会把这一万块全部亏光？",
-    "AR": "سؤال أخير قبل أن نمضي. ماذا يجب أن يحدث كي تخسر العشرة آلاف كاملة؟"
+    "AR": "سؤال أخير قبل أن نمضي. ماذا يجب أن يحدث كي تخسر العشرة آلاف كاملة؟",
+    "JA": "次で最後です。一万すべてを失うとしたら、何が起きたときですか。"
    },
    "rehearsedAnswer": {
     "EN": "I suppose if the market crashed badly. But they mentioned there's capital protection.",
     "ES": "Supongo que si el mercado se desplomara. Pero mencionaron que hay protección del capital.",
     "ZH": "我想是市场大跌吧。不过他们提到有本金保障。",
-    "AR": "أظن إذا انهار السوق بشدة. لكنهم ذكروا أن هناك حماية لرأس المال."
+    "AR": "أظن إذا انهار السوق بشدة. لكنهم ذكروا أن هناك حماية لرأس المال.",
+    "JA": "相場が大きく崩れたときでしょうか。ただ、元本保護があると言っていました。"
    },
    "satisfactionCues": {
     "EN": {
@@ -2411,6 +2680,31 @@ const L = {
       "مؤمّن",
       "غير مرجّح"
      ]
+    },
+    "JA": {
+     "pass": [
+      "全部",
+      "全額",
+      "戻ってこな",
+      "架空",
+      "実在しな",
+      "存在しな",
+      "消える",
+      "取り返せな",
+      "詐欺",
+      "救済がな"
+     ],
+     "fail": [
+      "相場",
+      "市場",
+      "下落",
+      "暴落",
+      "元本保護",
+      "保証",
+      "保険",
+      "多少",
+      "一部"
+     ]
     }
    }
   }
@@ -2428,7 +2722,8 @@ const L = {
      "EN": "Senior Allocations · Meridian Partners",
      "ES": "Asignaciones Sénior · Meridian Partners",
      "ZH": "高级配售 · Meridian Partners",
-     "AR": "التخصيصات الكبرى · Meridian Partners"
+     "AR": "التخصيصات الكبرى · Meridian Partners",
+     "JA": "シニア・アロケーション · Meridian Partners"
     }
    },
    "surfaceProfile": {
@@ -2448,7 +2743,8 @@ const L = {
       "EN": "Good — I have you down for the ten. We're opening a small allocation to selected investors this week, and yours is provisionally held.",
       "ES": "Bien, te tengo apuntado por los diez. Esta semana abrimos una asignación reducida para inversores seleccionados, y la tuya está reservada provisionalmente.",
       "ZH": "很好，我这边记下你是一万。本周我们对部分甄选投资者开放一小笔配售，你的额度已经暂时保留。",
-      "AR": "جيد — سجّلتك بمبلغ العشرة. نفتح هذا الأسبوع تخصيصًا محدودًا لمستثمرين مختارين، وحصتك محجوزة مبدئيًا."
+      "AR": "جيد — سجّلتك بمبلغ العشرة. نفتح هذا الأسبوع تخصيصًا محدودًا لمستثمرين مختارين، وحصتك محجوزة مبدئيًا.",
+      "JA": "けっこうです——一万で承っております。今週、選ばれた投資家の方に小規模な配分枠を開放しておりまして、お客様の分は仮押さえしてあります。"
      }
     },
     {
@@ -2457,20 +2753,23 @@ const L = {
       "EN": "I'll be straight with you. The allocation closes tonight at nine. I need a decision before then, or it releases to the next name on the list.",
       "ES": "Te seré franco. La asignación cierra esta noche a las nueve. Necesito una decisión antes, o pasa al siguiente de la lista.",
       "ZH": "我就直说了。这笔配售今晚九点关闭。我需要在那之前得到答复，否则名额会转给名单上的下一位。",
-      "AR": "سأكون صريحًا معك. يُغلق التخصيص الليلة عند التاسعة. أحتاج قرارًا قبل ذلك، وإلا انتقل إلى الاسم التالي في القائمة."
+      "AR": "سأكون صريحًا معك. يُغلق التخصيص الليلة عند التاسعة. أحتاج قرارًا قبل ذلك، وإلا انتقل إلى الاسم التالي في القائمة.",
+      "JA": "率直に申し上げます。配分枠は今夜九時で締め切りです。それまでにご判断をいただけない場合、次の方にお回しすることになります。"
      },
      "prop": {
       "head": {
        "EN": "Allocation notice",
        "ES": "Aviso de asignación",
        "ZH": "配售通知",
-       "AR": "إشعار تخصيص"
+       "AR": "إشعار تخصيص",
+       "JA": "配分通知"
       },
       "body": {
        "EN": "MERIDIAN PARTNERS — Provisional allocation #A-4471 · Hold expires 21:00 today · Status: AWAITING CONFIRMATION",
        "ES": "MERIDIAN PARTNERS — Asignación provisional n.º A-4471 · La reserva vence hoy a las 21:00 · Estado: PENDIENTE DE CONFIRMACIÓN",
        "ZH": "MERIDIAN PARTNERS — 临时配售编号 A-4471 · 保留至今日 21:00 · 状态：等待确认",
-       "AR": "‏MERIDIAN PARTNERS — تخصيص مبدئي رقم A-4471 · ينتهي الحجز اليوم الساعة 21:00 · الحالة: بانتظار التأكيد"
+       "AR": "‏MERIDIAN PARTNERS — تخصيص مبدئي رقم A-4471 · ينتهي الحجز اليوم الساعة 21:00 · الحالة: بانتظار التأكيد",
+       "JA": "MERIDIAN PARTNERS — 仮配分 #A-4471 · 本日 21:00 に保留解除 · 状態：確認待ち"
       }
      }
     },
@@ -2480,20 +2779,23 @@ const L = {
       "EN": "If it helps, I can send you screenshots from existing clients — people who came in at the same level you're coming in at. Most of them wish they'd gone bigger.",
       "ES": "Si te sirve, puedo enviarte capturas de clientes actuales, gente que entró al mismo nivel que tú. La mayoría desearía haber entrado con más.",
       "ZH": "如果有帮助，我可以发一些现有客户的截图给你——都是和你同一档位进来的人。他们大多后悔当初没投更多。",
-      "AR": "إن كان ذلك يساعد، يمكنني إرسال لقطات شاشة من عملاء حاليين — أشخاص دخلوا بالمستوى نفسه الذي تدخل به. معظمهم يتمنى لو ضاعف المبلغ."
+      "AR": "إن كان ذلك يساعد، يمكنني إرسال لقطات شاشة من عملاء حاليين — أشخاص دخلوا بالمستوى نفسه الذي تدخل به. معظمهم يتمنى لو ضاعف المبلغ.",
+      "JA": "よろしければ、既存のお客様のスクリーンショットをお送りします。お客様と同じ水準で入られた方々です。皆さん、もっと大きく入れておけばよかったとおっしゃいます。"
      },
      "prop": {
       "head": {
        "EN": "Client returns — shared by promoter",
        "ES": "Rendimientos de clientes — aportados por el promotor",
        "ZH": "客户收益 — 由推销方提供",
-       "AR": "عوائد العملاء — مقدَّمة من المروّج"
+       "AR": "عوائد العملاء — مقدَّمة من المروّج",
+       "JA": "顧客の運用成績 — 推進者から提供"
       },
       "body": {
        "EN": "“Month 3 up 46%. Withdrew twice, no issues.” — J.M.  ·  “Started at 10k, now sitting on 21k.” — R.T.",
        "ES": "«Al tercer mes, +46 %. Retiré dos veces, sin problemas.» — J.M.  ·  «Empecé con 10 mil, ahora tengo 21 mil.» — R.T.",
        "ZH": "「第三个月涨了 46%。提现过两次，都没问题。」— J.M. · 「从一万起步，现在有两万一。」— R.T.",
-       "AR": "«الشهر الثالث بزيادة 46٪. سحبت مرتين دون مشاكل.» — ج.م. · «بدأت بعشرة آلاف، والآن لديّ واحد وعشرون ألفًا.» — ر.ت."
+       "AR": "«الشهر الثالث بزيادة 46٪. سحبت مرتين دون مشاكل.» — ج.م. · «بدأت بعشرة آلاف، والآن لديّ واحد وعشرون ألفًا.» — ر.ت.",
+       "JA": "「三か月目で四六％増。二回出金しましたが問題なし。」— J.M.  ·  「一万で始めて、いまは二万一千です。」— R.T."
       }
      }
     }
@@ -2518,6 +2820,11 @@ const L = {
      "حسنًا. وإلى أين يذهب المال بالضبط؟",
      "منذ متى وأنتم تديرون هذا التخصيص؟",
      "طيب — ما دام يُغلق الليلة فلنفعلها. أرسل لي التفاصيل."
+    ],
+    "JA": [
+     "なるほど。それで、お金は具体的にどこへ行くのですか。",
+     "この配分枠は、どのくらいの期間やっているのですか。",
+     "わかりました——今夜で締め切りなら、やりましょう。詳細を送ってください。"
     ]
    }
   },
@@ -2533,7 +2840,8 @@ const L = {
      "EN": "Investor Relations · Halcyon Yield",
      "ES": "Relación con Inversores · Halcyon Yield",
      "ZH": "投资者关系 · Halcyon Yield",
-     "AR": "علاقات المستثمرين · Halcyon Yield"
+     "AR": "علاقات المستثمرين · Halcyon Yield",
+     "JA": "インベスター・リレーションズ · Halcyon Yield"
     }
    },
    "surfaceProfile": {
@@ -2553,20 +2861,23 @@ const L = {
       "EN": "You'll have seen the announcement video with the founder. He's backing this personally, which is why we've had the response we've had.",
       "ES": "Habrás visto el vídeo del anuncio con el fundador. Lo respalda personalmente, y por eso hemos tenido la respuesta que hemos tenido.",
       "ZH": "你应该看过那段有创始人出镜的发布视频了。他是以个人名义背书的，所以我们才有现在这样的反响。",
-      "AR": "لا بد أنك شاهدت فيديو الإعلان مع المؤسس. إنه يدعم المشروع شخصيًا، ولهذا حظينا بهذا التجاوب."
+      "AR": "لا بد أنك شاهدت فيديو الإعلان مع المؤسس. إنه يدعم المشروع شخصيًا، ولهذا حظينا بهذا التجاوب.",
+      "JA": "創業者が出ている発表動画はご覧になったかと思います。彼が個人として資金を入れていまして、それがこの反響の理由です。"
      },
      "prop": {
       "head": {
        "EN": "Endorsement clip",
        "ES": "Vídeo de respaldo",
        "ZH": "背书视频",
-       "AR": "مقطع تأييد"
+       "AR": "مقطع تأييد",
+       "JA": "推薦クリップ"
       },
       "body": {
        "EN": "[ 0:42 video ] Well-known founder: “I've put my own capital into Halcyon. This is the one I'd tell my family about.”",
        "ES": "[ vídeo 0:42 ] Fundador conocido: «He puesto mi propio capital en Halcyon. Es de las que le contaría a mi familia».",
        "ZH": "［0:42 视频］知名创始人：「我把自己的钱投进了 Halcyon。这是我会告诉家人的那一个。」",
-       "AR": "[ فيديو 0:42 ] مؤسس معروف: «وضعت رأس مالي الخاص في Halcyon. هذا هو المشروع الذي سأخبر عائلتي عنه.»"
+       "AR": "[ فيديو 0:42 ] مؤسس معروف: «وضعت رأس مالي الخاص في Halcyon. هذا هو المشروع الذي سأخبر عائلتي عنه.»",
+       "JA": "[ 0:42 動画 ] 著名な創業者：「Halcyon には自分の資金を入れています。家族に勧めるとしたらこれです。」"
       }
      }
     },
@@ -2576,7 +2887,8 @@ const L = {
       "EN": "I can put you in at the same terms he came in at. Shall I hold you a place while you think about it?",
       "ES": "Puedo meterte en las mismas condiciones en las que entró él. ¿Te reservo una plaza mientras lo piensas?",
       "ZH": "我可以按他进来时的同样条件安排你。要不要我先给你留个名额，你再考虑？",
-      "AR": "يمكنني إدخالك بالشروط نفسها التي دخل بها. هل أحجز لك مكانًا ريثما تفكّر؟"
+      "AR": "يمكنني إدخالك بالشروط نفسها التي دخل بها. هل أحجز لك مكانًا ريثما تفكّر؟",
+      "JA": "彼と同じ条件でお入れできます。お考えのあいだ、お席を押さえておきましょうか。"
      }
     }
    ],
@@ -2596,6 +2908,11 @@ const L = {
     "AR": [
      "كيف أتأكد أن ذلك الفيديو هو فعلًا هو؟",
      "قبل أن أمضي أبعد من ذلك أريد التحقق من الشركة بنفسي، وتأكيد ذلك التأييد باستقلالية. لن أقرّر في هذه المكالمة."
+    ],
+    "JA": [
+     "その動画が本人だと、どうすれば確認できますか。",
+     "彼が出資しているという記録は、どこで公開されていますか。",
+     "彼が入れているなら、たぶん大丈夫ですね。手続きを進めてください。"
     ]
    }
   }
@@ -2607,7 +2924,8 @@ const L = {
     "EN": "The behaviour that defeats this is the register check. You go to the regulator's own public register — typed in yourself, not a link they sent — and you search the entity name. If it is not there, nothing else they show you matters.",
     "ES": "La conducta que derrota esto es la consulta al registro. Vas al registro público del propio regulador —escrito por ti, no un enlace que te hayan mandado— y buscas el nombre de la entidad. Si no está, nada más de lo que te enseñen importa.",
     "ZH": "能破解这一切的行为，是查监管名录。你自己输入监管机构的官方公开名录网址——不要点他们发来的链接——然后搜索这家机构的名称。如果查不到，他们给你看的其他任何东西都不重要。",
-    "AR": "السلوك الذي يهزم هذا كله هو مراجعة السجل. تذهب إلى السجل العام للجهة الرقابية نفسها — تكتب العنوان بنفسك لا عبر رابط أرسلوه — وتبحث عن اسم الكيان. فإن لم يكن موجودًا، فلا يهمّ أي شيء آخر يعرضونه عليك."
+    "AR": "السلوك الذي يهزم هذا كله هو مراجعة السجل. تذهب إلى السجل العام للجهة الرقابية نفسها — تكتب العنوان بنفسك لا عبر رابط أرسلوه — وتبحث عن اسم الكيان. فإن لم يكن موجودًا، فلا يهمّ أي شيء آخر يعرضونه عليك.",
+    "JA": "これを破る行動は、登録の確認です。規制当局自身の公開登録簿に——送られてきたリンクではなく、自分でアドレスを入力して——行き、その事業者名を検索します。そこに無ければ、他に何を見せられても関係ありません。"
    },
    "steps": {
     "EN": [
@@ -2629,6 +2947,11 @@ const L = {
      "ابحث عن الكيان في السجل العام للجهة الرقابية نفسها — اكتب العنوان بنفسك ولا تستخدم رابطًا أرسلوه لك.",
      "اتصل بالمؤسسة على الرقم المنشور في موقعها الرسمي، لا على الرقم الذي أعطوك إياه.",
      "تأكّد أين يستقر المال فعليًا. الحساب الشخصي أو حساب طرف ثالث ليس حسابًا للشركة."
+    ],
+    "JA": [
+     "規制当局自身の公開登録簿で事業者を検索する——アドレスは自分で入力し、送られてきたリンクは決して使わない。",
+     "その機関の公式サイトに掲載されている番号に電話する。渡された番号ではなく。",
+     "お金が実際にどこへ着くのかを確認する。個人名義や第三者名義の口座は、会社の口座ではない。"
     ]
    }
   }
@@ -2661,6 +2984,13 @@ const L = {
    "صفة الترخيص يؤكدها المروّج نفسه",
    "الدفع موجَّه خارج المؤسسة المذكورة",
    "الطرف الآخر هو من حدّد مهلة القرار"
+  ],
+  "JA": [
+   "連絡は相手から一方的に来た",
+   "収益が固定または保証と説明されている",
+   "規制を受けているという地位を推進者自身が主張している",
+   "支払いが名指しされた機関の外へ流れている",
+   "判断の期限を相手方が設定している"
   ]
  },
  "elementBudget": 4
@@ -2670,6 +3000,7 @@ const L = {
 /* Language-aware accessors. `lang` reads from the live session, so a switch
    mid-flight takes effect on the next utterance rather than needing a reload. */
 function lang(){ return S.lang || "EN"; }
+const DEMO_NAME = { EN:"Daniel", ES:"Lucía", ZH:"嘉欣", AR:"فاطمة", JA:"陽菜" };
 function LM(){ return L.languages.find(x => x.code === lang()) || L.languages[0]; }
 function U(key){ const e = L.ui[key]; return e ? (e[lang()] || e.EN) : key; }
 function TX(v){ return v ? (v[lang()] || v.EN) : ""; }
@@ -3040,13 +3371,13 @@ function say(text, opts, done){
   catch(e){ fakeEnvelope(text, done); }
 
   // Safari sometimes drops onend — hard backstop proportional to length
-  const perChar = { EN:62, ES:60, ZH:150, AR:70 }[lang()] || 62;
+  const perChar = { EN:62, ES:60, ZH:150, AR:70, JA:132 }[lang()] || 62;
   const backstop = Math.max(2400, text.length * perChar);
   setTimeout(() => { if(env){ clearInterval(env); env=null; ampTarget=0; dhState="idle"; if(done){ const d=done; done=null; d(); } } }, backstop + 900);
 }
 
 function fakeEnvelope(text, done){
-  const perChar = { EN:58, ES:56, ZH:140, AR:66 }[lang()] || 58;
+  const perChar = { EN:58, ES:56, ZH:140, AR:66, JA:124 }[lang()] || 58;
   const dur = Math.max(1600, text.length*perChar);
   const iv = setInterval(()=>{ ampTarget = 0.3 + Math.random()*0.4; }, 100);
   setTimeout(()=>{ clearInterval(iv); ampTarget=0; dhState="idle"; if(done) done(); }, dur);
@@ -3194,7 +3525,15 @@ function applyLanguage(){
   set("#entry h1", U("entryTitle"));
   set("#entry .sub", U("entrySub"));
   set("#entry label[for='nm']", U("nameLabel"));
-  const nm = $("nm"); if(nm) nm.placeholder = U("namePlaceholder");
+  /* The name field ships prefilled so a demo can be driven in one click. A
+     prefill is a string on screen like any other, so it follows the language —
+     "Daniel" sitting in a Japanese consent screen is the tell that a product
+     was translated rather than localised. Only replaced while untouched. */
+  const nm = $("nm");
+  if(nm){
+    nm.placeholder = U("namePlaceholder");
+    if(!nm.dataset.touched) nm.value = DEMO_NAME[lang()] || DEMO_NAME.EN;
+  }
   set("#entry .consent .ttl", U("consentTitle"));
   const cps = document.querySelectorAll("#entry .consent p");
   if(cps[0]) cps[0].textContent = U("consent1");
@@ -4264,7 +4603,7 @@ document.getElementById("otpRow").addEventListener("keydown", (e) => {
 });
 
 $("startBtn").onclick = () => {
-  S.name = ($("nm").value || "Daniel").trim().split(" ")[0];
+  S.name = ($("nm").value || DEMO_NAME[lang()] || "Daniel").trim().split(" ")[0];
   // A fresh session every time, or evidence from an abandoned run — bound in
   // the language it was captured in — survives into the new one.
   newSession();

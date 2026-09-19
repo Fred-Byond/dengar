@@ -30,7 +30,7 @@ import type {
   ObjectStatus,
 } from "./schema";
 
-const AUREN_LANGS = ["EN", "ES", "ZH", "AR"];
+const AUREN_LANGS = ["EN", "ES", "ZH", "AR", "JA"];
 
 function gov(
   status: ObjectStatus,
@@ -151,6 +151,7 @@ function aurenLibrary(): KnowledgeObject[] {
       "¿Esto es una estafa?",
       "这是骗局吗？",
       "هل هذا احتيال؟",
+      "これは詐欺ですか。",
     ],
     refusalBehaviour: "Reports unresolved markers; returns the decision to the learner.",
     eligibility: elig(["LEARN", "REHEARSE", "PROTECT"], AUREN_LANGS),

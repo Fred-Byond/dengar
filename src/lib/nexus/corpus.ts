@@ -35,6 +35,8 @@ export const AUTHORITIES: ContributingAuthority[] = [
   { id: "AUTH-AMF-FR", name: "Autorité des marchés financiers", jurisdiction: "FR", sharesToNetwork: true },
   { id: "AUTH-BAFIN-DE", name: "Bundesanstalt für Finanzdienstleistungsaufsicht", jurisdiction: "DE", sharesToNetwork: true },
   { id: "AUTH-CONSOB-IT", name: "Commissione Nazionale per le Società e la Borsa", jurisdiction: "IT", sharesToNetwork: true },
+  { id: "AUTH-SFC-HK", name: "Securities and Futures Commission", jurisdiction: "HK", sharesToNetwork: true },
+  { id: "AUTH-FSA-JP", name: "金融庁 — Financial Services Agency", jurisdiction: "JP", sharesToNetwork: true },
 ];
 
 export function authority(id: string): ContributingAuthority | undefined {

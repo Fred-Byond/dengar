@@ -232,6 +232,10 @@ const RESISTANCE: Record<Lang, RegExp> = {
   ES: /verific|comprob|registro|regulador|independiente|confirmar|por mi cuenta|no voy a decidir|pensarlo|esperar|no, gracias/i,
   ZH: /核实|核查|查一下|自己查|监管|独立|确认|不决定|再想想|等一下|先等|不用了/,
   AR: /تحقق|أتحقق|السجل|الجهة|الهيئة|مستقل|أتأكد|بنفسي|لن أقرر|أفكر|انتظر|لا شكرًا/,
+  /* Japanese resistance is mostly verb-final and negated at the end, so the
+     cues are stems rather than whole words: 決めま-せん and 決めない both have to
+     match, and a regex built from dictionary forms would miss both. */
+  JA: /確認|核心|調べ|登録|監督|金融庁|独立|自分で|決めません|決めない|まだ決め|考えます|考えさせ|待って|結構です|やめておき/,
 };
 
 export function resistedPressure(answer: string, lang: Lang): boolean {
@@ -339,6 +343,8 @@ const AILS_HEAD: Record<Lang, HeadFn> = {
     `${s} — 进入时你解决了 ${t2} 个推理要素中的 ${r} 个，并在压力下记录到 ${n} 项失效特征，每一项都绑定到你实际说过的一句话。`,
   AR: (s, r, t2, n) =>
     `${s} — حسمت ${r} من أصل ${t2} من عناصر التفكير عند الدخول، وسُجّلت ${n} من أنماط الإخفاق تحت الضغط، كل واحدة منها موثّقة بجملة قلتها فعلًا.`,
+  JA: (s, r, t2, n) =>
+    `${s} — 入口の段階で ${t2} 個の推論要素のうち ${r} 個を解決し、圧力の下で ${n} 件の失敗シグネチャが記録されました。いずれもあなたが実際に言った一文に紐づいています。`,
 };
 
 const AILS_TAIL_PASS: Record<Lang, string> = {
@@ -346,6 +352,7 @@ const AILS_TAIL_PASS: Record<Lang, string> = {
   ES: "Tras la orientación, demostraste verificación independiente en un escenario que no comparte tipología, canal, personaje ni clase de producto con aquel en el que fallaste. Por eso se mueve la puntuación.",
   ZH: "接受指导后，你在一个与失败情境在类型、渠道、人物和产品类别上均不相同的场景中，展现了独立核实。分数正因如此而变动。",
   AR: "بعد التوجيه، أثبتّ التحقق المستقل في سيناريو لا يشترك مع السيناريو الذي أخفقت فيه في النمط ولا القناة ولا الشخصية ولا فئة المنتج — ولهذا تتغيّر الدرجة.",
+  JA: "コーチングのあと、あなたが失敗した場面とは類型・チャネル・人物・商品区分のいずれも共有しない状況で、独立した確認が実証されました。評価が動くのはそのためです。",
 };
 
 const AILS_TAIL_FAIL: Record<Lang, string> = {
@@ -353,6 +360,7 @@ const AILS_TAIL_FAIL: Record<Lang, string> = {
   ES: "Tras la orientación, la verificación independiente siguió sin demostrarse en el escenario nuevo, así que el elemento trabajado queda abierto y pasa a tu cola de repaso. La puntuación apenas se mueve, y no debería.",
   ZH: "接受指导后，你在新情境中仍未展现独立核实，因此该要素保持未决状态并进入你的复训队列。分数几乎不动——本就不该动。",
   AR: "بعد التوجيه، لم يظهر التحقق المستقل في السيناريو الجديد، لذا يبقى العنصر المعالَج مفتوحًا وينتقل إلى قائمة إعادة التدريب. الدرجة تكاد لا تتحرك، وهذا هو الصواب.",
+  JA: "コーチングのあとも、新しい状況で独立した確認は実証されませんでした。したがって対象の要素は未解決のまま再訓練キューに入ります。評価はほとんど動きません——動くべきではありません。",
 };
 
 /**

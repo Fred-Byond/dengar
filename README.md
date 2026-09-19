@@ -21,7 +21,7 @@ been built out twice more, for investor protection and for the authorities super
 | **AUREN Nexus** | `/prototypes/auren-nexus.html` | The knowledge layer, with two intakes. Authorities lodge emerging **tactics** and upload their governed **training modules**; a signal produces challenges and failure signatures, a module produces competency elements and diagnostic questions, and both reach a learner only through the same ten-test publish gate. Cohort-level supervision. See [`docs/AUREN-NEXUS.md`](docs/AUREN-NEXUS.md). |
 | **AUREN Supervision Console** | `/prototypes/auren-console.html` | What a securities commission sees after its programme has been put under pressure: enrolled participants by region and cohort, each individual's assessment across five dimensions with their own words as evidence, and the verdict — investor-ready, coaching, or priority. |
 | **AUREN hub** | `/prototypes/auren-index.html` | The three doors, in the Beauty programme's house treatment. |
-| **AUREN rehearsal** | `/auren` | Investor rehearsal loop for the AUREN programme — a second configuration of the same governed-interview method. Voice-first digital-human session in **English / Español / 中文 / العربية**: understand → diagnose → stress → coach → retest → evidence chain. See [`docs/AUREN-ORDERING.md`](docs/AUREN-ORDERING.md). |
+| **AUREN rehearsal** | `/auren` | Investor rehearsal loop for the AUREN programme — a second configuration of the same governed-interview method. Voice-first digital-human session in **English / Español / 中文 / العربية / 日本語**: understand → diagnose → stress → coach → retest → evidence chain. See [`docs/AUREN-ORDERING.md`](docs/AUREN-ORDERING.md). |
 
 The **intelligence layer** — the moat — is the [Citizen Voice Intelligence Framework
 (CVIF)](docs/CVIF.md): it scores the *conversation as evidence about an issue*, never the
@@ -45,8 +45,9 @@ dengar/
 │   │   ├── SessionExplorer.tsx React-native view over the CVIF scorer
 │   │   ├── auren/              Stage router, Reasoning Map rail, coach beats, scorecard
 │   │   ├── console/            Governance console: registry, gate, release ledger
-│   │   └── nexus/              Vocabulary, signals, derivation, training modules, mapping,
-│   │                            corpus, cohort + participant analytics
+│   │   ├── nexus/              Vocabulary, signals, derivation, training modules, mapping,
+│   │   │                        corpus, cohort + participant analytics
+│   │   └── tenant/             Multi-tenancy: kinds, entitlements, the scope rule, CCU
 │   └── lib/
 │       ├── types.ts            Domain model (Citizen, Slot, Booking, Session, Insight, AuditLog)
 │       ├── seed.ts             Deterministic session generator (feeds the Session Explorer)
@@ -71,7 +72,7 @@ dengar/
 ├── public/prototypes/          The APPROVED prototypes, served verbatim
 │   ├── dengar-citizen.html
 │   ├── national-pulse.html
-│   ├── auren-rehearsal.html    Voice-first AUREN loop, 4 languages (no SDK key needed)
+│   ├── auren-rehearsal.html    Voice-first AUREN loop, 5 languages (no SDK key needed)
 │   ├── auren-index.html        The AUREN hub — three doors
 │   ├── auren-nexus.html        Knowledge layer: signals + training modules → gate → cohort view
 │   ├── auren-console.html      Supervision Console: participants, assessments, verdicts
@@ -81,7 +82,7 @@ dengar/
 │   ├── build-console-prototype.mjs `npm run console` — injects the console engine
 │   └── build-nexus-prototype.mjs   `npm run nexus`   — injects the Nexus engine into the
 │                                    Nexus *and* the Supervision Console, so the two cannot drift
-└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP · AUREN-ORDERING · AUREN-NEXUS · KNOWLEDGE-AUTHORITY
+└── docs/                       ENGINEERING-HANDOFF · INTEGRATION-DIGITAL-HUMAN · CVIF · ARCHITECTURE · ROADMAP · AUREN-ORDERING · AUREN-NEXUS · AUREN-COMMERCIAL · KNOWLEDGE-AUTHORITY
 ```
 
 > **Team taking this over?** Start at [`docs/ENGINEERING-HANDOFF.md`](docs/ENGINEERING-HANDOFF.md) —
