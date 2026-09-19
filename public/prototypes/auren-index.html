@@ -1,0 +1,280 @@
+<title>AUREN by BYOND</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   AUREN — the three doors.
+
+   Presentation layer, in the house treatment BYOND uses for a client hub:
+   near-black ground, brass accent, cream cards. The products behind each
+   door keep their own identities, the way DENGAR is navy and the Beauty
+   Coach is gold — this page is the foyer, not the building.
+   ═════════════════════════════════════════════════════════════════════ */
+:root{
+  --ground:#0E0C09; --ground-2:#171310; --panel:#1C1712;
+  --cream:#F7F4EE; --cream-2:#EDE7DC;
+  --ink:#171310; --ink-2:#4A423A; --ink-3:#736A5C;
+  --paper:#F3EFE7; --paper-2:#C9C0B2; --paper-3:#8E8578;
+  --brass:#C9A44C; --brass-deep:#8A6A18; --brass-line:#3A3021;
+  --line:#2A2419;
+  --display:"Playfair Display",Didot,"Bodoni MT",Georgia,serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+/* A page that commits to one world: the foyer is always the dark room.
+   Every colour is painted from a token, so it holds on either host ground. */
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--ground);color:var(--paper-2);
+  font-family:var(--sans);font-size:15.5px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+a{color:inherit}
+h1,h2,h3{margin:0;color:var(--paper);text-wrap:balance}
+
+.wrap{max-width:820px;margin:0 auto;padding-block:34px 72px;padding-left:20px;padding-right:20px}
+
+/* ── Language pill ───────────────────────────────────────────────────── */
+.langRow{display:flex;justify-content:flex-end;margin-bottom:26px}
+.langs{display:inline-flex;border:1px solid var(--brass-line);border-radius:999px;padding:3px;gap:2px;background:var(--ground-2)}
+.lang{
+  border:0;background:transparent;color:var(--paper-3);cursor:pointer;
+  font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:.09em;
+  padding:6px 15px;border-radius:999px;
+}
+.lang[aria-pressed="true"]{background:var(--brass);color:#241B06}
+
+/* ── Brand lockup ────────────────────────────────────────────────────── */
+.lockup{
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  border:1px solid var(--brass-line);border-radius:14px;
+  background:linear-gradient(135deg,var(--panel) 0%,var(--ground-2) 100%);
+  padding:19px 22px;margin-bottom:34px;
+}
+.lockLeft{display:flex;align-items:baseline;gap:3px}
+.lockMark{font-family:var(--sans);font-weight:800;font-size:21px;letter-spacing:.02em;color:var(--paper)}
+.lockMark em{font-style:normal;font-weight:400;color:var(--brass)}
+.lockRule{width:1px;align-self:stretch;background:var(--brass-line);min-height:44px}
+.lockRight{display:flex;flex-direction:column;gap:2px;min-width:0}
+.lockKicker{font-family:var(--sans);font-size:11.5px;font-weight:700;letter-spacing:.24em;color:var(--brass)}
+.lockLine{font-size:14.5px;color:var(--paper)}
+.lockPow{font-family:var(--sans);font-size:9.5px;font-weight:600;letter-spacing:.2em;color:var(--paper-3)}
+
+/* ── Hero ────────────────────────────────────────────────────────────── */
+h1{font-family:var(--display);font-weight:400;font-size:clamp(33px,7.6vw,52px);line-height:1.08;letter-spacing:-.01em}
+h1 em{font-style:italic;color:var(--brass)}
+.lead{margin:16px 0 0;max-width:60ch;color:var(--paper-2);font-size:16px}
+
+/* ── Cards ───────────────────────────────────────────────────────────── */
+.cards{display:flex;flex-direction:column;gap:16px;margin-top:34px}
+.card{
+  display:block;background:var(--cream);border:1px solid var(--cream-2);border-radius:18px;
+  padding:26px 26px 22px;text-decoration:none;color:var(--ink-2);
+  transition:border-color .18s ease,transform .18s ease;
+}
+.card:hover,.card:focus-visible{border-color:var(--brass);transform:translateY(-1px)}
+.card:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+.tag{
+  display:inline-block;font-family:var(--sans);font-size:10.5px;font-weight:700;
+  letter-spacing:.17em;text-transform:uppercase;padding:7px 13px;border-radius:7px;
+  background:var(--ink);color:var(--brass);margin-bottom:16px;
+}
+/* The middle door is the one a supervisor is here for; it carries the fill. */
+.tag.solid{background:var(--brass);color:#241B06}
+.card h2{font-family:var(--display);font-weight:400;font-size:clamp(26px,5vw,33px);line-height:1.12;color:var(--ink)}
+.card p{margin:10px 0 0;font-size:15px;line-height:1.55;color:var(--ink-2);max-width:56ch}
+.open{display:block;margin-top:18px;font-weight:700;font-size:15px;color:var(--brass-deep)}
+.rule{display:block;width:92px;height:2px;background:var(--brass);border-radius:2px;margin-top:12px;opacity:.8}
+
+/* ── Chain ───────────────────────────────────────────────────────────── */
+.chainTitle{
+  font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--paper-3);margin:44px 0 14px;
+}
+.chain{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+}
+.step{background:var(--ground-2);padding:15px 16px}
+.stepN{font-family:var(--mono);font-size:10.5px;color:var(--brass);letter-spacing:.1em}
+.stepT{color:var(--paper);font-size:14px;font-weight:600;margin-top:5px}
+.stepD{font-size:12.5px;color:var(--paper-3);line-height:1.5;margin-top:4px}
+
+.gate{
+  margin-top:16px;border:1px solid var(--brass-line);border-left:3px solid var(--brass);
+  border-radius:10px;padding:15px 17px;background:var(--ground-2);
+  font-size:13.5px;line-height:1.6;color:var(--paper-2);
+}
+.gate b{color:var(--paper)}
+
+@media (max-width:760px){.chain{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:430px){.chain{grid-template-columns:1fr}}
+footer{
+  margin-top:44px;padding-top:20px;border-top:1px solid var(--line);
+  font-size:12px;line-height:1.7;color:var(--paper-3);
+}
+code{
+  font-family:var(--mono);font-size:11.5px;background:var(--ground-2);
+  border:1px solid var(--line);border-radius:4px;padding:2px 6px;color:var(--paper-2);
+}
+</style>
+
+<div class="wrap">
+  <div class="langRow">
+    <div class="langs" role="group" aria-label="Language">
+      <button class="lang" id="langEN" aria-pressed="true">EN</button>
+      <button class="lang" id="langES" aria-pressed="false">ES</button>
+    </div>
+  </div>
+
+  <div class="lockup">
+    <div class="lockLeft"><span class="lockMark">BYOND<em>asia</em></span></div>
+    <div class="lockRule"></div>
+    <div class="lockRight">
+      <span class="lockKicker" id="lkKicker">AUREN</span>
+      <span class="lockLine" id="lkLine">Investor scam-resistance, rehearsed out loud</span>
+      <span class="lockPow">POWERED BY HOLOME</span>
+    </div>
+  </div>
+
+  <h1 id="heroH">Every investor, <em>pressure-tested</em>.</h1>
+  <p class="lead" id="heroP">
+    Five minutes with AUREN, the digital human who listens, finds where your reasoning
+    breaks, then puts you under the exact pressure a real scam would — in four languages.
+    Three solutions, one governed knowledge base, and nothing spoken that a named human
+    did not approve first.
+  </p>
+
+  <div class="cards">
+    <a class="card" data-to="rehearsal" href="#">
+      <span class="tag" id="t1">INVESTORS</span>
+      <h2 id="h1c">Rehearse with AUREN</h2>
+      <p id="p1">Talk to the coach out loud. She diagnoses how you reason, then becomes the
+        salesperson and applies real pressure inside approved limits. At the end she tells you
+        what she found — what held, what broke, what changes — with your own sentences as the
+        evidence.</p>
+      <span class="open" id="o1">Open the rehearsal →</span>
+      <span class="rule"></span>
+    </a>
+
+    <a class="card" data-to="super" href="#">
+      <span class="tag solid" id="t2">SUPERVISORS</span>
+      <h2 id="h2c">Supervision Console</h2>
+      <p id="p2">What the cohort can actually withstand — resistance by tactic, transfer after
+        coaching, where reasoning breaks first, and the tactics we have intelligence on but
+        cannot yet rehearse against. Cohort level only, and no durable-behaviour claim is made
+        anywhere on it.</p>
+      <span class="open" id="o2">Open the console →</span>
+      <span class="rule"></span>
+    </a>
+
+    <a class="card" data-to="nexus" href="#">
+      <span class="tag" id="t3">AUTHORITIES</span>
+      <h2 id="h3c">AUREN Nexus</h2>
+      <p id="p3">The knowledge base the coach rehearses every investor against. A securities
+        commission signs in, lodges a new scam tactic against a fixed frame, and derivation
+        proposes governed candidates — which reach nobody until a named reviewer has authored
+        them and the publish gate has passed them.</p>
+      <span class="open" id="o3">Open the Nexus →</span>
+      <span class="rule"></span>
+    </a>
+  </div>
+
+  <div class="chainTitle" id="chainT">How the three connect</div>
+  <div class="chain">
+    <div class="step"><div class="stepN">01</div><div class="stepT" id="s1t">Authority lodges</div>
+      <div class="stepD" id="s1d">A member regulator describes a tactic it is seeing, classified on four closed axes.</div></div>
+    <div class="step"><div class="stepN">02</div><div class="stepT" id="s2t">Human authors</div>
+      <div class="stepD" id="s2d">Derivation proposes drafts and names every field it could not fill, and whose signature closes it.</div></div>
+    <div class="step"><div class="stepN">03</div><div class="stepT" id="s3t">Gate decides</div>
+      <div class="stepD" id="s3d">Ten tests, seven blocking, no waive path. Only what passes is bundled.</div></div>
+    <div class="step"><div class="stepN">04</div><div class="stepT" id="s4t">Investor rehearses</div>
+      <div class="stepD" id="s4d">The coach speaks only from the released bundle, and binds every finding to what was said.</div></div>
+    <div class="step"><div class="stepN">05</div><div class="stepT" id="s5t">Supervisor reads</div>
+      <div class="stepD" id="s5d">Which tactics are beating people — and which the network cannot yet test anyone against.</div></div>
+  </div>
+
+  <div class="gate" id="gateNote">
+    <b>The loop closes.</b> What the console shows about where reasoning breaks is what tells
+    the network which intelligence to go and find next. That arrow back is the asset — a
+    dashboard that only reports how learners did is a report.
+  </div>
+
+  <footer id="foot">
+    Demonstration · synthetic cohort figures from a fixed seed · AUREN is a disclosed AI
+    representation and never advises on a real investment. Signals describe documented scam
+    typologies. Open in Safari or Chrome directly — in-app browsers mute speech and block the
+    microphone. Add <code>?ws=author</code> to the Nexus to land in the authoring workspace.
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* Where each door leads.
+
+   Opened from the repo (a path under /prototypes/) the siblings are right
+   there; opened as a published artifact they are separate artifacts, so the
+   links have to be absolute. Detect rather than pick one and be wrong half
+   the time. */
+const LOCAL = location.pathname.includes("/prototypes/");
+const DEST = LOCAL
+  ? { rehearsal: "./auren-rehearsal.html", nexus: "./auren-nexus.html?ws=intel", super: "./auren-nexus.html?ws=super" }
+  : {
+      rehearsal: "https://claude.ai/artifact/HMgH99kfQe6M2SovTiqhyE",
+      nexus: "https://claude.ai/artifact/4ymC3ocCfNvTvDVkADn5yz",
+      super: "https://claude.ai/artifact/4ymC3ocCfNvTvDVkADn5yz",
+    };
+
+document.querySelectorAll(".card").forEach((a) => {
+  a.setAttribute("href", DEST[a.dataset.to]);
+  if (!LOCAL) { a.setAttribute("target", "_blank"); a.setAttribute("rel", "noopener"); }
+});
+
+/* Spanish, because Madrid is the room this gets shown in. The rehearsal
+   itself already runs in four languages; this page carries two, and the
+   variant is marked review-pending in the product for the same honest
+   reason it is here. */
+const ES = {
+  lkLine: "Resistencia del inversor ante estafas, ensayada en voz alta",
+  heroH: 'Todo inversor, <em>puesto a prueba</em>.',
+  heroP: "Cinco minutos con AUREN, la humana digital que escucha, localiza dónde se rompe tu razonamiento y después te somete a la misma presión que ejercería una estafa real — en cuatro idiomas. Tres soluciones, una base de conocimiento gobernada, y nada que se diga en voz alta sin que una persona con nombre lo haya aprobado antes.",
+  t1: "INVERSORES", h1c: "Ensaya con AUREN",
+  p1: "Habla con la entrenadora en voz alta. Diagnostica cómo razonas, después se convierte en el vendedor y aplica presión real dentro de límites aprobados. Al final te cuenta lo que encontró — qué aguantó, qué se rompió, qué cambia — con tus propias frases como evidencia.",
+  o1: "Abrir el ensayo →",
+  t2: "SUPERVISORES", h2c: "Consola de Supervisión",
+  p2: "Lo que la cohorte realmente aguanta: resistencia por táctica, transferencia tras la orientación, dónde se rompe primero el razonamiento, y las tácticas sobre las que tenemos inteligencia pero contra las que aún no podemos ensayar. Solo a nivel de cohorte, y sin afirmar en ningún punto un cambio de conducta duradero.",
+  o2: "Abrir la consola →",
+  t3: "AUTORIDADES", h3c: "AUREN Nexus",
+  p3: "La base de conocimiento contra la que la entrenadora ensaya a cada inversor. Una comisión de valores inicia sesión, registra una nueva táctica de estafa en un marco fijo, y la derivación propone candidatos gobernados — que no llegan a nadie hasta que un revisor con nombre los ha redactado y la puerta de publicación los ha aprobado.",
+  o3: "Abrir el Nexus →",
+  chainT: "Cómo se conectan las tres",
+  s1t: "La autoridad registra", s1d: "Un regulador miembro describe una táctica que está observando, clasificada en cuatro ejes cerrados.",
+  s2t: "Una persona redacta", s2d: "La derivación propone borradores y nombra cada campo que no pudo rellenar, y qué firma lo cierra.",
+  s3t: "La puerta decide", s3d: "Diez pruebas, siete bloqueantes, sin excepciones. Solo se empaqueta lo que pasa.",
+  s4t: "El inversor ensaya", s4d: "La entrenadora solo habla desde el paquete publicado, y vincula cada hallazgo a lo que se dijo.",
+  s5t: "El supervisor lee", s5d: "Qué tácticas están venciendo a la gente — y contra cuáles la red aún no puede poner a prueba a nadie.",
+  gateNote: "<b>El ciclo se cierra.</b> Lo que la consola muestra sobre dónde se rompe el razonamiento es lo que le dice a la red qué inteligencia buscar a continuación. Esa flecha de vuelta es el activo — un panel que solo informa de cómo les fue a los alumnos es un informe.",
+};
+const EN = {};
+document.querySelectorAll("[id]").forEach((el) => { EN[el.id] = el.innerHTML; });
+
+function setLang(code) {
+  const dict = code === "ES" ? ES : EN;
+  Object.keys(code === "ES" ? ES : EN).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = dict[id];
+  });
+  if (code === "EN") Object.keys(EN).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = EN[id];
+  });
+  document.getElementById("langEN").setAttribute("aria-pressed", String(code === "EN"));
+  document.getElementById("langES").setAttribute("aria-pressed", String(code === "ES"));
+  document.documentElement.lang = code === "ES" ? "es" : "en";
+}
+document.getElementById("langEN").onclick = () => setLang("EN");
+document.getElementById("langES").onclick = () => setLang("ES");
+</script>

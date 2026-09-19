@@ -2538,6 +2538,18 @@ const S = {
 };
 
 const AS_OF = "2026-09-19";
+
+/* Deep link. The hub presents these as three separate solutions, so a card has
+   to land inside the right one rather than dropping everybody on the queue and
+   asking them to find it. The role is pre-selected to the one that workspace is
+   actually for — a supervisor arriving at an analyst's console learns nothing. */
+const WS_PARAM = (new URLSearchParams(location.search).get("ws") || "").toLowerCase();
+const DEEP = ["intel", "author", "super"].includes(WS_PARAM) ? WS_PARAM : null;
+const DEEP_ROLE = { intel: "role:analyst", author: "role:domain_reviewer", super: "role:supervisor" };
+if (DEEP) {
+  S.ws = DEEP;
+  S.panel = DEEP === "intel" ? "queue" : DEEP === "author" ? "derive" : "overview";
+}
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
@@ -2566,6 +2578,11 @@ function needs(action) {
 $("authSel").innerHTML = AUTHORITIES
   .map(a => `<option value="${a.id}">${esc(a.name)} · ${esc(a.jurisdiction)}</option>`)
   .join("");
+
+if (DEEP) {
+  $("roleSel").value = DEEP_ROLE[DEEP];
+  document.querySelectorAll(".wsBtn").forEach(x => x.classList.toggle("wsOn", x.dataset.ws === DEEP));
+}
 
 $("enterBtn").onclick = () => {
   S.user = { authorityId: $("authSel").value, role: $("roleSel").value };
