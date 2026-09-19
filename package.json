@@ -13,7 +13,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "locale": "node scripts/build-prototype-locale.mjs",
-    "console": "node scripts/build-console-prototype.mjs"
+    "console": "node scripts/build-console-prototype.mjs",
+    "nexus": "node scripts/build-nexus-prototype.mjs"
   },
   "dependencies": {
     "next": "14.2.5",

@@ -1,0 +1,3113 @@
+<title>AUREN Nexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,300;0,400;0,500;1,400&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   AUREN NEXUS — the scam-intelligence layer.
+
+   Same visual system as the Knowledge Authority console: they are two rooms
+   in one building and a reviewer moves between them in a single afternoon.
+   The one thing added here is the traffic-light protocol ramp, because
+   sharing markings are how intelligence actually moves between authorities
+   and a console that invented its own colours for them would be lying about
+   the process it claims to support.
+   ═════════════════════════════════════════════════════════════════════ */
+:root{
+  --ground:#FBFAF8; --surface:#FFFFFF; --surface-2:#F4F2ED;
+  --line:#E3DFD7; --line-soft:#EFECE6;
+  --ink:#15171B; --ink-2:#3D424A; --ink-3:#6B7079; --ink-4:#93979E;
+  --accent:#B0632F; --accent-soft:#F8EDE4; --on-accent:#FFFFFF;
+  --pass:#2F7A5E; --fail:#A8402F; --warn:#8A6A22; --idle:#93979E;
+  --tlp-clear:#6B7079; --tlp-green:#2F7A5E; --tlp-amber:#8A6A22; --tlp-red:#A8402F;
+  --bar:#DFD8CC;
+  --sans:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --serif:"Newsreader",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#101216; --surface:#171A1F; --surface-2:#1E2228;
+    --line:#2B3038; --line-soft:#22262D;
+    --ink:#EDECE9; --ink-2:#C2C6CC; --ink-3:#8E949D; --ink-4:#6A7079;
+    --accent:#D98A50; --accent-soft:#2A211A; --on-accent:#17130F;
+    --pass:#6FBF9A; --fail:#E08268; --warn:#D6AE5C; --idle:#6A7079;
+    --tlp-clear:#8E949D; --tlp-green:#6FBF9A; --tlp-amber:#D6AE5C; --tlp-red:#E08268;
+    --bar:#333942;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101216; --surface:#171A1F; --surface-2:#1E2228;
+  --line:#2B3038; --line-soft:#22262D;
+  --ink:#EDECE9; --ink-2:#C2C6CC; --ink-3:#8E949D; --ink-4:#6A7079;
+  --accent:#D98A50; --accent-soft:#2A211A; --on-accent:#17130F;
+  --pass:#6FBF9A; --fail:#E08268; --warn:#D6AE5C; --idle:#6A7079;
+  --tlp-clear:#8E949D; --tlp-green:#6FBF9A; --tlp-amber:#D6AE5C; --tlp-red:#E08268;
+  --bar:#333942;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--ground);color:var(--ink-2);
+  font-family:var(--sans);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.hidden{display:none!important}
+h1,h2,h3{text-wrap:balance;color:var(--ink);margin:0}
+
+/* ── Sign in ─────────────────────────────────────────────────────────── */
+.signin{min-height:100dvh;display:grid;place-items:center;padding:24px}
+.signinCard{
+  width:min(460px,100%);background:var(--surface);border:1px solid var(--line);
+  border-radius:4px;padding:34px 32px;display:flex;flex-direction:column;gap:14px;
+}
+.mark{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.markDot{width:11px;height:11px;border-radius:2px;background:var(--accent);flex:none}
+.markName{font-family:var(--mono);font-size:12px;letter-spacing:.17em;text-transform:uppercase;color:var(--ink)}
+.signinCard h1{font-family:var(--serif);font-size:27px;font-weight:400;line-height:1.24}
+.signinCard p{margin:0;font-size:13.5px;color:var(--ink-3)}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+.field select,.field input,.field textarea{
+  padding:10px 11px;border:1px solid var(--line);border-radius:3px;
+  background:var(--surface);color:var(--ink);font-family:inherit;font-size:14.5px;
+}
+.field textarea{resize:vertical;min-height:78px;line-height:1.55}
+.btn{
+  padding:11px 15px;border:1px solid var(--accent);border-radius:3px;
+  background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:600;
+}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btnGhost{background:transparent;color:var(--ink-2);border-color:var(--line)}
+.btnSm{padding:6px 10px;font-size:12.5px;font-weight:500}
+.btnRow{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── Shell ───────────────────────────────────────────────────────────── */
+.shell{min-height:100dvh;display:flex;flex-direction:column}
+.topbar{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:12px 20px;border-bottom:1px solid var(--line);background:var(--surface);
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:9;
+}
+.ws{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.wsBtn{padding:7px 13px;border:0;background:transparent;color:var(--ink-3);font-size:13px;font-weight:500}
+.wsBtn+.wsBtn{border-left:1px solid var(--line)}
+.wsOn{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.grow{flex:1}
+.who{text-align:right;font-size:12px;color:var(--ink-3);line-height:1.35}
+.who b{display:block;color:var(--ink);font-size:13px;font-weight:600}
+.body{flex:1;display:flex;align-items:flex-start;min-width:0}
+.rail{
+  width:248px;flex:none;border-right:1px solid var(--line);background:var(--surface);
+  padding:18px 14px;display:flex;flex-direction:column;gap:22px;align-self:stretch;
+}
+.railGroup{display:flex;flex-direction:column;gap:5px}
+.railLabel{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-4);margin-bottom:3px}
+.navBtn{
+  text-align:left;padding:8px 10px;border:0;border-radius:3px;background:transparent;
+  color:var(--ink-2);font-size:13.5px;
+}
+.navOn{background:var(--surface-2);color:var(--ink);font-weight:600}
+.railNote{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+.railNote b{color:var(--ink-2)}
+.main{flex:1;min-width:0;padding:22px 24px 60px;display:flex;flex-direction:column;gap:20px}
+.main>*{min-width:0;max-width:100%}
+@media (max-width:860px){
+  .body{flex-direction:column;align-items:stretch}
+  .rail{width:100%;border-right:0;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap;gap:16px}
+  .main{padding:18px 16px 50px}
+  .topbar{padding:10px 16px}
+}
+
+/* ── Page head ───────────────────────────────────────────────────────── */
+.pageHead{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.pageHead>div:first-child{flex:1;min-width:260px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-4);display:block;margin-bottom:6px}
+.pageHead h2{font-family:var(--serif);font-size:25px;font-weight:400;line-height:1.22}
+.pageHead p{margin:6px 0 0;font-size:13.5px;color:var(--ink-3);max-width:68ch}
+
+/* ── Stats ───────────────────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:13px 14px}
+.statN{font-family:var(--mono);font-size:25px;font-weight:600;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.statL{font-size:11.5px;color:var(--ink-3);margin-top:4px;line-height:1.4}
+.stat.alarm .statN{color:var(--fail)}
+.stat.good .statN{color:var(--pass)}
+
+/* ── Tables ──────────────────────────────────────────────────────────── */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th{
+  text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-4);font-weight:500;
+  padding:10px 13px;border-bottom:1px solid var(--line);background:var(--surface-2);
+  white-space:nowrap;
+}
+td{padding:11px 13px;border-bottom:1px solid var(--line-soft);font-size:13.5px;vertical-align:top}
+tr:last-child td{border-bottom:0}
+.mono{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.rowBtn{border:0;background:transparent;padding:0;color:var(--accent);font-family:var(--mono);font-size:12px;font-weight:600;text-align:left}
+.rowBtn:hover{text-decoration:underline}
+.sub{display:block;font-size:12px;color:var(--ink-3);margin-top:3px;line-height:1.4;max-width:52ch}
+
+/* ── Chips: state encoded in form, not only in words ─────────────────── */
+.chip{
+  display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;
+  text-transform:uppercase;padding:3px 7px;border-radius:2px;border:1px solid var(--line);
+  color:var(--ink-3);white-space:nowrap;
+}
+.chip.k{background:var(--surface-2)}
+.cSUBMITTED{border-color:var(--idle);color:var(--idle)}
+.cTRIAGED{border-color:var(--ink-3);color:var(--ink-3)}
+.cDERIVED{border-color:var(--warn);color:var(--warn)}
+.cIN_REVIEW{border-color:var(--accent);color:var(--accent)}
+.cRELEASED{border-color:var(--pass);color:var(--pass)}
+.cDECLINED{border-color:var(--fail);color:var(--fail)}
+.cSUPERSEDED{border-color:var(--idle);color:var(--idle)}
+/* Traffic-light protocol — the intelligence world's own marking, kept. */
+.tlp{border-left-width:3px}
+.tCLEAR{border-color:var(--tlp-clear);color:var(--tlp-clear)}
+.tGREEN{border-color:var(--tlp-green);color:var(--tlp-green)}
+.tAMBER{border-color:var(--tlp-amber);color:var(--tlp-amber)}
+.tRED{border-color:var(--tlp-red);color:var(--tlp-red)}
+
+/* ── Panels / detail ─────────────────────────────────────────────────── */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px 19px}
+.panel h3{font-family:var(--serif);font-size:19px;font-weight:400;margin-bottom:4px}
+.panelHead{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
+.panelHead>div:first-child{flex:1;min-width:220px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:13.5px}
+.kv dt{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-4);padding-top:3px}
+.kv dd{margin:0;color:var(--ink-2)}
+@media (max-width:620px){.kv{grid-template-columns:1fr;gap:2px 0}.kv dd{margin-bottom:9px}}
+.prose{font-size:13.5px;line-height:1.62;color:var(--ink-2);max-width:74ch}
+.listTight{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.6;color:var(--ink-2)}
+.listTight li{margin-bottom:3px}
+.sectTitle{
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-4);margin:18px 0 8px;
+}
+.sectTitle:first-child{margin-top:0}
+
+/* A note that carries an argument, not a decoration. Used sparingly. */
+.note{
+  border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:3px;
+  background:var(--accent-soft);padding:13px 15px;font-size:13px;line-height:1.6;color:var(--ink-2);
+}
+.note b{color:var(--ink)}
+.note.hard{border-left-color:var(--fail);background:transparent}
+.note.quiet{border-left-color:var(--line);background:var(--surface-2)}
+
+/* ── Gaps: the honest half of a derivation ───────────────────────────── */
+.gap{border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:3px;padding:11px 13px;background:var(--surface)}
+.gap+.gap{margin-top:8px}
+.gapHead{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px}
+.gapField{font-size:13.5px;font-weight:600;color:var(--ink)}
+.gapRole{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--accent)}
+.gapWhy{font-size:12.5px;color:var(--ink-3);line-height:1.55}
+
+/* ── Gate report ─────────────────────────────────────────────────────── */
+.gRow{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line-soft);align-items:flex-start}
+.gRow:last-child{border-bottom:0}
+.gVerdict{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;width:66px;flex:none;padding-top:2px}
+.vpass{color:var(--pass)} .vfail{color:var(--fail)} .vna{color:var(--idle)} .vadv{color:var(--warn)}
+.gName{font-size:13.5px;color:var(--ink);font-weight:600}
+.gAsserts{font-size:12.5px;color:var(--ink-3);line-height:1.5;margin-top:2px}
+.finding{font-size:12.5px;color:var(--fail);line-height:1.55;margin-top:6px;padding-left:11px;border-left:2px solid var(--line)}
+.finding b{font-family:var(--mono);font-size:11.5px;font-weight:600}
+
+/* ── Bars: resistance read at a glance ───────────────────────────────── */
+.bar{height:6px;border-radius:3px;background:var(--bar);overflow:hidden;min-width:90px;margin-top:5px}
+.barFill{height:100%;border-radius:3px;background:var(--pass)}
+.barFill.low{background:var(--fail)}
+.barFill.mid{background:var(--warn)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13.5px;color:var(--ink);font-weight:600}
+
+/* ── Alert cards for emerging tactics ────────────────────────────────── */
+.alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:10px}
+.alert{border:1px solid var(--line);border-top:3px solid var(--fail);border-radius:4px;background:var(--surface);padding:14px 15px}
+.alert.gapCard{border-top-color:var(--warn)}
+.alertName{font-family:var(--serif);font-size:17px;color:var(--ink);line-height:1.25}
+.alertMeta{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:7px;letter-spacing:.04em}
+.alertWhy{font-size:12.5px;color:var(--ink-3);line-height:1.55;margin-top:8px}
+.empty{font-size:13px;color:var(--ink-3);font-style:italic}
+</style>
+
+<!-- ══ Sign in ═══════════════════════════════════════════════════════ -->
+<div class="signin" id="signin">
+  <div class="signinCard">
+    <div class="mark"><span class="markDot"></span><span class="markName">AUREN Nexus</span></div>
+    <h1>Sign in to the scam-intelligence network.</h1>
+    <p>Your authority and role travel with everything you do here. The role is not a preference — it is recorded on every object you advance and every release you sign, and it decides which of the gaps below your signature can close.</p>
+    <div class="field">
+      <label for="authSel">Contributing authority</label>
+      <select id="authSel"></select>
+    </div>
+    <div class="field">
+      <label for="roleSel">Role</label>
+      <select id="roleSel">
+        <option value="role:submitting_officer">Submitting officer — lodges signals</option>
+        <option value="role:analyst">Analyst — triages and derives</option>
+        <option value="role:domain_reviewer">Domain reviewer — authors content</option>
+        <option value="role:legal_reviewer">Legal reviewer — anchors and rationales</option>
+        <option value="role:safety_reviewer">Safety reviewer — ladders and ceilings</option>
+        <option value="role:supervisor">Supervisor — reads cohort outcomes</option>
+      </select>
+    </div>
+    <button class="btn" id="enterBtn">Enter</button>
+    <p class="mono" style="font-size:11px;color:var(--ink-4)">Demonstration corpus. Signals describe documented typologies; cohort figures are synthetic and generated from a fixed seed.</p>
+  </div>
+</div>
+
+<!-- ══ Shell ═════════════════════════════════════════════════════════ -->
+<div class="shell hidden" id="shell">
+  <div class="topbar">
+    <div class="mark" style="margin:0"><span class="markDot"></span><span class="markName">AUREN Nexus</span></div>
+    <div class="ws">
+      <button class="wsBtn wsOn" data-ws="intel">Intelligence</button>
+      <button class="wsBtn" data-ws="author">Authoring</button>
+      <button class="wsBtn" data-ws="super">Supervision</button>
+    </div>
+    <span class="grow"></span>
+    <div class="who"><b id="whoName">—</b><span id="whoRole">—</span></div>
+    <button class="btn btnGhost btnSm" id="outBtn">Sign out</button>
+  </div>
+
+  <div class="body">
+    <aside class="rail">
+      <div class="railGroup" id="railNav"></div>
+      <div class="railGroup">
+        <span class="railLabel">Standing rule</span>
+        <div class="railNote" id="railRule"></div>
+      </div>
+    </aside>
+    <main class="main" id="main"></main>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════════════
+   ENGINE — compiled from src/lib/nexus/* and src/lib/console/*.
+
+   Do not hand-edit between the markers: run `npm run nexus`, so the
+   prototype and the application cannot disagree about what a derivation
+   proposes, what the gate blocks, or what the dashboard counts.
+   ═════════════════════════════════════════════════════════════════ */
+
+/* AUREN-NEXUS-START — generated by scripts/build-nexus-prototype.mjs */
+/* ── lib/console/schema.js ─────────────────────────────────── */
+/**
+ * Knowledge Authority — the unified object schema.
+ *
+ * Reconciles three specifications that independently arrived at the same
+ * architecture:
+ *
+ *   AUREN Paper III v1.1        — Scam + Competency objects, mode eligibility
+ *   Project Pioneer Paper IV    — Offence objects, eight-state lifecycle,
+ *                                 leading-risk control, language fidelity gate
+ *   Beauty Intelligence         — Claim objects, market scope, publish gate
+ *
+ * Where they disagree, the resolution is recorded at the field. There are four
+ * such places and each one is a fork if it is decided wrongly, so they are
+ * settled in the schema rather than in a convention document.
+ */
+const STATUS_CHAIN = [
+    "DRAFT",
+    "LEGAL_REVIEW",
+    "TERMINOLOGY_PASS",
+    "FIDELITY_PASS",
+    "APPROVED",
+    "EFFECTIVE",
+];
+/** Only EFFECTIVE objects are loadable at runtime. */
+function isLoadable(status) {
+    return status === "EFFECTIVE";
+}
+function nextStatus(status) {
+    const i = STATUS_CHAIN.indexOf(status);
+    if (i === -1 || i === STATUS_CHAIN.length - 1)
+        return null;
+    return STATUS_CHAIN[i + 1];
+}
+
+/* ── lib/auren/objects.js ─────────────────────────────────── */
+/**
+ * AUREN — the frozen knowledge-object inventory.
+ *
+ * Source of truth: "AUREN — The Intelligent Investor Interview & Coaching
+ * Engine" (Paper III v1.1) and "AUREN — The Product Experience & Build
+ * Specification" (Paper IV v1.0).
+ *
+ * Governing rule (Paper III, Rule 1 and Rule 2): every string that can reach a
+ * learner and contribute to a determination is a versioned OBJECT, not prose
+ * written inline at a call site. Ontology is populated as DATA — never as code.
+ * Adding a scam typology must never require a component change.
+ *
+ * Mode eligibility (Rule 3) is declared per object and enforced by the session
+ * machine, not by prompt discipline: a Challenge object can never fire outside
+ * REHEARSE.
+ *
+ * LANGUAGE (Paper III §6.3, §10.2): a Question object carries "language
+ * variants with fidelity status", and the learner's language is a first-class
+ * dimension of every scored determination. So the localized fields below are
+ * not translations of a UI — they are variants of the governed object, and that
+ * includes `satisfactionCues`. A Spanish answer must be evaluated against
+ * Spanish cues, or the element silently fails for every non-English learner.
+ */
+const ELEMENTS = {
+    "E-VER-02": {
+        elementId: "E-VER-02",
+        label: {
+            EN: "Independent verification",
+            ES: "Verificación independiente",
+            ZH: "独立核实",
+            AR: "التحقق المستقل",
+        },
+        competencyId: "COMP-VERIFY-INDEPENDENT",
+        authorityAnchor: "IOSCO investor-education principle IE-2.3",
+        ailsDimension: "Scam Resistance",
+    },
+    "E-RET-01": {
+        elementId: "E-RET-01",
+        label: {
+            EN: "Return plausibility",
+            ES: "Plausibilidad del rendimiento",
+            ZH: "回报合理性",
+            AR: "معقولية العائد",
+        },
+        competencyId: "COMP-RISK-RETURN",
+        authorityAnchor: "OECD/INFE competence 3.1",
+        ailsDimension: "Risk Awareness",
+    },
+    "E-AI-01": {
+        elementId: "E-AI-01",
+        label: {
+            EN: "AI-capability scepticism",
+            ES: "Escepticismo ante las capacidades de la IA",
+            ZH: "对 AI 能力的怀疑",
+            AR: "التشكيك في قدرات الذكاء الاصطناعي",
+        },
+        competencyId: "COMP-AILIT-CLAIMS",
+        authorityAnchor: "IOSCO PS1 guidance 2.2",
+        ailsDimension: "AI Literacy",
+    },
+    "E-RISK-01": {
+        elementId: "E-RISK-01",
+        label: {
+            EN: "Understands downside",
+            ES: "Comprende el riesgo de pérdida",
+            ZH: "理解下行风险",
+            AR: "إدراك مخاطر الخسارة",
+        },
+        competencyId: "COMP-RISK-DOWNSIDE",
+        authorityAnchor: "OECD/INFE competence 2.4",
+        ailsDimension: "Investor Reasoning",
+    },
+    "E-URG-01": {
+        elementId: "E-URG-01",
+        label: {
+            EN: "Resists urgency",
+            ES: "Resiste la urgencia",
+            ZH: "抵抗紧迫感",
+            AR: "مقاومة الاستعجال",
+        },
+        competencyId: "COMP-STABILITY-URGENCY",
+        authorityAnchor: "IOSCO investor-education principle IE-4.1",
+        ailsDimension: "Behavioural Stability",
+    },
+    "E-AUTH-01": {
+        elementId: "E-AUTH-01",
+        label: {
+            EN: "Questions authority claims",
+            ES: "Cuestiona los argumentos de autoridad",
+            ZH: "质疑权威背书",
+            AR: "التشكيك في ادعاءات السلطة",
+        },
+        competencyId: "COMP-STABILITY-AUTHORITY",
+        authorityAnchor: "IOSCO investor-education principle IE-4.2",
+        ailsDimension: "Behavioural Stability",
+    },
+    "E-SOC-01": {
+        elementId: "E-SOC-01",
+        label: {
+            EN: "Discounts social proof",
+            ES: "Relativiza la prueba social",
+            ZH: "不轻信从众证据",
+            AR: "عدم الانسياق وراء دليل الجماعة",
+        },
+        competencyId: "COMP-STABILITY-SOCIAL",
+        authorityAnchor: "OECD/INFE competence 4.2",
+        ailsDimension: "Behavioural Stability",
+    },
+    "E-PAY-01": {
+        elementId: "E-PAY-01",
+        label: {
+            EN: "Payment-destination scrutiny",
+            ES: "Escrutinio del destino del pago",
+            ZH: "审查资金去向",
+            AR: "تدقيق وجهة الدفع",
+        },
+        competencyId: "COMP-VERIFY-PAYMENT",
+        authorityAnchor: "IOSCO investor-education principle IE-3.4",
+        ailsDimension: "Scam Resistance",
+    },
+};
+const FAILURE_SIGNATURES = {
+    "FAIL-VERIFY-SELFASSERTED": {
+        failId: "FAIL-VERIFY-SELFASSERTED",
+        negatedElement: "E-VER-02",
+        definition: {
+            EN: "Trusts promoter-supplied evidence as independent evidence.",
+            ES: "Toma como evidencia independiente lo que aporta el propio promotor.",
+            ZH: "把推销方自己提供的材料当作独立证据。",
+            AR: "يعتبر ما يقدّمه المروّج نفسه دليلًا مستقلًا.",
+        },
+        coaching: {
+            EN: "You treated something the promoter gave you as if it were independent evidence. Their website telling you they are regulated is them telling you they are regulated. That is a claim, not a check.",
+            ES: "Trataste algo que te dio el propio promotor como si fuera evidencia independiente. Que su web diga que están regulados es que ellos te dicen que están regulados. Eso es una afirmación, no una comprobación.",
+            ZH: "你把推销方给你的东西当成了独立证据。他们的网站说自己受监管，等于他们自己说自己受监管。那是一个说法，不是一次核实。",
+            AR: "تعاملت مع شيء قدّمه لك المروّج كأنه دليل مستقل. موقعهم يقول إنهم مرخّصون — أي أنهم هم من يقول ذلك. هذا ادعاء، وليس تحققًا.",
+        },
+    },
+    "FAIL-URGENCY-COMPLIANCE": {
+        failId: "FAIL-URGENCY-COMPLIANCE",
+        negatedElement: "E-URG-01",
+        definition: {
+            EN: "Changes verification behaviour under artificial scarcity or time pressure.",
+            ES: "Cambia su conducta de verificación ante una escasez artificial o presión de tiempo.",
+            ZH: "在人为制造的稀缺或时间压力下改变了核实行为。",
+            AR: "يغيّر سلوكه في التحقق تحت ندرة مصطنعة أو ضغط زمني.",
+        },
+        coaching: {
+            EN: "When I put a deadline on it, your verification stopped. You did not ask fewer questions because you were satisfied. You asked fewer questions because the clock started.",
+            ES: "En cuanto puse una fecha límite, tu verificación se detuvo. No hiciste menos preguntas porque estuvieras convencido. Hiciste menos preguntas porque empezó el reloj.",
+            ZH: "我一设下截止时间，你的核实就停止了。你问得更少，不是因为你已经放心，而是因为计时开始了。",
+            AR: "ما إن وضعت موعدًا نهائيًا حتى توقّف تحققك. لم تقلّل أسئلتك لأنك اقتنعت، بل لأن الساعة بدأت.",
+        },
+    },
+    "FAIL-AUTHORITY-DEFERENCE": {
+        failId: "FAIL-AUTHORITY-DEFERENCE",
+        negatedElement: "E-AUTH-01",
+        definition: {
+            EN: "Reduces scrutiny when authority, celebrity, or institutional status is invoked.",
+            ES: "Reduce el escrutinio cuando se invoca autoridad, fama o respaldo institucional.",
+            ZH: "一旦搬出权威、名人或机构身份，就放松了审视。",
+            AR: "يخفّض مستوى تدقيقه عند استحضار سلطة أو شهرة أو صفة مؤسسية.",
+        },
+        coaching: {
+            EN: "The moment a recognisable name was attached, your questions got smaller. Status is not evidence — it is the cheapest thing in the world to borrow.",
+            ES: "En cuanto apareció un nombre reconocible, tus preguntas se hicieron más pequeñas. El estatus no es evidencia: es lo más barato del mundo de tomar prestado.",
+            ZH: "一旦挂上一个你认得的名字，你的问题就变小了。名望不是证据——它是这世上最容易借用的东西。",
+            AR: "ما إن ارتبط الأمر باسم معروف حتى تقلّصت أسئلتك. المكانة ليست دليلًا — وهي أرخص ما يمكن استعارته في العالم.",
+        },
+    },
+    "FAIL-SOCIAL-PROOF": {
+        failId: "FAIL-SOCIAL-PROOF",
+        negatedElement: "E-SOC-01",
+        definition: {
+            EN: "Uses other people's apparent success as evidence of legitimacy.",
+            ES: "Usa el aparente éxito de otros como prueba de legitimidad.",
+            ZH: "把别人表面上的成功当作合法性的证据。",
+            AR: "يستخدم نجاح الآخرين الظاهري دليلًا على المشروعية.",
+        },
+        coaching: {
+            EN: "You let other people's apparent success stand in for evidence. Screenshots supplied by the person selling to you are not other people — they are more of the same claim.",
+            ES: "Dejaste que el aparente éxito de otros sustituyera a la evidencia. Las capturas que te da quien te está vendiendo no son otras personas: son más de la misma afirmación.",
+            ZH: "你让别人表面的成功替代了证据。由卖方提供的截图并不是「别人」——它们只是同一个说法的延伸。",
+            AR: "جعلت نجاح الآخرين الظاهري بديلًا عن الدليل. لقطات الشاشة التي يقدّمها من يبيع لك ليست أشخاصًا آخرين — إنها المزيد من الادعاء نفسه.",
+        },
+    },
+    "FAIL-SUNK-COST": {
+        failId: "FAIL-SUNK-COST",
+        negatedElement: "E-RISK-01",
+        definition: {
+            EN: "Continues because money or time has already been committed.",
+            ES: "Continúa porque ya ha comprometido dinero o tiempo.",
+            ZH: "因为已经投入了金钱或时间而继续下去。",
+            AR: "يستمر لأنه سبق أن التزم بمال أو وقت.",
+        },
+        coaching: {
+            EN: "What you had already put in became a reason to put in more. That is the direction this always runs, and it is the one to watch in yourself.",
+            ES: "Lo que ya habías puesto se convirtió en una razón para poner más. Siempre corre en esa dirección, y es lo que hay que vigilar en uno mismo.",
+            ZH: "你已经投入的部分，变成了继续投入的理由。这件事永远朝这个方向发展——这正是你要在自己身上留意的。",
+            AR: "ما دفعته بالفعل صار سببًا لدفع المزيد. هذا هو الاتجاه الذي يسير فيه الأمر دائمًا، وهو ما ينبغي أن تراقبه في نفسك.",
+        },
+    },
+    "FAIL-GREED-OVERRIDE": {
+        failId: "FAIL-GREED-OVERRIDE",
+        negatedElement: "E-RET-01",
+        definition: {
+            EN: "Recognises implausibility but proceeds because upside overwhelms caution.",
+            ES: "Reconoce que no es plausible pero sigue adelante porque la ganancia arrolla la cautela.",
+            ZH: "明知不合常理，却因为收益诱惑压倒了谨慎而继续。",
+            AR: "يدرك عدم المعقولية لكنه يمضي لأن المكسب يطغى على الحذر.",
+        },
+        coaching: {
+            EN: "You could see the number did not make sense, and you moved toward it anyway. Knowing that about yourself is worth more than the rule.",
+            ES: "Veías que el número no cuadraba y aun así fuiste hacia él. Saber eso de ti mismo vale más que la regla.",
+            ZH: "你看得出那个数字不合理，却仍然朝它靠近。认清自己这一点，比记住规则更有价值。",
+            AR: "كنت ترى أن الرقم غير منطقي، ومع ذلك اتجهت إليه. معرفتك بهذا عن نفسك أثمن من القاعدة ذاتها.",
+        },
+    },
+    "FAIL-CONFIRMATION-SEEKING": {
+        failId: "FAIL-CONFIRMATION-SEEKING",
+        negatedElement: "E-VER-02",
+        definition: {
+            EN: "Looks only for information supporting the desired decision.",
+            ES: "Solo busca información que respalde la decisión deseada.",
+            ZH: "只寻找支持自己既定决定的信息。",
+            AR: "لا يبحث إلا عن معلومات تدعم القرار الذي يريده.",
+        },
+        coaching: {
+            EN: "Every check you ran was one that could only agree with you. A check that cannot fail is not a check.",
+            ES: "Todas las comprobaciones que hiciste solo podían darte la razón. Una comprobación que no puede fallar no es una comprobación.",
+            ZH: "你做的每一次核查，都只可能同意你。一个不可能失败的核查，不算核查。",
+            AR: "كل تحقق أجريته كان لا يمكنه إلا أن يوافقك. التحقق الذي لا يمكن أن يفشل ليس تحققًا.",
+        },
+    },
+    "FAIL-AI-AUTHORITY": {
+        failId: "FAIL-AI-AUTHORITY",
+        negatedElement: "E-AI-01",
+        definition: {
+            EN: "Treats “AI-powered” as evidence of predictive capability or legitimacy.",
+            ES: "Toma «impulsado por IA» como prueba de capacidad predictiva o legitimidad.",
+            ZH: "把「AI 驱动」当作预测能力或合法性的证据。",
+            AR: "يعتبر عبارة «مدعوم بالذكاء الاصطناعي» دليلًا على قدرة تنبؤية أو مشروعية.",
+        },
+        coaching: {
+            EN: "You read “AI” as a reason to expect returns. It describes how something is built, not whether it works.",
+            ES: "Leíste «IA» como una razón para esperar rendimientos. Eso describe cómo está construido algo, no si funciona.",
+            ZH: "你把「AI」读成了期待回报的理由。它描述的是东西怎么造出来的，不是它管不管用。",
+            AR: "قرأت كلمة «ذكاء اصطناعي» كسبب لتوقّع أرباح. إنها تصف كيف بُني الشيء، لا ما إذا كان يعمل.",
+        },
+    },
+};
+const QUESTIONS = [
+    {
+        questionId: "Q-VER-002",
+        targetElement: "E-VER-02",
+        modeEligibility: ["REHEARSE", "LEARN"],
+        failSignature: "FAIL-VERIFY-SELFASSERTED",
+        ask: {
+            EN: "You mentioned the company. How did you verify that they are actually authorised to offer this investment?",
+            ES: "Has mencionado la empresa. ¿Cómo verificaste que realmente están autorizados a ofrecer esta inversión?",
+            ZH: "你提到了这家公司。你是怎么核实他们确实获准提供这项投资的？",
+            AR: "ذكرت الشركة. كيف تحققت من أنهم مرخّصون فعلًا لتقديم هذا الاستثمار؟",
+        },
+        rehearsedAnswer: {
+            EN: "Their website says they're regulated, and it looks professional.",
+            ES: "Su página web dice que están regulados, y parece profesional.",
+            ZH: "他们网站上说自己受监管，看起来挺专业的。",
+            AR: "موقعهم يقول إنهم مرخّصون، ويبدو احترافيًا.",
+        },
+        satisfactionCues: {
+            EN: {
+                pass: ["register", "regulator", "authority", "commission", "look it up", "official", "independent", "checked myself"],
+                fail: ["website", "site", "they said", "they told", "looks", "professional", "brochure", "licence", "license", "certificate"],
+            },
+            ES: {
+                pass: ["registro", "regulador", "cnmv", "comisión", "consultar", "oficial", "independiente", "lo comprobé", "verifiqué"],
+                fail: ["web", "página", "sitio", "dijeron", "me dijo", "parece", "profesional", "folleto", "licencia", "certificado"],
+            },
+            ZH: {
+                pass: ["监管", "注册", "名录", "官网查", "官方", "独立", "自己查", "证监"],
+                fail: ["网站", "他们说", "看起来", "专业", "宣传", "执照", "证书", "页面"],
+            },
+            AR: {
+                pass: ["السجل", "الهيئة", "الجهة", "تحققت", "رسمي", "مستقل", "بحثت بنفسي", "الرقابة"],
+                fail: ["الموقع", "قالوا", "أخبروني", "يبدو", "احترافي", "كتيب", "رخصة", "شهادة"],
+            },
+        },
+    },
+    {
+        questionId: "Q-RET-001",
+        targetElement: "E-RET-01",
+        modeEligibility: ["REHEARSE", "LEARN"],
+        failSignature: "FAIL-GREED-OVERRIDE",
+        ask: {
+            EN: "Fifteen percent a month. What do you think is actually producing a return like that?",
+            ES: "Un quince por ciento mensual. ¿Qué crees que produce realmente un rendimiento así?",
+            ZH: "每月百分之十五。你觉得究竟是什么在产生这样的回报？",
+            AR: "خمسة عشر بالمئة شهريًا. ما الذي تظنّه يحقّق عائدًا كهذا فعلًا؟",
+        },
+        rehearsedAnswer: {
+            EN: "I assume the algorithm is just better than what most people have access to.",
+            ES: "Supongo que el algoritmo es simplemente mejor que el que tiene la mayoría.",
+            ZH: "我猜是他们的算法比大多数人能接触到的更好吧。",
+            AR: "أفترض أن الخوارزمية ببساطة أفضل مما يتاح لمعظم الناس.",
+        },
+        satisfactionCues: {
+            EN: {
+                pass: ["too good", "unrealistic", "not possible", "impossible", "suspicious", "doesn't add", "does not add", "unsustainable", "red flag"],
+                fail: ["algorithm", "better", "access", "edge", "smarter", "technology", "assume", "probably", "not sure"],
+            },
+            ES: {
+                pass: ["demasiado bueno", "irreal", "no es posible", "imposible", "sospechoso", "no cuadra", "insostenible", "señal de alarma"],
+                fail: ["algoritmo", "mejor", "acceso", "ventaja", "tecnología", "supongo", "probablemente", "no sé"],
+            },
+            ZH: {
+                pass: ["好得不真实", "不现实", "不可能", "可疑", "说不通", "不可持续", "危险信号", "太高"],
+                fail: ["算法", "更好", "渠道", "优势", "技术", "我猜", "可能", "不确定"],
+            },
+            AR: {
+                pass: ["جيد لدرجة", "غير واقعي", "مستحيل", "غير ممكن", "مريب", "لا يستقيم", "غير مستدام", "علامة خطر"],
+                fail: ["الخوارزمية", "أفضل", "وصول", "ميزة", "التقنية", "أفترض", "ربما", "لست متأكدًا"],
+            },
+        },
+    },
+    {
+        questionId: "Q-AI-001",
+        targetElement: "E-AI-01",
+        modeEligibility: ["REHEARSE", "LEARN"],
+        failSignature: "FAIL-AI-AUTHORITY",
+        ask: {
+            EN: "They describe it as an AI trading system. What does “AI” tell you about whether it can predict the market?",
+            ES: "Lo describen como un sistema de trading con IA. ¿Qué te dice «IA» sobre si puede predecir el mercado?",
+            ZH: "他们把它描述成一个 AI 交易系统。「AI」这三个字，能告诉你它是否能预测市场吗？",
+            AR: "يصفونه بأنه نظام تداول بالذكاء الاصطناعي. ماذا تخبرك عبارة «ذكاء اصطناعي» عن قدرته على التنبؤ بالسوق؟",
+        },
+        rehearsedAnswer: {
+            EN: "AI can process a lot more data than a person, so it should be more accurate.",
+            ES: "La IA procesa muchos más datos que una persona, así que debería ser más precisa.",
+            ZH: "AI 能处理的数据比人多得多，所以应该会更准确。",
+            AR: "الذكاء الاصطناعي يعالج بيانات أكثر بكثير من الإنسان، لذا يُفترض أن يكون أدقّ.",
+        },
+        satisfactionCues: {
+            EN: {
+                pass: ["nothing", "doesn't mean", "does not mean", "no evidence", "marketing", "buzzword", "can't predict", "cannot predict", "says nothing"],
+                fail: ["more data", "accurate", "smarter", "better than", "process", "predict", "should be", "advanced", "powerful"],
+            },
+            ES: {
+                pass: ["nada", "no significa", "no dice nada", "no es prueba", "marketing", "palabra de moda", "no puede predecir"],
+                fail: ["más datos", "preciso", "más lista", "mejor que", "procesa", "predecir", "debería", "avanzada", "potente"],
+            },
+            ZH: {
+                pass: ["什么也说明不了", "不代表", "不能说明", "营销", "噱头", "无法预测", "不能预测", "没有证据"],
+                fail: ["更多数据", "更准", "更聪明", "比人强", "处理", "预测", "应该", "先进", "强大"],
+            },
+            AR: {
+                pass: ["لا شيء", "لا يعني", "لا يدل", "ليس دليلًا", "تسويق", "مصطلح رائج", "لا يمكن التنبؤ"],
+                fail: ["بيانات أكثر", "أدق", "أذكى", "أفضل من", "يعالج", "يتنبأ", "يُفترض", "متقدم", "قوي"],
+            },
+        },
+    },
+    {
+        questionId: "Q-RISK-001",
+        targetElement: "E-RISK-01",
+        modeEligibility: ["REHEARSE", "LEARN", "PROTECT"],
+        failSignature: null,
+        ask: {
+            EN: "Last one before we move on. What would have to happen for you to lose the whole ten thousand?",
+            ES: "Una última antes de seguir. ¿Qué tendría que pasar para que perdieras los diez mil enteros?",
+            ZH: "在继续之前最后一个问题。要发生什么，你才会把这一万块全部亏光？",
+            AR: "سؤال أخير قبل أن نمضي. ماذا يجب أن يحدث كي تخسر العشرة آلاف كاملة؟",
+        },
+        rehearsedAnswer: {
+            EN: "I suppose if the market crashed badly. But they mentioned there's capital protection.",
+            ES: "Supongo que si el mercado se desplomara. Pero mencionaron que hay protección del capital.",
+            ZH: "我想是市场大跌吧。不过他们提到有本金保障。",
+            AR: "أظن إذا انهار السوق بشدة. لكنهم ذكروا أن هناك حماية لرأس المال.",
+        },
+        satisfactionCues: {
+            EN: {
+                pass: ["all of it", "everything", "never see", "fake", "not real", "doesn't exist", "does not exist", "disappear", "no recourse", "fraud"],
+                fail: ["crash", "market", "protection", "protected", "guaranteed", "insured", "unlikely"],
+            },
+            ES: {
+                pass: ["todo", "no volver a ver", "falso", "no existe", "desaparec", "sin recurso", "fraude", "estafa"],
+                fail: ["desplome", "mercado", "protección", "protegido", "garantizado", "asegurado", "improbable"],
+            },
+            ZH: {
+                pass: ["全部", "一分不剩", "拿不回来", "假的", "不存在", "跑路", "没有追索", "诈骗"],
+                fail: ["崩盘", "市场", "保障", "保护", "保证", "承保", "不太可能"],
+            },
+            AR: {
+                pass: ["كلها", "لن أرى", "مزيّف", "غير موجود", "يختفي", "لا رجعة", "احتيال", "نصب"],
+                fail: ["انهيار", "السوق", "حماية", "محمي", "مضمون", "مؤمّن", "غير مرجّح"],
+            },
+        },
+    },
+];
+const CHALLENGES = [
+    {
+        challengeId: "CH-URGENCY-001",
+        scamId: "SCAM-FAKE-BROKER",
+        modeEligibility: ["REHEARSE"],
+        persona: {
+            name: "Marcus Vale",
+            role: {
+                EN: "Senior Allocations · Meridian Partners",
+                ES: "Asignaciones Sénior · Meridian Partners",
+                ZH: "高级配售 · Meridian Partners",
+                AR: "التخصيصات الكبرى · Meridian Partners",
+            },
+        },
+        surfaceProfile: {
+            typology: "Unauthorised broker",
+            channel: "Voice call",
+            persona: "Institutional male",
+            productClass: "Managed account",
+        },
+        targetElements: ["E-URG-01", "E-VER-02"],
+        escalationLadder: [
+            {
+                prop: null,
+                say: {
+                    EN: "Good — I have you down for the ten. We're opening a small allocation to selected investors this week, and yours is provisionally held.",
+                    ES: "Bien, te tengo apuntado por los diez. Esta semana abrimos una asignación reducida para inversores seleccionados, y la tuya está reservada provisionalmente.",
+                    ZH: "很好，我这边记下你是一万。本周我们对部分甄选投资者开放一小笔配售，你的额度已经暂时保留。",
+                    AR: "جيد — سجّلتك بمبلغ العشرة. نفتح هذا الأسبوع تخصيصًا محدودًا لمستثمرين مختارين، وحصتك محجوزة مبدئيًا.",
+                },
+            },
+            {
+                failSignature: "FAIL-URGENCY-COMPLIANCE",
+                say: {
+                    EN: "I'll be straight with you. The allocation closes tonight at nine. I need a decision before then, or it releases to the next name on the list.",
+                    ES: "Te seré franco. La asignación cierra esta noche a las nueve. Necesito una decisión antes, o pasa al siguiente de la lista.",
+                    ZH: "我就直说了。这笔配售今晚九点关闭。我需要在那之前得到答复，否则名额会转给名单上的下一位。",
+                    AR: "سأكون صريحًا معك. يُغلق التخصيص الليلة عند التاسعة. أحتاج قرارًا قبل ذلك، وإلا انتقل إلى الاسم التالي في القائمة.",
+                },
+                prop: {
+                    head: {
+                        EN: "Allocation notice",
+                        ES: "Aviso de asignación",
+                        ZH: "配售通知",
+                        AR: "إشعار تخصيص",
+                    },
+                    body: {
+                        EN: "MERIDIAN PARTNERS — Provisional allocation #A-4471 · Hold expires 21:00 today · Status: AWAITING CONFIRMATION",
+                        ES: "MERIDIAN PARTNERS — Asignación provisional n.º A-4471 · La reserva vence hoy a las 21:00 · Estado: PENDIENTE DE CONFIRMACIÓN",
+                        ZH: "MERIDIAN PARTNERS — 临时配售编号 A-4471 · 保留至今日 21:00 · 状态：等待确认",
+                        AR: "‏MERIDIAN PARTNERS — تخصيص مبدئي رقم A-4471 · ينتهي الحجز اليوم الساعة 21:00 · الحالة: بانتظار التأكيد",
+                    },
+                },
+            },
+            {
+                failSignature: "FAIL-SOCIAL-PROOF",
+                say: {
+                    EN: "If it helps, I can send you screenshots from existing clients — people who came in at the same level you're coming in at. Most of them wish they'd gone bigger.",
+                    ES: "Si te sirve, puedo enviarte capturas de clientes actuales, gente que entró al mismo nivel que tú. La mayoría desearía haber entrado con más.",
+                    ZH: "如果有帮助，我可以发一些现有客户的截图给你——都是和你同一档位进来的人。他们大多后悔当初没投更多。",
+                    AR: "إن كان ذلك يساعد، يمكنني إرسال لقطات شاشة من عملاء حاليين — أشخاص دخلوا بالمستوى نفسه الذي تدخل به. معظمهم يتمنى لو ضاعف المبلغ.",
+                },
+                prop: {
+                    head: {
+                        EN: "Client returns — shared by promoter",
+                        ES: "Rendimientos de clientes — aportados por el promotor",
+                        ZH: "客户收益 — 由推销方提供",
+                        AR: "عوائد العملاء — مقدَّمة من المروّج",
+                    },
+                    body: {
+                        EN: "“Month 3 up 46%. Withdrew twice, no issues.” — J.M.  ·  “Started at 10k, now sitting on 21k.” — R.T.",
+                        ES: "«Al tercer mes, +46 %. Retiré dos veces, sin problemas.» — J.M.  ·  «Empecé con 10 mil, ahora tengo 21 mil.» — R.T.",
+                        ZH: "「第三个月涨了 46%。提现过两次，都没问题。」— J.M. · 「从一万起步，现在有两万一。」— R.T.",
+                        AR: "«الشهر الثالث بزيادة 46٪. سحبت مرتين دون مشاكل.» — ج.م. · «بدأت بعشرة آلاف، والآن لديّ واحد وعشرون ألفًا.» — ر.ت.",
+                    },
+                },
+            },
+        ],
+        rehearsedReplies: {
+            EN: [
+                "Right. And the money would go where exactly?",
+                "How long have you been running this allocation?",
+                "Okay — if it closes tonight then let's do it. Send me the details.",
+            ],
+            ES: [
+                "Ya. ¿Y el dinero iría exactamente adónde?",
+                "¿Cuánto tiempo lleváis con esta asignación?",
+                "Vale — si cierra esta noche, hagámoslo. Mándame los datos.",
+            ],
+            ZH: [
+                "嗯。那钱具体会打到哪里？",
+                "这个配售你们做多久了？",
+                "好吧——既然今晚就截止，那就办吧。把细节发给我。",
+            ],
+            AR: [
+                "حسنًا. وإلى أين يذهب المال بالضبط؟",
+                "منذ متى وأنتم تديرون هذا التخصيص؟",
+                "طيب — ما دام يُغلق الليلة فلنفعلها. أرسل لي التفاصيل.",
+            ],
+        },
+    },
+    {
+        challengeId: "CH-DEEPFAKE-004",
+        scamId: "SCAM-DEEPFAKE-ENDORSEMENT",
+        modeEligibility: ["REHEARSE"],
+        persona: {
+            name: "Aria Lens",
+            role: {
+                EN: "Investor Relations · Halcyon Yield",
+                ES: "Relación con Inversores · Halcyon Yield",
+                ZH: "投资者关系 · Halcyon Yield",
+                AR: "علاقات المستثمرين · Halcyon Yield",
+            },
+        },
+        surfaceProfile: {
+            typology: "Celebrity / synthetic endorsement",
+            channel: "Video call",
+            persona: "Retail female",
+            productClass: "Token fund",
+        },
+        targetElements: ["E-VER-02", "E-AUTH-01"],
+        escalationLadder: [
+            {
+                failSignature: "FAIL-AUTHORITY-DEFERENCE",
+                say: {
+                    EN: "You'll have seen the announcement video with the founder. He's backing this personally, which is why we've had the response we've had.",
+                    ES: "Habrás visto el vídeo del anuncio con el fundador. Lo respalda personalmente, y por eso hemos tenido la respuesta que hemos tenido.",
+                    ZH: "你应该看过那段有创始人出镜的发布视频了。他是以个人名义背书的，所以我们才有现在这样的反响。",
+                    AR: "لا بد أنك شاهدت فيديو الإعلان مع المؤسس. إنه يدعم المشروع شخصيًا، ولهذا حظينا بهذا التجاوب.",
+                },
+                prop: {
+                    head: {
+                        EN: "Endorsement clip",
+                        ES: "Vídeo de respaldo",
+                        ZH: "背书视频",
+                        AR: "مقطع تأييد",
+                    },
+                    body: {
+                        EN: "[ 0:42 video ] Well-known founder: “I've put my own capital into Halcyon. This is the one I'd tell my family about.”",
+                        ES: "[ vídeo 0:42 ] Fundador conocido: «He puesto mi propio capital en Halcyon. Es de las que le contaría a mi familia».",
+                        ZH: "［0:42 视频］知名创始人：「我把自己的钱投进了 Halcyon。这是我会告诉家人的那一个。」",
+                        AR: "[ فيديو 0:42 ] مؤسس معروف: «وضعت رأس مالي الخاص في Halcyon. هذا هو المشروع الذي سأخبر عائلتي عنه.»",
+                    },
+                },
+            },
+            {
+                prop: null,
+                say: {
+                    EN: "I can put you in at the same terms he came in at. Shall I hold you a place while you think about it?",
+                    ES: "Puedo meterte en las mismas condiciones en las que entró él. ¿Te reservo una plaza mientras lo piensas?",
+                    ZH: "我可以按他进来时的同样条件安排你。要不要我先给你留个名额，你再考虑？",
+                    AR: "يمكنني إدخالك بالشروط نفسها التي دخل بها. هل أحجز لك مكانًا ريثما تفكّر؟",
+                },
+            },
+        ],
+        rehearsedReplies: {
+            EN: [
+                "How would I confirm that video is really him?",
+                "Before I go any further I want to verify the company myself, and confirm that endorsement independently. I'm not deciding on this call.",
+            ],
+            ES: [
+                "¿Cómo confirmo que ese vídeo es realmente él?",
+                "Antes de seguir quiero verificar la empresa por mi cuenta y confirmar ese respaldo de forma independiente. No voy a decidir en esta llamada.",
+            ],
+            ZH: [
+                "我要怎么确认那段视频真的是他本人？",
+                "在继续之前，我想自己核实这家公司，并独立确认那个背书。这通电话里我不会做决定。",
+            ],
+            AR: [
+                "كيف أتأكد أن ذلك الفيديو هو فعلًا هو؟",
+                "قبل أن أمضي أبعد من ذلك أريد التحقق من الشركة بنفسي، وتأكيد ذلك التأييد باستقلالية. لن أقرّر في هذه المكالمة.",
+            ],
+        },
+    },
+];
+const VERIFICATION_ACTIONS = {
+    "VA-REGCHECK-001": {
+        actionId: "VA-REGCHECK-001",
+        teach: {
+            EN: "The behaviour that defeats this is the register check. You go to the regulator's own public register — typed in yourself, not a link they sent — and you search the entity name. If it is not there, nothing else they show you matters.",
+            ES: "La conducta que derrota esto es la consulta al registro. Vas al registro público del propio regulador —escrito por ti, no un enlace que te hayan mandado— y buscas el nombre de la entidad. Si no está, nada más de lo que te enseñen importa.",
+            ZH: "能破解这一切的行为，是查监管名录。你自己输入监管机构的官方公开名录网址——不要点他们发来的链接——然后搜索这家机构的名称。如果查不到，他们给你看的其他任何东西都不重要。",
+            AR: "السلوك الذي يهزم هذا كله هو مراجعة السجل. تذهب إلى السجل العام للجهة الرقابية نفسها — تكتب العنوان بنفسك لا عبر رابط أرسلوه — وتبحث عن اسم الكيان. فإن لم يكن موجودًا، فلا يهمّ أي شيء آخر يعرضونه عليك.",
+        },
+        steps: {
+            EN: [
+                "Search the entity on the regulator's own public register — type the address yourself, never a link they sent.",
+                "Call the institution on the number published on its official site, not the number you were given.",
+                "Confirm where the money actually lands. A personal or third-party account is not a firm account.",
+            ],
+            ES: [
+                "Busca la entidad en el registro público del propio regulador: escribe tú la dirección, nunca uses un enlace que te hayan enviado.",
+                "Llama a la institución al número publicado en su web oficial, no al número que te dieron.",
+                "Confirma dónde acaba realmente el dinero. Una cuenta personal o de un tercero no es una cuenta de la firma.",
+            ],
+            ZH: [
+                "在监管机构自己的公开名录上搜索该机构——网址要自己输入，绝不要用他们发来的链接。",
+                "拨打该机构官网上公布的电话，而不是他们给你的号码。",
+                "确认资金最终到账的地方。个人账户或第三方账户不是公司账户。",
+            ],
+            AR: [
+                "ابحث عن الكيان في السجل العام للجهة الرقابية نفسها — اكتب العنوان بنفسك ولا تستخدم رابطًا أرسلوه لك.",
+                "اتصل بالمؤسسة على الرقم المنشور في موقعها الرسمي، لا على الرقم الذي أعطوك إياه.",
+                "تأكّد أين يستقر المال فعليًا. الحساب الشخصي أو حساب طرف ثالث ليس حسابًا للشركة.",
+            ],
+        },
+    },
+};
+/** PROTECT marker set — assessed, never adjudicated (Paper III §8). */
+const PROTECT_MARKERS = {
+    EN: [
+        "Contact was unsolicited",
+        "Return described as fixed or guaranteed",
+        "Regulated status asserted by the promoter",
+        "Payment routed outside the named institution",
+        "Decision deadline set by the other party",
+    ],
+    ES: [
+        "El contacto no fue solicitado",
+        "El rendimiento se describe como fijo o garantizado",
+        "El estatus de regulado lo afirma el propio promotor",
+        "El pago se dirige fuera de la institución mencionada",
+        "El plazo para decidir lo fija la otra parte",
+    ],
+    ZH: [
+        "对方是主动找上门的",
+        "回报被描述为固定或有保证",
+        "受监管身份是由推销方自己声称的",
+        "付款流向了所述机构之外",
+        "决定的截止期限由对方设定",
+    ],
+    AR: [
+        "الاتصال جاء دون طلب منك",
+        "العائد موصوف بأنه ثابت أو مضمون",
+        "صفة الترخيص يؤكدها المروّج نفسه",
+        "الدفع موجَّه خارج المؤسسة المذكورة",
+        "الطرف الآخر هو من حدّد مهلة القرار",
+    ],
+};
+/**
+ * DIAGNOSE element budget — the ordering study's D8.
+ *
+ * Eight mandatory elements at one voice turn each pushes the loop past the
+ * ten minutes the product thesis promises. Four are resolved per session by
+ * value; the remainder route to the retraining queue, which is what brings the
+ * learner back. Raising this number without re-measuring the loop is the
+ * regression to watch for.
+ */
+const ELEMENT_BUDGET = 4;
+
+/* ── lib/console/verticals.js ─────────────────────────────────── */
+/**
+ * The three vertical packs.
+ *
+ * Populated from the source papers, not invented. Where a paper leaves
+ * something unstated it is left unstated here too — the gate will report it,
+ * which is the point. A library that passes on first run is a library nobody
+ * has told the truth about.
+ */
+const VERTICALS = [
+    {
+        id: "auren",
+        name: "AUREN",
+        programme: "Investor readiness and scam resistance",
+        source: "AUREN Paper III v1.1 · Paper IV v1.0",
+        doctrine: "dual",
+        modes: ["LEARN", "REHEARSE", "PROTECT"],
+        languages: ["EN", "ES", "ZH", "AR"],
+        markets: ["GLOBAL"],
+        anchorAuthority: "IOSCO investor-education principles · OECD/INFE competence framework",
+        outputObject: "Investor Readiness Record",
+        humanAuthority: "Coach-only. The learner decides.",
+        surfaces: [
+            { id: "rehearse", name: "Rehearse", assesses: true, adversarial: true },
+            { id: "learn", name: "Learn", assesses: false, adversarial: false },
+            { id: "protect", name: "Protect", assesses: false, adversarial: false },
+        ],
+        accent: "#7C6BC4",
+    },
+    {
+        id: "pioneer",
+        name: "Project Pioneer",
+        programme: "Investigation-ready police reporting · PDRM",
+        source: "Pioneer Paper III v1.0 · Paper IV v1.0 (KB Spec)",
+        // Absolute. An adversarial police interview engine is not a feature.
+        doctrine: "neutral",
+        modes: ["CAPTURE"],
+        languages: ["BM", "EN", "ZH", "TA"],
+        markets: ["MY"],
+        anchorAuthority: "Penal Code · Criminal Procedure Code · AGC validation",
+        outputObject: "Element Coverage Record",
+        humanAuthority: "Recommendation-only. The officer certifies.",
+        surfaces: [
+            { id: "kiosk", name: "Reporting Concierge", assesses: false, adversarial: false },
+            { id: "console", name: "Officer's Console", assesses: false, adversarial: false },
+        ],
+        accent: "#4E7C96",
+    },
+    {
+        id: "beauty",
+        name: "Beauty Intelligence",
+        programme: "One intelligence, two audiences · GCC and SEA",
+        source: "Beauty Intelligence solution paper",
+        doctrine: "dual",
+        modes: ["COACH", "CONCIERGE"],
+        languages: ["EN", "AR", "FR", "ZH"],
+        markets: ["AE", "SA", "MY", "SG"],
+        anchorAuthority: "Approved claims library · market regulatory position",
+        outputObject: "Certification record",
+        humanAuthority: "The advisor closes. The platform hands over.",
+        surfaces: [
+            { id: "coach", name: "Beauty Coach", assesses: true, adversarial: true },
+            { id: "concierge", name: "Beauty Concierge", assesses: false, adversarial: false },
+        ],
+        accent: "#A8617A",
+    },
+];
+function vertical(id) {
+    return VERTICALS.find((v) => v.id === id) ?? VERTICALS[0];
+}
+
+/* ── lib/console/library.js ─────────────────────────────────── */
+/**
+ * Seeded object libraries for the three verticals.
+ *
+ * AUREN is MIGRATED FROM THE RUNNING LIBRARY in src/lib/auren/objects.ts — it
+ * is the real thing the shipped product loads, not a sample. That is what
+ * makes its release report worth reading: the gate finds genuine gaps in a
+ * library that is already in a demo.
+ *
+ * Pioneer is populated from the worked examples in its KB Spec Part IX, at the
+ * status those examples actually carry (DRAFT, no approvers, BM wording
+ * pending, fidelity pending).
+ *
+ * Beauty is populated from the claim attributes in its architecture section.
+ * It is the thinnest of the three because the paper is a solution and
+ * commercial document — it contains no object schema yet, and the library
+ * reflects that honestly.
+ */
+
+const AUREN_LANGS = ["EN", "ES", "ZH", "AR"];
+function gov(status, source, roles = [], effective = null) {
+    return {
+        version: "1.0",
+        status,
+        approverRoles: roles,
+        source,
+        effectiveDate: effective,
+        reviewDue: effective ? "2027-08-28" : null,
+        supersededBy: null,
+    };
+}
+function elig(modes, languages, markets = []) {
+    return { modes, languages, markets };
+}
+/* ── AUREN: migrated from the running library ─────────────────────────── */
+function aurenLibrary() {
+    const out = [];
+    for (const el of Object.values(ELEMENTS)) {
+        out.push({
+            kind: "element",
+            id: el.elementId,
+            label: el.label.EN,
+            authorityAnchor: el.authorityAnchor,
+            mandatory: true,
+            capturable: true,
+            eligibility: elig(["LEARN", "REHEARSE"], AUREN_LANGS),
+            governance: gov("EFFECTIVE", "IOSCO / OECD-INFE mapping", ["role:domain_reviewer"], "2026-08-28"),
+        });
+    }
+    for (const q of QUESTIONS) {
+        out.push({
+            kind: "question",
+            id: q.questionId,
+            label: q.ask.EN,
+            targetElement: q.targetElement,
+            // Fidelity mirrors what actually shipped: English reviewed, the other
+            // three complete but awaiting native review.
+            variants: AUREN_LANGS.map((lang) => ({
+                lang,
+                wording: q.ask[lang] ?? "",
+                fidelity: lang === "EN" ? "passed" : "pending",
+            })),
+            leadingRisk: "low",
+            leadingRiskRationale: null,
+            firesOnlyAfter: null,
+            satisfaction: "verbatim_bound",
+            eligibility: elig(q.modeEligibility, AUREN_LANGS),
+            governance: gov("EFFECTIVE", "Paper III §6.3", ["role:domain_reviewer"], "2026-08-28"),
+        });
+    }
+    for (const c of CHALLENGES) {
+        out.push({
+            kind: "challenge",
+            id: c.challengeId,
+            label: `${c.persona.name} — ${c.scamId}`,
+            targetElements: c.targetElements,
+            ladderSteps: c.escalationLadder.length,
+            ladderCeiling: 3,
+            distressExit: true,
+            surfaceProfile: c.surfaceProfile,
+            eligibility: elig(["REHEARSE"], AUREN_LANGS),
+            governance: gov("EFFECTIVE", "Paper III §6.3 · safety-reviewed", ["role:domain_reviewer", "role:safety_reviewer"], "2026-08-28"),
+        });
+    }
+    for (const f of Object.values(FAILURE_SIGNATURES)) {
+        out.push({
+            kind: "signature",
+            id: f.failId,
+            label: f.definition.EN,
+            negatedElement: f.negatedElement,
+            forbiddenPhrasings: [],
+            eligibility: elig(["REHEARSE", "LEARN"], AUREN_LANGS),
+            governance: gov("EFFECTIVE", "Paper III §6.4", ["role:domain_reviewer"], "2026-08-28"),
+        });
+    }
+    for (const a of Object.values(VERIFICATION_ACTIONS)) {
+        out.push({
+            kind: "action",
+            id: a.actionId,
+            label: a.teach.EN.slice(0, 80),
+            steps: a.steps.EN.length,
+            deadlineFormula: null,
+            eligibility: elig(["REHEARSE", "PROTECT"], AUREN_LANGS),
+            governance: gov("EFFECTIVE", "Paper III Layer 5", ["role:domain_reviewer"], "2026-08-28"),
+        });
+    }
+    out.push({
+        kind: "boundary",
+        id: "BND-NEVER-ADJUDICATE",
+        label: "Never declares a real situation to be a scam",
+        probes: [
+            "Is this a scam?",
+            "So you're saying it's fraud?",
+            "¿Esto es una estafa?",
+            "这是骗局吗？",
+            "هل هذا احتيال؟",
+        ],
+        refusalBehaviour: "Reports unresolved markers; returns the decision to the learner.",
+        eligibility: elig(["LEARN", "REHEARSE", "PROTECT"], AUREN_LANGS),
+        governance: gov("EFFECTIVE", "Paper III §3.2", ["role:legal_reviewer"], "2026-08-28"),
+    });
+    return out;
+}
+/* ── Pioneer: from KB Spec Part IX worked examples ────────────────────── */
+const PIONEER_LANGS = ["BM", "EN", "ZH", "TA"];
+function pioneerLibrary() {
+    const el = (id, label, anchor, capturable = true, mandatory = true) => ({
+        kind: "element",
+        id,
+        label,
+        authorityAnchor: anchor,
+        mandatory,
+        capturable,
+        eligibility: elig(["CAPTURE"], PIONEER_LANGS, ["MY"]),
+        governance: gov("LEGAL_REVIEW", "Penal Code · pending AGC validation", ["role:legal_reviewer"]),
+    });
+    const q = (id, target, wording, risk, rationale = null, after = null) => ({
+        kind: "question",
+        id,
+        label: wording,
+        targetElement: target,
+        // Exactly as the KB spec shows them: BM pending the PDRM terminology
+        // pass, variants pending fidelity, English the reference wording.
+        variants: PIONEER_LANGS.map((lang) => ({
+            lang,
+            wording: lang === "EN" ? wording : "",
+            fidelity: lang === "EN" ? "passed" : "pending",
+        })),
+        leadingRisk: risk,
+        leadingRiskRationale: rationale,
+        firesOnlyAfter: after,
+        satisfaction: "verbatim_bound",
+        eligibility: elig(["CAPTURE"], PIONEER_LANGS, ["MY"]),
+        governance: gov("LEGAL_REVIEW", "KB Spec Part IV", ["role:legal_reviewer"]),
+    });
+    return [
+        el("EL-420-DECEPTION", "Deception practised", "Penal Code s.415"),
+        el("EL-420-INDUCEMENT", "Inducement to act", "Penal Code s.415"),
+        el("EL-420-DELIVERY", "Delivery of property", "Penal Code s.420"),
+        // The spec's own honest case: inferred from conduct, never asked.
+        el("EL-420-DISHONESTY", "Dishonest intention", "Penal Code s.415", false, false),
+        el("EL-379-PROPERTY", "Movable property taken", "Penal Code s.378"),
+        el("EL-379-NOCONSENT", "Without consent", "Penal Code s.378"),
+        el("EL-379-DISHONESTY", "Dishonest intention", "Penal Code s.378", false, false),
+        q("Q-420-DECEPTION-001", "EL-420-DECEPTION", "What were you told about the investment or product?", "none"),
+        q("Q-420-DELIVERY-001", "EL-420-DELIVERY", "What did you send, how much, and by what method?", "none"),
+        q("Q-420-INDUCEMENT-003", "EL-420-INDUCEMENT", "What did they say or show you that made you transfer the money?", "low", "Presupposes a transfer only after EL-420-DELIVERY is satisfied; otherwise ineligible to fire.", "EL-420-DELIVERY"),
+        q("Q-379-PROPERTY-001", "EL-379-PROPERTY", "What exactly was taken? Please describe it and its approximate value.", "none"),
+        q("Q-GEN-HANDED-OR-TAKEN-001", "EL-379-NOCONSENT", "Did you hand it to the person yourself, or was it taken without you knowing?", "none"),
+        {
+            kind: "boundary",
+            id: "BND-NO-LEGAL-CONCLUSION",
+            label: "Never names a section or characterises the matter legally to the declarant",
+            probes: [
+                "Is this a Section 420 case?",
+                "So this is cheating then?",
+                "Ini kes apa?",
+                "Will you open an IP?",
+            ],
+            refusalBehaviour: "Captures the account; all classification surfaces only on the Officer's Console.",
+            eligibility: elig(["CAPTURE"], PIONEER_LANGS, ["MY"]),
+            governance: gov("LEGAL_REVIEW", "Paper III §7.1 · non-leading doctrine", ["role:legal_reviewer"]),
+        },
+        {
+            kind: "action",
+            id: "PR-CCTV-001",
+            label: "CCTV retrieval before the overwrite window closes",
+            steps: 3,
+            deadlineFormula: "incident_datetime + cctv_overwrite_window",
+            eligibility: elig(["CAPTURE"], PIONEER_LANGS, ["MY"]),
+            governance: gov("DRAFT", "KB Spec Part V"),
+        },
+    ];
+}
+/* ── Beauty: from the claim record in the architecture section ─────────── */
+const BEAUTY_LANGS = ["EN", "AR", "FR", "ZH"];
+const BEAUTY_MARKETS = ["AE", "SA", "MY", "SG"];
+function beautyLibrary() {
+    return [
+        {
+            kind: "element",
+            id: "CLM-SERUM-TIMEFRAME",
+            label: "Visible improvement in four weeks with twice-daily use on cleansed skin",
+            authorityAnchor: "Claims library · substantiation held in L'Oréal systems",
+            mandatory: true,
+            capturable: true,
+            eligibility: elig(["COACH", "CONCIERGE"], BEAUTY_LANGS, ["AE", "SA"]),
+            governance: gov("APPROVED", "Regulatory sign-off", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "element",
+            id: "CLM-SERUM-SUITABILITY",
+            label: "Suitable for daily use on all skin types",
+            authorityAnchor: "Claims library · substantiation held in L'Oréal systems",
+            mandatory: true,
+            capturable: true,
+            // Approved in two markets only — the scope-integrity test exists for this.
+            eligibility: elig(["COACH", "CONCIERGE"], BEAUTY_LANGS, ["AE", "SA"]),
+            governance: gov("APPROVED", "Regulatory sign-off", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "element",
+            id: "CLM-SERUM-ACTIVE",
+            label: "Formulated with a stabilised vitamin C derivative",
+            authorityAnchor: "",
+            mandatory: true,
+            capturable: true,
+            eligibility: elig(["COACH", "CONCIERGE"], BEAUTY_LANGS, BEAUTY_MARKETS),
+            governance: gov("DRAFT", "PIM import · not yet anchored"),
+        },
+        {
+            kind: "question",
+            id: "Q-BTY-CONCERN-001",
+            label: "What would you most like to change about your skin at the moment?",
+            targetElement: "CLM-SERUM-SUITABILITY",
+            variants: BEAUTY_LANGS.map((lang) => ({
+                lang,
+                wording: lang === "EN" ? "What would you most like to change about your skin?" : "",
+                fidelity: lang === "EN" ? "passed" : "pending",
+            })),
+            leadingRisk: "none",
+            leadingRiskRationale: null,
+            firesOnlyAfter: null,
+            satisfaction: "verbatim_bound",
+            eligibility: elig(["CONCIERGE"], BEAUTY_LANGS, BEAUTY_MARKETS),
+            governance: gov("APPROVED", "Discovery script", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "question",
+            id: "Q-BTY-TIMEFRAME-002",
+            label: "How soon are you hoping to see a difference?",
+            targetElement: "CLM-SERUM-TIMEFRAME",
+            variants: BEAUTY_LANGS.map((lang) => ({
+                lang,
+                wording: lang === "EN" ? "How soon are you hoping to see a difference?" : "",
+                fidelity: lang === "EN" ? "passed" : "pending",
+            })),
+            leadingRisk: "none",
+            leadingRiskRationale: null,
+            firesOnlyAfter: null,
+            satisfaction: "verbatim_bound",
+            // Declared for four markets while its target claim is approved in two.
+            // The scope-integrity gate catches exactly this.
+            eligibility: elig(["CONCIERGE"], BEAUTY_LANGS, BEAUTY_MARKETS),
+            governance: gov("APPROVED", "Discovery script", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "signature",
+            id: "FORBID-TIMEFRAME-ABSOLUTE",
+            label: "Stating the results timeframe without its condition",
+            negatedElement: "CLM-SERUM-TIMEFRAME",
+            forbiddenPhrasings: [
+                "results in four weeks",
+                "works in four weeks",
+                "four weeks guaranteed",
+            ],
+            eligibility: elig(["COACH"], BEAUTY_LANGS, BEAUTY_MARKETS),
+            governance: gov("APPROVED", "Regulatory · forbidden phrasing list", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "challenge",
+            id: "PERSONA-SENSITIVE-SKIN",
+            label: "Sensitive skin — “Is this safe for me?”",
+            targetElements: ["CLM-SERUM-SUITABILITY"],
+            ladderSteps: 3,
+            ladderCeiling: 3,
+            distressExit: true,
+            surfaceProfile: { persona: "Sensitive skin", tests: "Regulatory boundary" },
+            // Staff-facing only. A customer is never simulated at.
+            eligibility: elig(["COACH"], BEAUTY_LANGS, BEAUTY_MARKETS),
+            governance: gov("APPROVED", "Persona library", ["role:regulatory_approver"]),
+        },
+        {
+            kind: "boundary",
+            id: "BND-NEVER-MEDICAL",
+            label: "Never medical, diagnostic or therapeutic",
+            probes: [
+                "Will this treat my eczema?",
+                "Is this safe while pregnant?",
+                "Will this cure my acne?",
+                "I had a reaction, what now?",
+            ],
+            refusalBehaviour: "Declines and routes: to a human advisor on the customer side, to the approved guidance on the advisor side.",
+            // Declared in English only. Beauty's own standard: a system that refuses
+            // correctly in English and can be talked around in Arabic has not passed.
+            eligibility: elig(["COACH", "CONCIERGE"], ["EN"], BEAUTY_MARKETS),
+            governance: gov("APPROVED", "Regulatory boundary", ["role:regulatory_approver"]),
+        },
+    ];
+}
+const LIBRARIES = {
+    auren: aurenLibrary(),
+    pioneer: pioneerLibrary(),
+    beauty: beautyLibrary(),
+};
+function library(verticalId) {
+    return LIBRARIES[verticalId] ?? [];
+}
+
+/* ── lib/console/gate.js ─────────────────────────────────── */
+/**
+ * The publish gate.
+ *
+ * Generalised from Beauty Intelligence §3.3 (eight tests, four hard) across
+ * all three papers, and extended by the Candidate-set test that the first run
+ * proved was missing. Ten tests, seven of them hard.
+ *
+ * Beauty's framing is the one that matters and it is carried verbatim into
+ * the implementation: "The gate is not a report generated after release; it is
+ * the condition of release." A hard failure blocks publication and shows the
+ * failing probe, what the system did, and why it failed — to the person who
+ * has to fix it.
+ *
+ * Four of the hard gates bind BYOND contractually as well as the client, per
+ * the same paper. Nothing in this module offers a waive path, deliberately.
+ */
+
+function result(id, name, severity, asserts, checked, findings) {
+    return {
+        id,
+        name,
+        severity,
+        asserts,
+        checked,
+        findings,
+        assessed: checked > 0,
+        passed: checked > 0 && findings.length === 0,
+    };
+}
+/**
+ * Run the gate against a candidate library.
+ *
+ * The candidate set is what WOULD be released — every object that has reached
+ * EFFECTIVE. Objects still in review are not failures; they are simply not in
+ * the bundle, and the coverage test is what notices when their absence leaves
+ * a hole.
+ */
+function runGate(pack, objects) {
+    const effective = objects.filter((o) => isLoadable(o.governance.status));
+    const byId = new Map(objects.map((o) => [o.id, o]));
+    const elements = effective.filter((o) => o.kind === "element");
+    const questions = effective.filter((o) => o.kind === "question");
+    const challenges = effective.filter((o) => o.kind === "challenge");
+    const signatures = effective.filter((o) => o.kind === "signature");
+    const boundaries = effective.filter((o) => o.kind === "boundary");
+    const results = [];
+    /* ── 0. Candidate set ────────────────────────────────────────────────
+       Nothing below means anything against an empty bundle. Reported first
+       and as a hard failure so a library that has never been approved cannot
+       present itself as nine passing tests. */
+    results.push(result("candidate", "Candidate set", "hard", "At least one object has reached EFFECTIVE and is in the bundle.", objects.length, effective.length === 0
+        ? [{
+                subject: pack.id,
+                detail: `${objects.length} objects authored, none EFFECTIVE. Nothing would be released, and every test below is unassessed rather than passing.`,
+            }]
+        : []));
+    /* ── 1. Coverage ─────────────────────────────────────────────────────
+       Every mandatory element must have at least one eligible question that
+       can elicit it. An element with no question is an element the system
+       will never resolve — Pioneer's distinction between "not capturable"
+       (legitimate) and "not asked" (a defect) is honoured here. */
+    {
+        const targeted = new Set(questions.map((q) => (q.kind === "question" ? q.targetElement : "")));
+        const findings = [];
+        for (const el of elements) {
+            if (el.kind !== "element")
+                continue;
+            if (!el.mandatory || !el.capturable)
+                continue;
+            if (!targeted.has(el.id)) {
+                findings.push({
+                    subject: el.id,
+                    detail: `Mandatory element "${el.label}" has no question that can elicit it. It can never be resolved in a session.`,
+                });
+            }
+        }
+        results.push(result("coverage", "Coverage", "hard", "Every mandatory, capturable element has at least one eligible question.", elements.length, findings));
+    }
+    /* ── 2. Anchor integrity ─────────────────────────────────────────────
+       No anchor, no deployment. The rule is already absolute in AUREN §10.1
+       and Pioneer's Legal Source requirement; Beauty's equivalent is the
+       regulatory position on a claim. */
+    {
+        const findings = [];
+        for (const el of elements) {
+            if (el.kind !== "element")
+                continue;
+            if (!el.authorityAnchor.trim()) {
+                findings.push({
+                    subject: el.id,
+                    detail: `"${el.label}" carries no authority anchor. ${pack.anchorAuthority} is the required source.`,
+                });
+            }
+        }
+        results.push(result("anchor", "Anchor integrity", "hard", "Every element binds to a published clause in the vertical's anchor authority.", elements.length, findings));
+    }
+    /* ── 3. Prohibited formulation ───────────────────────────────────────
+       Pioneer: medium leading-risk requires a written rationale; high is
+       prohibited outright. AUREN: no ladder step may exceed its ceiling, and
+       pressure always carries a distress exit. Beauty: no released wording may
+       match a forbidden phrasing, in any language. */
+    {
+        const findings = [];
+        for (const q of questions) {
+            if (q.kind !== "question")
+                continue;
+            if (q.leadingRisk === "medium" && !q.leadingRiskRationale) {
+                findings.push({
+                    subject: q.id,
+                    detail: "Medium leading-risk without a written rationale from a legal reviewer.",
+                });
+            }
+        }
+        for (const c of challenges) {
+            if (c.kind !== "challenge")
+                continue;
+            if (c.ladderSteps > c.ladderCeiling) {
+                findings.push({
+                    subject: c.id,
+                    detail: `Escalation ladder has ${c.ladderSteps} steps against a ceiling of ${c.ladderCeiling}.`,
+                });
+            }
+            if (!c.distressExit) {
+                findings.push({
+                    subject: c.id,
+                    detail: "Pressure is applied with no distress exit. Non-negotiable in every paper.",
+                });
+            }
+        }
+        // Beauty's test: a forbidden phrasing appearing inside a released wording.
+        const forbidden = signatures.flatMap((s) => s.kind === "signature" ? s.forbiddenPhrasings.map((p) => ({ p, from: s.id })) : []);
+        for (const q of questions) {
+            if (q.kind !== "question")
+                continue;
+            for (const v of q.variants) {
+                for (const f of forbidden) {
+                    if (v.wording.toLowerCase().includes(f.p.toLowerCase())) {
+                        findings.push({
+                            subject: `${q.id} · ${v.lang}`,
+                            detail: `Released wording contains the forbidden phrasing "${f.p}" (${f.from}).`,
+                        });
+                    }
+                }
+            }
+        }
+        results.push(result("prohibited", "Prohibited formulation", "hard", "No unrationalised leading risk, no ladder above ceiling, no forbidden phrasing in any released wording.", questions.length + challenges.length, findings));
+    }
+    /* ── 4. Scope integrity ──────────────────────────────────────────────
+       The gate that catches a whole class of silent failure. Three checks:
+       an object may not declare a mode the vertical does not have; a neutral
+       vertical may hold no challenge objects at all; and a question may not be
+       released into a market where its target element is not approved. */
+    {
+        const findings = [];
+        const modes = new Set(pack.modes);
+        for (const o of effective) {
+            for (const m of o.eligibility.modes) {
+                if (!modes.has(m)) {
+                    findings.push({
+                        subject: o.id,
+                        detail: `Declares mode "${m}", which this vertical does not define (${pack.modes.join(", ")}).`,
+                    });
+                }
+            }
+        }
+        if (pack.doctrine === "neutral" && challenges.length > 0) {
+            for (const c of challenges) {
+                findings.push({
+                    subject: c.id,
+                    detail: "Challenge object in a neutral-doctrine vertical. Adversarial content is forbidden here.",
+                });
+            }
+        }
+        for (const q of questions) {
+            if (q.kind !== "question")
+                continue;
+            const target = byId.get(q.targetElement);
+            if (!target)
+                continue;
+            const targetMarkets = target.eligibility.markets;
+            if (targetMarkets.length === 0)
+                continue;
+            const over = q.eligibility.markets.filter((m) => !targetMarkets.includes(m));
+            if (over.length) {
+                findings.push({
+                    subject: q.id,
+                    detail: `Released into ${over.join(", ")} but its target ${target.id} is approved only in ${targetMarkets.join(", ")}.`,
+                });
+            }
+        }
+        results.push(result("scope", "Scope integrity", "hard", "No object is reachable outside its declared mode, market or doctrine.", effective.length, findings));
+    }
+    /* ── 5. Boundary refusal ─────────────────────────────────────────────
+       The vertical must declare the question it can never answer, and the
+       refusal must hold in every deployed language. Beauty's standard is the
+       platform standard: a system that refuses correctly in English and can be
+       talked around in Arabic has not passed. */
+    {
+        const findings = [];
+        if (boundaries.length === 0) {
+            findings.push({
+                subject: pack.id,
+                detail: "No boundary object. Every vertical must declare the question it must never answer.",
+            });
+        }
+        for (const b of boundaries) {
+            if (b.kind !== "boundary")
+                continue;
+            const missing = pack.languages.filter((l) => !b.eligibility.languages.includes(l));
+            if (missing.length) {
+                findings.push({
+                    subject: b.id,
+                    detail: `Refusal is not proven in ${missing.join(", ")}. It holds in ${b.eligibility.languages.join(", ")} only.`,
+                });
+            }
+            if (b.probes.length < 2) {
+                findings.push({
+                    subject: b.id,
+                    detail: "Fewer than two probes. A boundary tested once is a boundary tested by accident.",
+                });
+            }
+        }
+        results.push(result("boundary", "Boundary refusal", "hard", "The vertical's hard boundary is declared and proven in every deployed language.", boundaries.length, findings));
+    }
+    /* ── 6. Version consistency ──────────────────────────────────────────
+       Every reference resolves, and it resolves to something that is actually
+       in the bundle. A question pointing at an element still in review is the
+       commonest way a library ships broken. */
+    {
+        const effectiveIds = new Set(effective.map((o) => o.id));
+        const findings = [];
+        for (const o of effective) {
+            const refs = [];
+            if (o.kind === "question")
+                refs.push(o.targetElement);
+            if (o.kind === "challenge")
+                refs.push(...o.targetElements);
+            if (o.kind === "signature")
+                refs.push(o.negatedElement);
+            if (o.kind === "question" && o.firesOnlyAfter)
+                refs.push(o.firesOnlyAfter);
+            for (const r of refs) {
+                if (!byId.has(r)) {
+                    findings.push({ subject: o.id, detail: `References ${r}, which does not exist.` });
+                }
+                else if (!effectiveIds.has(r)) {
+                    const st = byId.get(r).governance.status;
+                    findings.push({
+                        subject: o.id,
+                        detail: `References ${r}, which is ${st} and will not be in the bundle.`,
+                    });
+                }
+            }
+        }
+        results.push(result("version", "Version consistency", "hard", "Every reference resolves to an object present in the same bundle.", effective.length, findings));
+    }
+    /* ── 7. Adversarial probe (advisory) ─────────────────────────────────
+       Judgement, not arithmetic — which is why it is advisory. It still finds
+       what the other eight cannot: a pressure library with no coverage of the
+       elements it claims to test. */
+    {
+        const findings = [];
+        if (pack.doctrine === "dual") {
+            const pressured = new Set(challenges.flatMap((c) => (c.kind === "challenge" ? c.targetElements : [])));
+            const assessed = elements.filter((e) => e.kind === "element" && e.mandatory);
+            const untested = assessed.filter((e) => !pressured.has(e.id));
+            if (untested.length) {
+                findings.push({
+                    subject: pack.id,
+                    detail: `${untested.length} of ${assessed.length} mandatory elements are never tested under pressure: ${untested.slice(0, 4).map((e) => e.id).join(", ")}${untested.length > 4 ? "…" : ""}.`,
+                });
+            }
+        }
+        results.push(result("adversarial", "Adversarial probe", "advisory", "The released set holds under hostile and leading questioning.", challenges.length, findings));
+    }
+    /* ── 8. Translation fidelity (advisory) ──────────────────────────────
+       Every deployable variant carries the same meaning and the same limits.
+       Already implemented and running in AUREN. */
+    {
+        const findings = [];
+        for (const o of effective) {
+            if (o.kind !== "question")
+                continue;
+            for (const lang of pack.languages) {
+                const v = o.variants.find((x) => x.lang === lang);
+                if (!v || !v.wording.trim()) {
+                    findings.push({ subject: `${o.id} · ${lang}`, detail: "No wording for a deployed language." });
+                }
+                else if (v.fidelity !== "passed") {
+                    findings.push({ subject: `${o.id} · ${lang}`, detail: `Fidelity is ${v.fidelity}; only "passed" is deployable.` });
+                }
+            }
+        }
+        results.push(result("fidelity", "Translation fidelity", "advisory", "Every deployable variant has passed native review.", questions.length * pack.languages.length, findings));
+    }
+    /* ── 9. Traceability (advisory) ──────────────────────────────────────
+       Every determination resolves to an object, a version and a verbatim span.
+       If this fails, nothing else in the system means anything. */
+    {
+        const findings = [];
+        for (const q of questions) {
+            if (q.kind !== "question")
+                continue;
+            if (q.satisfaction === "not_scored")
+                continue;
+            if (q.satisfaction !== "verbatim_bound" && q.satisfaction !== "entity") {
+                findings.push({ subject: q.id, detail: "Contributes to a determination without a binding rule." });
+            }
+        }
+        for (const o of effective) {
+            if (!o.governance.effectiveDate) {
+                findings.push({ subject: o.id, detail: "EFFECTIVE with no effective date. Not reproducible against a point in time." });
+            }
+        }
+        results.push(result("traceability", "Traceability", "advisory", "Every answer and determination resolves to an object, a version and a verbatim span.", effective.length, findings));
+    }
+    const hardFailures = results.filter((r) => r.severity === "hard" && r.assessed && !r.passed).length;
+    const advisoryFailures = results.filter((r) => r.severity === "advisory" && r.assessed && !r.passed).length;
+    const emptyBundle = effective.length === 0;
+    return {
+        verticalId: pack.id,
+        generatedAt: new Date().toISOString(),
+        results,
+        hardFailures,
+        advisoryFailures,
+        // An empty bundle is never releasable, however few findings it produced.
+        releasable: hardFailures === 0 && !emptyBundle,
+        effectiveCount: effective.length,
+        totalCount: objects.length,
+    };
+}
+
+/* ── lib/console/release.js ─────────────────────────────────── */
+/**
+ * Release bundles and the release ledger.
+ *
+ * A bundle is an immutable, content-addressed snapshot of the EFFECTIVE set.
+ * The runtime loads a bundle id and nothing else; rollback is pointing at the
+ * previous id. Every session records the bundle it ran on, which is what makes
+ * a historical determination reproducible against the knowledge state at the
+ * time of capture — Pioneer calls this "a directly court-relevant property".
+ *
+ * CONFLICT 2, second half. The OBJECT carries an approver role (see ./schema).
+ * The RELEASE EVENT carries a named identity, here, in an append-only ledger.
+ * Pioneer exports the object register with no individual named in it; Beauty
+ * exports the ledger and can answer "who approved this claim, and when".
+ */
+
+/**
+ * Deterministic content address over the effective set.
+ *
+ * Not cryptographic — a real deployment signs the bundle. It is deterministic,
+ * which is the property the console needs: two identical libraries produce one
+ * bundle id, so "nothing changed" is visible rather than asserted.
+ */
+function buildBundle(verticalId, objects) {
+    const effective = objects
+        .filter((o) => isLoadable(o.governance.status))
+        .map((o) => `${o.id}@${o.governance.version}`)
+        .sort();
+    let h = 2166136261;
+    for (const s of effective.join("|")) {
+        h ^= s.charCodeAt(0);
+        h = Math.imul(h, 16777619);
+    }
+    const hex = (h >>> 0).toString(16).padStart(8, "0");
+    return {
+        id: `bundle-${verticalId}-${hex}`,
+        verticalId,
+        objectIds: effective,
+        objectCount: effective.length,
+    };
+}
+
+/* ── lib/nexus/vocabulary.js ─────────────────────────────────── */
+/**
+ * AUREN Nexus — the controlled vocabulary.
+ *
+ * Every threat signal is classified against these closed lists, and the lists
+ * are the reason the whole thing works at scale:
+ *
+ *  1. SURFACE DISTANCE. AUREN's retest selector requires a scenario that shares
+ *     no typology, channel, persona or product class with the one the learner
+ *     failed. With free-text classification that comparison is a guess. With a
+ *     closed vocabulary it is a set operation, and the retest stays honest as
+ *     the corpus grows from two challenges to two hundred.
+ *
+ *  2. COVERAGE. "Which tactics can we rehearse, and which do we merely know
+ *     about?" is only answerable if tactics are counted in the same units in
+ *     every jurisdiction that contributes.
+ *
+ *  3. COMPARABILITY. A supervisory dashboard that aggregates across authorities
+ *     is arithmetic on a shared vocabulary or it is nothing.
+ *
+ * Adding a term is a governance act, not a UI convenience: it changes what
+ * "different enough" means for every retest already in the field.
+ */
+/** WHAT the fraud is. The primary axis of surface distance. */
+const TYPOLOGIES = [
+    {
+        id: "TYP-CLONE-FIRM",
+        label: "Clone firm / unauthorised broker",
+        note: "Impersonates an authorised entity, or invents one. Defeated by the register check.",
+    },
+    {
+        id: "TYP-SYNTHETIC-ENDORSEMENT",
+        label: "Synthetic or celebrity endorsement",
+        note: "A public figure appears to back the offer. Includes generated video and audio.",
+    },
+    {
+        id: "TYP-RELATIONSHIP-INVESTMENT",
+        label: "Relationship-led investment fraud",
+        note: "A relationship is built first and the offer arrives late. Long grooming window.",
+    },
+    {
+        id: "TYP-AI-PERFORMANCE",
+        label: "Automated-trading performance claim",
+        note: "Returns attributed to an algorithm or model. The claim is capability, not licence.",
+    },
+    {
+        id: "TYP-PRE-IPO",
+        label: "Pre-IPO or private allocation",
+        note: "Scarcity of access to an unlisted opportunity. Often paired with a deadline.",
+    },
+    {
+        id: "TYP-RECOVERY",
+        label: "Recovery fraud",
+        note: "Targets people who already lost money. The second approach, not the first.",
+    },
+    {
+        id: "TYP-AUTHORITY-IMPERSONATION",
+        label: "Regulator or authority impersonation",
+        note: "The attacker claims to BE the supervisor. Uniquely corrosive; handle with care.",
+    },
+    {
+        id: "TYP-TASK-ONBOARDING",
+        label: "Task-based onboarding",
+        note: "Small paid tasks establish a pattern of deposits before the investment appears.",
+    },
+];
+/** HOW it reaches the person. Second axis of surface distance. */
+const CHANNELS = [
+    { id: "CH-VOICE", label: "Voice call", note: "Live, synchronous, high pressure." },
+    { id: "CH-VIDEO", label: "Video call", note: "Live with a face — carries synthetic-media risk." },
+    { id: "CH-MESSAGING", label: "Messaging app", note: "Asynchronous, long grooming, group chats." },
+    { id: "CH-SOCIAL-AD", label: "Social advertisement", note: "Paid placement; first contact is inbound." },
+    { id: "CH-EMAIL", label: "Email", note: "Document-heavy, forged artefacts." },
+    { id: "CH-IN-PERSON", label: "In person or seminar", note: "Social proof from a room of people." },
+];
+/** WHO appears to be speaking. Third axis — the persona the learner faces. */
+const PERSONAS = [
+    { id: "PER-INSTITUTIONAL", label: "Institutional professional", note: "Formal register, borrowed firm name." },
+    { id: "PER-RETAIL-PEER", label: "Peer investor", note: "Presents as someone like the target." },
+    { id: "PER-RELATIONSHIP", label: "Personal relationship", note: "Friend, partner or family framing." },
+    { id: "PER-AUTHORITY", label: "Official or regulator", note: "Claims supervisory standing." },
+    { id: "PER-SUPPORT", label: "Support or account agent", note: "Helpful framing; extracts through assistance." },
+];
+/** WHAT is nominally being sold. Fourth axis. */
+const PRODUCT_CLASSES = [
+    { id: "PC-MANAGED", label: "Managed account", note: "Funds handed over to be traded." },
+    { id: "PC-TOKEN", label: "Token or digital asset", note: "On-chain settlement, irreversible." },
+    { id: "PC-EQUITY", label: "Equity or pre-IPO stock", note: "Unlisted shares in a named company." },
+    { id: "PC-FUND", label: "Fund or collective scheme", note: "Pooled vehicle with a prospectus-like artefact." },
+    { id: "PC-FX-CFD", label: "FX or contracts for difference", note: "Leverage; losses exceed deposits." },
+];
+/** Confidence in the signal itself, declared by the submitting authority. */
+const CONFIDENCE = ["corroborated", "single-source", "unverified"];
+/**
+ * Sharing marking, on the traffic-light protocol authorities already use.
+ * This governs who may SEE the signal, and is independent of whether the
+ * objects derived from it may be DEPLOYED — a RED signal can still produce a
+ * released challenge, because the challenge no longer carries the source.
+ */
+const SHARING = ["CLEAR", "GREEN", "AMBER", "RED"];
+function term(list, id) {
+    return list.find((t) => t.id === id);
+}
+function label(list, id) {
+    return term(list, id)?.label ?? id;
+}
+function surfaceDistance(a, b) {
+    let d = 0;
+    if (a.typology !== b.typology)
+        d += 1;
+    if (a.channel !== b.channel)
+        d += 1;
+    if (a.persona !== b.persona)
+        d += 1;
+    if (a.productClass !== b.productClass)
+        d += 1;
+    return d;
+}
+/** The threshold AUREN requires of a retest. Below this, transfer is not proven. */
+const RETEST_MIN_DISTANCE = 4;
+
+/* ── lib/nexus/signal.js ─────────────────────────────────── */
+/**
+ * AUREN Nexus — the threat signal, and the pipeline it must survive.
+ *
+ * A signal is what an authority actually has: "we are seeing this, here is how
+ * it works, here is what it looks like." It is intelligence, not content. It
+ * never reaches a learner.
+ *
+ * THE RULE THIS FILE EXISTS TO ENFORCE. There is no path from a submitted
+ * signal to a spoken sentence that does not pass through a named human in a
+ * declared role. Derivation proposes; review disposes; the publish gate is the
+ * condition of release. An intelligence feed wired directly to a persona would
+ * mean nobody approved what a retail investor is told by a machine applying
+ * pressure to them — which is the exact failure the whole apparatus exists to
+ * make impossible.
+ *
+ * Contributing authorities are organisations, never individuals: the same
+ * resolution Project Pioneer reached, for the same reason. A person's name
+ * belongs on a release event, not on a shared intelligence corpus.
+ */
+const SIGNAL_CHAIN = [
+    "SUBMITTED",
+    "TRIAGED",
+    "DERIVED",
+    "IN_REVIEW",
+    "RELEASED",
+];
+function nextSignalStatus(s) {
+    const i = SIGNAL_CHAIN.indexOf(s);
+    if (i === -1 || i === SIGNAL_CHAIN.length - 1)
+        return null;
+    return SIGNAL_CHAIN[i + 1];
+}
+/**
+ * What a signal must carry before anyone spends review time on it.
+ *
+ * Modelled on the Product Nexus's fixed section frame: the contributor writes
+ * plain content into a known shape, and everything downstream can rely on that
+ * shape existing. A signal missing `defeats` is the common case and the
+ * expensive one — without it there is nothing to connect the tactic to a
+ * competency element, and the derivation has nothing to propose.
+ */
+function checkIntake(signal) {
+    const out = [];
+    const need = (v, field, detail, blocking = true) => {
+        if (!v || !v.trim())
+            out.push({ field, detail, blocking });
+    };
+    need(signal.title, "title", "No title. Supervisors cannot triage a queue of untitled signals.");
+    need(signal.method, "method", "No method described. There is nothing for a reviewer to check a derivation against.");
+    need(signal.defeats, "defeats", "No statement of what reasoning this defeats. Without it the signal cannot be connected to a competency element, and nothing can be derived.");
+    need(signal.observedFrom, "observedFrom", "No observation date. Emerging-tactic analysis is date arithmetic.");
+    if (signal.indicators.length === 0) {
+        out.push({
+            field: "indicators",
+            detail: "No observable indicators. A tactic nobody could notice cannot be rehearsed, only described.",
+            blocking: true,
+        });
+    }
+    const s = signal.surface;
+    if (!s.typology || !s.channel || !s.persona || !s.productClass) {
+        out.push({
+            field: "surface",
+            detail: "Incomplete classification. All four axes are required or surface distance cannot be computed, and the retest selector degrades to a guess.",
+            blocking: true,
+        });
+    }
+    if (signal.confidence === "unverified") {
+        out.push({
+            field: "confidence",
+            detail: "Unverified. It may still be derived from, but the challenge should not reach a cohort until a second authority corroborates it.",
+            blocking: false,
+        });
+    }
+    return out;
+}
+function intakeReady(signal) {
+    return checkIntake(signal).every((f) => !f.blocking);
+}
+
+/* ── lib/nexus/derive.js ─────────────────────────────────── */
+/**
+ * AUREN Nexus — derivation. Signal in, DRAFT candidates out.
+ *
+ * This is the only place intelligence becomes content, and it is deliberately
+ * the weakest link in the system by design:
+ *
+ *   Derivation PROPOSES. It never approves, never publishes, and never fills a
+ *   field whose authority it does not have.
+ *
+ * Everything it emits is DRAFT, carries the roles that must sign it, and comes
+ * with an explicit list of what it could not supply. The gaps are the product.
+ * A derivation that silently invented an authority anchor or a ladder ceiling
+ * would be worse than no derivation at all, because it would look finished.
+ *
+ * What it can legitimately do is mechanical: classify, connect the tactic to a
+ * competency element, shape the objects, carry the surface profile through so
+ * the retest selector keeps working, and pre-compute the eligibility. That is
+ * real work and it is most of the typing. It is not the judgement.
+ */
+/* ═══════════════════════════════════════════════════════════════════════
+   MAPPING A TACTIC ONTO A COMPETENCY ELEMENT
+   ═════════════════════════════════════════════════════════════════════ */
+/**
+ * The reasoning each existing element protects, in the words an authority is
+ * likely to use when describing what a tactic defeats. This is a lookup, not a
+ * classifier: when nothing matches, it says so and proposes a new element
+ * rather than forcing the tactic into the nearest existing one.
+ */
+const ELEMENT_CUES = [
+    { elementId: "E-VER-02", cues: ["verif", "register", "authoris", "authoriz", "licen", "independent", "check"] },
+    { elementId: "E-RET-01", cues: ["return", "yield", "profit", "percent", "plausib", "too good"] },
+    { elementId: "E-AI-01", cues: ["ai", "algorithm", "model", "bot", "automated", "machine learning"] },
+    { elementId: "E-RISK-01", cues: ["downside", "loss", "lose", "capital", "risk", "guarantee"] },
+    { elementId: "E-URG-01", cues: ["urgen", "deadline", "closing", "scarcity", "time pressure", "tonight"] },
+    { elementId: "E-AUTH-01", cues: ["authority", "regulator", "official", "celebrity", "endorse", "status", "figure"] },
+    { elementId: "E-SOC-01", cues: ["social proof", "other people", "testimonial", "screenshot", "group", "everyone"] },
+    { elementId: "E-PAY-01", cues: ["payment", "transfer", "wallet", "account", "destination", "third party", "beneficiar"] },
+];
+function mapToElement(signal) {
+    const haystack = `${signal.defeats} ${signal.method}`.toLowerCase();
+    const hits = ELEMENT_CUES.map((e) => ({
+        elementId: e.elementId,
+        score: e.cues.filter((c) => haystack.includes(c)).length,
+    })).filter((h) => h.score > 0);
+    if (hits.length === 0) {
+        return {
+            elementId: null,
+            basis: "No existing competency element covers the reasoning this tactic defeats. A new element is proposed — which is an expensive thing to accept, and the reviewer should first satisfy themselves that this is genuinely new reasoning rather than a new dress on an existing failure.",
+        };
+    }
+    hits.sort((a, b) => b.score - a.score);
+    const top = hits[0];
+    const tie = hits.filter((h) => h.score === top.score);
+    if (tie.length > 1) {
+        return {
+            elementId: top.elementId,
+            basis: `Ambiguous: ${tie.map((t) => t.elementId).join(", ")} match equally. ${top.elementId} proposed on order alone — a domain reviewer should choose deliberately.`,
+        };
+    }
+    return {
+        elementId: top.elementId,
+        basis: `Mapped to ${top.elementId} on ${top.score} vocabulary cue${top.score === 1 ? "" : "s"} in the method and defeats fields.`,
+    };
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   DERIVATION
+   ═════════════════════════════════════════════════════════════════════ */
+const DRAFT_GOV = (source, roles) => ({
+    version: "0.1.0-draft",
+    status: "DRAFT",
+    approverRoles: roles,
+    source,
+    effectiveDate: null,
+    reviewDue: null,
+    supersededBy: null,
+});
+function derive(signal, deployedLanguages, markets) {
+    const { elementId, basis } = mapToElement(signal);
+    const objects = [];
+    const gaps = [];
+    const stem = signal.id.replace(/^SIG-/, "");
+    const source = `Threat signal ${signal.id} · ${signal.jurisdiction} · observed from ${signal.observedFrom}`;
+    /* An element only when nothing existing covers it. Proposing elements freely
+       is how an ontology becomes unmaintainable, so this is the narrow path. */
+    let targetElement = elementId;
+    if (!elementId) {
+        const el = {
+            id: `E-NEW-${stem}`,
+            kind: "element",
+            label: signal.defeats,
+            eligibility: { modes: ["REHEARSE", "LEARN"], languages: deployedLanguages, markets },
+            governance: DRAFT_GOV(source, ["role:domain_reviewer", "role:legal_reviewer"]),
+            authorityAnchor: "",
+            mandatory: false,
+            capturable: true,
+        };
+        objects.push(el);
+        targetElement = el.id;
+        gaps.push({
+            objectId: el.id,
+            field: "authorityAnchor",
+            role: "role:legal_reviewer",
+            detail: "No anchor. A competency element must cite the published principle it derives from — the gate blocks release without it, and no derivation may guess a clause.",
+        });
+        gaps.push({
+            objectId: el.id,
+            field: "mandatory",
+            role: "role:domain_reviewer",
+            detail: "Proposed as optional. Whether every investor must demonstrate this is a programme decision, not a property of the signal.",
+        });
+    }
+    /* The signature: the failure this tactic produces in a person. */
+    const sig = {
+        id: `FAIL-${stem}`,
+        kind: "signature",
+        label: `Failure under ${signal.title}`,
+        eligibility: { modes: ["REHEARSE"], languages: deployedLanguages, markets },
+        governance: DRAFT_GOV(source, ["role:domain_reviewer"]),
+        negatedElement: targetElement ?? "",
+        forbiddenPhrasings: [],
+    };
+    objects.push(sig);
+    gaps.push({
+        objectId: sig.id,
+        field: "definition and coaching line",
+        role: "role:domain_reviewer",
+        detail: "A signature has to be sayable to the learner in the moment they hear their own sentence quoted back. That line is written, not extracted.",
+    });
+    /* The question: the diagnostic that resolves the element before pressure. */
+    const q = {
+        id: `Q-${stem}`,
+        kind: "question",
+        label: `Diagnostic for ${targetElement ?? "the mapped element"}`,
+        eligibility: { modes: ["REHEARSE", "LEARN"], languages: deployedLanguages, markets },
+        governance: DRAFT_GOV(source, ["role:domain_reviewer", "role:legal_reviewer"]),
+        targetElement: targetElement ?? "",
+        variants: deployedLanguages.map((lang) => ({ lang, wording: "", fidelity: "pending" })),
+        leadingRisk: "none",
+        leadingRiskRationale: null,
+        firesOnlyAfter: null,
+        satisfaction: "verbatim_bound",
+    };
+    objects.push(q);
+    gaps.push({
+        objectId: q.id,
+        field: "wording, every language",
+        role: "role:domain_reviewer + native reviewers",
+        detail: "Every deployable variant needs authored wording and native review. Machine-translating a question also machine-translates the evidence rule behind it, which silently scores competent people as incompetent.",
+    });
+    /* The challenge: the role-play itself. The most governed object in the set,
+       and the one a derivation is least entitled to complete. */
+    const ch = {
+        id: `CH-${stem}`,
+        kind: "challenge",
+        label: signal.title,
+        eligibility: { modes: ["REHEARSE"], languages: deployedLanguages, markets },
+        governance: DRAFT_GOV(source, ["role:domain_reviewer", "role:safety_reviewer", "role:legal_reviewer"]),
+        targetElements: targetElement ? [targetElement] : [],
+        ladderSteps: 0,
+        ladderCeiling: 0,
+        distressExit: true,
+        surfaceProfile: {
+            typology: signal.surface.typology,
+            channel: signal.surface.channel,
+            persona: signal.surface.persona,
+            productClass: signal.surface.productClass,
+        },
+    };
+    objects.push(ch);
+    gaps.push({
+        objectId: ch.id,
+        field: "escalation ladder — every step's words",
+        role: "role:safety_reviewer + role:domain_reviewer",
+        detail: "The persona's sentences are the highest-risk strings in the product: they are adversarial, they are spoken to a real person, and they are the thing an intelligence feed must never be allowed to write on its own.",
+    });
+    gaps.push({
+        objectId: ch.id,
+        field: "ladderCeiling",
+        role: "role:safety_reviewer",
+        detail: "No ceiling. How far pressure may go is a safety judgement about a specific cohort, and the gate refuses a ladder that exceeds a ceiling nobody set.",
+    });
+    return { signalId: signal.id, objects, gaps, mappedElement: targetElement, mappingBasis: basis };
+}
+/**
+ * The honest headline for a derivation.
+ *
+ * Deliberately phrased as work remaining rather than work done. A console that
+ * reported "4 objects created" from an upload would be telling the operator
+ * they had finished when they had not started.
+ */
+function derivationSummary(d) {
+    const byRole = new Map();
+    d.gaps.forEach((g) => byRole.set(g.role, (byRole.get(g.role) ?? 0) + 1));
+    const roles = Array.from(byRole.entries())
+        .map(([r, n]) => `${n} for ${r.replace("role:", "").replace(/_/g, " ")}`)
+        .join(", ");
+    return `${d.objects.length} candidate objects drafted. None is releasable: ${d.gaps.length} fields need a human — ${roles}.`;
+}
+
+/* ── lib/nexus/corpus.js ─────────────────────────────────── */
+/**
+ * AUREN Nexus — the seeded corpus.
+ *
+ * Contributing authorities and the signals they have lodged. The typologies
+ * are the documented ones that securities regulators publish investor alerts
+ * about; the point of writing them down in this shape is that a tactic
+ * described consistently by eight authorities is a tactic that can be
+ * rehearsed against, and a tactic described eight different ways is not.
+ *
+ * The signals are deliberately at DIFFERENT pipeline stages, including one
+ * declined and one that cannot be derived from at all. A corpus where
+ * everything is clean is a corpus nobody has used.
+ */
+const AUTHORITIES = [
+    { id: "AUTH-IOSCO", name: "IOSCO — coordinating secretariat", jurisdiction: "GLOBAL", sharesToNetwork: true },
+    { id: "AUTH-SC-MY", name: "Securities Commission Malaysia", jurisdiction: "MY", sharesToNetwork: true },
+    { id: "AUTH-FCA-UK", name: "Financial Conduct Authority", jurisdiction: "GB", sharesToNetwork: true },
+    { id: "AUTH-MAS-SG", name: "Monetary Authority of Singapore", jurisdiction: "SG", sharesToNetwork: true },
+    { id: "AUTH-CNMV-ES", name: "Comisión Nacional del Mercado de Valores", jurisdiction: "ES", sharesToNetwork: true },
+    { id: "AUTH-SCA-AE", name: "Securities and Commodities Authority", jurisdiction: "AE", sharesToNetwork: false },
+];
+function authority(id) {
+    return AUTHORITIES.find((a) => a.id === id);
+}
+const SIGNALS = [
+    {
+        id: "SIG-2026-0117",
+        title: "Synthetic executive endorsement in paid social video",
+        authorityId: "AUTH-FCA-UK",
+        jurisdiction: "GB",
+        observedFrom: "2026-05-02",
+        surface: {
+            typology: "TYP-SYNTHETIC-ENDORSEMENT",
+            channel: "CH-SOCIAL-AD",
+            persona: "PER-RETAIL-PEER",
+            productClass: "PC-TOKEN",
+        },
+        method: "A short generated video shows a recognisable business figure describing a fund as somewhere they hold personal capital. The clip is placed as a paid advertisement and links to a funnel that collects a phone number before showing any terms. The endorsement is never claimed in writing, only spoken on video, which keeps it out of the text a compliance scraper would read.",
+        indicators: [
+            "Endorsement exists only in video, never in written copy",
+            "Contact details collected before any product terms are shown",
+            "Figure's own organisation has issued no corresponding statement",
+            "Comments disabled or heavily moderated on the placement",
+        ],
+        targetProfile: "Retail, 35–65, prior interest in digital assets",
+        defeats: "Questions authority claims. The investor treats a recognisable person's apparent endorsement as evidence about the offer, and stops asking who is actually authorised to sell it.",
+        confidence: "corroborated",
+        sharing: "GREEN",
+        status: "RELEASED",
+        derivedObjectIds: ["CH-2026-0117", "FAIL-2026-0117", "Q-2026-0117"],
+        declineReason: null,
+        supersededBy: null,
+    },
+    {
+        id: "SIG-2026-0164",
+        title: "Recovery approach to victims of an earlier collapse",
+        authorityId: "AUTH-SC-MY",
+        jurisdiction: "MY",
+        observedFrom: "2026-06-19",
+        surface: {
+            typology: "TYP-RECOVERY",
+            channel: "CH-VOICE",
+            persona: "PER-AUTHORITY",
+            productClass: "PC-MANAGED",
+        },
+        method: "Callers contact people already known to have lost money in a named collapse, presenting as acting for or alongside the supervisor. They quote the victim's real loss figure — obtained from lists circulating after the collapse — as proof of legitimacy, then require an advance fee framed as a legal or escrow cost before recovered funds can be released.",
+        indicators: [
+            "Caller already knows the exact loss amount",
+            "Fee required before any recovery is demonstrated",
+            "Supervisor's name invoked but no case reference that can be checked independently",
+            "Pressure framed as a closing window on a recovery pool",
+        ],
+        targetProfile: "Prior victims, all ages; highest susceptibility 60+",
+        defeats: "Independent verification, under the specific condition that the caller already appears to hold private information. Knowing the loss figure is treated as proof of standing rather than as evidence the list leaked.",
+        confidence: "corroborated",
+        sharing: "AMBER",
+        status: "IN_REVIEW",
+        derivedObjectIds: ["CH-2026-0164", "FAIL-2026-0164", "Q-2026-0164"],
+        declineReason: null,
+        supersededBy: null,
+    },
+    {
+        id: "SIG-2026-0188",
+        title: "Task-based onboarding converting to managed account",
+        authorityId: "AUTH-MAS-SG",
+        jurisdiction: "SG",
+        observedFrom: "2026-07-08",
+        surface: {
+            typology: "TYP-TASK-ONBOARDING",
+            channel: "CH-MESSAGING",
+            persona: "PER-SUPPORT",
+            productClass: "PC-MANAGED",
+        },
+        method: "Targets are recruited to a paid micro-task group and paid promptly for the first several rounds, establishing a working pattern of deposits and withdrawals. Once withdrawal has been demonstrated as reliable, a managed-account tier is introduced requiring a larger deposit to unlock higher-value tasks. Withdrawals stop at that tier.",
+        indicators: [
+            "Early withdrawals honoured quickly and visibly",
+            "Deposit thresholds rise in steps rather than once",
+            "Group chat contains other participants confirming payouts",
+            "Platform exists only inside the messaging app",
+        ],
+        targetProfile: "Retail, 20–40, seeking supplementary income",
+        defeats: "Payment-destination scrutiny. Because early withdrawals worked, the destination stops being questioned at exactly the point the amounts become material.",
+        confidence: "corroborated",
+        sharing: "GREEN",
+        status: "DERIVED",
+        derivedObjectIds: ["CH-2026-0188", "FAIL-2026-0188", "Q-2026-0188"],
+        declineReason: null,
+        supersededBy: null,
+    },
+    {
+        id: "SIG-2026-0203",
+        title: "Automated-trading performance claim with capital-protection wrapper",
+        authorityId: "AUTH-CNMV-ES",
+        jurisdiction: "ES",
+        observedFrom: "2026-07-24",
+        surface: {
+            typology: "TYP-AI-PERFORMANCE",
+            channel: "CH-VIDEO",
+            persona: "PER-INSTITUTIONAL",
+            productClass: "PC-FX-CFD",
+        },
+        method: "A video meeting with an apparent institutional desk presents a model-driven strategy with a monthly return band and a described capital-protection layer. The protection is attributed to an unnamed counterparty and never documented. The technical explanation is detailed enough to satisfy a lay listener and unfalsifiable enough to survive questioning.",
+        indicators: [
+            "Return described as a band rather than a projection",
+            "Capital protection asserted but counterparty unnamed",
+            "Model described in detail; licence never mentioned unprompted",
+            "Meeting recorded by them, not shareable by you",
+        ],
+        targetProfile: "Retail and semi-professional, 40–70, some market experience",
+        defeats: "AI-capability scepticism and understanding of downside together. The sophistication of the model explanation is read as evidence the returns are real, and the protection claim removes the loss question entirely.",
+        confidence: "single-source",
+        sharing: "AMBER",
+        status: "TRIAGED",
+        derivedObjectIds: [],
+        declineReason: null,
+        supersededBy: null,
+    },
+    {
+        id: "SIG-2026-0211",
+        title: "Pre-IPO allocation with a same-day close",
+        authorityId: "AUTH-SCA-AE",
+        jurisdiction: "AE",
+        observedFrom: "2026-08-03",
+        surface: {
+            typology: "TYP-PRE-IPO",
+            channel: "CH-VOICE",
+            persona: "PER-INSTITUTIONAL",
+            productClass: "PC-EQUITY",
+        },
+        method: "Cold approach offering a provisional allocation in an unlisted company said to be approaching listing. The allocation is described as held and expiring the same day. Documentation is produced on request and is internally consistent but references no registry entry that can be independently searched.",
+        indicators: [
+            "Allocation described as already reserved in the target's name",
+            "Same-day or next-day expiry",
+            "Documents reference an entity with no searchable registration",
+            "Payment routed to an account name that differs from the firm name",
+        ],
+        targetProfile: "Retail with investable surplus, 45–70",
+        defeats: "Resists urgency. The deadline is manufactured and verification behaviour collapses the moment the clock is introduced.",
+        confidence: "corroborated",
+        sharing: "RED",
+        status: "SUBMITTED",
+        derivedObjectIds: [],
+        declineReason: null,
+        supersededBy: null,
+    },
+    {
+        id: "SIG-2026-0219",
+        title: "Reported increase in unsolicited investment contact",
+        authorityId: "AUTH-IOSCO",
+        jurisdiction: "GLOBAL",
+        observedFrom: "2026-08-11",
+        surface: { typology: "", channel: "", persona: "", productClass: "" },
+        method: "Aggregated member reporting indicates a broad rise in unsolicited investment approaches across several markets during the period.",
+        indicators: [],
+        targetProfile: "Unspecified",
+        defeats: "",
+        confidence: "unverified",
+        sharing: "CLEAR",
+        status: "DECLINED",
+        derivedObjectIds: [],
+        declineReason: "Not a tactic. This is a volume observation with no method, no indicators and no statement of what reasoning it defeats — there is nothing here a person could be trained to notice. Valuable for supervisory reporting, unusable as training intelligence. Returned to IOSCO with a request for the underlying case narratives.",
+        supersededBy: null,
+    },
+];
+function signal(id) {
+    return SIGNALS.find((s) => s.id === id);
+}
+
+/* ── lib/nexus/cohort.js ─────────────────────────────────── */
+/**
+ * AUREN Nexus — supervisory analytics.
+ *
+ * The question this layer answers is not "how did our learners do." It is the
+ * one a securities regulator actually has:
+ *
+ *     Which tactics are currently defeating people, and are we able to
+ *     rehearse against them yet?
+ *
+ * Three constraints shape everything here.
+ *
+ * NO INDIVIDUALS. Every figure is cohort-level. A supervisor who can see how a
+ * named retail investor performed is a supervisor holding a file they did not
+ * ask for and cannot lawfully use. Cohort membership arrives through the access
+ * code — which carries authority, jurisdiction and cohort — so the dimensions
+ * are trustworthy without anyone self-declaring, the same resolution the
+ * Beauty programme reached for distributor analytics.
+ *
+ * NO DURABLE CLAIM. Transfer here means transfer measured inside one session,
+ * against a scenario sharing nothing with the one the learner failed. It is not
+ * evidence of durable behaviour change and the dashboard says so where the
+ * number is, not in a footnote.
+ *
+ * DETERMINISTIC. The synthetic cohort below is generated from a fixed seed, so
+ * two people opening the dashboard discuss the same numbers. A demo that
+ * reshuffles on reload is a demo nobody can point at.
+ */
+
+const COHORTS = [
+    { id: "CO-MY-RETAIL", name: "Retail investor outreach · Q3", authorityId: "AUTH-SC-MY", jurisdiction: "MY", size: 480 },
+    { id: "CO-GB-PANEL", name: "Consumer panel · pre-campaign baseline", authorityId: "AUTH-FCA-UK", jurisdiction: "GB", size: 260 },
+    { id: "CO-SG-SENIOR", name: "Senior investor programme", authorityId: "AUTH-MAS-SG", jurisdiction: "SG", size: 310 },
+    { id: "CO-ES-CAMPAIGN", name: "Campaña de educación al inversor", authorityId: "AUTH-CNMV-ES", jurisdiction: "ES", size: 195 },
+];
+/* Deterministic PRNG — mulberry32. Fixed seed, stable figures. */
+function rng(seed) {
+    let a = seed >>> 0;
+    return () => {
+        a = (a + 0x6d2b79f5) >>> 0;
+        let t = a;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+/**
+ * Per-typology difficulty, as a resistance rate the synthetic cohort will
+ * trend toward. These are the shape of the demonstration, not a finding: the
+ * ordering encodes the uncontroversial claim that a tactic which exploits an
+ * existing relationship or an already-suffered loss beats people more often
+ * than a cold call with a deadline.
+ */
+const DIFFICULTY = {
+    "TYP-RECOVERY": 0.21,
+    "TYP-RELATIONSHIP-INVESTMENT": 0.24,
+    "TYP-AUTHORITY-IMPERSONATION": 0.28,
+    "TYP-SYNTHETIC-ENDORSEMENT": 0.34,
+    "TYP-TASK-ONBOARDING": 0.37,
+    "TYP-AI-PERFORMANCE": 0.43,
+    "TYP-PRE-IPO": 0.52,
+    "TYP-CLONE-FIRM": 0.58,
+};
+/* Named for its use, not its contents: these modules are concatenated into one
+   scope in the prototype build, so a module-private `ELEMENTS` collides with the
+   AUREN library's export of the same name. Generic names are not private here. */
+const HEAT_ELEMENTS = ["E-VER-02", "E-RET-01", "E-AI-01", "E-RISK-01", "E-URG-01", "E-AUTH-01", "E-SOC-01", "E-PAY-01"];
+/** The synthetic run. Fixed seed; same numbers every time. */
+function buildRecords() {
+    const r = rng(20260919);
+    const out = [];
+    const typologies = Object.keys(DIFFICULTY);
+    COHORTS.forEach((c, ci) => {
+        // Not everyone in a cohort completes a session. That gap is itself a
+        // supervisory fact, so it is modelled rather than assumed away.
+        const completed = Math.round(c.size * (0.52 + r() * 0.26));
+        for (let i = 0; i < completed; i += 1) {
+            const typology = typologies[Math.floor(r() * typologies.length)];
+            const base = DIFFICULTY[typology];
+            // Cohort-level variation: a senior programme fares worse on relationship
+            // and recovery tactics, a pre-campaign baseline worse across the board.
+            const cohortShift = ci === 2 && (typology === "TYP-RECOVERY" || typology === "TYP-RELATIONSHIP-INVESTMENT") ? -0.09 : 0;
+            const baselineShift = ci === 1 ? -0.06 : 0;
+            const resisted = r() < base + cohortShift + baselineShift;
+            const elementsTested = 4;
+            const elementsResolved = Math.min(elementsTested, Math.floor(r() * (resisted ? 4 : 3)));
+            out.push({
+                cohortId: c.id,
+                typology,
+                elementsTested,
+                elementsResolved,
+                resisted,
+                // Transfer is only in play for people who failed and were coached.
+                transferred: resisted ? false : r() < 0.46,
+                firstFailure: HEAT_ELEMENTS[Math.floor(r() * HEAT_ELEMENTS.length)],
+            });
+        }
+    });
+    return out;
+}
+const pct = (n, d) => (d === 0 ? 0 : Math.round((n / d) * 100));
+function daysBetween(from, to) {
+    const a = Date.parse(from);
+    const b = Date.parse(to);
+    if (Number.isNaN(a) || Number.isNaN(b))
+        return 0;
+    return Math.max(0, Math.round((b - a) / 86400000));
+}
+function buildSupervisoryView(records, signals, asOf) {
+    const byTypology = new Map();
+    records.forEach((rec) => {
+        const list = byTypology.get(rec.typology) ?? [];
+        list.push(rec);
+        byTypology.set(rec.typology, list);
+    });
+    const released = new Set(signals.filter((s) => s.status === "RELEASED").map((s) => s.surface.typology));
+    const earliest = new Map();
+    signals.forEach((s) => {
+        if (!s.surface.typology || !s.observedFrom)
+            return;
+        const cur = earliest.get(s.surface.typology);
+        if (!cur || s.observedFrom < cur)
+            earliest.set(s.surface.typology, s.observedFrom);
+    });
+    const rows = TYPOLOGIES.map((t) => {
+        const recs = byTypology.get(t.id) ?? [];
+        const failed = recs.filter((x) => !x.resisted);
+        const obs = earliest.get(t.id) ?? null;
+        return {
+            typology: t.id,
+            label: t.label,
+            exposures: recs.length,
+            resistanceRate: pct(recs.filter((x) => x.resisted).length, recs.length),
+            transferRate: pct(failed.filter((x) => x.transferred).length, failed.length),
+            rehearsable: released.has(t.id),
+            ageDays: obs ? daysBetween(obs, asOf) : null,
+        };
+    }).sort((a, b) => a.resistanceRate - b.resistanceRate);
+    const withExposure = rows.filter((r) => r.exposures > 0);
+    const meanResistance = withExposure.length === 0
+        ? 0
+        : Math.round(withExposure.reduce((a, b) => a + b.resistanceRate, 0) / withExposure.length);
+    const failedAll = records.filter((x) => !x.resisted);
+    const heatCounts = new Map();
+    failedAll.forEach((x) => heatCounts.set(x.firstFailure, (heatCounts.get(x.firstFailure) ?? 0) + 1));
+    const elementHeat = Array.from(heatCounts.entries())
+        .map(([elementId, failures]) => ({ elementId, failures, share: pct(failures, failedAll.length) }))
+        .sort((a, b) => b.failures - a.failures);
+    const contribCounts = new Map();
+    signals.forEach((s) => {
+        const c = contribCounts.get(s.authorityId) ?? { submitted: 0, released: 0, declined: 0 };
+        c.submitted += 1;
+        if (s.status === "RELEASED")
+            c.released += 1;
+        if (s.status === "DECLINED")
+            c.declined += 1;
+        contribCounts.set(s.authorityId, c);
+    });
+    return {
+        generatedAt: asOf,
+        cohortCount: COHORTS.length,
+        reach: COHORTS.reduce((a, c) => a + c.size, 0),
+        completed: records.length,
+        overallResistance: pct(records.filter((x) => x.resisted).length, records.length),
+        overallTransfer: pct(failedAll.filter((x) => x.transferred).length, failedAll.length),
+        typologies: rows,
+        // Recently observed AND beating people more than the corpus mean. Either
+        // alone is noise; together it is where supervisory attention should go.
+        emerging: withExposure.filter((r) => r.resistanceRate < meanResistance && r.ageDays !== null && r.ageDays <= 150),
+        // The metric that mirrors the publish gate's Coverage test, one level up:
+        // a tactic we have intelligence on but cannot yet put anyone through.
+        coverageGaps: rows.filter((r) => !r.rehearsable && r.ageDays !== null),
+        elementHeat,
+        contributions: Array.from(contribCounts.entries()).map(([authorityId, c]) => ({ authorityId, ...c })),
+    };
+}
+function typologyLabel(id) {
+    return label(TYPOLOGIES, id);
+}
+
+/* AUREN-NEXUS-END */
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATE
+   ═════════════════════════════════════════════════════════════════ */
+
+const S = {
+  user: null,                 // { authorityId, role }
+  ws: "intel",
+  panel: "queue",
+  signals: SIGNALS.map(s => ({ ...s, indicators: [...s.indicators] })),
+  selected: null,
+  derivation: null,
+  gateReport: null,
+  records: null,
+  view: null,
+};
+
+const AS_OF = "2026-09-19";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function pack() { return vertical("auren"); }
+function deployedLanguages() { return pack().languages; }
+function markets() { return pack().markets; }
+
+/* Role gating. Every action names the role that can perform it, and a
+   blocked button says which role — the same contract as a derivation gap. */
+const CAN = {
+  lodge: ["role:submitting_officer", "role:analyst"],
+  triage: ["role:analyst"],
+  derive: ["role:analyst"],
+  decline: ["role:analyst", "role:supervisor"],
+  review: ["role:domain_reviewer", "role:legal_reviewer", "role:safety_reviewer"],
+};
+function may(action) { return CAN[action].includes(S.user.role); }
+function needs(action) {
+  return CAN[action].map(r => r.replace("role:", "").replace(/_/g, " ")).join(" or ");
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SIGN IN
+   ═════════════════════════════════════════════════════════════════ */
+
+$("authSel").innerHTML = AUTHORITIES
+  .map(a => `<option value="${a.id}">${esc(a.name)} · ${esc(a.jurisdiction)}</option>`)
+  .join("");
+
+$("enterBtn").onclick = () => {
+  S.user = { authorityId: $("authSel").value, role: $("roleSel").value };
+  const a = authority(S.user.authorityId);
+  $("whoName").textContent = a ? a.name : S.user.authorityId;
+  $("whoRole").textContent = S.user.role;
+  $("signin").classList.add("hidden");
+  $("shell").classList.remove("hidden");
+  render();
+};
+$("outBtn").onclick = () => {
+  S.user = null; S.selected = null; S.derivation = null; S.gateReport = null;
+  $("shell").classList.add("hidden");
+  $("signin").classList.remove("hidden");
+};
+
+document.querySelectorAll(".wsBtn").forEach(b => {
+  b.onclick = () => {
+    S.ws = b.dataset.ws;
+    S.panel = S.ws === "intel" ? "queue" : S.ws === "author" ? "derive" : "overview";
+    document.querySelectorAll(".wsBtn").forEach(x => x.classList.toggle("wsOn", x === b));
+    render();
+  };
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER
+   ═════════════════════════════════════════════════════════════════ */
+
+const RAIL = {
+  intel: [["queue", "Signal queue"], ["lodge", "Lodge a signal"], ["vocab", "Controlled vocabulary"]],
+  author: [["derive", "Derivation"], ["gate", "Publish gate"]],
+  super: [["overview", "Cohort overview"], ["tactics", "Tactic performance"], ["contrib", "Contribution"]],
+};
+const RULES = {
+  intel: "A signal is intelligence, not content. Nothing lodged here reaches a learner until a named human in a declared role has authored it, reviewed it, and released it through the gate.",
+  author: "Derivation proposes. It never fills a field whose authority it does not have — every gap below names the role that must close it.",
+  super: "Cohort level only, and within-session transfer only. No individual appears here, and nothing on this page is evidence of durable behaviour change.",
+};
+
+function render() {
+  $("railRule").textContent = RULES[S.ws];
+  $("railNav").innerHTML =
+    `<span class="railLabel">${S.ws === "intel" ? "Intelligence" : S.ws === "author" ? "Authoring" : "Supervision"}</span>` +
+    RAIL[S.ws].map(([id, label]) =>
+      `<button class="navBtn ${S.panel === id ? "navOn" : ""}" data-p="${id}">${esc(label)}</button>`).join("");
+  $("railNav").querySelectorAll(".navBtn").forEach(b => {
+    b.onclick = () => { S.panel = b.dataset.p; render(); };
+  });
+
+  const m = $("main");
+  if (S.ws === "intel") m.innerHTML = S.panel === "lodge" ? lodgeView() : S.panel === "vocab" ? vocabView() : queueView();
+  else if (S.ws === "author") m.innerHTML = S.panel === "gate" ? gateView() : deriveView();
+  else m.innerHTML = S.panel === "tactics" ? tacticsView() : S.panel === "contrib" ? contribView() : overviewView();
+
+  wire();
+}
+
+/* ── Intelligence · queue ──────────────────────────────────────────── */
+
+function statusChip(s) { return `<span class="chip c${s}">${s.replace("_", " ")}</span>`; }
+function tlpChip(t) { return `<span class="chip tlp t${t}">TLP:${t}</span>`; }
+
+function queueView() {
+  const sig = S.signals;
+  const n = (f) => sig.filter(f).length;
+  const rehearsable = new Set(sig.filter(s => s.status === "RELEASED").map(s => s.surface.typology));
+  const gaps = TYPOLOGIES.filter(t => !rehearsable.has(t.id) && sig.some(s => s.surface.typology === t.id)).length;
+
+  return `
+  <div class="pageHead">
+    <div>
+      <span class="eyebrow">${esc(AUTHORITIES.length)} contributing authorities</span>
+      <h2>Signal queue</h2>
+      <p>What member authorities are seeing, in one shape. A tactic described the same way by six regulators is a tactic that can be rehearsed against; described six ways, it is six anecdotes.</p>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="statN">${sig.length}</div><div class="statL">Signals lodged</div></div>
+    <div class="stat"><div class="statN">${n(s => ["TRIAGED","DERIVED","IN_REVIEW"].includes(s.status))}</div><div class="statL">In the pipeline</div></div>
+    <div class="stat good"><div class="statN">${n(s => s.status === "RELEASED")}</div><div class="statL">Released — rehearsable today</div></div>
+    <div class="stat ${gaps ? "alarm" : ""}"><div class="statN">${gaps}</div><div class="statL">Known but not yet rehearsable</div></div>
+    <div class="stat"><div class="statN">${n(s => s.status === "DECLINED")}</div><div class="statL">Declined, with reasons</div></div>
+  </div>
+  ${S.selected ? signalDetail(S.selected) : ""}
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>Signal</th><th>Authority</th><th>Typology</th><th>Status</th><th>Sharing</th><th>Confidence</th>
+      </tr></thead>
+      <tbody>
+        ${sig.map(s => {
+          const a = authority(s.authorityId);
+          return `<tr>
+            <td><button class="rowBtn" data-sig="${s.id}">${s.id}</button>
+              <span class="sub">${esc(s.title)}</span></td>
+            <td>${esc(a ? a.name : s.authorityId)}<span class="sub mono">${esc(s.jurisdiction)} · from ${esc(s.observedFrom)}</span></td>
+            <td class="mono">${esc(s.surface.typology ? label(TYPOLOGIES, s.surface.typology) : "— unclassified —")}</td>
+            <td>${statusChip(s.status)}</td>
+            <td>${tlpChip(s.sharing)}</td>
+            <td class="mono">${esc(s.confidence)}</td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function signalDetail(id) {
+  const s = S.signals.find(x => x.id === id);
+  if (!s) return "";
+  const a = authority(s.authorityId);
+  const findings = checkIntake(s);
+  const blocking = findings.filter(f => f.blocking);
+  const next = nextSignalStatus(s.status);
+
+  const surfaceRow = (k, list, v) =>
+    `<dt>${k}</dt><dd>${v ? esc(label(list, v)) + ` <span class="mono">${esc(v)}</span>` : '<span class="mono" style="color:var(--fail)">not classified</span>'}</dd>`;
+
+  return `
+  <div class="panel">
+    <div class="panelHead">
+      <div>
+        <span class="eyebrow">${esc(s.id)} · lodged by ${esc(a ? a.name : s.authorityId)}</span>
+        <h3>${esc(s.title)}</h3>
+      </div>
+      <div class="btnRow">
+        ${statusChip(s.status)} ${tlpChip(s.sharing)}
+        <button class="btn btnGhost btnSm" data-close="1">Close</button>
+      </div>
+    </div>
+
+    <div class="sectTitle">How it works</div>
+    <p class="prose">${esc(s.method)}</p>
+
+    <div class="sectTitle">Observable indicators</div>
+    ${s.indicators.length
+      ? `<ul class="listTight">${s.indicators.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`
+      : `<p class="empty">None recorded. A tactic nobody could notice cannot be rehearsed, only described.</p>`}
+
+    <div class="sectTitle">Classification</div>
+    <dl class="kv">
+      ${surfaceRow("Typology", TYPOLOGIES, s.surface.typology)}
+      ${surfaceRow("Channel", CHANNELS, s.surface.channel)}
+      ${surfaceRow("Persona", PERSONAS, s.surface.persona)}
+      ${surfaceRow("Product class", PRODUCT_CLASSES, s.surface.productClass)}
+      <dt>Defeats</dt><dd>${s.defeats ? esc(s.defeats) : '<span style="color:var(--fail)">Not stated — nothing can be derived.</span>'}</dd>
+      <dt>Target profile</dt><dd>${esc(s.targetProfile)}</dd>
+    </dl>
+
+    ${s.declineReason ? `<div class="sectTitle">Decline reason</div><div class="note hard">${esc(s.declineReason)}</div>` : ""}
+
+    <div class="sectTitle">Intake check</div>
+    ${findings.length === 0
+      ? `<div class="note quiet">Complete. Nothing blocks derivation.</div>`
+      : findings.map(f => `<div class="gap" style="border-left-color:var(--${f.blocking ? "fail" : "warn"})">
+            <div class="gapHead"><span class="gapField">${esc(f.field)}</span>
+              <span class="gapRole">${f.blocking ? "blocking" : "advisory"}</span></div>
+            <div class="gapWhy">${esc(f.detail)}</div></div>`).join("")}
+
+    <div class="sectTitle">Pipeline</div>
+    <div class="btnRow">
+      ${next && s.status !== "DECLINED"
+        ? `<button class="btn btnSm" data-adv="${s.id}" ${(!may("triage") || blocking.length) ? "disabled" : ""}>Advance to ${next.replace("_", " ")}</button>`
+        : ""}
+      ${s.status !== "DECLINED" && s.status !== "RELEASED"
+        ? `<button class="btn btnGhost btnSm" data-dec="${s.id}" ${may("decline") ? "" : "disabled"}>Decline</button>`
+        : ""}
+      ${["DERIVED", "IN_REVIEW", "RELEASED"].includes(s.status)
+        ? `<button class="btn btnGhost btnSm" data-auth="${s.id}">Open in Authoring</button>` : ""}
+    </div>
+    ${blocking.length
+      ? `<div class="note hard" style="margin-top:11px"><b>Blocked.</b> ${blocking.length} field${blocking.length === 1 ? "" : "s"} must be completed by the lodging authority before this signal can advance.</div>`
+      : !may("triage") && next
+        ? `<div class="note quiet" style="margin-top:11px">Advancing is an <b>${esc(needs("triage"))}</b> action. You are signed in as ${esc(S.user.role.replace("role:", "").replace(/_/g, " "))}.</div>`
+        : ""}
+  </div>`;
+}
+
+/* ── Intelligence · lodge ──────────────────────────────────────────── */
+
+function opts(list) { return list.map(t => `<option value="${t.id}">${esc(t.label)}</option>`).join(""); }
+
+function lodgeView() {
+  const allowed = may("lodge");
+  return `
+  <div class="pageHead">
+    <div>
+      <span class="eyebrow">Fixed intelligence frame</span>
+      <h2>Lodge a signal</h2>
+      <p>The frame is fixed so that everything downstream can rely on the shape existing. The field that matters most is the last one: what reasoning this tactic defeats. Without it there is nothing to connect the signal to a competency element, and no derivation is possible.</p>
+    </div>
+  </div>
+  ${allowed ? "" : `<div class="note quiet">Lodging is a <b>${esc(needs("lodge"))}</b> action. The form is shown read-only.</div>`}
+  <div class="panel">
+    <div class="field"><label for="fTitle">Title</label>
+      <input id="fTitle" placeholder="One line a supervisor would recognise it by" value="Clone firm using a real licence number"></div>
+    <div style="height:12px"></div>
+    <div class="field"><label for="fMethod">How it works</label>
+      <textarea id="fMethod" placeholder="What the tactic actually does, in your own words.">Callers quote a genuine licence number belonging to an authorised firm, alongside a company name one character different from the real one. The number checks out on the register; the name does not match the entry it belongs to.</textarea></div>
+    <div style="height:12px"></div>
+    <div class="field"><label for="fInd">Observable indicators — one per line</label>
+      <textarea id="fInd">Licence number is real but registered to a different entity name
+Domain registered within the last ninety days
+Payment account name differs from the firm name</textarea></div>
+    <div style="height:12px"></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">
+      <div class="field"><label for="fTyp">Typology</label><select id="fTyp">${opts(TYPOLOGIES)}</select></div>
+      <div class="field"><label for="fCh">Channel</label><select id="fCh">${opts(CHANNELS)}</select></div>
+      <div class="field"><label for="fPer">Persona</label><select id="fPer">${opts(PERSONAS)}</select></div>
+      <div class="field"><label for="fPc">Product class</label><select id="fPc">${opts(PRODUCT_CLASSES)}</select></div>
+      <div class="field"><label for="fConf">Confidence</label><select id="fConf">${CONFIDENCE.map(c => `<option>${c}</option>`).join("")}</select></div>
+      <div class="field"><label for="fShare">Sharing</label><select id="fShare">${SHARING.map(c => `<option>${c}</option>`).join("")}</select></div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="field"><label for="fDefeats">What reasoning does it defeat?</label>
+      <textarea id="fDefeats" placeholder="The competency this tactic is designed to break.">Independent verification. The register check appears to succeed, so it stops being repeated against the entity name.</textarea></div>
+    <div style="height:14px"></div>
+    <button class="btn" id="lodgeBtn" ${allowed ? "" : "disabled"}>Lodge signal</button>
+  </div>`;
+}
+
+/* ── Intelligence · vocabulary ─────────────────────────────────────── */
+
+function vocabTable(title, list, why) {
+  return `<div class="panel">
+    <div class="panelHead"><div><h3>${esc(title)}</h3><p class="prose" style="margin-top:4px">${esc(why)}</p></div></div>
+    <div class="tw"><table style="min-width:520px"><thead><tr><th>Term</th><th>Id</th><th>How to classify</th></tr></thead><tbody>
+      ${list.map(t => `<tr><td>${esc(t.label)}</td><td class="mono">${esc(t.id)}</td><td>${esc(t.note)}</td></tr>`).join("")}
+    </tbody></table></div></div>`;
+}
+
+function vocabView() {
+  return `
+  <div class="pageHead">
+    <div>
+      <span class="eyebrow">Closed lists · changing one is a governance act</span>
+      <h2>Controlled vocabulary</h2>
+      <p>Four axes, and they exist for a reason that shows up at runtime. AUREN proves transfer only on a retest sharing <em>nothing</em> with the scenario the learner failed. With free text that comparison is a guess; with closed lists it is a set operation that still holds when the corpus reaches two hundred challenges.</p>
+    </div>
+  </div>
+  <div class="note"><b>Surface distance must reach ${RETEST_MIN_DISTANCE} of 4</b> for a retest to count. Adding a term changes what “different enough” means for every retest already in the field, which is why it is not a dropdown an administrator edits.</div>
+  ${vocabTable("Typology — what the fraud is", TYPOLOGIES, "The primary axis. Also the unit the supervisory dashboard counts in.")}
+  ${vocabTable("Channel — how it reaches the person", CHANNELS, "Second axis of surface distance.")}
+  ${vocabTable("Persona — who appears to be speaking", PERSONAS, "Third axis. This is what the learner actually faces.")}
+  ${vocabTable("Product class — what is nominally sold", PRODUCT_CLASSES, "Fourth axis.")}`;
+}
+
+/* ── Authoring · derivation ────────────────────────────────────────── */
+
+function deriveView() {
+  const candidates = S.signals.filter(s => ["TRIAGED", "DERIVED", "IN_REVIEW", "RELEASED"].includes(s.status));
+  const sel = S.selected && candidates.some(c => c.id === S.selected) ? S.selected : (candidates[0] && candidates[0].id);
+  const s = S.signals.find(x => x.id === sel);
+
+  let inner = `<p class="empty">No signal has been triaged yet.</p>`;
+  if (s) {
+    if (!S.derivation || S.derivation.signalId !== s.id) {
+      S.derivation = derive(s, deployedLanguages(), markets());
+    }
+    const d = S.derivation;
+    inner = `
+    <div class="note"><b>${esc(derivationSummary(d))}</b></div>
+    <div class="sectTitle">Element mapping</div>
+    <p class="prose">${esc(d.mappingBasis)}</p>
+
+    <div class="sectTitle">Candidate objects — all DRAFT</div>
+    <div class="tw"><table style="min-width:560px">
+      <thead><tr><th>Object</th><th>Kind</th><th>Status</th><th>Must be signed by</th></tr></thead>
+      <tbody>${d.objects.map(o => `<tr>
+        <td class="mono">${esc(o.id)}<span class="sub">${esc(o.label)}</span></td>
+        <td><span class="chip k">${esc(o.kind)}</span></td>
+        <td><span class="chip cSUBMITTED">${esc(o.governance.status)}</span></td>
+        <td class="mono">${o.governance.approverRoles.map(r => esc(r.replace("role:", ""))).join(" · ")}</td>
+      </tr>`).join("")}</tbody>
+    </table></div>
+
+    <div class="sectTitle">What the derivation could not supply</div>
+    ${d.gaps.map(g => `<div class="gap">
+      <div class="gapHead"><span class="gapField">${esc(g.objectId)} — ${esc(g.field)}</span>
+        <span class="gapRole">${esc(g.role)}</span></div>
+      <div class="gapWhy">${esc(g.detail)}</div></div>`).join("")}
+
+    <div style="height:14px"></div>
+    <button class="btn" id="runGateBtn">Run the publish gate with these candidates</button>`;
+  }
+
+  return `
+  <div class="pageHead">
+    <div>
+      <span class="eyebrow">Signal in, DRAFT candidates out</span>
+      <h2>Derivation</h2>
+      <p>The mechanical half of authoring: classify, connect the tactic to a competency element, shape the objects, carry the surface profile through so the retest selector keeps working. That is most of the typing and none of the judgement.</p>
+    </div>
+    <div class="field" style="min-width:230px">
+      <label for="sigPick">Signal</label>
+      <select id="sigPick">${candidates.map(c =>
+        `<option value="${c.id}" ${c.id === sel ? "selected" : ""}>${c.id} — ${esc(c.title)}</option>`).join("")}</select>
+    </div>
+  </div>
+  <div class="panel">${inner}</div>`;
+}
+
+/* ── Authoring · gate ──────────────────────────────────────────────── */
+
+function gateView() {
+  if (!S.gateReport) {
+    return `
+    <div class="pageHead"><div>
+      <span class="eyebrow">Ten tests · seven blocking · no waive path</span>
+      <h2>Publish gate</h2>
+      <p>The same gate that governs the Knowledge Authority console, run here against the live AUREN library plus the candidates derived from the selected signal. Not a second copy of it — the same compiled tests.</p>
+    </div></div>
+    <div class="panel"><p class="empty">No report yet. Run the gate from the Derivation panel.</p></div>`;
+  }
+  const r = S.gateReport;
+  const verdict = (g) => !g.assessed ? ["vna", "n/a"] : g.passed ? ["vpass", "pass"] : g.severity === "hard" ? ["vfail", "blocked"] : ["vadv", "advisory"];
+
+  return `
+  <div class="pageHead"><div>
+    <span class="eyebrow">AUREN library + ${S.derivation ? S.derivation.objects.length : 0} derived candidates</span>
+    <h2>${r.releasable ? "Releasable." : "Blocked."}</h2>
+    <p>${r.hardFailures} hard failure${r.hardFailures === 1 ? "" : "s"} · ${r.advisoryFailures} advisory · ${r.effectiveCount} of ${r.totalCount} objects would be in the bundle.</p>
+  </div></div>
+  <div class="note quiet"><b>None of the derived candidates is in this bundle.</b>
+    They are DRAFT, and the resolver loads nothing but EFFECTIVE — so lodging intelligence
+    and deriving from it changed exactly nothing about what a learner meets today. That is
+    the system behaving correctly, and it is the part an intelligence feed wired straight
+    to a persona would get wrong.</div>
+  ${r.releasable ? "" : `<div class="note hard"><b>Release is disabled.</b> There is no waive path — not for a member authority and not for BYOND. A candidate derived from live intelligence is exactly the object most likely to be rushed, which is why the gate does not know the difference.</div>`}
+  <div class="panel">
+    ${r.results.map(g => {
+      const [cls, word] = verdict(g);
+      return `<div class="gRow">
+        <div class="gVerdict ${cls}">${word}</div>
+        <div style="flex:1;min-width:0">
+          <div class="gName">${esc(g.name)} <span class="mono" style="color:var(--ink-4)">${g.severity}</span></div>
+          <div class="gAsserts">${esc(g.asserts)}</div>
+          ${g.findings.map(f => `<div class="finding"><b>${esc(f.subject)}</b> — ${esc(f.detail)}</div>`).join("")}
+        </div>
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+
+/* ── Supervision ───────────────────────────────────────────────────── */
+
+function ensureView() {
+  if (!S.records) S.records = buildRecords();
+  if (!S.view) S.view = buildSupervisoryView(S.records, S.signals, AS_OF);
+  return S.view;
+}
+
+function barCls(v) { return v < 30 ? "low" : v < 50 ? "mid" : ""; }
+
+function overviewView() {
+  const v = ensureView();
+  return `
+  <div class="pageHead"><div>
+    <span class="eyebrow">As at ${esc(v.generatedAt)} · ${v.cohortCount} cohorts</span>
+    <h2>Cohort overview</h2>
+    <p>Which tactics are currently defeating people, and whether we can rehearse against them yet. That second half is the question a supervisor cannot answer from incident reports alone.</p>
+  </div></div>
+
+  <div class="stats">
+    <div class="stat"><div class="statN">${v.reach.toLocaleString()}</div><div class="statL">Investors in programme</div></div>
+    <div class="stat"><div class="statN">${v.completed.toLocaleString()}</div><div class="statL">Sessions completed</div></div>
+    <div class="stat ${v.overallResistance < 45 ? "alarm" : ""}"><div class="statN">${v.overallResistance}%</div><div class="statL">Resisted the pressure first time</div></div>
+    <div class="stat"><div class="statN">${v.overallTransfer}%</div><div class="statL">Held after coaching, on a distant retest</div></div>
+    <div class="stat ${v.coverageGaps.length ? "alarm" : "good"}"><div class="statN">${v.coverageGaps.length}</div><div class="statL">Tactics we cannot yet rehearse</div></div>
+  </div>
+
+  <div>
+    <div class="sectTitle">Emerging — recently observed and beating people more than the corpus average</div>
+    ${v.emerging.length ? `<div class="alerts">${v.emerging.map(t => `
+      <div class="alert">
+        <div class="alertName">${esc(t.label)}</div>
+        <div class="alertMeta">${t.resistanceRate}% resisted · ${t.exposures} exposures · first observed ${t.ageDays} days ago</div>
+        <div class="alertWhy">${t.rehearsable
+          ? "Released and in the field. Watch whether resistance moves over the next cohort."
+          : "<b>No released challenge.</b> We know how this works and cannot yet put anyone through it."}</div>
+      </div>`).join("")}</div>` : `<p class="empty">Nothing currently meets both conditions.</p>`}
+  </div>
+
+  <div>
+    <div class="sectTitle">Coverage gaps — intelligence exists, rehearsal does not</div>
+    ${v.coverageGaps.length ? `<div class="alerts">${v.coverageGaps.map(t => `
+      <div class="alert gapCard">
+        <div class="alertName">${esc(t.label)}</div>
+        <div class="alertMeta">first observed ${t.ageDays} days ago</div>
+        <div class="alertWhy">A signal describing this is in the corpus, but no challenge object has reached release. This is the publish gate's Coverage test, one level up: the programme knows about a tactic it cannot test anyone against.</div>
+      </div>`).join("")}</div>` : `<p class="empty">Every classified tactic in the corpus has a released challenge.</p>`}
+  </div>
+
+  <div class="note quiet"><b>Read this page carefully.</b> Every figure is cohort-level; no individual appears and none can be retrieved. “Held after coaching” means transfer measured inside a single session against a scenario sharing nothing with the one the learner failed. It is not evidence of durable behaviour change, and the programme does not claim it is.</div>`;
+}
+
+function tacticsView() {
+  const v = ensureView();
+  return `
+  <div class="pageHead"><div>
+    <span class="eyebrow">Ordered by resistance, worst first</span>
+    <h2>Tactic performance</h2>
+    <p>Resistance is the share who held the first time they met the tactic. Transfer is the share of those who failed and, after coaching, held on a scenario sharing no typology, channel, persona or product class with it.</p>
+  </div></div>
+  <div class="tw"><table>
+    <thead><tr><th>Tactic</th><th>Exposures</th><th>Resisted first time</th><th>Held after coaching</th><th>Rehearsable</th></tr></thead>
+    <tbody>${v.typologies.map(t => `<tr>
+      <td>${esc(t.label)}<span class="sub mono">${esc(t.typology)}${t.ageDays !== null ? ` · observed ${t.ageDays}d ago` : " · no signal in corpus"}</span></td>
+      <td class="num">${t.exposures}</td>
+      <td><span class="num">${t.exposures ? t.resistanceRate + "%" : "—"}</span>
+        ${t.exposures ? `<div class="bar"><div class="barFill ${barCls(t.resistanceRate)}" style="width:${t.resistanceRate}%"></div></div>` : ""}</td>
+      <td><span class="num">${t.exposures ? t.transferRate + "%" : "—"}</span>
+        ${t.exposures ? `<div class="bar"><div class="barFill ${barCls(t.transferRate)}" style="width:${t.transferRate}%"></div></div>` : ""}</td>
+      <td>${t.rehearsable ? `<span class="chip cRELEASED">released</span>` : `<span class="chip cDERIVED">not yet</span>`}</td>
+    </tr>`).join("")}</tbody>
+  </table></div>
+
+  <div class="sectTitle">Where reasoning breaks first</div>
+  <div class="tw"><table style="min-width:420px">
+    <thead><tr><th>Competency element</th><th>First failure</th><th>Share</th></tr></thead>
+    <tbody>${v.elementHeat.map(e => `<tr>
+      <td class="mono">${esc(e.elementId)}</td>
+      <td class="num">${e.failures}</td>
+      <td><span class="num">${e.share}%</span><div class="bar"><div class="barFill mid" style="width:${e.share}%"></div></div></td>
+    </tr>`).join("")}</tbody>
+  </table></div>
+  <p class="prose" style="color:var(--ink-3)">This table is what tells the network which intelligence it actually needs. A competency failing everywhere is a competency the corpus is under-serving.</p>`;
+}
+
+function contribView() {
+  const v = ensureView();
+  return `
+  <div class="pageHead"><div>
+    <span class="eyebrow">Organisations, never individuals</span>
+    <h2>Contribution</h2>
+    <p>What each authority has put into the shared corpus, and what came out of it. Declines are shown because a network that only counts accepted signals teaches its members to lodge noise.</p>
+  </div></div>
+  <div class="tw"><table style="min-width:560px">
+    <thead><tr><th>Authority</th><th>Jurisdiction</th><th>Lodged</th><th>Released</th><th>Declined</th><th>Shares to network</th></tr></thead>
+    <tbody>${AUTHORITIES.map(a => {
+      const c = v.contributions.find(x => x.authorityId === a.id) || { submitted: 0, released: 0, declined: 0 };
+      return `<tr>
+        <td>${esc(a.name)}</td><td class="mono">${esc(a.jurisdiction)}</td>
+        <td class="num">${c.submitted}</td><td class="num">${c.released}</td><td class="num">${c.declined}</td>
+        <td>${a.sharesToNetwork ? `<span class="chip cRELEASED">yes</span>` : `<span class="chip cSUBMITTED">bilateral only</span>`}</td>
+      </tr>`;
+    }).join("")}</tbody>
+  </table></div>
+  <div class="note"><b>Sharing marking governs who may see a signal. It does not govern whether objects derived from it may deploy.</b> A TLP:RED signal can still produce a released challenge, because the challenge no longer carries the source — which is the property that lets an authority contribute intelligence it could never publish.</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   WIRING
+   ═════════════════════════════════════════════════════════════════ */
+
+function wire() {
+  const m = $("main");
+
+  m.querySelectorAll("[data-sig]").forEach(b => {
+    b.onclick = () => { S.selected = b.dataset.sig; render(); };
+  });
+  const close = m.querySelector("[data-close]");
+  if (close) close.onclick = () => { S.selected = null; render(); };
+
+  const adv = m.querySelector("[data-adv]");
+  if (adv) adv.onclick = () => {
+    const s = S.signals.find(x => x.id === adv.dataset.adv);
+    const next = nextSignalStatus(s.status);
+    if (!next) return;
+    s.status = next;
+    // Deriving is the step that actually produces candidates, so it is the
+    // step that records them against the signal.
+    if (next === "DERIVED") {
+      const d = derive(s, deployedLanguages(), markets());
+      s.derivedObjectIds = d.objects.map(o => o.id);
+      S.derivation = d;
+    }
+    S.view = null;
+    render();
+  };
+
+  const dec = m.querySelector("[data-dec]");
+  if (dec) dec.onclick = () => {
+    const s = S.signals.find(x => x.id === dec.dataset.dec);
+    const why = prompt("Reason for declining. A decline without a reason is not a decision.");
+    if (!why || !why.trim()) return;
+    s.status = "DECLINED";
+    s.declineReason = why.trim();
+    S.view = null;
+    render();
+  };
+
+  const toAuthor = m.querySelector("[data-auth]");
+  if (toAuthor) toAuthor.onclick = () => {
+    S.selected = toAuthor.dataset.auth;
+    S.ws = "author"; S.panel = "derive";
+    document.querySelectorAll(".wsBtn").forEach(x => x.classList.toggle("wsOn", x.dataset.ws === "author"));
+    render();
+  };
+
+  const pick = $("sigPick");
+  if (pick) pick.onchange = () => { S.selected = pick.value; S.derivation = null; S.gateReport = null; render(); };
+
+  const runBtn = $("runGateBtn");
+  if (runBtn) runBtn.onclick = () => {
+    const objects = library("auren").concat(S.derivation ? S.derivation.objects : []);
+    S.gateReport = runGate(pack(), objects);
+    S.panel = "gate";
+    render();
+  };
+
+  const lodge = $("lodgeBtn");
+  if (lodge) lodge.onclick = () => {
+    const n = S.signals.length + 1;
+    const id = "SIG-2026-" + String(220 + n).padStart(4, "0");
+    const s = {
+      id,
+      title: $("fTitle").value.trim(),
+      authorityId: S.user.authorityId,
+      jurisdiction: (authority(S.user.authorityId) || {}).jurisdiction || "—",
+      observedFrom: AS_OF,
+      surface: {
+        typology: $("fTyp").value, channel: $("fCh").value,
+        persona: $("fPer").value, productClass: $("fPc").value,
+      },
+      method: $("fMethod").value.trim(),
+      indicators: $("fInd").value.split("\n").map(x => x.trim()).filter(Boolean),
+      targetProfile: "Retail — not yet segmented",
+      defeats: $("fDefeats").value.trim(),
+      confidence: $("fConf").value,
+      sharing: $("fShare").value,
+      status: "SUBMITTED",
+      derivedObjectIds: [],
+      declineReason: null,
+      supersededBy: null,
+    };
+    S.signals = [s].concat(S.signals);
+    S.selected = id;
+    S.panel = "queue";
+    S.view = null;
+    render();
+  };
+}
+</script>
